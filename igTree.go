@@ -1,0 +1,280 @@
+package igTree
+
+import (
+	"log"
+)
+
+type Statement struct {
+	// Regulative Statement
+	Attributes *Node
+	AttributesProperty *Node
+	Deontic *Node
+	Aim *Node
+	DirectObject *Node
+	DirectObjectProperty *Node
+	IndirectObject *Node
+	IndirectObjectProperty *Node
+	//Constitutive Statement
+	ConstitutedEntity *Node
+	ConstitutedEntityProperty *Node
+	Modal *Node
+	ConstitutiveFunction *Node
+	ConstitutingProperties *Node
+	ConstitutingPropertiesProperty *Node
+	// Shared Components
+	ActivationConditionSimple *Node
+	ActivationConditionComplex *Statement
+	ExecutionConstraintSimple *Node
+	ExecutionConstraintComplex *Statement
+	OrElse *Statement
+}
+
+func (s *Statement) String() string {
+	out := ""
+	if s.Attributes != nil {
+		out += s.Attributes.String()
+	}
+	if s.AttributesProperty != nil {
+		out += s.AttributesProperty.String()
+	}
+	if s.Deontic != nil {
+		out += s.Deontic.String()
+	}
+	if s.Aim != nil {
+		out += s.Aim.String()
+	}
+	if s.DirectObject != nil {
+		out += s.DirectObject.String()
+	}
+	if s.DirectObjectProperty != nil {
+		out += s.DirectObjectProperty.String()
+	}
+	if s.IndirectObject != nil {
+		out += s.IndirectObject.String()
+	}
+	if s.IndirectObjectProperty != nil {
+		out += s.IndirectObjectProperty.String()
+	}
+	if s.ConstitutedEntity != nil {
+		out += s.ConstitutedEntity.String()
+	}
+	if s.ConstitutedEntityProperty != nil {
+		out += s.ConstitutedEntityProperty.String()
+	}
+	if s.Modal != nil {
+		out += s.Modal.String()
+	}
+	if s.ConstitutiveFunction != nil {
+		out += s.ConstitutiveFunction.String()
+	}
+	if s.ConstitutingProperties != nil {
+		out += s.ConstitutingProperties.String()
+	}
+	if s.ConstitutingPropertiesProperty != nil {
+		out += s.ConstitutingPropertiesProperty.String()
+	}
+	if s.ActivationConditionSimple != nil {
+		out += s.ActivationConditionSimple.String()
+	}
+	if s.ActivationConditionComplex != nil {
+		out += s.ActivationConditionComplex.String()
+	}
+	if s.ExecutionConstraintSimple != nil {
+		out += s.ExecutionConstraintSimple.String()
+	}
+	if s.ExecutionConstraintComplex != nil {
+		out += s.ExecutionConstraintComplex.String()
+	}
+	if s.OrElse != nil {
+		out += s.OrElse.String()
+	}
+	return out
+}
+
+type Node struct {
+	Parent *Node			  	// Linkage to parent
+	Left *Node				  	// Linkage to left child
+	Right *Node				  	// Linkage to right child
+	ComponentType string 	// Indicates component type
+	Entry string			  	// Substantive content of the node
+	Shared string			  	// Text shared across children (e.g., shared prefix)
+	LogicalOperator string		// Logical operator that links left and right values/nodes
+}
+
+/*
+Prints node content
+ */
+func (n *Node) String() string {
+	if n.isLeafNode() {
+		return n.ComponentType + ": " + n.Entry + "\n"
+	} else {
+		out := ""
+		if n.Shared != "" {
+			out = "Shared: " + n.Shared + ", "
+		}
+		return out + n.Left.String() + " " +
+			n.LogicalOperator + " " +
+			n.Right.String()
+	}
+}
+
+/*
+Inserts a leaf node under a given node and inherits its component type
+ */
+func (n *Node) InsertLeafNode(entry string) *Node {
+	return n.InsertChildNode(entry, "", "", n.ComponentType, "", "")
+}
+
+func ComponentLeafNode(entry string, componentType string) *Node {
+	return ComponentNode(entry, "", "", componentType, "", "")
+}
+
+func ComponentNode(entry string, leftValue string, rightValue string, componentType string, sharedValue string, logicalOperator string) *Node {
+
+	// Validation (Entry cannot be mixed with the other fields)
+	if entry != "" {
+		if leftValue != "" {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as left-hand node (" + leftValue + ").")
+		}
+		if rightValue != "" {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as right-hand node (" + rightValue + ").")
+		}
+		if sharedValue != "" {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as shared content field (" + sharedValue + ").")
+		}
+		if logicalOperator != "" {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry +
+			"), as well as logical operator field (" + logicalOperator + ").")
+		}
+	}
+	// Validation (Check whether left-, right-hand, and logical operator are filled)
+	if entry == "" && (leftValue == "" || rightValue == "" || logicalOperator == "") {
+		log.Fatal("Non-leaf node, but missing specification of left-hand, right-hand value, " +
+		"or logical operator (Left hand: " + leftValue + "; Right hand: " + rightValue +
+		"; Logical operator: " + logicalOperator + ")")
+	}
+	if logicalOperator != "" {
+		if !stringInSlice(logicalOperator, igLogicalOperators) {
+			log.Fatal("Logical operator value invalid (Value: " + logicalOperator + ")")
+		}
+	}
+
+	// Specification must be valid. Continue with creation ...
+
+	node := Node{}
+
+	// Assign parent as nil
+	node.Parent = nil
+
+	// Inherit (if not specified), or assign component name from parameters
+	if componentType == "" {
+		log.Println("Inheriting component type from parent ... (" + componentType + ")")
+		if componentType != "" {
+			node.ComponentType = componentType
+		}
+	} else {
+		log.Println("Assigning component type " + componentType)
+		node.ComponentType = componentType
+	}
+
+	/*if parent != nil {
+		fmt.Println("Node is non-root node.")
+		node.Parent = parent
+	} else {
+		fmt.Println("Node is root node.")
+	}*/
+
+	// If leaf node, fill all relevant fields
+	if entry != "" {
+		node.Entry = entry
+	} else {
+		// if non-leaf, fill all relevant fields
+		node.Left = node.InsertLeafNode(leftValue)
+		node.Right = node.InsertLeafNode(rightValue)
+		node.LogicalOperator = logicalOperator
+		node.Shared = sharedValue
+	}
+	return &node
+}
+
+/*
+Creates a new node based on parameter specification. If non-root node, the node should be created
+within parent node (to ensure proper association as either left- or right-hand node).
+If entry value is specified, the node is presumed to be leaf node; in all other instances, the
+nodes is interpreted as combination, and left and right values are moved into respective leaf nodes.
+Component type name is saved in node.
+ */
+func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string, componentType string, sharedValue string, logicalOperator string) *Node {
+	// Validation (Entry cannot be mixed with the other fields)
+	if entry != "" {
+		if leftValue != "" {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as left-hand node (" + leftValue + ").")
+		}
+		if rightValue != "" {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as right-hand node (" + rightValue + ").")
+		}
+		if sharedValue != "" {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as shared content field (" + sharedValue + ").")
+		}
+		if logicalOperator != "" {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry +
+				"), as well as logical operator field (" + logicalOperator + ").")
+		}
+	}
+	// Validation (Check whether left-, right-hand, and logical operator are filled)
+	if entry == "" && (leftValue == "" || rightValue == "" || logicalOperator == "") {
+		log.Fatal("Non-leaf node, but missing specification of left-hand, right-hand value, " +
+			"or logical operator (Left hand: " + leftValue + "; Right hand: " + rightValue +
+			"; Logical operator: " + logicalOperator + ")")
+	}
+	if logicalOperator != "" {
+		if !stringInSlice(logicalOperator, igLogicalOperators) {
+			log.Fatal("Logical operator value invalid (Value: " + logicalOperator + ")")
+		}
+	}
+
+	// Specification must be valid. Continue with creation ...
+
+	node := Node{}
+	// Assign node on which this function is called as parent
+	node.Parent = n
+
+	// Inherit (if not specified), or assign component name from parameters
+	if componentType == "" {
+		log.Println("Inheriting component type from parent ... (" + n.ComponentType + ")")
+		if n.ComponentType != "" {
+			node.ComponentType = n.ComponentType
+		}
+	} else {
+		log.Println("Assigning component type " + componentType)
+		node.ComponentType = componentType
+	}
+
+	/*if parent != nil {
+		fmt.Println("Node is non-root node.")
+		node.Parent = parent
+	} else {
+		fmt.Println("Node is root node.")
+	}*/
+
+	// If leaf node, fill all relevant fields
+	if entry != "" {
+		node.Entry = entry
+	} else {
+		// if non-leaf, fill all relevant fields
+		node.Left = n.InsertLeafNode(leftValue)
+		node.Right = n.InsertLeafNode(rightValue)
+		node.LogicalOperator = logicalOperator
+		node.Shared = sharedValue
+	}
+	return &node
+}
+
+
+
+/*
+Indicates whether node is leaf node
+ */
+func (n *Node) isLeafNode() bool {
+	return n.Left == nil && n.Right == nil
+}
