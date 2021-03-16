@@ -1,4 +1,4 @@
-package igTree
+package tree
 
 import "testing"
 

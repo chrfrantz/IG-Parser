@@ -1,4 +1,4 @@
-package igTree
+package tree
 
 import (
 	"log"
@@ -92,29 +92,50 @@ func (s *Statement) String() string {
 }
 
 type Node struct {
-	Parent *Node			  	// Linkage to parent
-	Left *Node				  	// Linkage to left child
-	Right *Node				  	// Linkage to right child
-	ComponentType string 	// Indicates component type
-	Entry string			  	// Substantive content of the node
-	Shared string			  	// Text shared across children (e.g., shared prefix)
-	LogicalOperator string		// Logical operator that links left and right values/nodes
+	Parent *Node           // Linkage to parent
+	Left *Node             // Linkage to left child
+	Right *Node            // Linkage to right child
+	ComponentType string   // Indicates component type
+	Entry string           // Substantive content of the node
+	Shared string          // Text shared across children (e.g., shared prefix)
+	LogicalOperator string // Logical operator that links left and right values/nodes
+}
+
+func (n *Node) CountParents() int {
+	if n.Parent == nil {
+		return 0
+	} else {
+		return 1 + n.Parent.CountParents()
+	}
 }
 
 /*
 Prints node content
  */
 func (n *Node) String() string {
-	if n.isLeafNode() {
-		return n.ComponentType + ": " + n.Entry + "\n"
+	/*if n.Parent != nil {
+		for n.Parent
+	}*/
+	if n == nil {
+		return "Node is not initialized."
+	} else if n.isLeafNode() {
+		return /*n.ComponentType + */"Leaf entry: " + n.Entry //+ "\n"
 	} else {
 		out := ""
 		if n.Shared != "" {
-			out = "Shared: " + n.Shared + ", "
+			out = "Shared: " + n.Shared + ", \n"
 		}
-		return out + n.Left.String() + " " +
-			n.LogicalOperator + " " +
-			n.Right.String()
+		i := 0
+		prefix := ""
+		for i < n.CountParents() {
+			prefix += "===="
+			i++
+		}
+		return "(\n" + out +
+			prefix + "Left: " + n.Left.String() + "\n" +
+			prefix + "Operator: " + n.LogicalOperator + "\n" +
+			prefix + "Right: " + n.Right.String() + "\n" +
+			prefix + ")"
 	}
 }
 
@@ -154,7 +175,7 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 		"; Logical operator: " + logicalOperator + ")")
 	}
 	if logicalOperator != "" {
-		if !stringInSlice(logicalOperator, igLogicalOperators) {
+		if !StringInSlice(logicalOperator, IGLogicalOperators) {
 			log.Fatal("Logical operator value invalid (Value: " + logicalOperator + ")")
 		}
 	}
@@ -228,7 +249,7 @@ func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string
 			"; Logical operator: " + logicalOperator + ")")
 	}
 	if logicalOperator != "" {
-		if !stringInSlice(logicalOperator, igLogicalOperators) {
+		if !StringInSlice(logicalOperator, IGLogicalOperators) {
 			log.Fatal("Logical operator value invalid (Value: " + logicalOperator + ")")
 		}
 	}
@@ -276,5 +297,5 @@ func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string
 Indicates whether node is leaf node
  */
 func (n *Node) isLeafNode() bool {
-	return n.Left == nil && n.Right == nil
+	return n == nil || (n.Left == nil && n.Right == nil)
 }

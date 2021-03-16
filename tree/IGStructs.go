@@ -1,4 +1,4 @@
-package igTree
+package tree
 
 
 const (
@@ -22,6 +22,13 @@ const (
 	OR = "OR"
 	XOR = "XOR"
 	NOT = "NOT"
+	AND_BRACKETS = "[" + AND + "]"
+	OR_BRACKETS = "[" + OR + "]"
+	XOR_BRACKETS = "[" + XOR + "]"
+	NOT_BRACKETS = "[" + NOT + "]"
+	PARSING_MODE_LEFT = "PARSING_LEFT"
+	PARSING_MODE_RIGHT = "PARSING_RIGHT"
+	PARSING_MODE_OUTSIDE_EXPRESSION = "PARSING_OUTSIDE"
 )
 
 /*
@@ -42,13 +49,13 @@ func (i igComponent) String() string {
 Checks whether component value is valid (i.e., a valid IG Component symbol).
  */
 /*func (c *igComponent) valid() bool {
-	return stringInSlice(c.ComponentName, igComponents)
+	return StringInSlice(c.ComponentName, igComponents)
 }*/
 
 /*
 IG 2.0 Component Symbols
  */
-var igComponents = []string{
+var IGComponents = []string{
 	ATTRIBUTES,
 	ATTRIBUTES_PROPERTY,
 	DEONTIC,
@@ -74,7 +81,7 @@ type igLogicalOperator struct {
 Checks whether operator value is valid (i.e., a valid logical operator symbol).
 */
 func (o *igLogicalOperator) valid() bool {
-	return stringInSlice(o.LogicalOperatorName, igLogicalOperators)
+	return StringInSlice(o.LogicalOperatorName, IGLogicalOperators)
 }
 
 func (o igLogicalOperator) String() string {
@@ -84,14 +91,25 @@ func (o igLogicalOperator) String() string {
 /*
 Valid logical operators in IG 2.0
  */
-var igLogicalOperators = []string{
+var IGLogicalOperators = []string{
 	AND,
 	OR,
 	XOR,
 	NOT,
 }
 
-func stringInSlice(a string, list []string) bool {
+/**
+Signals boundary values for detected combinations
+ */
+type Boundaries struct {
+	Left int
+	Operator int
+	OperatorVal string
+	Right int
+	Complete bool
+}
+
+func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
 			return true
