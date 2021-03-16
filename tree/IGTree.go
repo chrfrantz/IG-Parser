@@ -118,7 +118,7 @@ func (n *Node) String() string {
 	}*/
 	if n == nil {
 		return "Node is not initialized."
-	} else if n.isLeafNode() {
+	} else if n.IsLeafNode() {
 		return /*n.ComponentType + */"Leaf entry: " + n.Entry //+ "\n"
 	} else {
 		out := ""
@@ -291,11 +291,61 @@ func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string
 	return &node
 }
 
+/*
+Counts the number of leaves of node tree
+ */
+func (n *Node) CountLeaves() int {
+	if n == nil {
+		// Uninitialized node
+		return 0
+	}
+	if n.Left == nil && n.Right == nil && n.Entry == "" {
+		// Must be empty node
+		return 0
+	}
+	if n.Left == nil && n.Right == nil && n.Entry != "" {
+		// Must be single leaf node (entry)
+		return 1
+	}
+	leftBreadth := 0
+	rightBreadth := 0
+	if n.Left != nil {
+		leftBreadth = n.Left.CountLeaves()
+	}
+	if n.Right != nil {
+		rightBreadth = n.Right.CountLeaves()
+	}
+	return leftBreadth + rightBreadth
+}
 
+/*
+Calculate depth of node tree
+ */
+func (n *Node) CalculateDepth() int {
+	if n == nil {
+		return 0
+	}
+	if n.Left == nil && n.Right == nil {
+		return 0
+	}
+	leftDepth := 0
+	rightDepth := 0
+	if n.Left != nil {
+		leftDepth = 1 + n.Left.CalculateDepth()
+	}
+	if n.Right != nil {
+		rightDepth = 1 + n.Right.CalculateDepth()
+	}
+	if leftDepth < rightDepth {
+		return rightDepth
+	} else {
+		return leftDepth
+	}
+}
 
 /*
 Indicates whether node is leaf node
  */
-func (n *Node) isLeafNode() bool {
+func (n *Node) IsLeafNode() bool {
 	return n == nil || (n.Left == nil && n.Right == nil)
 }
