@@ -1,6 +1,9 @@
 package tree
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 const (
 	ATTRIBUTES = "A"
@@ -116,6 +119,23 @@ func (b *Boundaries) String() string {
 		"  Op Pos: " + strconv.Itoa(b.Operator) + "\n" +
 		"  Operator: " + b.OperatorVal + "\n" +
 		"  Right: " + strconv.Itoa(b.Right) + "\n}"
+}
+
+
+const PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS = "INVALID_LOGICAL_OPERATOR_COMBINATIONS"
+const PARSING_NO_ERROR = "NO_ERROR_DURING_PARSING"
+const PARSING_NO_COMBINATIONS = "NO_COMBINATIONS_IN_INPUT"
+const PARSING_INVALID_COMBINATION = "INVALID_COMBINATION_IN_INPUT"
+const PARSING_ERROR_EMPTY_LEAF = "EMPTY_LEAF_VALUE"
+const PARSING_ERROR_IMBALANCED_PARENTHESES = "UNBALANCED_PARENTHESES"
+
+type ParsingError struct {
+	ErrorCode string
+	ErrorMessage string
+}
+
+func (e *ParsingError) Error() string {
+	return fmt.Sprint("Parsing Error " + e.ErrorCode + ": " + e.ErrorMessage)
 }
 
 func StringInSlice(a string, list []string) bool {

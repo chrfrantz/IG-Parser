@@ -110,6 +110,34 @@ func (n *Node) CountParents() int {
 }
 
 /*
+Returns string representation of node tree structure. The output is
+compatible to the input parser to reconstruct the tree.
+ */
+func (n *Node) Stringify() string {
+	// Empty node
+	if n.Left == nil && n.Right == nil && n.Entry == "" {
+		return ""
+	}
+	// Leaf node
+	if n.IsLeafNode() {
+		return n.Entry
+	}
+	out := "("
+	// Walk the tree
+	if n.Left != nil {
+		out += n.Left.Stringify()
+	}
+	if n.LogicalOperator != "" {
+		out += " [" + n.LogicalOperator + "] " // no extra spacing on left side; due to parsing
+	}
+	if n.Right != nil {
+		out += n.Right.Stringify()
+	}
+	out += ")"
+	return out
+}
+
+/*
 Prints node content
  */
 func (n *Node) String() string {
