@@ -1,4 +1,4 @@
-package parser
+package main
 
 import (
 	"IG-Parser/tree"
@@ -30,13 +30,22 @@ func main() {
 	//input = "(inspect and OR party [AND] ((review [XOR] muse) [AND] pray))"
 	// Excessive parentheses are acceptable (will be flattened in parsing process)
 	input = "((((inspect and [OR] party) [AND] ((review [XOR] muse) [AND] pray))))"
+	// Non-combinations are ignored (i.e., parentheses within components)
+	input = "(French (and) [AND] (accredited certifying agents))"
+	// Repeated AND combinations (e.g., "expr1 AND expr2 AND expr3") are collapsed into nested structures (e.g., "(expr1 AND expr2) AND expr3")
+	input = "(French (and) [AND] (certified production and [XOR] handling operations) and [AND] (accredited certifying agents))"
+	// Repeated logical operators will break (empty leaf value in the AND case)
+	//input = "(French (and) [AND] [AND] (certified production and [XOR] handling operations) and [AND] (accredited certifying agents))"
+	// Repeated logical operators will break (multiple non-AND operators (or mix thereof))
+	//input = "(French (and) [AND] [OR] (certified production and [XOR] handling operations) and [AND] (accredited certifying agents))"
 
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	parseDepth(input, &node)
+	_, modifiedInput := parseDepth(input, &node)
 	// Print resulting tree
 	fmt.Println("Final tree: \n" + node.String())
+	fmt.Println("Corresponding (potentially modified) input string: " + modifiedInput)
 }
 
 /*
@@ -44,6 +53,15 @@ Parses combinations in string. The syntactic form of input is:
 "( leftSide [OPERATOR] rightSide )", where [OPERATOR] is one
 of the logical operators [AND], [OR], [XOR] (including brackets),
 and left and right side are either text or combinations themselves.
+For [AND] operators, an arbitrary number of expressions can be combined;
+in this case the function will decompose those into nested structures
+(e.g., expanding "( expr1 [AND] expr2 [AND] expr3 )" into
+"(( expr1 [AND] expr2 ) [AND] expr3)"), with precedence for left combinations.
+
+The function returns
+- a node tree of the structure, as well as
+- the potentially modified input string corresponding to the node tree
+
 Note:
 - The entire expression must be surrounded with parentheses, else only
 the right-most outer combination (and combinations nested therein) is parsed.
@@ -51,8 +69,9 @@ the right-most outer combination (and combinations nested therein) is parsed.
 - Invalid combinations (e.g., missing logical operator) are discarded
 in the processing.
  */
-func parseDepth(input string, node *tree.Node) *tree.Node {
-	combinations := detectCombinations(input)
+func parseDepth(input string, node *tree.Node) (*tree.Node, string) {
+	// Return detected combinations, alongside potentially modified input string
+	combinations, input := detectCombinations(input)
 	if len(combinations) == 0 {
 		fmt.Println("No combinations detected.")
 	} else {
@@ -82,7 +101,7 @@ func parseDepth(input string, node *tree.Node) *tree.Node {
 
 	// if no valid combinations are left, the parsing is finished
 	if len(combinations) == 0 {
-		return node
+		return node, input
 	}
 
 	// Now the parsing of nested combinations starts
@@ -104,8 +123,8 @@ func parseDepth(input string, node *tree.Node) *tree.Node {
 
 			fmt.Println("Tree after adding logical operator: " + node.String())
 
-			// Left side
-			leftCombos := detectCombinations(left)
+			// Left side (potentially modifying input string)
+			leftCombos, left := detectCombinations(left)
 			// Assign nested nodes either way
 			leftNode := tree.Node{}
 			// Link both nodes
@@ -113,9 +132,14 @@ func parseDepth(input string, node *tree.Node) *tree.Node {
 			leftNode.Parent = node
 
 			if len(leftCombos) == 0 {
-				// If no combinations exist, assign as left leaf
-				fmt.Println("Found leaf on left side: " +  left)
-				node.Left.Entry = left
+				if left != "" {
+					// If no combinations exist, assign as left leaf
+					fmt.Println("Found leaf on left side: " + left)
+					node.Left.Entry = left
+				} else {
+					log.Fatal("Empty leaf value on left side: " + left + " (Corresponding right value and operator: " + right + "; " + node.LogicalOperator +
+						");\n processed expression: " + input)
+				}
 			} else {
 				// If combinations exist, delegate
 				fmt.Println("Go deep on left side: " +  left)
@@ -123,17 +147,22 @@ func parseDepth(input string, node *tree.Node) *tree.Node {
 				fmt.Println("Tree after processing left deep: " + node.String())
 			}
 
-			// Right side
-			rightCombos := detectCombinations(right)
+			// Right side (potentially modifying input string)
+			rightCombos, right := detectCombinations(right)
 			// Assign nested nodes either way
 			rightNode := tree.Node{}
 			// Link both nodes
 			node.Right = &rightNode
 			rightNode.Parent = node
 			if len(rightCombos) == 0 {
-				// If no combinations exist, assign as left leaf
-				fmt.Println("Found leaf on right side: " +  right)
-				node.Right.Entry = right
+				if right != "" {
+					// If no combinations exist, assign as left leaf
+					fmt.Println("Found leaf on right side: " + right)
+					node.Right.Entry = right
+				} else {
+					log.Fatal("Empty leaf value on right side: " + right + " (Corresponding left value and operator: " + left + "; " + node.LogicalOperator +
+						");\n processed expression: " + input)
+				}
 			} else {
 				// If combinations exist, delegate
 				fmt.Println("Go deep on right side: " +  right)
@@ -141,7 +170,7 @@ func parseDepth(input string, node *tree.Node) *tree.Node {
 				fmt.Println("Tree after processing right deep: " + node.String())
 			}
 			// break out if combination has been found and processed - must be top-level combination
-			return node
+			return node, (left + "[" + node.LogicalOperator + "]" + right)
 		} else {
 			fmt.Println("==No combination for key/level " + strconv.Itoa(v))
 		}
@@ -149,12 +178,14 @@ func parseDepth(input string, node *tree.Node) *tree.Node {
 	}
 
 	//fmt.Println("Should not really reach here; probably empty node: " + node.String())
-	return node
+	return node, input
 }
 
 /*
 This function detects levels of combinations present in the expression
 and returns the boundary indices as well logical operator (where present).
+It further returns the input string in potentially modified form to reflect
+changes performed during processing.
 To signal incomplete combinations, it contains a Complete flag that signals
 completeness for further postprocessing.
 Note: This function does not extract all combinations present in the expression,
@@ -165,15 +196,22 @@ Default syntactic form of input: "( leftSide [OPERATOR] rightSide )", where
 [OPERATOR] is one of the logical operators (including brackets), and left
 and right side are either text or combinations themselves.
  */
-func detectCombinations(expression string) map[int]tree.Boundaries {
+func detectCombinations(expression string) (map[int]tree.Boundaries, string) {
 
 	level := 0
 	parCount := 0
-	mode := ""
+	//mode := ""
 
+	// Map of mode states across levels (to recover during parsing)
+	modeMap := make(map[int]string)
+
+	// Maintain map of boundaries across different levels // note: only records one entry per level; good for top-level identification
 	levelMap := make(map[int]tree.Boundaries)
 
+	// Collection of found operators (with operator as key, followed by level, and count as value)
+	foundOperators := make(map[string]map[int]int)
 
+	//rerun := false
 	fmt.Println("Testing expression " + expression)
 	for i, letter := range expression {
 
@@ -183,35 +221,56 @@ func detectCombinations(expression string) map[int]tree.Boundaries {
 			level++
 			fmt.Println("Expression start detected (Level " + strconv.Itoa(level) + ")")
 			// Configure mode
-			mode = tree.PARSING_MODE_LEFT
-			fmt.Println("Mode: " +  mode)
+			//mode = tree.PARSING_MODE_LEFT
+			modeMap[level] = tree.PARSING_MODE_LEFT
+			fmt.Println("Mode: " + modeMap[level])
 			//Test of existing entries
 			if _, ok := levelMap[level]; ok {
 				fmt.Println("Key already defined - not added")
 			} else {
 				// Store index reference (incremented with 1 to avoid left parenthesis - balanced)
-				levelMap[level] = tree.Boundaries{Left: i+1, Complete: false}
+				levelMap[level] = tree.Boundaries{Left: i + 1, Complete: false}
 			}
 			// Count parentheses to detect uneven matching
 			parCount++
 		case ")":
 			fmt.Println("Expression end detected (Level " + strconv.Itoa(level) + ")")
+			// Check if there are repetitions
+			for k, _ := range foundOperators { // key: operator, value:
+				for k2, v2 := range foundOperators[k] { // key: level, value: number of occurrences
+					if v2 > 1 {
+						log.Println("Found " + strconv.Itoa(v2) + " occurrences of operator " + k + " on level " + strconv.Itoa(k2) + " in map.")
+					}
+				}
+
+			}
 			// Store index reference
 			fmt.Println("Level before saving: " + strconv.Itoa(level))
 			if b, ok := levelMap[level]; ok {
+				fmt.Println("Level map for level " + strconv.Itoa(level) + " before saving: " + b.String())
 				b.Right = i
 				if b.Left != 0 && b.OperatorVal != "" {
 					b.Complete = true
+					levelMap[level] = b
 				} else {
-					fmt.Println("Detected end, but combination incomplete! (Missing operator or left parenthesis)")
+					fmt.Println("Detected end, but combination incomplete (Missing operator or left parenthesis). Discarding combination.")
+					delete(levelMap, level)
 				}
-				levelMap[level] = b
 			}
+
 			// Configure mode
-			mode = tree.PARSING_MODE_OUTSIDE_EXPRESSION
-			fmt.Println("Mode: " +  mode)
+			modeMap[level] = tree.PARSING_MODE_OUTSIDE_EXPRESSION
+			fmt.Println("Mode: " + modeMap[level])
+
+			// Reset operator count for given level
+			for op := range foundOperators {
+				fmt.Println("Deleting operators for level " + strconv.Itoa(level))
+				delete(foundOperators[op], level)
+			}
+
 			// Reduce level
 			level--
+			fmt.Println("Moving back to level " + strconv.Itoa(level) + ", Mode: " + modeMap[level])
 			// Count parentheses to detect uneven matching
 			parCount--
 		case "[":
@@ -225,13 +284,48 @@ func detectCombinations(expression string) map[int]tree.Boundaries {
 				fmt.Println("Detected " + tree.OR_BRACKETS)
 				foundOperator = tree.OR
 			case tree.XOR_BRACKETS:
-				fmt.Println("Detected " +  tree.XOR_BRACKETS)
+				fmt.Println("Detected " + tree.XOR_BRACKETS)
 				foundOperator = tree.XOR
 			}
 			fmt.Println("Found logical operator " + foundOperator + " on level " + strconv.Itoa(level))
+
+			// Store operators
+			if _, ok := foundOperators[foundOperator]; ok {
+				if _, ok2 := foundOperators[foundOperator][level]; ok2 {
+					// if entry exists, increment
+					foundOperators[foundOperator][level] = foundOperators[foundOperator][level] + 1
+					fmt.Println(" -> Added. Count: " + strconv.Itoa(foundOperators[foundOperator][level]))
+				} else {
+					// else create new level entry with default value of 1
+					foundOperators[foundOperator][level] = 1
+					fmt.Println(" -> Created. Count: " + strconv.Itoa(foundOperators[foundOperator][level]))
+				}
+			} else {
+				// if no operator entry exists, else create new operator entry with default value of 1
+				foundOperators[foundOperator] = make(map[int]int)
+				foundOperators[foundOperator][level] = 1
+				fmt.Println(" -> Created level and value. Count: " + strconv.Itoa(foundOperators[foundOperator][level]))
+			}
+
+			// If already in right parsing mode, there should be no operator
+			if modeMap[level] == tree.PARSING_MODE_RIGHT {
+				log.Println("Found additional operator [" + foundOperator + "] (now " + strconv.Itoa(foundOperators[foundOperator][level]) +
+					" times on level " + strconv.Itoa(level) + "), even though looking for terminating parenthesis.")
+				if foundOperator == tree.AND && foundOperators[foundOperator][level] > 1 { // if AND operator and multiple on the same level
+					// Consider injecting parenthesis (i.e., add mixfix ") " before logical operator), e.g., "... ) [AND] ..."
+					expression = expression[:levelMap[level].Left] + "(" + expression[levelMap[level].Left:i-1] + ") " + expression[i:]
+					log.Println("Multiple [AND] operators found. Reconstructed nested structure by introducing parentheses, now: " + expression)
+					log.Println("Rerunning all parsing on combination to capture nested AND combinations")
+					return detectCombinations(expression)
+				} else {
+					log.Fatal("Error: Duplicate non-[AND] operators (or mix of [AND] and non-[AND] operators) on level " + strconv.Itoa(level) + " in single expression (Expression: " + expression)
+				}
+			}
+
 			// Configure mode
-			mode = tree.PARSING_MODE_RIGHT
-			fmt.Println("Mode: " +  mode)
+			modeMap[level] = tree.PARSING_MODE_RIGHT
+			fmt.Println("Mode: " +  modeMap[level])
+
 			// Store index reference and value
 			if o, ok := levelMap[level]; ok {
 				o.Operator = i
@@ -245,5 +339,5 @@ func detectCombinations(expression string) map[int]tree.Boundaries {
 		log.Fatal("Uneven number of parentheses (positive --> too many left; negative --> too many right): " + strconv.Itoa(parCount))
 	}
 
-	return levelMap
+	return levelMap, expression
 }

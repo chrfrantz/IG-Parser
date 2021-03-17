@@ -53,8 +53,20 @@ func parseStatement(text string) tree.Statement {
 	default: 	log.Println("No Aim found")
 	}
 
+	bdir := parseDirectObject(text)
+	// Switch on number of component patterns (not combinations)
+	switch len(bdir) {
+	case 1:		s.DirectObject = tree.ComponentLeafNode(bdir[0][0], tree.DIRECT_OBJECT)
+	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(bdir)) + " items.")
+	default: 	log.Println("No Direct Object found")
+	}
+
+	fmt.Println(s.String())
+
+	//fmt.Println(s.Aim.String())
+
 	// Remove symbol
-	k := parseCombinations(i[0][0][len(tree.AIM):])
+	//k := parseCombinations(i[0][0][len(tree.AIM):])
 
 	/*
 	fmt.Println(len(strings.Split(i[0][0], igTree.AIM)))
@@ -66,7 +78,9 @@ func parseStatement(text string) tree.Statement {
 
 	//k := parseCombinations(strings.Split(i[0][0], igTree.AIM))
 
-	fmt.Println(k)
+	//fmt.Println(k)
+
+	os.Exit(0)
 
 	return s
 

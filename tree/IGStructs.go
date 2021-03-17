@@ -1,5 +1,6 @@
 package tree
 
+import "strconv"
 
 const (
 	ATTRIBUTES = "A"
@@ -107,6 +108,14 @@ type Boundaries struct {
 	OperatorVal string
 	Right int
 	Complete bool
+}
+
+func (b *Boundaries) String() string {
+	return "Boundaries{\n"+
+		"  Left: " + strconv.Itoa(b.Left) + "\n" +
+		"  Op Pos: " + strconv.Itoa(b.Operator) + "\n" +
+		"  Operator: " + b.OperatorVal + "\n" +
+		"  Right: " + strconv.Itoa(b.Right) + "\n}"
 }
 
 func StringInSlice(a string, list []string) bool {
