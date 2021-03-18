@@ -23,7 +23,7 @@ func main() {
 		"D(may) " +
 		"I(inspect and), I(review [OR] refresh) " +
 		"Bdir(certified production and [AND] handling operations and [AND] accredited certifying agents) " +
-		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+		"Cex(for compliance with the (Act or [XOR] regulations in this part) )."
 
 
 	s := parseStatement(text)
@@ -36,27 +36,19 @@ func main() {
 func parseStatement(text string) tree.Statement {
 	s := tree.Statement{}
 
+
 	result, err := parseAttributes(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		log.Fatal(err.Error())
 	}
 	s.Attributes = result
-	/*switch len(a) {
-	case 1:		s.Attributes = tree.ComponentLeafNode(a[0][0], tree.ATTRIBUTES)
-	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(a)) + " items.")
-	default: 	log.Println("No Attributes found")
-	}*/
 
 	result, err = parseDeontic(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		log.Fatal(err.Error())
 	}
 	s.Deontic = result
-	/*switch len(d) {
-	case 1:		s.Deontic = tree.ComponentLeafNode(d[0][0], tree.DEONTIC)
-	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(d)) + " items.")
-	default: 	log.Println("No Deontic found")
-	}*/
+
 
 
 	result, err = parseAim(text)
@@ -65,20 +57,15 @@ func parseStatement(text string) tree.Statement {
 	}
 	s.Aim = result
 
-	// Switch on number of component patterns (not combinations)
-	/*switch len(i) {
-	case 1:		s.Aim = tree.ComponentLeafNode(i[0][0], tree.AIM)
-	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(i)) + " items.")
-	default: 	log.Println("No Aim found")
-	}*/
 
-	result,err = parseDirectObject(text)
+	result, err = parseDirectObject(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		log.Fatal(err.Error())
 	}
 	s.DirectObject = result
 
-	result,err = parseExecutionConstraint(text)
+
+	result, err = parseExecutionConstraint(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		log.Fatal(err.Error())
 	}

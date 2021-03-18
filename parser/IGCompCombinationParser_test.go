@@ -257,6 +257,82 @@ func TestMultipleNonCombinationParentheses(t *testing.T) {
 }
 
 /*
+Tests parsing of shared elements in surrounding non-combination parentheses and inclusion in resulting node
+ */
+func TestSharedElements(t *testing.T) {
+	input := "( shared left (Left side information [XOR] middle information) shared right)"
+
+	// Create root node
+	node := tree.Node{}
+	// Parse provided expression
+	_, modified, err := ParseDepth(input, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+	}
+
+	// Test return information from parsing
+	if modified != "(Left side information [XOR] middle information)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}
+
+	if node.SharedLeft != "shared left" {
+		t.Fatal("Parsed left shared value is not correct. Output: " + node.SharedLeft)
+	}
+
+	if node.SharedRight != "shared right" {
+		t.Fatal("Parsed right shared value is not correct. Output: " + node.SharedRight)
+	}
+
+	// Test reconstruction from tree
+	if node.Stringify() != "(shared left (Left side information [XOR] middle information) shared right)" {
+		t.Fatal("Stringified output does not correspond to input (Output: " + node.Stringify() + "')")
+	}
+}
+
+/*
+Tests for correct parsing of shared elements as well as decomposition of multiple AND combinations
+ */
+func TestSharedElementsAndAndCombination(t *testing.T) {
+	input := "( shared left (Left side information [AND] middle information [AND] right information) shared right)"
+
+	// Create root node
+	node := tree.Node{}
+	// Parse provided expression
+	_, modified, err := ParseDepth(input, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+	}
+
+	// Test return information from parsing (strips shared elements)
+	if modified != "((Left side information [AND] middle information) [AND] right information)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}
+
+	if node.SharedLeft != "shared left" {
+		t.Fatal("Parsed left shared value is not correct. Output: " + node.SharedLeft)
+	}
+
+	if node.SharedRight != "shared right" {
+		t.Fatal("Parsed right shared value is not correct. Output: " + node.SharedRight)
+	}
+
+	if node.Left.SharedLeft != "shared left" {
+		t.Fatal("Left-nested left node did not inherit shared value. Node value: " + node.Left.SharedLeft + ". Expected output: " + node.SharedLeft)
+	}
+
+	if node.Left.SharedRight != "shared right" {
+		t.Fatal("Left-nested right node did not inherit shared value. Node value: " + node.Left.SharedRight + ". Expected output: " + node.SharedRight)
+	}
+
+	// Test reconstruction from tree
+	if node.Stringify() != "(shared left ((Left side information [AND] middle information) [AND] right information) shared right)" {
+		t.Fatal("Stringified output does not correspond to input (Output: " + node.Stringify() + "')")
+	}
+}
+
+/*
 Tests whether inline annotations using the [text] notation are ignored
  */
 func TestInlineAnnotations(t *testing.T) {

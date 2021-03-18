@@ -118,7 +118,8 @@ func (b *Boundaries) String() string {
 		"  Left: " + strconv.Itoa(b.Left) + "\n" +
 		"  Op Pos: " + strconv.Itoa(b.Operator) + "\n" +
 		"  Operator: " + b.OperatorVal + "\n" +
-		"  Right: " + strconv.Itoa(b.Right) + "\n}"
+		"  Right: " + strconv.Itoa(b.Right) + "\n" +
+		"  Complete: " +  strconv.FormatBool(b.Complete) + "\n}"
 }
 
 

@@ -60,13 +60,18 @@ For [AND] operators, an arbitrary number of expressions can be combined;
 in this case the function will decompose those into nested structures
 (e.g., expanding "( expr1 [AND] expr2 [AND] expr3 )" into
 "(( expr1 [AND] expr2 ) [AND] expr3)"), with precedence for left combinations.
-Note that left expressions are trimmed prior storing in tree structure.
+Note that expressions are trimmed prior storing in tree structure.
+The parsing further supports shared values outside of the combination (e.g.,
+'(shared left value (left element [AND] right element) shared right value)',
+and returns those as part of the node that holds the logical operator.
 
 Hint: Call Stringify() on the returned node to reconstruct string
 
 The function returns
 - a node tree of the structure, as well as
 - the potentially modified input string corresponding to the node tree
+  Note: Shared elements are stripped from the modified output string (but
+  included in the node instance
 
 Note:
 - The entire expression must be surrounded with parentheses, else only
@@ -85,15 +90,16 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 	if len(combinations) == 0 {
 		fmt.Println("No combinations detected.")
 	} else {
+		//TODO to be reviewed if issues arise with unwanted elements; else remove
 		ct := 0
 		toBeDeleted := []int{}
-		for k, v := range combinations {
+		/*for k, v := range combinations {
 			if v.Complete {
 				ct++
 			} else {
 				toBeDeleted = append(toBeDeleted, k)
 			}
-		}
+		}*/
 		errorMsg := ""
 		if len(toBeDeleted) > 0 {
 			errorMsg = ", with one partial " + strconv.Itoa(len(toBeDeleted)) + " to be removed"
@@ -120,15 +126,63 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 
 	// Depth first
 	v := 0
+	// Shared content framing combinations (e.g., "(shared info (left [AND] right))").
+	sharedLeft := ""
+	sharedRight := ""
 	for { // infinite loop - breaks out eventually
 		fmt.Println("Level " + strconv.Itoa(v))
 		if _, ok := combinations[v]; ok {
+			fmt.Print("Combinations on level " + strconv.Itoa(v) + ": ")
+			fmt.Println(combinations[v])
+
+			// Test for shared values
+			if combinations[v].Operator == 0 &&
+				combinations[v].OperatorVal == "" &&
+				!combinations[v].Complete {
+				fmt.Println("Detected shared string: ")
+				// Must contain embedded combination (e.g., "(left shared info (left [AND] right) right shared info)").
+
+				// Extract potential left shared element (without leading bracket)
+				leftShared := input[combinations[v].Left:combinations[v+1].Left-1]
+				leftShared = strings.Trim(leftShared, " ")
+				// Extract potential right shared element (without trailing brackets)
+				rightShared := input[combinations[v+1].Right+1:combinations[v].Right]
+				rightShared = strings.Trim(rightShared, " ")
+				// Store in shared variables
+				if len(leftShared) > 0 {
+					sharedLeft += leftShared
+					fmt.Println("Left shared: " + sharedLeft)
+				}
+				if len(rightShared) > 0 {
+					sharedRight += rightShared
+					fmt.Println("Right shared: " + sharedRight)
+				}
+				// Move to next round by deleting entry
+				delete(combinations, v)
+				fmt.Println("Moving to next round after shared string processing ...")
+				continue
+			}
 			left := input[combinations[v].Left:combinations[v].Operator]
 			right := input[combinations[v].Operator+len(combinations[v].OperatorVal)+2:combinations[v].Right]
 			fmt.Println("==Left value: " +  left)
 			fmt.Println("==Operator: " + combinations[v].OperatorVal)
 			fmt.Println("==Right value: " +  right)
 			// Scan through top level only and break out afterwards ...
+
+			// Assign left shared value if existing
+			if len(sharedLeft) > 0 {
+				fmt.Println("Assigning left shared element '" + sharedLeft + "'.")
+				node.SharedLeft = sharedLeft
+				// Reset shared
+				sharedLeft = ""
+			}
+			// Assign shared value if existing
+			if len(sharedRight) > 0 {
+				fmt.Println("Assigning right shared element '" + sharedRight + "'.")
+				node.SharedRight = sharedRight
+				// Reset shared
+				sharedRight = ""
+			}
 
 			// Assign logical operator
 			node.LogicalOperator = combinations[v].OperatorVal
@@ -284,8 +338,9 @@ func detectCombinations(expression string) (map[int]tree.Boundaries, string, tre
 			// Store index reference
 			fmt.Println("Level before saving: " + strconv.Itoa(level))
 			if b, ok := levelMap[level]; ok {
-				fmt.Println("Level map for level " + strconv.Itoa(level) + " before saving: " + b.String())
 				b.Right = i
+				levelMap[level] = b
+				fmt.Println("Level map for level " + strconv.Itoa(level) + " (after adding right value): " + b.String())
 				// Test whether indices are identical or immediately following - suggesting gaps in values
 				if (b.Left == b.Operator) || ((b.Operator + len(b.OperatorVal) + 2) == b.Right) {
 					msg := "Input contains invalid combination expression in the range '" + expression[b.Left:b.Right] + "'."
@@ -293,12 +348,25 @@ func detectCombinations(expression string) (map[int]tree.Boundaries, string, tre
 						msg}
 				}
 				if b.Left != 0 && b.OperatorVal != "" {
+					// Update complete marker
+					b := levelMap[level]
 					b.Complete = true
 					levelMap[level] = b
 				} else {
-					log.Println("Detected end, but combination incomplete (Missing operator or left parenthesis). " +
+					fmt.Println("Detected end, but combination incomplete (Missing operator or left parenthesis). " +
 						"Discarding combination. (Input: '" + expression + "')")
-					delete(levelMap, level)
+					fmt.Println(levelMap[level])
+					// Retrieve higher level
+					_, ok := levelMap[level+1]
+					if !ok {
+						fmt.Print("No nested complete combination, so deleted this incomplete one: ")
+						fmt.Println(levelMap[level])
+						// If no higher-level exists (within the lower level), delete this incomplete entry
+						delete(levelMap, level)
+					} else {
+						// else retain
+						fmt.Println("Nested complete combination, so incomplete higher-level combination is retained.")
+					}
 				}
 			}
 
@@ -308,7 +376,7 @@ func detectCombinations(expression string) (map[int]tree.Boundaries, string, tre
 
 			// Reset operator count for given level
 			for op := range foundOperators {
-				fmt.Println("Deleting operators for level " + strconv.Itoa(level))
+				fmt.Println("Deleting operator " + op + " for level " + strconv.Itoa(level))
 				delete(foundOperators[op], level)
 			}
 
