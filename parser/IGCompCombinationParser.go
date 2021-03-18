@@ -43,7 +43,7 @@ func main() {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, modifiedInput, _ := parseDepth(input, &node)
+	_, modifiedInput, _ := ParseDepth(input, &node)
 	// Print resulting tree
 	fmt.Println("Final tree: \n" + node.String())
 	fmt.Println("Corresponding (potentially modified) input string: " + modifiedInput)
@@ -75,7 +75,7 @@ the right-most outer combination (and combinations nested therein) is parsed.
 - Invalid combinations (e.g., missing logical operator) are discarded
 in the processing.
  */
-func parseDepth(input string, node *tree.Node) (*tree.Node, string, tree.ParsingError) {
+func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.ParsingError) {
 	// Return detected combinations, alongside potentially modified input string
 	combinations, input, err := detectCombinations(input)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -111,6 +111,7 @@ func parseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 
 	// if no valid combinations are left, the parsing is finished
 	if len(combinations) == 0 {
+		node.Entry = input
 		return node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_COMBINATIONS,
 			ErrorMessage: "The input does not contain combinations"}
 	}
@@ -164,7 +165,7 @@ func parseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 			} else {
 				// If combinations exist, delegate
 				fmt.Println("Go deep on left side: " +  left)
-				_, left, err := parseDepth(left, &leftNode)
+				_, left, err := ParseDepth(left, &leftNode)
 				if err.ErrorCode != tree.PARSING_NO_ERROR {
 					return nil, left, err
 				}
@@ -199,7 +200,7 @@ func parseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 			} else {
 				// If combinations exist, delegate
 				fmt.Println("Go deep on right side: " +  right)
-				_, right, err := parseDepth(right, node.Right)
+				_, right, err := ParseDepth(right, node.Right)
 				if err.ErrorCode != tree.PARSING_NO_ERROR {
 					return nil, right, err
 				}
@@ -295,7 +296,8 @@ func detectCombinations(expression string) (map[int]tree.Boundaries, string, tre
 					b.Complete = true
 					levelMap[level] = b
 				} else {
-					log.Println("Detected end, but combination incomplete (Missing operator or left parenthesis). Discarding combination.")
+					log.Println("Detected end, but combination incomplete (Missing operator or left parenthesis). " +
+						"Discarding combination. (Input: '" + expression + "')")
 					delete(levelMap, level)
 				}
 			}

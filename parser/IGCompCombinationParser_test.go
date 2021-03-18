@@ -7,6 +7,27 @@ import (
 	"testing"
 )
 
+func TestNonCombination(t *testing.T) {
+
+	input := "(inspect and )"
+
+	// Create root node
+	node := tree.Node{}
+	_, _, err := ParseDepth(input, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+		t.Fatal("Parsing throws error where there should be none. Error: " + err.Error())
+	}
+
+	if !node.IsLeafNode() {
+		t.Fatal("Node should be leaf node")
+	}
+
+	if node.Entry != input {
+		t.Fatal("Leaf node entry should be filled with non-combination text")
+	}
+
+}
 
 func TestBasicExpression(t *testing.T) {
 
@@ -24,7 +45,11 @@ func TestBasicExpression(t *testing.T) {
 	}
 
 	// Parse provided expression
-	parseDepth(input, &node)
+	_, _, err := ParseDepth(input, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing throws error where there should be none.")
+	}
 
 	if node.IsLeafNode() {
 		t.Fatal("Node should not be leaf node")
@@ -65,7 +90,11 @@ func TestTwoLevelTree(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	parseDepth(input, &node)
+	_, _, err := ParseDepth(input, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing throws error where there should be none.")
+	}
 
 	if node.IsLeafNode() {
 		t.Fatal("Node should not be leaf node")
@@ -94,7 +123,11 @@ func TestComplexExpression(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	parseDepth(input, &node)
+	_, _, err := ParseDepth(input, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing throws error where there should be none.")
+	}
 
 	if !(node.LogicalOperator == "AND" &&
 		node.Left.Left.Entry == "inspect and" &&
@@ -123,7 +156,11 @@ func TestDeepExpression(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	parseDepth(input, &node)
+	_, _, err := ParseDepth(input, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing throws error where there should be none.")
+	}
 
 	if node.Stringify() != input[2:len(input)-2] {
 		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
@@ -148,7 +185,7 @@ func TestAutomatedAndExpansion(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, modified, err := parseDepth(input, &node)
+	_, modified, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing throws error where there should be none.")
@@ -171,7 +208,7 @@ func TestNonCombinationParentheses(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, modified, err := parseDepth(input, &node)
+	_, modified, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Inline parentheses without embedded combinations (e.g., (dgjslkgjsø)) should not produce error")
@@ -194,7 +231,7 @@ func TestMultipleNonCombinationParentheses(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, modified, err := parseDepth(input, &node)
+	_, modified, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Inline parentheses without embedded combinations (e.g., (dgjslkgjsø)) should not produce error")
@@ -228,7 +265,7 @@ func TestInlineAnnotations(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, modified, err := parseDepth(input, &node)
+	_, modified, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Inline annotations (e.g., [dgjslkgjsø]) should not produce error " + err.Error())
@@ -255,7 +292,7 @@ func TestCombinedOperators(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, text, err := parseDepth(input, &node)
+	_, text, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
 		t.Fatal("Did not pick up on invalid logical operator combinations on given level")
@@ -274,7 +311,7 @@ func TestAdjacentAndOperators(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, text, err := parseDepth(input, &node)
+	_, text, err := ParseDepth(input, &node)
 
 	fmt.Println(err.Error())
 
@@ -297,7 +334,7 @@ func TestAdjacentNonAndOperators(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, text, err := parseDepth(input, &node)
+	_, text, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
 		t.Fatal("Did not pick up on invalid logical operator combinations on given level")
@@ -316,7 +353,7 @@ func TestAdjacentAndAndNonAndOperators(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, text, err := parseDepth(input, &node)
+	_, text, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
 		t.Fatal("Did not pick up on invalid logical operator combinations on given level")
@@ -331,7 +368,7 @@ func TestAdjacentAndAndNonAndOperators(t *testing.T) {
 	// Create root node
 	node = tree.Node{}
 	// Parse provided expression
-	_, text, err = parseDepth(input, &node)
+	_, text, err = ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
 		t.Fatal("Did not pick up on invalid logical operator combinations on given level")
@@ -351,7 +388,7 @@ func TestIncompleteExpression(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, text, err := parseDepth(input, &node)
+	_, text, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_ERROR_EMPTY_LEAF {
 		t.Fatal("Did not pick up on empty leaf value")
@@ -367,7 +404,7 @@ func TestIncompleteExpression(t *testing.T) {
 	// Create root node
 	node = tree.Node{}
 	// Parse provided expression
-	_, text, err = parseDepth(input, &node)
+	_, text, err = ParseDepth(input, &node)
 
 	fmt.Println(err.Error())
 
@@ -385,7 +422,7 @@ func TestIncompleteExpression(t *testing.T) {
 	// Create root node
 	node = tree.Node{}
 	// Parse provided expression
-	_, text, err = parseDepth(input, &node)
+	_, text, err = ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_ERROR_EMPTY_LEAF {
 		t.Fatal("Did not pick up on empty leaf value")
@@ -401,7 +438,7 @@ func TestIncompleteExpression(t *testing.T) {
 	// Create root node
 	node = tree.Node{}
 	// Parse provided expression
-	_, text, err = parseDepth(input, &node)
+	_, text, err = ParseDepth(input, &node)
 
 	fmt.Println(err.Error())
 
@@ -422,7 +459,7 @@ func TestUnbalancedParentheses(t *testing.T) {
 	// Create root node
 	node := tree.Node{}
 	// Parse provided expression
-	_, text, err := parseDepth(input, &node)
+	_, text, err := ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_ERROR_IMBALANCED_PARENTHESES {
 		t.Fatal("Did not pick up on imbalanced parentheses")
@@ -437,7 +474,7 @@ func TestUnbalancedParentheses(t *testing.T) {
 	// Create root node
 	node = tree.Node{}
 	// Parse provided expression
-	_, text, err = parseDepth(input, &node)
+	_, text, err = ParseDepth(input, &node)
 
 	if err.ErrorCode != tree.PARSING_ERROR_IMBALANCED_PARENTHESES {
 		t.Fatal("Did not pick up on imbalanced parentheses")

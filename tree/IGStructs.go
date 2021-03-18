@@ -122,12 +122,20 @@ func (b *Boundaries) String() string {
 }
 
 
+// Signals invalid component combinations on a given parsing level (generally non-AND components)
 const PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS = "INVALID_LOGICAL_OPERATOR_COMBINATIONS"
+// Indicates that there were no issues during parsing
 const PARSING_NO_ERROR = "NO_ERROR_DURING_PARSING"
+// Signals that no combinations were found in input
 const PARSING_NO_COMBINATIONS = "NO_COMBINATIONS_IN_INPUT"
+// Signals invalid combination expression (e.g., missing left, right, or operator)
 const PARSING_INVALID_COMBINATION = "INVALID_COMBINATION_IN_INPUT"
+// Signals empty leaf value during parsing
 const PARSING_ERROR_EMPTY_LEAF = "EMPTY_LEAF_VALUE"
+// Indicates that parentheses are umbalanced during parsing
 const PARSING_ERROR_IMBALANCED_PARENTHESES = "UNBALANCED_PARENTHESES"
+// Indicates that component was not found during preprocessing
+const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 
 type ParsingError struct {
 	ErrorCode string

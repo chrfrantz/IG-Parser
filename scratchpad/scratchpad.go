@@ -1,8 +1,12 @@
 package main
 
 import (
+	"IG-Parser/parser"
+	"IG-Parser/tree"
 	"fmt"
+	"log"
 	"regexp"
+	"strings"
 )
 
 func main0() {
@@ -33,7 +37,59 @@ func main0() {
 	//fmt.Println(text)
 }
 
-func main(){
+var words = "([a-zA-Z',;]+\\s*)+"
+var wordsWithParentheses = "([a-zA-Z',;()\\[\\]]+\\s*)+"
+var logicalOperators = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
+
+func main() {
+
+	//component := "I"
+
+	text := "Cex((on behalf of the Secretary) [AND] (for compliance with the (Act or [XOR] regulations in this part)))"
+
+	//r, _ := regexp.Compile(component + "\\(" + wordsWithParentheses + "(\\[" + logicalOperators + "\\]\\s" + wordsWithParentheses + ")*\\)")
+
+	//result := r.FindAllStringSubmatch(text, -1)
+	//result := extractComponent(component, text)
+
+	node := tree.Node{}
+	parser.ParseDepth(text, &node)
+
+
+
+	fmt.Println("Final: " + node.String())
+
+}
+
+func extractComponent(component string, input string) string {
+
+	// Parentheses count to check for balance
+	parCount := 0
+
+	startPos := strings.Index(input, component)
+	if startPos == -1 {
+		log.Fatal("Component signature not found")
+		return ""
+	}
+
+	for i, letter := range input[startPos:] {
+
+		switch string(letter) {
+
+		case "(":
+			parCount++
+		case ")":
+			parCount--
+			if parCount == 0 {
+				return input[startPos:startPos+i+1]
+			}
+		}
+	}
+
+	return ""
+}
+
+func main2(){
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), D(may) I(inspect and [AND] review) Bdir(certified production and [AND] handling operations and [AND] accredited certifying agents) Cex(for compliance with the (Act or [XOR] regulations in this part))."
 

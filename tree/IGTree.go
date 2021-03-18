@@ -33,60 +33,79 @@ func (s *Statement) String() string {
 	out := ""
 	if s.Attributes != nil {
 		out += s.Attributes.String()
+		out += " "
 	}
 	if s.AttributesProperty != nil {
 		out += s.AttributesProperty.String()
+		out += " "
 	}
 	if s.Deontic != nil {
 		out += s.Deontic.String()
+		out += " "
 	}
 	if s.Aim != nil {
 		out += s.Aim.String()
+		out += " "
 	}
 	if s.DirectObject != nil {
 		out += s.DirectObject.String()
+		out += " "
 	}
 	if s.DirectObjectProperty != nil {
 		out += s.DirectObjectProperty.String()
+		out += " "
 	}
 	if s.IndirectObject != nil {
 		out += s.IndirectObject.String()
+		out += " "
 	}
 	if s.IndirectObjectProperty != nil {
 		out += s.IndirectObjectProperty.String()
+		out += " "
 	}
 	if s.ConstitutedEntity != nil {
 		out += s.ConstitutedEntity.String()
+		out += " "
 	}
 	if s.ConstitutedEntityProperty != nil {
 		out += s.ConstitutedEntityProperty.String()
+		out += " "
 	}
 	if s.Modal != nil {
 		out += s.Modal.String()
+		out += " "
 	}
 	if s.ConstitutiveFunction != nil {
 		out += s.ConstitutiveFunction.String()
+		out += " "
 	}
 	if s.ConstitutingProperties != nil {
 		out += s.ConstitutingProperties.String()
+		out += " "
 	}
 	if s.ConstitutingPropertiesProperty != nil {
 		out += s.ConstitutingPropertiesProperty.String()
+		out += " "
 	}
 	if s.ActivationConditionSimple != nil {
 		out += s.ActivationConditionSimple.String()
+		out += " "
 	}
 	if s.ActivationConditionComplex != nil {
 		out += s.ActivationConditionComplex.String()
+		out += " "
 	}
 	if s.ExecutionConstraintSimple != nil {
 		out += s.ExecutionConstraintSimple.String()
+		out += " "
 	}
 	if s.ExecutionConstraintComplex != nil {
 		out += s.ExecutionConstraintComplex.String()
+		out += " "
 	}
 	if s.OrElse != nil {
 		out += s.OrElse.String()
+		out += " "
 	}
 	return out
 }

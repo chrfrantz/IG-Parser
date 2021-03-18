@@ -1,6 +1,7 @@
 package main
 
 import (
+	"IG-Parser/parser"
 	"IG-Parser/tree"
 	"fmt"
 	"log"
@@ -18,69 +19,91 @@ func main() {
 
 	//text := "National Organic Program's Program Manager, on behalf of the Secretary, may (inspect and [AND] review) (certified production and [AND] handling operations and [AND] accredited certifying agents) for compliance with the (Act or [XOR] regulations in this part)."
 
-	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), D(may) I(inspect and [AND] review) Bdir(certified production and [AND] handling operations and [AND] accredited certifying agents) Cex(for compliance with the (Act or [XOR] regulations in this part))."
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(review [OR] refresh) " +
+		"Bdir(certified production and [AND] handling operations and [AND] accredited certifying agents) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 
 	s := parseStatement(text)
 
-	s.String()
-	//fmt.Println(s.String())
+	//s.String()
+	fmt.Println(s.String())
 
 }
 
 func parseStatement(text string) tree.Statement {
 	s := tree.Statement{}
 
-	a := parseAttributes(text)
-	switch len(a) {
+	result, err := parseAttributes(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		log.Fatal(err.Error())
+	}
+	s.Attributes = result
+	/*switch len(a) {
 	case 1:		s.Attributes = tree.ComponentLeafNode(a[0][0], tree.ATTRIBUTES)
 	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(a)) + " items.")
 	default: 	log.Println("No Attributes found")
-	}
+	}*/
 
-	d := parseDeontic(text)
-	switch len(d) {
+	result, err = parseDeontic(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		log.Fatal(err.Error())
+	}
+	s.Deontic = result
+	/*switch len(d) {
 	case 1:		s.Deontic = tree.ComponentLeafNode(d[0][0], tree.DEONTIC)
 	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(d)) + " items.")
 	default: 	log.Println("No Deontic found")
-	}
+	}*/
 
-	i := parseAim(text)
+
+	result, err = parseAim(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		log.Fatal(err.Error())
+	}
+	s.Aim = result
+
 	// Switch on number of component patterns (not combinations)
-	switch len(i) {
+	/*switch len(i) {
 	case 1:		s.Aim = tree.ComponentLeafNode(i[0][0], tree.AIM)
 	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(i)) + " items.")
 	default: 	log.Println("No Aim found")
-	}
+	}*/
 
-	bdir := parseDirectObject(text)
+	result,err = parseDirectObject(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		log.Fatal(err.Error())
+	}
+	s.DirectObject = result
+
+	result,err = parseExecutionConstraint(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		log.Fatal(err.Error())
+	}
+	s.ExecutionConstraintSimple = result
+
+	result,err = parseActivationCondition(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND {
+		log.Fatal(err.Error())
+	}
+	s.ActivationConditionSimple = result
+
+
+
+
 	// Switch on number of component patterns (not combinations)
-	switch len(bdir) {
+	/*switch len(bdir) {
 	case 1:		s.DirectObject = tree.ComponentLeafNode(bdir[0][0], tree.DIRECT_OBJECT)
 	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(bdir)) + " items.")
 	default: 	log.Println("No Direct Object found")
-	}
+	}*/
 
-	fmt.Println(s.String())
+	//fmt.Println(s.String())
 
-	//fmt.Println(s.Aim.String())
 
-	// Remove symbol
-	//k := parseCombinations(i[0][0][len(tree.AIM):])
-
-	/*
-	fmt.Println(len(strings.Split(i[0][0], igTree.AIM)))
-
-	fmt.Println(i[0][0][len(igTree.AIM):])
-
-	fmt.Println(i[0][0])
-	*/
-
-	//k := parseCombinations(strings.Split(i[0][0], igTree.AIM))
-
-	//fmt.Println(k)
-
-	os.Exit(0)
+	//os.Exit(0)
 
 	return s
 
@@ -142,71 +165,129 @@ func parseStatement(text string) tree.Statement {
 	*/
 }
 
-func parseAttributes(text string) [][]string {
+func parseAttributes(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.ATTRIBUTES, text)
 }
 
-func parseAttributesProperty(text string) [][]string {
+func parseAttributesProperty(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.ATTRIBUTES_PROPERTY, text)
 }
 
-func parseDeontic(text string) [][]string {
+func parseDeontic(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.DEONTIC, text)
 }
 
-func parseAim(text string) [][]string {
+func parseAim(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.AIM, text)
 }
 
-func parseDirectObject(text string) [][]string {
+func parseDirectObject(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.DIRECT_OBJECT, text)
 }
 
-func parseDirectObjectProperty(text string) [][]string {
+func parseDirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.DIRECT_OBJECT_PROPERTY, text)
 }
 
-func parseIndirectObject(text string) [][]string {
+func parseIndirectObject(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.INDIRECT_OBJECT, text)
 }
 
+/*
 func parseIndirectObjectProperty(text string) [][]string {
-	return parseComponent(tree.INDIRECT_OBJECT_PROPERTY, text)
+	return parseComponentOld(tree.INDIRECT_OBJECT_PROPERTY, text)
 }
 
 func parseConstitutedEntity(text string) [][]string {
-	return parseComponent(tree.CONSTITUTED_ENTITY, text)
+	return parseComponentOld(tree.CONSTITUTED_ENTITY, text)
 }
 
 func parseConstitutedEntityProperty(text string) [][]string {
-	return parseComponent(tree.CONSTITUTED_ENTITY_PROPERTY, text)
+	return parseComponentOld(tree.CONSTITUTED_ENTITY_PROPERTY, text)
 }
 
 func parseConstitutingFunction(text string) [][]string {
-	return parseComponent(tree.CONSTITUTIVE_FUNCTION, text)
+	return parseComponentOld(tree.CONSTITUTIVE_FUNCTION, text)
 }
 
 func parseConstitutingProperties(text string) [][]string {
-	return parseComponent(tree.CONSTITUTING_PROPERTIES, text)
+	return parseComponentOld(tree.CONSTITUTING_PROPERTIES, text)
 }
 
 func parseConstitutingPropertiesProperty(text string) [][]string {
-	return parseComponent(tree.CONSTITUTING_PROPERTIES_PROPERTY, text)
+	return parseComponentOld(tree.CONSTITUTING_PROPERTIES_PROPERTY, text)
 }
+*/
 
-func parseActivationCondition(text string) [][]string {
+func parseActivationCondition(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.ACTIVATION_CONDITION, text)
 }
 
-func parseExecutionConstraint(text string) [][]string {
+func parseExecutionConstraint(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.EXECUTION_CONSTRAINT, text)
 }
 
-func parseComponent(component string, text string) [][]string {
+func parseComponentOld(component string, text string) [][]string {
 	log.Println("Invoking parsing of component " + component)
 
-	// Detects any content framed by component prefix
 	r, _ := regexp.Compile(component + "\\(" + words + "(\\[" + logicalOperators + "\\]\\s" + words + ")*\\)")
+	return r.FindAllStringSubmatch(text, -1)
+}
+
+/*
+Extracts a component specification from string based on component signature (e.g., A, I, etc.)
+and balanced parentheses.
+If no component is found, an empty string is returned
+ */
+func extractComponent(component string, input string) []string {
+
+	// Strings for given component
+	componentStrings := []string{}
+
+	// Copy string for truncating
+	processedString := input
+
+	fmt.Println("Looking for component: " + component)
+
+	for { // infinite loop - needs to break out
+		// Find first occurrence of signature
+		startPos := strings.Index(processedString, component + "(")
+		
+		if startPos == -1 {
+			//log.Println("Component signature " + component + " not found in input string '" + input + "'")
+			return componentStrings
+		}
+
+		// Parentheses count to check for balance
+		parCount := 0
+
+		stop := false
+
+		for i, letter := range processedString[startPos:] {
+
+			switch string(letter) {
+			case "(":
+				parCount++
+			case ")":
+				parCount--
+				if parCount == 0 {
+					componentStrings = append(componentStrings, processedString[startPos:startPos+i+1])
+					fmt.Println("Added string " + processedString[startPos:startPos+i+1])
+					processedString = processedString[startPos+i+1:]
+					stop = true
+				}
+			}
+			if stop {
+				break
+			}
+		}
+	}
+
+}
+
+func parseComponent(component string, text string) (*tree.Node, tree.ParsingError) {
+	// Detects any content framed by component prefix
+	//r, _ := regexp.Compile(component + "\\(" + words + "(\\[" + logicalOperators + "\\]\\s" + words + ")*\\)")
 
 	/*for k,v := range r.FindAllStringSubmatch(text, -1){
 		fmt.Println(k)
@@ -215,8 +296,61 @@ func parseComponent(component string, text string) [][]string {
 
 	//fmt.Println()
 
-	return r.FindAllStringSubmatch(text, -1)
+	/*matches := r.FindAllStringSubmatch(text, -1)
+	if len(matches) == 0 {
+		log.Fatal("No element found for component " + component + " found in text " + text)
+	}
+	if len(matches) > 1 {
+		log.Fatal("More than one component " + component + " found in text " + text)
+	}*/
 
+	componentStrings := extractComponent(component, text)
+
+
+
+	componentString := "("
+
+	// Create root node
+	node := tree.Node{}
+
+
+	if len(componentStrings) > 1 {
+		for i, v := range componentStrings {
+			fmt.Println(strconv.Itoa(i) + ": " + v)
+			componentString += v[len(component):]
+			if i < len(componentStrings)-1 {
+				componentString += " " + tree.AND_BRACKETS + " "
+			} else {
+				componentString += ")"
+			}
+		}
+	} else if len(componentStrings) == 1 {
+		// Single entry
+		componentString = componentStrings[0]
+	} else {
+		return nil, tree.ParsingError{tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
+			"Component " + component + " was not found in input string"}
+	}
+
+	fmt.Println(componentString)
+
+	//os.Exit(2)
+	// Parse provided expression
+	_, modifiedInput, err := parser.ParseDepth(componentString, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
+	}
+
+	// Override missing combination error, since it is not relevant at this level
+	if err.ErrorCode == tree.PARSING_NO_COMBINATIONS {
+		err.ErrorCode = tree.PARSING_NO_ERROR
+		err.ErrorMessage = ""
+	}
+
+	fmt.Println("Modified output for " + component + ": " + modifiedInput)
+
+	return &node, err
 }
 
 func parseCombinations(text string) [][]string {
