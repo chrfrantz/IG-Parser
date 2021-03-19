@@ -293,8 +293,11 @@ func TestSharedElements(t *testing.T) {
 /*
 Tests for correct parsing of shared elements as well as decomposition of multiple AND combinations
  */
-func TestSharedElementsAndAndCombination(t *testing.T) {
+func TestSharedElementsAndAndCombinationWithInheritance(t *testing.T) {
+
 	input := "( shared left (Left side information [AND] middle information [AND] right information) shared right)"
+
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_OVERRIDE
 
 	// Create root node
 	node := tree.Node{}
@@ -327,8 +330,197 @@ func TestSharedElementsAndAndCombination(t *testing.T) {
 	}
 
 	// Test reconstruction from tree
+	if node.Stringify() != "(shared left ((shared left (Left side information [AND] middle information) shared right) [AND] right information) shared right)" {
+		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
+	}
+}
+
+/*
+Tests for correct parsing of shared elements as well as decomposition of multiple AND combinations in APPEND mode
+*/
+func TestSharedElementsAndAndCombinationWithInheritanceAppendMode(t *testing.T) {
+
+	input := "( shared left ( inner left (innermost left (left-most information [AND] Left side information [AND] middle information) [AND] right information)) shared right)"
+
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
+
+	// Create root node
+	node := tree.Node{}
+	// Parse provided expression
+	_, modified, err := ParseDepth(input, &node)
+
+	fmt.Println(node.String())
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+	}
+
+	// Test return information from parsing (strips shared elements)
+	if modified != "(innermost left ((left-most information [AND] Left side information)[AND] middle information)  [AND] right information)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}
+
+	if node.SharedLeft != "shared left,inner left" {
+		t.Fatal("Parsed left shared value is not correct. Node value: " + node.SharedLeft + ". Expected output: shared left,inner left")
+	}
+
+	if node.SharedRight != "shared right" {
+		t.Fatal("Parsed right shared value is not correct. Node value: " + node.SharedRight + ". Expected output: shared right")
+	}
+
+	if node.Left.SharedLeft != "shared left,inner left" {
+		t.Fatal("Left-nested left node did not inherit shared value. Node value: " + node.Left.SharedLeft + ". Expected output: shared left,inner left")
+	}
+
+	if node.Left.SharedRight != "shared right" {
+		t.Fatal("Left-nested right node did not inherit shared value. Node value: " + node.Left.SharedRight + ". Expected output: shared right")
+	}
+
+	// Test reconstruction from tree
+	if node.Stringify() != "(shared left,inner left ((shared left,inner left ((left-most information [AND] Left side information) [AND] middle information) shared right) [AND] right information) shared right)" {
+		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
+	}
+}
+
+/*
+Tests for correct parsing of shared elements as well as decomposition of multiple AND combinations in OVERRIDE mode
+*/
+func TestSharedElementsAndAndCombinationWithInheritanceOverrideMode(t *testing.T) {
+
+	input := "( shared left ( ( innermost left (Far left side [AND] Left side information [AND] inner right)) [AND] right information) shared right)"
+
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
+
+	// Create root node
+	node := tree.Node{}
+	// Parse provided expression
+	_, modified, err := ParseDepth(input, &node)
+
+	fmt.Println(node.String())
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+	}
+
+	// Test return information from parsing (strips shared elements)
+	if modified != "( ( innermost left ((Far left side [AND] Left side information)[AND] inner right))  [AND] right information)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}
+
+	if node.SharedLeft != "shared left" {
+		t.Fatal("Parsed left shared value is not correct. Node value: " + node.SharedLeft + ". Expected output: shared left,inner left")
+	}
+
+	if node.SharedRight != "shared right" {
+		t.Fatal("Parsed right shared value is not correct. Node value: " + node.SharedRight + ". Expected output: shared right")
+	}
+
+	if node.Left.SharedLeft != "shared left,innermost left" {
+		t.Fatal("Left-nested left node did not inherit shared value. Node value: " + node.Left.SharedLeft + ". Expected output: shared left,inner left")
+	}
+
+	if node.Left.SharedRight != "shared right" {
+		t.Fatal("Left-nested right node did not inherit shared value. Node value: " + node.Left.SharedRight + ". Expected output: shared right")
+	}
+
+	// Test reconstruction from tree
+	if node.Stringify() != "(shared left ((shared left,innermost left ((innermost left (Far left side [AND] Left side information) [AND] inner right) shared right) [AND] right information) shared right)" {
+		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
+	}
+}
+
+/*
+Tests whether missing specification of logical operator between simple string and combination is picked up.
+ */
+func TestSharedElementsAndAndCombinationWithMissingCombination(t *testing.T) {
+
+	input := "( left string ( inner left (Far left side [AND] Left side information [AND] inner right)) [AND] right information)"
+
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
+
+	// Create root node
+	node := tree.Node{}
+	// Parse provided expression
+	_, _, err := ParseDepth(input, &node)
+
+	fmt.Println(err.Error())
+
+	fmt.Println(node.String())
+
+
+	if err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
+		t.Fatal("Parser has not picked up on non-logically linked 'shared left' string. Error: " + err.Error())
+	}
+
+	// Test return information from parsing (strips shared elements)
+/*	if modified != "( shared left ( inner left ((Far left side [AND] Left side information)[AND] inner right)) [AND] right information)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}*/
+/*
+	if node.SharedLeft != "" {
+		t.Fatal("Parsed left shared value is not correct. Node value: " + node.SharedLeft + ". Expected empty output.")
+	}
+
+	if node.SharedRight != "shared right" {
+		t.Fatal("Parsed right shared value is not correct. Node value: " + node.SharedRight + ". Expected output: shared right")
+	}
+
+	if node.Left.SharedLeft != "shared left,inner left" {
+		t.Fatal("Left-nested left node did not inherit shared value. Node value: " + node.Left.SharedLeft + ". Expected output: shared left,inner left")
+	}
+
+	if node.Left.SharedRight != "shared right" {
+		t.Fatal("Left-nested right node did not inherit shared value. Node value: " + node.Left.SharedRight + ". Expected output: shared right")
+	}
+
+	// Test reconstruction from tree
+	if node.Stringify() != "(shared left,inner left ((shared left,inner left (Left side information [AND] middle information) shared right) [AND] right information) shared right)" {
+		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
+	}*/
+}
+
+/*
+Tests for correct parsing of shared elements as well as decomposition of multiple AND combinations
+*/
+func TestSharedElementsAndAndCombinationWithoutInheritance(t *testing.T) {
+
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_NOTHING
+
+	input := "( shared left (Left side information [AND] middle information [AND] right information) shared right)"
+
+	// Create root node
+	node := tree.Node{}
+	// Parse provided expression
+	_, modified, err := ParseDepth(input, &node)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+	}
+
+	// Test return information from parsing (strips shared elements)
+	if modified != "((Left side information [AND] middle information) [AND] right information)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}
+
+	if node.SharedLeft != "shared left" {
+		t.Fatal("Parsed left shared value is not correct. Output: " + node.SharedLeft)
+	}
+
+	if node.SharedRight != "shared right" {
+		t.Fatal("Parsed right shared value is not correct. Output: " + node.SharedRight)
+	}
+
+	if node.Left.SharedLeft != "" {
+		t.Fatal("Left-nested left node should not inherit shared value. Node value: " + node.Left.SharedLeft + ". Expected output: ")
+	}
+
+	if node.Left.SharedRight != "" {
+		t.Fatal("Left-nested right node should not inherit shared value. Node value: " + node.Left.SharedRight + ". Expected output: ")
+	}
+
+	// Test reconstruction from tree
 	if node.Stringify() != "(shared left ((Left side information [AND] middle information) [AND] right information) shared right)" {
-		t.Fatal("Stringified output does not correspond to input (Output: " + node.Stringify() + "')")
+		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
 	}
 }
 

@@ -84,36 +84,36 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 	// Return detected combinations, alongside potentially modified input string
 	combinations, input, err := detectCombinations(input)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return nil, input, err
+		return node, input, err
 	}
 
-	if len(combinations) == 0 {
+	/*if len(combinations) == 0 {
 		fmt.Println("No combinations detected.")
 	} else {
 		//TODO to be reviewed if issues arise with unwanted elements; else remove
-		ct := 0
+		/*ct := 0
 		toBeDeleted := []int{}
-		/*for k, v := range combinations {
+		for k, v := range combinations {
 			if v.Complete {
 				ct++
 			} else {
 				toBeDeleted = append(toBeDeleted, k)
 			}
-		}*/
+		}
 		errorMsg := ""
 		if len(toBeDeleted) > 0 {
 			errorMsg = ", with one partial " + strconv.Itoa(len(toBeDeleted)) + " to be removed"
 		}
-		fmt.Println(strconv.Itoa(ct) + " valid combination detected" + errorMsg + "!")
-		fmt.Println(combinations)
+		fmt.Println(strconv.Itoa(ct) + " valid combination detected" + errorMsg + "!")*/
+
 
 		// Clean up invalid entries
-		i := 0
+		/*i := 0
 		for i < len(toBeDeleted) {
 			delete(combinations, toBeDeleted[i])
 			i++
 		}
-	}
+	}*/
 
 	// if no valid combinations are left, the parsing is finished
 	if len(combinations) == 0 {
@@ -123,6 +123,8 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 	}
 
 	// Now the parsing of nested combinations starts
+	fmt.Print("STARTING TREE CONSTRUCTION: Detected combinations: ")
+	fmt.Println(combinations)
 
 	// Depth first
 	v := 0
@@ -150,11 +152,23 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 				rightShared = strings.Trim(rightShared, " ")
 				// Store in shared variables
 				if len(leftShared) > 0 {
-					sharedLeft += leftShared
+					if sharedLeft != "" {
+						// Append
+						sharedLeft += INHERITANCE_DELIMITER + leftShared
+					} else {
+						// Overwrite
+						sharedLeft = leftShared
+					}
 					fmt.Println("Left shared: " + sharedLeft)
 				}
 				if len(rightShared) > 0 {
-					sharedRight += rightShared
+					if sharedRight != "" {
+						// Append
+						sharedRight += INHERITANCE_DELIMITER + rightShared
+					} else {
+						// Overwrite
+						sharedRight = rightShared
+					}
 					fmt.Println("Right shared: " + sharedRight)
 				}
 				// Move to next round by deleting entry
@@ -189,11 +203,15 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 
 			fmt.Println("Tree after adding logical operator: " + node.String())
 
+
 			// Left side (potentially modifying input string)
 			leftCombos, left, err := detectCombinations(left)
-			if err.ErrorCode != tree.PARSING_NO_ERROR {
+			if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 				log.Println("Error when parsing left side: " + err.ErrorMessage)
-				return nil, input, err
+				return node, input, err
+			}
+			if err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
+				log.Print("Warning: Discarded elements during deep left parsing: " + tree.PrintArray(err.ErrorIgnoredElements))
 			}
 			// Assign nested nodes either way
 			leftNode := tree.Node{}
@@ -223,15 +241,23 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 				if err.ErrorCode != tree.PARSING_NO_ERROR {
 					return nil, left, err
 				}
+
+				// Check for inheriting shared elements on AND nodes
+				inheritSharedElements(&leftNode)
+
 				fmt.Println("Tree after processing left deep: " + node.String())
 			}
 
 			// Right side (potentially modifying input string)
 			rightCombos, right, err := detectCombinations(right)
-			if err.ErrorCode != tree.PARSING_NO_ERROR {
+			if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 				log.Println("Error when parsing right side: " + err.ErrorMessage)
-				return nil, input, err
+				return node, input, err
 			}
+			if err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
+				log.Print("Warning: Discarded elements during deep right parsing: " + tree.PrintArray(err.ErrorIgnoredElements))
+			}
+
 			// Assign nested nodes either way
 			rightNode := tree.Node{}
 			// Link both nodes
@@ -258,10 +284,14 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 				if err.ErrorCode != tree.PARSING_NO_ERROR {
 					return nil, right, err
 				}
+
+				// Check for inheriting shared elements on AND nodes
+				inheritSharedElements(&rightNode)
+
 				fmt.Println("Tree after processing right deep: " + node.String())
 			}
 			// break out if combination has been found and processed - must be top-level combination
-			return node, ("(" + left + " [" + node.LogicalOperator + "] " + right + ")"), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return node, "(" + left + " [" + node.LogicalOperator + "] " + right + ")", tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 		} else {
 			fmt.Println("==No combination for key/level " + strconv.Itoa(v))
 		}
@@ -294,6 +324,24 @@ func detectCombinations(expression string) (map[int]tree.Boundaries, string, tre
 
 	// Parentheses count to check for balance
 	parCount := 0
+
+	// Initial test run for parentheses
+	for i, letter := range expression {
+
+		switch string(letter) {
+		case "(":
+			parCount++
+		case ")":
+			parCount--
+		}
+		i++
+	}
+	if parCount != 0 {
+		msg := "Uneven number of parentheses (positive --> too many left; negative --> too many right): " + strconv.Itoa(parCount)
+		log.Println(msg)
+		return nil, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
+	}
+	// Passed parentheses count
 
 	// Map of mode states across levels (to recover during parsing)
 	modeMap := make(map[int]string)
@@ -344,8 +392,8 @@ func detectCombinations(expression string) (map[int]tree.Boundaries, string, tre
 				// Test whether indices are identical or immediately following - suggesting gaps in values
 				if (b.Left == b.Operator) || ((b.Operator + len(b.OperatorVal) + 2) == b.Right) {
 					msg := "Input contains invalid combination expression in the range '" + expression[b.Left:b.Right] + "'."
-					return levelMap, expression, tree.ParsingError{tree.PARSING_INVALID_COMBINATION,
-						msg}
+					return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
+						ErrorMessage: msg}
 				}
 				if b.Left != 0 && b.OperatorVal != "" {
 					// Update complete marker
@@ -436,7 +484,7 @@ func detectCombinations(expression string) (map[int]tree.Boundaries, string, tre
 					log.Println("Found additional operator [" + foundOperator + "] (now " + strconv.Itoa(foundOperators[foundOperator][level]) +
 						" times on level " + strconv.Itoa(level) + "), even though looking for terminating parenthesis.")
 					if foundOperator == tree.AND && foundOperators[foundOperator][level] > 1 { // if AND operator and multiple on the same level
-						// Consider injecting parenthesis (i.e., add mixfix ") " before logical operator), e.g., "... ) [AND] ..."
+						// Consider injecting a left parenthesis before the expression and add mixfix ") " before logical operator, e.g., "( left ... [AND] right ... ) [AND] ..."
 						expression = expression[:levelMap[level].Left] + "(" + expression[levelMap[level].Left:i-1] + ")" + expression[i:]
 						log.Println("Multiple [AND] operators found. Reconstructed nested structure by introducing parentheses, now: " + expression)
 						log.Println("Rerunning all parsing on combination to capture nested AND combinations")
@@ -468,6 +516,98 @@ func detectCombinations(expression string) (map[int]tree.Boundaries, string, tre
 		return nil, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
 	}
 
-	fmt.Println("Returning expression: " + expression)
+	// Check for non-parsed prefix or suffix of input string
+	/*i := 0
+	firstIdx := -1
+	lastIdx := -1
+	for i < len(levelMap) {
+		if _, ok := levelMap[i]; ok {
+			if firstIdx == -1 {
+				// Assign first value
+				firstIdx = levelMap[i].Left
+				fmt.Println("Prefix pos: " + strconv.Itoa(firstIdx))
+			}
+			if levelMap[i].Right > lastIdx {
+				// Assign highest last index
+				lastIdx = levelMap[i].Right
+				fmt.Println("Suffix pos: " + strconv.Itoa(lastIdx))
+			}
+		}
+		i++
+	}
+	prefix := ""
+	suffix := ""
+	if firstIdx > 0 {
+		prefix = strings.Trim(expression[:firstIdx], " (")
+	}
+	if lastIdx != -1 {
+		suffix = strings.Trim(expression[lastIdx+1:], ") ")
+	}
+	if prefix != "" || suffix != "" {
+		fmt.Println("Prefix: " + prefix)
+		fmt.Println("Suffix: " + suffix)
+		ignoredElements := []string{}
+		errorString := ""
+		if prefix != "" {
+			ignoredElements = append(ignoredElements, prefix)
+			errorString += prefix
+		}
+		if suffix != "" {
+			ignoredElements = append(ignoredElements, suffix)
+			if errorString != "" {
+				errorString += ", "
+			}
+			errorString += suffix
+		}
+		fmt.Println("Returning expression (ignored elements: " + errorString + "): " + expression)
+		return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IGNORED_ELEMENTS,
+			ErrorMessage: "Parsing was successful, but expression parts were ignored during coding (" + errorString + "). " +
+			"This commonly occurs when logical operators between simple strings and combinations are omitted " +
+			"(e.g., ... some string (left [AND] right) ...) and not wrapped by parentheses to signal shared elements. " +
+			"In this case, simple strings are ignored in the parsing process.",
+			ErrorIgnoredElements: ignoredElements}
+	}*/
+
+	fmt.Println("Returning expression (complete parsing): " + expression)
+	// if no omitted elements during parsing, regular return without error
 	return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+}
+
+/*
+Processes potential inheritance of shared element values from parent to child nodes,
+where both parent and child nodes have AND operators
+ */
+func inheritSharedElements(node *tree.Node) {
+	if node.LogicalOperator == tree.AND &&
+		node.Parent.LogicalOperator == tree.AND &&
+		SHARED_ELEMENT_INHERITANCE_MODE != SHARED_ELEMENT_INHERIT_NOTHING {
+
+		switch SHARED_ELEMENT_INHERITANCE_MODE {
+		case SHARED_ELEMENT_INHERIT_OVERRIDE:
+			// Overwrite child with parent shared element values
+			if node.Parent.SharedLeft != "" {
+				node.SharedLeft = node.Parent.SharedLeft
+			}
+			if node.Parent.SharedRight != "" {
+				node.SharedRight = node.Parent.SharedRight
+			}
+		case SHARED_ELEMENT_INHERIT_APPEND:
+			if node.Parent.SharedLeft != "" && node.SharedLeft != "" {
+				// Append child to parent values and assign to child
+				node.SharedLeft = node.Parent.SharedLeft + INHERITANCE_DELIMITER + node.SharedLeft
+			} else if node.Parent.SharedLeft != "" {
+				//if child is empty, just overwrite
+				node.SharedLeft = node.Parent.SharedLeft
+			}
+			if node.Parent.SharedRight != "" && node.SharedRight != "" {
+				// Append child to parent values and assign to child
+				node.SharedRight = node.Parent.SharedRight + INHERITANCE_DELIMITER + node.SharedRight
+			} else if node.Parent.SharedRight != "" {
+				//if child is empty, just overwrite
+				node.SharedRight = node.Parent.SharedRight
+			}
+		}
+		fmt.Println("Inherited shared component from parent component in mode " + SHARED_ELEMENT_INHERITANCE_MODE + ": " +
+			"Left: " + node.SharedLeft + ", Right: " + node.SharedRight)
+	}
 }

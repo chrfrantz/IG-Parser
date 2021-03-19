@@ -137,14 +137,18 @@ const PARSING_ERROR_EMPTY_LEAF = "EMPTY_LEAF_VALUE"
 const PARSING_ERROR_IMBALANCED_PARENTHESES = "UNBALANCED_PARENTHESES"
 // Indicates that component was not found during preprocessing
 const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
+// Indicates ignored elements during parsing
+const PARSING_ERROR_IGNORED_ELEMENTS = "IGNORED_ELEMENTS"
 
 type ParsingError struct {
 	ErrorCode string
 	ErrorMessage string
+	ErrorIgnoredElements []string
 }
 
 func (e *ParsingError) Error() string {
-	return fmt.Sprint("Parsing Error " + e.ErrorCode + ": " + e.ErrorMessage)
+	return fmt.Sprint("Parsing Error " + e.ErrorCode + ": " + e.ErrorMessage +
+		" (Ignored elements: " + strconv.Itoa(len(e.ErrorIgnoredElements)) + ")")
 }
 
 func StringInSlice(a string, list []string) bool {
@@ -154,4 +158,17 @@ func StringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func PrintArray(array []string) string {
+	i := 0
+	out := ""
+	for i < len(array) {
+		out += array[i]
+		if i < len(array) {
+			out += ","
+		}
+		i++
+	}
+	return out
 }

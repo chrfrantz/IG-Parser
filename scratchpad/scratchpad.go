@@ -43,19 +43,27 @@ var logicalOperators = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
 
 func main() {
 
+
+
+	text := "( shared left ( inner left (Far left side [AND] Left side information [AND] inner right)) [AND] right information)"
+
+
 	//component := "I"
 
-	text := "Cex((on behalf of the Secretary) [AND] (for compliance with the (Act or [XOR] regulations in this part)))"
+	//text := "Cex((on behalf of the Secretary) [AND] (for compliance with the (Act or [XOR] regulations in this part)))"
 
 	//r, _ := regexp.Compile(component + "\\(" + wordsWithParentheses + "(\\[" + logicalOperators + "\\]\\s" + wordsWithParentheses + ")*\\)")
 
 	//result := r.FindAllStringSubmatch(text, -1)
 	//result := extractComponent(component, text)
 
+	text = "(left (inner left [AND] inner right)   (inner2Left [OR] inner2Right) other)"
+
 	node := tree.Node{}
-	parser.ParseDepth(text, &node)
+	_, _, err := parser.ParseDepth(text, &node)
 
 
+	fmt.Println(err.Error())
 
 	fmt.Println("Final: " + node.String())
 

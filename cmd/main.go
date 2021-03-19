@@ -21,13 +21,20 @@ func main() {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
-		"I(inspect and), I(review [OR] refresh) " +
-		"Bdir(certified production and [AND] handling operations and [AND] accredited certifying agents) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part) )."
 
+	text = "A(certifying agent) D(may) I(investigate) " +
+		"Bdir(complaints of noncompliance with the (Act or [OR] regulations of this part) " +
+		"concerning " +
+		"((production [operation] and [AND] handling operations) " +
+		"))"
+		//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
 	s := parseStatement(text)
 
+	fmt.Println("Printing stuff: ")
 	//s.String()
 	fmt.Println(s.String())
 
@@ -38,41 +45,45 @@ func parseStatement(text string) tree.Statement {
 
 
 	result, err := parseAttributes(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
+		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 		log.Fatal(err.Error())
 	}
 	s.Attributes = result
 
 	result, err = parseDeontic(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
+		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 		log.Fatal(err.Error())
 	}
 	s.Deontic = result
 
-
-
 	result, err = parseAim(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
+		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 		log.Fatal(err.Error())
 	}
 	s.Aim = result
 
-
 	result, err = parseDirectObject(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND {//&&
+		//err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS
+
 		log.Fatal(err.Error())
 	}
 	s.DirectObject = result
 
 
 	result, err = parseExecutionConstraint(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
+		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 		log.Fatal(err.Error())
 	}
 	s.ExecutionConstraintSimple = result
 
 	result,err = parseActivationCondition(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
+		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 		log.Fatal(err.Error())
 	}
 	s.ActivationConditionSimple = result
@@ -315,8 +326,8 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 		// Single entry
 		componentString = componentStrings[0]
 	} else {
-		return nil, tree.ParsingError{tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
-			"Component " + component + " was not found in input string"}
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
+			ErrorMessage: "Component " + component + " was not found in input string"}
 	}
 
 	fmt.Println(componentString)
@@ -325,8 +336,9 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 	// Parse provided expression
 	_, modifiedInput, err := parser.ParseDepth(componentString, &node)
 
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
+		log.Fatal("Error during component parsing: " + err.Error())
 	}
 
 	// Override missing combination error, since it is not relevant at this level
