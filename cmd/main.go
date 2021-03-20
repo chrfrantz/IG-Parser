@@ -26,7 +26,7 @@ func main() {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part) )."
 
 	text = //s"A(certifying agent) D(may) I(investigate) " +
-		"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part)) " +
+		"Bdir(complaints of noncompliance with the (Act or [OR] regulations of this part) " +
 		"concerning " +
 		"(production [operation] and [AND] handling operations) " +
 		")"

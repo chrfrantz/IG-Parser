@@ -135,8 +135,11 @@ func ParseDepth(input string, nodeTree *tree.Node) (*tree.Node, string, tree.Par
 	//sharedRight := ""
 	//for { // infinite loop - breaks out eventually
 
-		// Link input node to temporary node for incremental addition of elements
+		// Link input node to temporary node for incremental addition of elements - needs to be copied back prior to return
 		node := nodeTree
+		// Map to keep order of entry for correct tree construction (retention of order)
+		orderMap := make(map[int]*tree.Node)
+
 
 		// Iterate through all levels
 		for v <= len(combinations) {
@@ -275,10 +278,8 @@ func ParseDepth(input string, nodeTree *tree.Node) (*tree.Node, string, tree.Par
 						fmt.Println("Tree after processing right deep: " + node.String())
 					}
 
-					// If node is filled, assign it to parent (will be automatically AND-combined)
-					if !node.IsEmptyNode() {
-						nodeTree.Insert(node)
-					}
+					//Adds node to map with starting character index as key - for later reconstruction of tree prior to return
+					orderMap[combinations[v][idx].Left] = node
 
 				}
 				fmt.Println("==Finished parsing index " + strconv.Itoa(idx) + " on level " + strconv.Itoa(v))
@@ -302,8 +303,19 @@ func ParseDepth(input string, nodeTree *tree.Node) (*tree.Node, string, tree.Par
 	fmt.Print("Combinations before return: ")
 	fmt.Println(combinations)
 
-	fmt.Println("RETURNING FINAL NODE: " + node.String())
-	return node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	// Reconstructing node based on order of node input
+	//fmt.Println("Node order: ")
+	ct := 0
+	for ct < len(input) {
+		if _, ok := orderMap[ct]; ok {
+			nodeTree.Insert(orderMap[ct])
+			//fmt.Println("Added to tree: " + fmt.Sprint(orderMap[ct]))
+		}
+		ct++
+	}
+
+	fmt.Println("RETURNING FINAL NODE: " + nodeTree.String())
+	return nodeTree, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
