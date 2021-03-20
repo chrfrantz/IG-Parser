@@ -15,6 +15,8 @@ func TestNonCombination(t *testing.T) {
 	node := tree.Node{}
 	_, _, err := ParseDepth(input, &node)
 
+	fmt.Println(node.String())
+
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		t.Fatal("Parsing throws error where there should be none. Error: " + err.Error())
 	}

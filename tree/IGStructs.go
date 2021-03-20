@@ -106,11 +106,18 @@ var IGLogicalOperators = []string{
 Signals boundary values for detected combinations
  */
 type Boundaries struct {
+	// Left boundary
 	Left int
+	// Operator position
 	Operator int
+	// Operator value (if combination)
 	OperatorVal string
+	// Right boundary
 	Right int
+	// Indicates whether element is combination
 	Complete bool
+	// Indicates whether element is shared (i.e., belongs to some combination)
+	Shared bool
 }
 
 func (b *Boundaries) String() string {

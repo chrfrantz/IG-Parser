@@ -4,6 +4,7 @@ import (
 	"IG-Parser/parser"
 	"IG-Parser/tree"
 	"fmt"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"log"
 	"regexp"
 	"strings"
@@ -41,6 +42,19 @@ var words = "([a-zA-Z',;]+\\s*)+"
 var wordsWithParentheses = "([a-zA-Z',;()\\[\\]]+\\s*)+"
 var logicalOperators = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
 
+func main3() {
+	diff := diffmatchpatch.New()
+
+	diffs := diff.DiffMain("world", "helloe world etx sdosdgsdklcx ", false)
+
+	fmt.Println(diffs)
+
+	diffs = diff.DiffMain("sox wulli beloved sds", "wulli", false)
+
+	fmt.Println(diffs)
+	fmt.Println(diffs[0].Type.String())
+}
+
 func main() {
 
 
@@ -57,8 +71,19 @@ func main() {
 	//result := r.FindAllStringSubmatch(text, -1)
 	//result := extractComponent(component, text)
 
-	text = "(left (inner left [AND] inner right)   (inner2Left [OR] inner2Right) other)"
+	text = "left middle right"
 
+	//text = "(left middle [AND] right)"
+
+	//text = "((lefty) (left (ADND [OR] SGSD) (smalleft [AND] mouse) (inner left [AND] inner right)))"
+
+	text = "(left (inner left [AND] inner right [AND] nother) other)"
+
+	//text = "(left (inner left [AND] inner right)   (inner2Left [OR] inner2Right) other)"
+
+	/*
+	text = "(left (inner left [AND] inner right) middle (inner2Left [OR] inner2Right) other)"
+	*/
 	node := tree.Node{}
 	_, _, err := parser.ParseDepth(text, &node)
 
