@@ -123,9 +123,9 @@ type Node struct {
 	// Substantive content of a leaf node
 	Entry string
 	// Text shared across children to the left of a combination (e.g., (shared info (left val [AND] right val)))
-	SharedLeft string
+	SharedLeft []string
 	// Text shared across children to the right of a combination (e.g., ((left val [AND] right val) shared info))
-	SharedRight string
+	SharedRight []string
 	// Logical operator that links left and right values/nodes
 	LogicalOperator string
 	// Implicitly holds element order by keeping non-shared elements and references to nodes in order of addition
@@ -156,8 +156,8 @@ func (n *Node) Stringify() string {
 	// Walk the tree
 	out := ""
 	// Potential left shared elements
-	if n.SharedLeft != "" {
-		out += "(" + n.SharedLeft + " "
+	if n.SharedLeft != nil && len(n.SharedLeft) != 0 {
+		out += "(" + fmt.Sprint(n.SharedLeft) + " "
 	}
 	// Inner combination
 	out += "("
@@ -173,8 +173,8 @@ func (n *Node) Stringify() string {
 	// Close inner combinations
 	out += ")"
 	// Potential right shared elements
-	if n.SharedRight != "" {
-		out += " " + n.SharedRight + ")"
+	if n.SharedRight != nil && len(n.SharedRight) != 0 {
+		out += " " + fmt.Sprint(n.SharedRight) + ")"
 	}
 	return out
 }
@@ -211,11 +211,11 @@ func (n *Node) String() string {
 			}
 		}
 
-		if n.SharedLeft != "" {
-			out += prefix + "Shared (left): " + n.SharedLeft + "\n"
+		if n.SharedLeft != nil && len(n.SharedLeft) != 0 {
+			out += prefix + "Shared (left): " + fmt.Sprint(n.SharedLeft) + "\n"
 		}
-		if n.SharedRight != "" {
-			out += prefix + "Shared (right): " + n.SharedRight + "\n"
+		if n.SharedRight != nil && len(n.SharedRight) != 0 {
+			out += prefix + "Shared (right): " + fmt.Sprint(n.SharedRight) + "\n"
 		}
 
 		return "(\n" + out +
@@ -262,14 +262,14 @@ func (n *Node) InsertNonSharedValues(value string) {
 Inserts a leaf node under a given node and inherits its component type
  */
 func (n *Node) InsertLeafNode(entry string) *Node {
-	return n.InsertChildNode(entry, "", "", n.ComponentType, "", "", "")
+	return n.InsertChildNode(entry, "", "", n.ComponentType, nil, nil, "")
 }
 
 func ComponentLeafNode(entry string, componentType string) *Node {
-	return ComponentNode(entry, "", "", componentType, "", "", "")
+	return ComponentNode(entry, "", "", componentType, nil, nil, "")
 }
 
-func ComponentNode(entry string, leftValue string, rightValue string, componentType string, sharedValueLeft string, sharedValueRight string, logicalOperator string) *Node {
+func ComponentNode(entry string, leftValue string, rightValue string, componentType string, sharedValueLeft []string, sharedValueRight []string, logicalOperator string) *Node {
 
 	// Validation (Entry cannot be mixed with the other fields)
 	if entry != "" {
@@ -279,11 +279,11 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 		if rightValue != "" {
 			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as right-hand node (" + rightValue + ").")
 		}
-		if sharedValueLeft != "" {
-			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as (left) shared content field (" + sharedValueLeft + ").")
+		if sharedValueLeft != nil || len(sharedValueLeft) > 0 {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as (left) shared content field (" + fmt.Sprint(sharedValueLeft) + ").")
 		}
-		if sharedValueRight != "" {
-			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as (right) shared content field (" + sharedValueRight + ").")
+		if sharedValueRight != nil || len(sharedValueRight) > 0 {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as (right) shared content field (" + fmt.Sprint(sharedValueRight) + ").")
 		}
 		if logicalOperator != "" {
 			log.Fatal("Invalid node specification. Entry field is filled (" + entry +
@@ -348,7 +348,7 @@ If entry value is specified, the node is presumed to be leaf node; in all other 
 nodes is interpreted as combination, and left and right values are moved into respective leaf nodes.
 Component type name is saved in node.
  */
-func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string, componentType string, sharedValueLeft string, sharedValueRight string, logicalOperator string) *Node {
+func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string, componentType string, sharedValueLeft []string, sharedValueRight []string, logicalOperator string) *Node {
 	// Validation (Entry cannot be mixed with the other fields)
 	if entry != "" {
 		if leftValue != "" {
@@ -357,11 +357,11 @@ func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string
 		if rightValue != "" {
 			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as right-hand node (" + rightValue + ").")
 		}
-		if sharedValueLeft != "" {
-			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as (left) shared content field (" + sharedValueLeft + ").")
+		if sharedValueLeft != nil && len(sharedValueLeft) != 0 {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as (left) shared content field (" + fmt.Sprint(sharedValueLeft) + ").")
 		}
-		if sharedValueRight != "" {
-			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as (right) shared content field (" + sharedValueRight + ").")
+		if sharedValueRight != nil && len(sharedValueRight) != 0 {
+			log.Fatal("Invalid node specification. Entry field is filled (" + entry + "), as well as (right) shared content field (" + fmt.Sprint(sharedValueRight) + ").")
 		}
 		if logicalOperator != "" {
 			log.Fatal("Invalid node specification. Entry field is filled (" + entry +

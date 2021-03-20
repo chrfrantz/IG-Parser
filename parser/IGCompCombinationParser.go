@@ -83,7 +83,7 @@ in the processing.
  */
 func ParseDepth(input string, nodeTree *tree.Node) (*tree.Node, string, tree.ParsingError) {
 	// Return detected combinations, alongside potentially modified input string
-	combinations, input, err := detectCombinations(input)
+	combinations, _, input, err := detectCombinations(input)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return nodeTree, input, err
 	}
@@ -94,8 +94,8 @@ func ParseDepth(input string, nodeTree *tree.Node) (*tree.Node, string, tree.Par
 		//TODO to be reviewed if issues arise with unwanted elements; else remove
 		/*ct := 0
 		toBeDeleted := []int{}
-		for k, v := range combinations {
-			if v.Complete {
+		for k, level := range combinations {
+			if level.Complete {
 				ct++
 			} else {
 				toBeDeleted = append(toBeDeleted, k)
@@ -129,176 +129,184 @@ func ParseDepth(input string, nodeTree *tree.Node) (*tree.Node, string, tree.Par
 
 
 	// Depth first
-	v := 0
-	// Shared content framing combinations (e.g., "(shared info (left [AND] right))").
-	//sharedLeft := ""
-	//sharedRight := ""
-	//for { // infinite loop - breaks out eventually
+	level := 0
 
-		// Link input node to temporary node for incremental addition of elements - needs to be copied back prior to return
-		node := nodeTree
-		// Map to keep order of entry for correct tree construction (retention of order)
-		orderMap := make(map[int]*tree.Node)
+	// Link input node to temporary node for incremental addition of elements - needs to be copied back prior to return
+	node := nodeTree
+	// Map to keep order of entry for correct tree construction (retention of order)
+	orderMap := make(map[int]*tree.Node)
 
+	// Iterate through all levels
+	for level <= len(combinations) {
+		fmt.Println("Level " + strconv.Itoa(level))
+		fmt.Print("Combinations on level " + strconv.Itoa(level) + ": ")
+		fmt.Println(combinations[level])
 
-		// Iterate through all levels
-		for v <= len(combinations) {
-			fmt.Println("Level " + strconv.Itoa(v))
-			fmt.Print("Combinations on level " + strconv.Itoa(v) + ": ")
-			fmt.Println(combinations[v])
+		idx := 0
+		//Iterate through all indices
+		for idx < len(combinations[level]) {
 
-			idx := 0
-			//Iterate through all indices
-			for idx < len(combinations[v]) {
+			fmt.Println("TREE BEFORE NEXT COMBINATION: " + node.String())
 
-				fmt.Println("TREE BEFORE NEXT COMBINATION: " + node.String())
+			// Parse complete combinations, and combinations can extract their respective shared elements
+			if combinations[level][idx].Complete {
 
-				// Parse complete combinations, and combinations can extract their respective shared elements
-				if combinations[v][idx].Complete {
+				fmt.Println("Found combination to parse on level " + strconv.Itoa(level) +
+					", Index: " + strconv.Itoa(idx))
 
-					fmt.Println("Found combination to parse on level " + strconv.Itoa(v) +
-						", Index: " + strconv.Itoa(idx))
+				node := &tree.Node{}
 
-					node := &tree.Node{}
+				// full parsing
+				left := input[combinations[level][idx].Left:combinations[level][idx].Operator]
+				right := input[combinations[level][idx].Operator+len(combinations[level][idx].OperatorVal)+2 : combinations[level][idx].Right]
+				fmt.Println("==Raw Left value: " + left)
+				fmt.Println("==Raw Operator: " + combinations[level][idx].OperatorVal)
+				fmt.Println("==Raw Right value: " + right)
 
-					// full parsing
-					left := input[combinations[v][idx].Left:combinations[v][idx].Operator]
-					right := input[combinations[v][idx].Operator+len(combinations[v][idx].OperatorVal)+2 : combinations[v][idx].Right]
-					fmt.Println("==Raw Left value: " + left)
-					fmt.Println("==Raw Operator: " + combinations[v][idx].OperatorVal)
-					fmt.Println("==Raw Right value: " + right)
+				// Check for shared elements by sending ID to parse function and search boundaries for next lower level and embracing
+				sharedLeft, sharedRight := extractSharedComponents(input, combinations, level, idx)
 
-					// Check for shared elements by sending ID to parse function and search boundaries for next lower level and embracing
-					sharedLeft, sharedRight := extractSharedComponents(input, combinations, v, idx)
-
-					// Assign left shared value if existing
-					if len(sharedLeft) > 0 {
-						fmt.Println("Assigning left shared element '" + sharedLeft + "'.")
-						node.SharedLeft = sharedLeft
-						// Reset shared
-						sharedLeft = ""
-					}
-					// Assign shared value if existing
-					if len(sharedRight) > 0 {
-						fmt.Println("Assigning right shared element '" + sharedRight + "'.")
-						node.SharedRight = sharedRight
-						// Reset shared
-						sharedRight = ""
-					}
-
-					// Assign logical operator
-					node.LogicalOperator = combinations[v][idx].OperatorVal
-
-					fmt.Println("Tree before deep parsing: " + node.String())
-
-					// Left side (potentially modifying input string)
-					leftCombos, left, err := detectCombinations(left)
-					if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-						log.Println("Error when parsing left side: " + err.ErrorMessage)
-						return node, input, err
-					}
-					if err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-						log.Print("Warning: Discarded elements during deep left parsing: " + tree.PrintArray(err.ErrorIgnoredElements))
-					}
-					// Assign nested nodes either way
-					leftNode := tree.Node{}
-					// Link both nodes
-					node.Left = &leftNode
-					leftNode.Parent = node
-
-					if len(leftCombos) == 0 {
-						// Trim content first
-						left = strings.Trim(left, " ")
-						if left != "" {
-							// If no combinations exist, assign as left leaf
-							fmt.Println("Found leaf on left side: " + left)
-							node.Left.Entry = left
-						} else {
-							msg := "Empty leaf value on left side: " + left +
-								" (Corresponding right value and operator: " + right + "; " + node.LogicalOperator +
-								");\n processed expression: " + input
-							log.Println(msg)
-							return nil, input, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_LEAF,
-								ErrorMessage: msg}
-						}
-					} else {
-						// If combinations exist, delegate
-						fmt.Println("Go deep on left side: " + left)
-						_, left, err := ParseDepth(left, &leftNode)
-						if err.ErrorCode != tree.PARSING_NO_ERROR {
-							return nil, left, err
-						}
-
-						// Check for inheriting shared elements on AND nodes
-						inheritSharedElements(&leftNode)
-
-						fmt.Println("Tree after processing left deep: " + node.String())
-					}
-
-					// Right side (potentially modifying input string)
-					rightCombos, right, err := detectCombinations(right)
-					if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-						log.Println("Error when parsing right side: " + err.ErrorMessage)
-						return node, input, err
-					}
-					if err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-						log.Print("Warning: Discarded elements during deep right parsing: " + tree.PrintArray(err.ErrorIgnoredElements))
-					}
-
-					// Assign nested nodes either way
-					rightNode := tree.Node{}
-					// Link both nodes
-					node.Right = &rightNode
-					rightNode.Parent = node
-					if len(rightCombos) == 0 {
-						// Trim content first
-						right = strings.Trim(right, " ")
-						if right != "" {
-							// If no combinations exist, assign as left leaf
-							fmt.Println("Found leaf on right side: " + right)
-							node.Right.Entry = right
-						} else {
-							msg := "Empty leaf value on right side: " + right + " (Corresponding left value and operator: " + left + "; " + node.LogicalOperator +
-								");\n processed expression: " + input
-							log.Println(msg)
-							return nil, input, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_LEAF,
-								ErrorMessage: msg}
-						}
-					} else {
-						// If combinations exist, delegate
-						fmt.Println("Go deep on right side: " + right)
-						_, right, err := ParseDepth(right, node.Right)
-						if err.ErrorCode != tree.PARSING_NO_ERROR {
-							return nil, right, err
-						}
-
-						// Check for inheriting shared elements on AND nodes
-						inheritSharedElements(&rightNode)
-
-						fmt.Println("Tree after processing right deep: " + node.String())
-					}
-
-					//Adds node to map with starting character index as key - for later reconstruction of tree prior to return
-					orderMap[combinations[v][idx].Left] = node
-
+				// Assign left shared value if existing
+				if sharedLeft != nil {
+					fmt.Println("Assigning left shared element '" + fmt.Sprint(sharedLeft) + "'.")
+					node.SharedLeft = sharedLeft
+					// Reset shared
+					sharedLeft = []string{}
 				}
-				fmt.Println("==Finished parsing index " + strconv.Itoa(idx) + " on level " + strconv.Itoa(v))
-				// Increase to explore other entries
-				idx++
+				// Assign shared value if existing
+				if sharedRight != nil {
+					fmt.Println("Assigning right shared element '" + fmt.Sprint(sharedRight) + "'.")
+					node.SharedRight = sharedRight
+					// Reset shared
+					sharedRight = []string{}
+				}
+
+				// Assign logical operator
+				node.LogicalOperator = combinations[level][idx].OperatorVal
+
+				fmt.Println("Tree before deep parsing: " + node.String())
+
+				// Left side (potentially modifying input string)
+				leftCombos, leftNonShared, left, err := detectCombinations(left)
+				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
+					log.Println("Error when parsing left side: " + err.ErrorMessage)
+					return node, input, err
+				}
+				if err.ErrorCode == tree.PARSING_ERROR_IGNORED_ELEMENTS {
+					log.Print("Warning: Discarded elements during deep left parsing: " + tree.PrintArray(err.ErrorIgnoredElements))
+				}
+
+				// Assign nested nodes either way
+				leftNode := tree.Node{}
+				// Link both nodes
+				node.Left = &leftNode
+				leftNode.Parent = node
+
+				if len(leftCombos) == 0 {
+					// Trim content first
+					left = strings.Trim(left, " ")
+					if left != "" {
+						// If no combinations exist, assign as left leaf
+						fmt.Println("Found leaf on left side: " + left)
+						node.Left.Entry = left
+					} else {
+						msg := "Empty leaf value on left side: " + left +
+							" (Corresponding right value and operator: " + right + "; " + node.LogicalOperator +
+							");\n processed expression: " + input
+						log.Println(msg)
+						return nil, input, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_LEAF,
+							ErrorMessage: msg}
+					}
+				} else {
+					// If combinations exist, delegate
+
+					// Deal with non-shared items
+					if len(leftNonShared) > 0 {
+						fmt.Println("NOT HANDLED - JUST INFORMATION: Non-shared elements left: " + fmt.Sprint(leftNonShared))
+						// TODO: Assign the left node - order not managed
+					}
+
+					fmt.Println("Go deep on left side: " + left)
+					_, left, err := ParseDepth(left, &leftNode)
+					if err.ErrorCode != tree.PARSING_NO_ERROR {
+						return nil, left, err
+					}
+
+					// Check for inheriting shared elements on AND nodes
+					inheritSharedElements(&leftNode)
+
+					fmt.Println("Tree after processing left deep: " + node.String())
+				}
+
+				// Right side (potentially modifying input string)
+				rightCombos, rightNonShared, right, err := detectCombinations(right)
+				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
+					log.Println("Error when parsing right side: " + err.ErrorMessage)
+					return node, input, err
+				}
+				if err.ErrorCode == tree.PARSING_ERROR_IGNORED_ELEMENTS {
+					log.Print("Warning: Discarded elements during deep right parsing: " + tree.PrintArray(err.ErrorIgnoredElements))
+				}
+
+				// Assign nested nodes either way
+				rightNode := tree.Node{}
+				// Link both nodes
+				node.Right = &rightNode
+				rightNode.Parent = node
+
+				if len(rightCombos) == 0 {
+					// Trim content first
+					right = strings.Trim(right, " ")
+					if right != "" {
+						// If no combinations exist, assign as left leaf
+						fmt.Println("Found leaf on right side: " + right)
+						node.Right.Entry = right
+					} else {
+						msg := "Empty leaf value on right side: " + right + " (Corresponding left value and operator: " + left + "; " + node.LogicalOperator +
+							");\n processed expression: " + input
+						log.Println(msg)
+						return nil, input, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_LEAF,
+							ErrorMessage: msg}
+					}
+				} else {
+					// If combinations exist, delegate
+
+					// Deal with non-shared items
+					if len(rightNonShared) > 0 {
+						fmt.Println("NOT HANDLED - JUST INFORMATION: Non-shared elements right: " + fmt.Sprint(rightNonShared))
+						// TODO: Assign to right node - order not managed
+					}
+
+					fmt.Println("Go deep on right side: " + right)
+					_, right, err := ParseDepth(right, node.Right)
+					if err.ErrorCode != tree.PARSING_NO_ERROR {
+						return nil, right, err
+					}
+
+					// Check for inheriting shared elements on AND nodes
+					inheritSharedElements(&rightNode)
+
+					fmt.Println("Tree after processing right deep: " + node.String())
+				}
+
+				//Adds node to map with starting character index as key - for later reconstruction of tree prior to return
+				orderMap[combinations[level][idx].Left] = node
+
 			}
-			// break out if combination has been found and processed - must be top-level combination
-			// TODO - check output
-			//return node, "(" + left + " [" + node.LogicalOperator + "] " + right + ")", tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-			//return node, "", tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-			fmt.Println("==Finished parsing on level " + strconv.Itoa(v))
-
-			// Increase level
-			v++
-
+			fmt.Println("==Finished parsing index " + strconv.Itoa(idx) + " on level " + strconv.Itoa(level))
+			// Increase to explore other entries
+			idx++
 		}
+		// break out if combination has been found and processed - must be top-level combination
+		// TODO - check output
+		//return node, "(" + left + " [" + node.LogicalOperator + "] " + right + ")", tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+		//return node, "", tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+		fmt.Println("==Finished parsing on level " + strconv.Itoa(level))
 
+		// Increase level
+		level++
 
-	//}
+	}
 
 	fmt.Print("Combinations before return: ")
 	fmt.Println(combinations)
@@ -334,7 +342,7 @@ Default syntactic form of input: "( leftSide [OPERATOR] rightSide )", where
 [OPERATOR] is one of the logical operators (including brackets), and left
 and right side are either text or combinations themselves.
  */
-func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, /*[]string,*/ string, tree.ParsingError) {
+func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []string, string, tree.ParsingError) {
 
 	// Tracks current parsing level
 	level := 0
@@ -356,18 +364,27 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, /*[
 	if parCount != 0 {
 		msg := "Uneven number of parentheses (positive --> too many left; negative --> too many right): " + strconv.Itoa(parCount)
 		log.Println(msg)
-		return nil, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
+		return nil, nil, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
 	}
 	// Passed parentheses count
 
 	// Map of mode states across levels (to recover during parsing)
 	modeMap := make(map[int]string)
+	// Default mode for level 0
+	modeMap[level] = tree.PARSING_MODE_OUTSIDE_EXPRESSION
 
 	// Maintain map of boundaries across different levels (with level as key, followed by index (if multiple entries) and corresponding value)
 	levelMap := make(map[int]map[int]tree.Boundaries)
 
 	// Collection of found operators (with operator as key, followed by level, and count as value)
 	foundOperators := make(map[string]map[int]int)
+
+	// Holds the current non-shared element (to be stored into nonSharedElements upon completion)
+	nonSharedElement := ""
+	// Stores reference to last character index in which an non-shared element was identified (break in between suggests new token)
+	lastCharIndex := 0
+	// Holds all non-shared elements across entire expression (to be returned with identified combinations)
+	nonSharedElements := []string{}
 
 	fmt.Println("Testing expression " + expression)
 	for i, letter := range expression {
@@ -414,7 +431,7 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, /*[
 				// Test whether indices are identical or immediately following - suggesting gaps in values
 				if ((b.Operator + len(b.OperatorVal) + 2) == b.Right) {
 					msg := "Input contains invalid combination expression in the range '" + expression[b.Left:b.Right] + "'."
-					return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
+					return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
 						ErrorMessage: msg}
 				}
 				if b.Left != 0 && b.OperatorVal != "" {
@@ -482,7 +499,7 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, /*[
 				if levelMap[level][levelIdx].Left == i {
 					msg := "Input contains invalid combination expression in the range '" + expression[levelMap[level][levelIdx].Left:] + "'."
 					log.Println(msg)
-					return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
+					return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
 						ErrorMessage: msg}
 				}
 
@@ -515,7 +532,7 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, /*[
 						log.Println("Rerunning all parsing on combination to capture nested AND combinations")
 						return detectCombinations(expression)
 					} else {
-						return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS,
+						return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS,
 							ErrorMessage: "Error: Duplicate non-[AND] operators (or mix of [AND] and non-[AND] operators) on level " + strconv.Itoa(level) +
 								" in single expression (Expression: " + expression + ")"}
 					}
@@ -536,13 +553,31 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, /*[
 					levelMap[level] = o
 				}*/
 			}
+		default:
+			// Note that this is called for every non-combination element; requires higher-level filtering for leaf entries
+			if modeMap[level] == tree.PARSING_MODE_OUTSIDE_EXPRESSION {
+				// Copy cached string to array if disruption in continuation in expression (e.g., combinations in between)
+				if lastCharIndex - i > 1 && nonSharedElement != "" {
+					nonSharedElements = append(nonSharedElements, nonSharedElement)
+					nonSharedElement = ""
+				}
+				// Append current letter to cached string
+				nonSharedElement += string(letter)
+				// Update index of last letter identified as non-shared
+				lastCharIndex = i
+			}
 		}
+	}
+
+	// Copy outstanding cached non-shared element into elements array before returning
+	if nonSharedElement != "" {
+		nonSharedElements = append(nonSharedElements, nonSharedElement)
 	}
 
 	if parCount != 0 {
 		msg := "Uneven number of parentheses (positive --> too many left; negative --> too many right): " + strconv.Itoa(parCount)
 		log.Println(msg)
-		return nil, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
+		return nil, nil, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
 	}
 
 	// Check for non-parsed prefix or suffix of input string
@@ -597,9 +632,10 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, /*[
 			ErrorIgnoredElements: ignoredElements}
 	}*/
 
+
 	fmt.Println("Returning expression (complete parsing): " + expression)
 	// if no omitted elements during parsing, regular return without error
-	return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
@@ -614,48 +650,49 @@ func inheritSharedElements(node *tree.Node) {
 		switch SHARED_ELEMENT_INHERITANCE_MODE {
 		case SHARED_ELEMENT_INHERIT_OVERRIDE:
 			// Overwrite child with parent shared element values
-			if node.Parent.SharedLeft != "" {
+			if node.Parent.SharedLeft != nil {
 				node.SharedLeft = node.Parent.SharedLeft
 			}
-			if node.Parent.SharedRight != "" {
+			if node.Parent.SharedRight != nil {
 				node.SharedRight = node.Parent.SharedRight
 			}
 		case SHARED_ELEMENT_INHERIT_APPEND:
-			if node.Parent.SharedLeft != "" && node.SharedLeft != "" {
+			if node.Parent.SharedLeft != nil && node.SharedLeft != nil {
 				// Append child to parent values and assign to child
-				node.SharedLeft = node.Parent.SharedLeft + INHERITANCE_DELIMITER + node.SharedLeft
-			} else if node.Parent.SharedLeft != "" {
+				node.SharedLeft = append(node.Parent.SharedLeft,node.SharedLeft...)
+			} else if node.Parent.SharedLeft != nil {
 				//if child is empty, just overwrite
 				node.SharedLeft = node.Parent.SharedLeft
 			}
-			if node.Parent.SharedRight != "" && node.SharedRight != "" {
+			if node.Parent.SharedRight != nil && node.SharedRight != nil {
 				// Append child to parent values and assign to child
-				node.SharedRight = node.Parent.SharedRight + INHERITANCE_DELIMITER + node.SharedRight
-			} else if node.Parent.SharedRight != "" {
+				node.SharedRight = append(node.Parent.SharedRight, node.SharedRight...)
+			} else if node.Parent.SharedRight != nil {
 				//if child is empty, just overwrite
 				node.SharedRight = node.Parent.SharedRight
 			}
 		}
 		fmt.Println("Inherited shared component from parent component in mode " + SHARED_ELEMENT_INHERITANCE_MODE + ": " +
-			"Left: " + node.SharedLeft + ", Right: " + node.SharedRight)
+			"Left: " + fmt.Sprint(node.SharedLeft) + ", Right: " + fmt.Sprint(node.SharedRight))
 	}
 }
 
 /*
 Extracts left and right shared elements of a combination (e.g., (left shared (left [AND] right) right shared))
 Input: full string, all boundaries and reference to combination for which shared entries are sought
+Return: string arrays for left and right side shared components
  */
-func extractSharedComponents(input string, boundaries map[int]map[int]tree.Boundaries, level int, index int) (string, string) {
+func extractSharedComponents(input string, boundaries map[int]map[int]tree.Boundaries, level int, index int) ([]string, []string) {
 
 	// shared components can only be on first level onwards, i.e., if combination is on second level
 	if len(boundaries) < 2 {
-		return "", ""
+		return nil, nil
 	}
 
 	fmt.Println("IDENTIFYING left and right shared entries for " + input[boundaries[level][index].Left:boundaries[level][index].Right])
 
-	sharedLeft := ""
-	sharedRight := ""
+	sharedLeft := []string{}
+	sharedRight := []string{}
 	combination := boundaries[level][index]
 
 	idx := 0
@@ -676,7 +713,7 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 
 				// parse from left until combination boundary and check for other combinations in between
 				idx1 := 0
-				filtered := ""
+				
 				matcher := diffmatchpatch.New()
 
 				for idx1 < len(boundaries[level])+1 {
@@ -698,7 +735,7 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 							fidx := 0
 							for fidx < len(diff) {
 								if diff[fidx].Type.String() == "Delete" {
-									filtered += diff[fidx].Text
+									sharedLeft = append(sharedLeft, diff[fidx].Text)
 								}
 								fidx++
 							}
@@ -708,12 +745,16 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 				}
 
 				//Left shared content here
-				if filtered != "" {
-					sharedLeft = strings.Trim(filtered, " ")
+				if len(sharedLeft) != 0 {
+					ct := 0
+					for ct < len(sharedLeft) {
+						sharedLeft[ct] = strings.Trim(sharedLeft[ct], " ")
+						ct++
+					}
 				} else {
-					sharedLeft = strings.Trim(input[entry.Left:combination.Left-1], " ")
+					sharedLeft = append(sharedLeft, strings.Trim(input[entry.Left:combination.Left-1], " "))
 				}
-				fmt.Println("Found left shared content: " + sharedLeft)
+				fmt.Println("Found left shared content: " + fmt.Sprint(sharedLeft))
 				// Set flag to signal that this entry is shared for later processing of non-shared content
 				entry.Shared = true
 				boundaries[level-1][idx] = entry
@@ -725,7 +766,7 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 
 				// parse from left until combination boundary and check for other combinations in between
 				idx1 := 0
-				filtered := ""
+				
 				matcher := diffmatchpatch.New()
 
 				elementsToExclude := []tree.Boundaries{}
@@ -760,22 +801,26 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 					fidx := 0
 					for fidx < len(diff) {
 						if diff[fidx].Type.String() == "Delete" {
-							filtered += diff[fidx].Text
+							sharedRight = append(sharedRight, diff[fidx].Text)
 						}
 						fidx++
 					}
 				}
 
 				//Right shared content here
-				if filtered != "" {
-					sharedRight = strings.Trim(filtered, " ")
+				if len(sharedRight) != 0 {
+					ct := 0
+					for ct < len(sharedLeft) {
+						sharedRight[ct] = strings.Trim(sharedRight[ct], " ")
+						ct++
+					}
 				} else {
-					sharedRight = strings.Trim(input[combination.Right+1:entry.Right], " ")
+					sharedRight = append(sharedRight, strings.Trim(input[combination.Right+1:entry.Right], " "))
 				}
 
 				//sharedRight = strings.Trim(input[entry.Left:entry.Right], " ")
 				//sharedRight = strings.Trim(input[combination.Right+1:entry.Right], " ")
-				fmt.Println("Found right shared content: " + sharedRight)
+				fmt.Println("Found right shared content: " + fmt.Sprint(sharedRight))
 				// Set flag to signal that this entry is shared for later processing of non-shared content
 				entry.Shared = true
 				boundaries[level-1][idx] = entry
@@ -785,46 +830,5 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 		idx++
 	}
 	// no shared content found
-	return "", ""
-
-
-	// Test for shared values
-	/*if entry.Operator == 0 &&
-		entry.OperatorVal == "" &&
-		!entry.Complete {
-		fmt.Println("Detected shared string: ")
-		// Must contain embedded combination (e.g., "(left shared info (left [AND] right) right shared info)").
-
-		// Extract potential left shared element (without leading bracket)
-		leftShared := input[entry.Left : combinations[v+1].Left-1]
-		leftShared = strings.Trim(leftShared, " ")
-		// Extract potential right shared element (without trailing brackets)
-		rightShared := input[combinations[v+1].Right+1 : combinations[v].Right]
-		rightShared = strings.Trim(rightShared, " ")
-		// Store in shared variables
-		if len(leftShared) > 0 {
-			if sharedLeft != "" {
-				// Append
-				sharedLeft += INHERITANCE_DELIMITER + leftShared
-			} else {
-				// Overwrite
-				sharedLeft = leftShared
-			}
-			fmt.Println("Left shared: " + sharedLeft)
-		}
-		if len(rightShared) > 0 {
-			if sharedRight != "" {
-				// Append
-				sharedRight += INHERITANCE_DELIMITER + rightShared
-			} else {
-				// Overwrite
-				sharedRight = rightShared
-			}
-			fmt.Println("Right shared: " + sharedRight)
-		}
-		// Move to next round by deleting entry
-		delete(combinations[v], ct)
-		fmt.Println("Moving to next round after shared string processing ...")
-		continue
-	}*/
+	return nil, nil
 }
