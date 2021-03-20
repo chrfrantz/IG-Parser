@@ -25,7 +25,7 @@ func main() {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part) )."
 
-	text = "A(certifying agent) D(may) I(investigate) " +
+	text = //s"A(certifying agent) D(may) I(investigate) " +
 		"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part)) " +
 		"concerning " +
 		"(production [operation] and [AND] handling operations) " +
@@ -330,10 +330,19 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 			ErrorMessage: "Component " + component + " was not found in input string"}
 	}
 
+	fmt.Println(component)
 	fmt.Println(componentString)
 
 	//os.Exit(2)
+	// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string
+	componentString = componentString[len(component)+1:len(componentString)-1]
 	// Parse provided expression
+	//componentString = strings.Trim(componentString, "()")
+
+	//tree.PrintValueOrder = true
+
+	fmt.Println(componentString)
+
 	_, modifiedInput, err := parser.ParseDepth(componentString, &node)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {

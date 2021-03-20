@@ -81,11 +81,11 @@ the right-most outer combination (and combinations nested therein) is parsed.
 - Invalid combinations (e.g., missing logical operator) are discarded
 in the processing.
  */
-func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.ParsingError) {
+func ParseDepth(input string, nodeTree *tree.Node) (*tree.Node, string, tree.ParsingError) {
 	// Return detected combinations, alongside potentially modified input string
 	combinations, input, err := detectCombinations(input)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return node, input, err
+		return nodeTree, input, err
 	}
 
 	/*if len(combinations) == 0 {
@@ -118,8 +118,8 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 
 	// if no valid combinations are left, the parsing is finished
 	if len(combinations) == 0 {
-		node.Entry = input
-		return node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_COMBINATIONS,
+		nodeTree.Entry = input
+		return nodeTree, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_COMBINATIONS,
 			ErrorMessage: "The input does not contain combinations"}
 	}
 
@@ -127,12 +127,16 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 	fmt.Print("STARTING TREE CONSTRUCTION: Detected combinations: ")
 	fmt.Println(combinations)
 
+
 	// Depth first
 	v := 0
 	// Shared content framing combinations (e.g., "(shared info (left [AND] right))").
 	//sharedLeft := ""
 	//sharedRight := ""
 	//for { // infinite loop - breaks out eventually
+
+		// Link input node to temporary node for incremental addition of elements
+		node := nodeTree
 
 		// Iterate through all levels
 		for v <= len(combinations) {
@@ -144,12 +148,15 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 			//Iterate through all indices
 			for idx < len(combinations[v]) {
 
-				// Parsing left and right side
+				fmt.Println("TREE BEFORE NEXT COMBINATION: " + node.String())
 
+				// Parse complete combinations, and combinations can extract their respective shared elements
 				if combinations[v][idx].Complete {
 
-					fmt.Println("Found combination to parse on level " + strconv.Itoa(v) + ", Index: " + strconv.Itoa(idx))
-					// Valid combinations
+					fmt.Println("Found combination to parse on level " + strconv.Itoa(v) +
+						", Index: " + strconv.Itoa(idx))
+
+					node := &tree.Node{}
 
 					// full parsing
 					left := input[combinations[v][idx].Left:combinations[v][idx].Operator]
@@ -157,7 +164,6 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 					fmt.Println("==Raw Left value: " + left)
 					fmt.Println("==Raw Operator: " + combinations[v][idx].OperatorVal)
 					fmt.Println("==Raw Right value: " + right)
-
 
 					// Check for shared elements by sending ID to parse function and search boundaries for next lower level and embracing
 					sharedLeft, sharedRight := extractSharedComponents(input, combinations, v, idx)
@@ -268,7 +274,14 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 
 						fmt.Println("Tree after processing right deep: " + node.String())
 					}
+
+					// If node is filled, assign it to parent (will be automatically AND-combined)
+					if !node.IsEmptyNode() {
+						nodeTree.Insert(node)
+					}
+
 				}
+				fmt.Println("==Finished parsing index " + strconv.Itoa(idx) + " on level " + strconv.Itoa(v))
 				// Increase to explore other entries
 				idx++
 			}
@@ -289,14 +302,15 @@ func ParseDepth(input string, node *tree.Node) (*tree.Node, string, tree.Parsing
 	fmt.Print("Combinations before return: ")
 	fmt.Println(combinations)
 
-	//fmt.Println("Should not really reach here; probably empty node: " + node.String())
+	fmt.Println("RETURNING FINAL NODE: " + node.String())
 	return node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
 This function detects levels of combinations present in the expression
 and returns the boundary indices as well logical operator (where present).
-It further returns the input string in potentially modified form to reflect
+It further returns an array of text elements that exist outside of combinations,
+and the input string in potentially modified form to reflect
 changes performed during processing.
 To signal incomplete combinations, it contains a Complete flag that signals
 completeness for further postprocessing.
@@ -308,7 +322,7 @@ Default syntactic form of input: "( leftSide [OPERATOR] rightSide )", where
 [OPERATOR] is one of the logical operators (including brackets), and left
 and right side are either text or combinations themselves.
  */
-func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, string, tree.ParsingError) {
+func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, /*[]string,*/ string, tree.ParsingError) {
 
 	// Tracks current parsing level
 	level := 0

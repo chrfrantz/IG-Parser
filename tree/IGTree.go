@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -127,6 +128,8 @@ type Node struct {
 	SharedRight string
 	// Logical operator that links left and right values/nodes
 	LogicalOperator string
+	// Implicitly holds element order by keeping non-shared elements and references to nodes in order of addition
+	ElementOrder []interface{}
 }
 
 func (n *Node) CountParents() int {
@@ -176,6 +179,9 @@ func (n *Node) Stringify() string {
 	return out
 }
 
+
+var PrintValueOrder = false
+
 /*
 Prints node content
  */
@@ -197,6 +203,14 @@ func (n *Node) String() string {
 			i++
 		}
 
+		if len(n.ElementOrder) > 0 && PrintValueOrder {
+			i := 0
+			for i < len(n.ElementOrder) {
+				out += prefix + "Non-Shared: " + fmt.Sprintf("%v", n.ElementOrder[i]) + "\n"
+				i++
+			}
+		}
+
 		if n.SharedLeft != "" {
 			out += prefix + "Shared (left): " + n.SharedLeft + "\n"
 		}
@@ -210,6 +224,38 @@ func (n *Node) String() string {
 			prefix + "Right: " + n.Right.String() + "\n" +
 			prefix + ")"
 	}
+}
+
+/*
+Inserts node under the current node (not replacing it), and associates any existing node with an AND combination,
+pushing it to the bottom of the tree.
+The added node itself can be of any kind, i.e., either have a nested structure or be a leaf node.
+ */
+func (n *Node) Insert(node *Node) {
+
+	if n.Left == nil {
+		n.Left = node
+		// Assign new parent
+		node.Parent = n
+		n.ElementOrder = append(n.ElementOrder, node)
+	} else if n.Left != nil && n.Right == nil {
+		n.Right = node
+		// Assign new parent
+		node.Parent = n
+		n.LogicalOperator = AND
+		n.ElementOrder = append(n.ElementOrder, node)
+	} else if n.Left != nil && n.Right != nil {
+		// Insert on right side to retain order (should be reviewed for balance, but ok for now)
+		n.Right.Insert(node)
+	}
+}
+
+/**
+Adds non-shared values to the node, i.e., values that are not shared across subnodes, but attached to the
+node itself.
+ */
+func (n *Node) InsertNonSharedValues(value string) {
+	n.ElementOrder = append(n.ElementOrder, value)
 }
 
 /*
@@ -429,4 +475,11 @@ Indicates whether node is leaf node
  */
 func (n *Node) IsLeafNode() bool {
 	return n == nil || (n.Left == nil && n.Right == nil)
+}
+
+/*
+Indicates whether node is empty
+ */
+func (n *Node) IsEmptyNode() bool {
+	return n.IsLeafNode() && n.Entry == ""
 }
