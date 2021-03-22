@@ -28,7 +28,7 @@ func main() {
 	text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
 		"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part) " +
 		"concerning " +
-		"(production [operation] and [AND] handling operations)) " +
+		"(production [operation] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
 		")"
 		//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 

@@ -251,11 +251,36 @@ func (n *Node) InsertRightLeaf(entry string) {
 }
 
 /*
+Combines existing nodes into new node and returns newly generated node
+ */
+func Combine(leftnode *Node, rightNode *Node, logicalOperator string) *Node {
+
+	if leftnode == nil && rightNode == nil {
+		log.Fatal("Illegal call to Combine() with nil nodes")
+	}
+	if leftnode == nil || leftnode.IsEmptyNode() {
+		fmt.Println("Combining nodes returns right node (other node is nil or empty)")
+		return rightNode
+	}
+	if rightNode == nil || rightNode.IsEmptyNode() {
+		fmt.Println("Combining nodes returns left node (other node is nil or empty)")
+		return leftnode
+	}
+	// In all other cases, create new combination using provided logical operator
+	newNode := Node{}
+	newNode.Left = leftnode
+	newNode.Left.Parent = &newNode
+	newNode.Right = rightNode
+	newNode.Right.Parent = &newNode
+	newNode.LogicalOperator = logicalOperator
+	return &newNode
+}
+/*
 Inserts node under the current node (not replacing it), and associates any existing node with an AND combination,
 pushing it to the bottom of the tree.
 The added node itself can be of any kind, i.e., either have a nested structure or be a leaf node.
  */
-func (n *Node) Insert(node *Node) *Node {
+func (n *Node) Insert(node *Node, logicalOperator string) *Node {
 
 	fmt.Println("Insert into ... ")
 	// If this node is empty, assign new one to it
@@ -267,11 +292,14 @@ func (n *Node) Insert(node *Node) *Node {
 	} else if n.IsLeafNode() {
 		// make combination
 		fmt.Println("Leaf node --> make combination (old left, new right)")
-		n.Left = &Node{Entry: n.Entry,ComponentType: n.ComponentType, Parent: n}
-		n.LogicalOperator = AND
+		//newNode := Node{}
+		newNode := n
+		n.Left = newNode//&Node{Entry: n.Entry,ComponentType: n.ComponentType, Parent: n}
+		n.Left.Parent = n
+		n.LogicalOperator = logicalOperator
 		n.Entry = ""
 		n.Right = node
-		node.Parent = n
+		n.Right.Parent = n
 		n.ElementOrder = append(n.ElementOrder, node)
 		return n
 	}
@@ -296,7 +324,7 @@ func (n *Node) Insert(node *Node) *Node {
 		// Delegate to right child node to deal with it ...
 		// TODO: Insert on right side to retain order (should be reviewed for balance, but ok for now)
 		fmt.Println("Delegate to right side ...")
-		return n.Right.Insert(node)
+		return n.Right.Insert(node, logicalOperator)
 	//}
 	//return n
 }

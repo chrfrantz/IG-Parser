@@ -347,21 +347,21 @@ func ParseDepth(input string, nestedNode bool) (*tree.Node, string, tree.Parsing
 	//fmt.Println("Node order: ")
 	ct := 0
 	// If more than one node ...
-	if len(orderMap) > 1 {
+	if len(orderMap) > 0 {
 		for ct < len(input) {
 			if _, ok := orderMap[ct]; ok {
-				nodeTree = nodeTree.Insert(orderMap[ct])
+				nodeTree = tree.Combine(nodeTree, orderMap[ct], tree.AND)//nodeTree.Insert(orderMap[ct], tree.AND)
 				fmt.Println("Added to tree: " + fmt.Sprint(orderMap[ct]))
 			}
 			ct++
 		}
-	} else if len(orderMap) == 1 {
+	} /*else if len(orderMap) == 1 {
 		// or simply assign last node if only one has been found
 		for _, v := range orderMap {
 			nodeTree = v
 		}
 		fmt.Println("Simple assignment of single node...")
-	}
+	}*/
 
 	fmt.Println("RETURNING FINAL NODE: " + nodeTree.String())
 	return nodeTree, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
