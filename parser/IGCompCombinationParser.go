@@ -752,7 +752,7 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 			(entry.Left < combination.Left &&
 			 entry.Right > combination.Right) {
 
-			fmt.Println("Testing left side")
+			fmt.Println("Testing for shared elements on left side")
 
 			if entry.Left < combination.Left {
 
@@ -761,6 +761,10 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 				
 				matcher := diffmatchpatch.New()
 
+				// Collection of elements to be prevented from being classified as shared
+				elementsToExclude := []tree.Boundaries{}
+
+				// Collect excluded components on same level
 				for idx1 < len(boundaries[level])+1 {
 
 					// Don't check for own index
@@ -770,23 +774,31 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 						if elementToTest.Left > entry.Left &&
 							elementToTest.Right < combination.Left &&
 							elementToTest.Complete {
-							// then remove overlapping string in between
 
-							diff := matcher.DiffMain(input[entry.Left:combination.Left-1], input[elementToTest.Left-1:elementToTest.Right+1], false)
-
-							fmt.Print("Found overlaps: ")
-							fmt.Println(diff)
-
-							fidx := 0
-							for fidx < len(diff) {
-								if diff[fidx].Type.String() == "Delete" {
-									sharedLeft = append(sharedLeft, diff[fidx].Text)
-								}
-								fidx++
-							}
+							// Collect elements that have overlaps
+							elementsToExclude = append(elementsToExclude, elementToTest)
+							fmt.Print("Planning to exclude element: ")
+							fmt.Println(elementToTest)
 						}
 					}
 					idx1++
+				}
+
+				if len(elementsToExclude) > 0 {
+					// Perform actual filtering
+					diff := matcher.DiffMain(input[entry.Left:combination.Left-1],
+						input[elementsToExclude[0].Left-1:elementsToExclude[len(elementsToExclude)-1].Right+1], false)
+					fmt.Print("Found overlaps: ")
+					fmt.Println(diff)
+
+					// Evaluate and assign shared elements
+					fidx := 0
+					for fidx < len(diff) {
+						if diff[fidx].Type.String() == "Delete" {
+							sharedLeft = append(sharedLeft, diff[fidx].Text)
+						}
+						fidx++
+					}
 				}
 
 				//Left shared content here
@@ -805,7 +817,7 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 				boundaries[level-1][idx] = entry
 			}
 
-			fmt.Println("Testing right side")
+			fmt.Println("Testing for shared elements on right side")
 
 			if entry.Right > combination.Right+1 {
 
@@ -814,8 +826,10 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 				
 				matcher := diffmatchpatch.New()
 
+				// Collection of elements to be prevented from being classified as shared
 				elementsToExclude := []tree.Boundaries{}
 
+				// Collect excluded components on same level
 				for idx1 < len(boundaries[level])+1 {
 					fmt.Println("Index: " + strconv.Itoa(idx1))
 					// Don't check for own index
@@ -827,7 +841,8 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 						if elementToTest.Right < entry.Right &&
 							elementToTest.Left > combination.Right &&
 							elementToTest.Complete {
-							// collect elements that have overlaps
+
+							// Collect elements that have overlaps
 							elementsToExclude = append(elementsToExclude, elementToTest)
 							fmt.Print("Planning to exclude element: ")
 							fmt.Println(elementToTest)
@@ -843,6 +858,7 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 					fmt.Print("Found overlaps: ")
 					fmt.Println(diff)
 
+					// Evaluate and assign shared elements
 					fidx := 0
 					for fidx < len(diff) {
 						if diff[fidx].Type.String() == "Delete" {

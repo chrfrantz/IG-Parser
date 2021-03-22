@@ -73,11 +73,12 @@ func main() {
 
 	text = "left middle right"
 
-	text = "(shared left ((left middle [AND] ((left [OR] right) [AND] right)) [AND] (shared right [OR] pisa)) right stuff)"
+	//text = "(shared left ((left middle [AND] ((left [OR] right) [AND] right)) [AND] (shared right [OR] pisa)) right stuff)"
 
 	//text = "(shared (left [AND] (inner left [OR] inner right)))"
 
-	//text = "((lefty) (left (ADND [OR] SGSD) (smalleft [AND] mouse) (inner left [AND] inner right)))"
+	//text = "(lefty (left (ADND [OR] SGSD) (smalleft [AND] mouse) (inner left [AND] inner right)))"
+	text = "(lefty (left (ADND [OR] SGSD) (smalleft [AND] mouse) (otherLeft [OR] otherRight) inner right ))"
 
 	//text = "(left (inner left [AND] inner right [AND] nother) other)"
 
@@ -93,6 +94,8 @@ func main() {
 	fmt.Println(err.Error())
 
 	fmt.Println("Final: " + node.String())
+
+	fmt.Println(fmt.Sprint(node.ElementOrder))
 
 }
 
