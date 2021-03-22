@@ -73,19 +73,21 @@ func main() {
 
 	text = "left middle right"
 
-	//text = "(left middle [AND] right)"
+	text = "(shared left ((left middle [AND] ((left [OR] right) [AND] right)) [AND] (shared right [OR] pisa)) right stuff)"
+
+	//text = "(shared (left [AND] (inner left [OR] inner right)))"
 
 	//text = "((lefty) (left (ADND [OR] SGSD) (smalleft [AND] mouse) (inner left [AND] inner right)))"
 
-	text = "(left (inner left [AND] inner right [AND] nother) other)"
+	//text = "(left (inner left [AND] inner right [AND] nother) other)"
 
 	//text = "(left (inner left [AND] inner right)   (inner2Left [OR] inner2Right) other)"
 
 	/*
 	text = "(left (inner left [AND] inner right) middle (inner2Left [OR] inner2Right) other)"
 	*/
-	node := tree.Node{}
-	_, _, err := parser.ParseDepth(text, &node)
+	//node := tree.Node{}
+	node, _, err := parser.ParseDepth(text, false)
 
 
 	fmt.Println(err.Error())

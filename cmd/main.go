@@ -25,7 +25,7 @@ func main() {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part) )."
 
-	text = //s"A(certifying agent) D(may) I(investigate) " +
+	text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
 		"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part) " +
 		"concerning " +
 		"(production [operation] and [AND] handling operations)) " +
@@ -309,7 +309,7 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 	componentString := "("
 
 	// Create root node
-	node := tree.Node{}
+	//node := tree.Node{}
 
 
 	if len(componentStrings) > 1 {
@@ -343,7 +343,7 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 
 	fmt.Println(componentString)
 
-	_, modifiedInput, err := parser.ParseDepth(componentString, &node)
+	node, modifiedInput, err := parser.ParseDepth(componentString, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
@@ -358,7 +358,7 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 
 	fmt.Println("Modified output for " + component + ": " + modifiedInput)
 
-	return &node, err
+	return node, err
 }
 
 func parseCombinations(text string) [][]string {

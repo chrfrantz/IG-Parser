@@ -226,28 +226,79 @@ func (n *Node) String() string {
 	}
 }
 
+func (n *Node) InsertLeftLeaf(entry string) {
+	if n.Left != nil {
+		log.Fatal("Attempting to add left leaf node to node already containing left leaf. Node: " + n.String())
+	}
+	if n.Entry != "" {
+		log.Fatal("Attempting to add left leaf node to populated node (i.e., it has an entry itself). Node: " + n.String())
+	}
+	newNode := Node{}
+	newNode.Entry = entry
+	n.Left = &newNode
+}
+
+func (n *Node) InsertRightLeaf(entry string) {
+	if n.Right != nil {
+		log.Fatal("Attempting to add right leaf node to node already containing right leaf. Node: " + n.String())
+	}
+	if n.Entry != "" {
+		log.Fatal("Attempting to add right leaf node to populated node (i.e., it has an entry itself). Node: " + n.String())
+	}
+	newNode := Node{}
+	newNode.Entry = entry
+	n.Right = &newNode
+}
+
 /*
 Inserts node under the current node (not replacing it), and associates any existing node with an AND combination,
 pushing it to the bottom of the tree.
 The added node itself can be of any kind, i.e., either have a nested structure or be a leaf node.
  */
-func (n *Node) Insert(node *Node) {
+func (n *Node) Insert(node *Node) *Node {
 
-	if n.Left == nil {
-		n.Left = node
-		// Assign new parent
+	fmt.Println("Insert into ... ")
+	// If this node is empty, assign new one to it
+	if n.IsEmptyNode() {
+		node.Parent = nil
+		n = node
+		fmt.Println("Empty node (Overwrite)")
+		return n
+	} else if n.IsLeafNode() {
+		// make combination
+		fmt.Println("Leaf node --> make combination (old left, new right)")
+		n.Left = &Node{Entry: n.Entry,ComponentType: n.ComponentType, Parent: n}
+		n.LogicalOperator = AND
+		n.Entry = ""
+		n.Right = node
 		node.Parent = n
 		n.ElementOrder = append(n.ElementOrder, node)
-	} else if n.Left != nil && n.Right == nil {
-		n.Right = node
+		return n
+	}
+
+	/*
+	if n.Left == nil {
+		// If left is empty, assign there, ...
 		// Assign new parent
+		node.Parent = n
+		n.Left = node
+		n.ElementOrder = append(n.ElementOrder, node)
+		return n
+	} else if n.Left != nil && n.Right == nil {
+		// else try on the right
+		// Assign new parent
+		n.Right = node
 		node.Parent = n
 		n.LogicalOperator = AND
 		n.ElementOrder = append(n.ElementOrder, node)
-	} else if n.Left != nil && n.Right != nil {
-		// Insert on right side to retain order (should be reviewed for balance, but ok for now)
-		n.Right.Insert(node)
-	}
+		return n
+	} else if n.Left != nil && n.Right != nil {*/
+		// Delegate to right child node to deal with it ...
+		// TODO: Insert on right side to retain order (should be reviewed for balance, but ok for now)
+		fmt.Println("Delegate to right side ...")
+		return n.Right.Insert(node)
+	//}
+	//return n
 }
 
 /**

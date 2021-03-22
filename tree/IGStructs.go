@@ -118,6 +118,8 @@ type Boundaries struct {
 	Complete bool
 	// Indicates whether element is shared (i.e., belongs to some combination)
 	Shared bool
+	// Signals whether a boundary value has already been added to the final output
+	//AlreadyAdded bool
 }
 
 func (b *Boundaries) String() string {
@@ -132,6 +134,8 @@ func (b *Boundaries) String() string {
 
 // Signals invalid component combinations on a given parsing level (generally non-AND components)
 const PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS = "INVALID_LOGICAL_OPERATOR_COMBINATIONS"
+// Signals the detection of a logical operator outside a combination (i.e., no left or right side)
+const PARSING_ERROR_LOGICAL_OPERATOR_OUTSIDE_COMBINATION = "LOGICAL_OPERATOR_OUTSIDE_COMBINATION"
 // Indicates that there were no issues during parsing
 const PARSING_NO_ERROR = "NO_ERROR_DURING_PARSING"
 // Signals that no combinations were found in input
