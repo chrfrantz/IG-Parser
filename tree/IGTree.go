@@ -3,6 +3,8 @@ package tree
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 )
 
 type Statement struct {
@@ -157,7 +159,7 @@ func (n *Node) Stringify() string {
 	out := ""
 	// Potential left shared elements
 	if n.SharedLeft != nil && len(n.SharedLeft) != 0 {
-		out += "(" + fmt.Sprint(n.SharedLeft) + " "
+		out += "(" + strings.Trim(fmt.Sprint(n.SharedLeft), "[]") + " "
 	}
 	// Inner combination
 	out += "("
@@ -174,7 +176,7 @@ func (n *Node) Stringify() string {
 	out += ")"
 	// Potential right shared elements
 	if n.SharedRight != nil && len(n.SharedRight) != 0 {
-		out += " " + fmt.Sprint(n.SharedRight) + ")"
+		out += " " + strings.Trim(fmt.Sprint(n.SharedRight), "[]") + ")"
 	}
 	return out
 }
@@ -186,9 +188,7 @@ var PrintValueOrder = false
 Prints node content
  */
 func (n *Node) String() string {
-	/*if n.Parent != nil {
-		for n.Parent
-	}*/
+
 	if n == nil {
 		return "Node is not initialized."
 	} else if n.IsLeafNode() {
@@ -212,10 +212,12 @@ func (n *Node) String() string {
 		}
 
 		if n.SharedLeft != nil && len(n.SharedLeft) != 0 {
-			out += prefix + "Shared (left): " + fmt.Sprint(n.SharedLeft) + "\n"
+			fmt.Println("LEFT CONTAINS: " + fmt.Sprint(n.SharedLeft) + strconv.Itoa(len(n.SharedLeft)))
+			out += prefix + "Shared (left): " + strings.Trim(fmt.Sprint(n.SharedLeft), "[]") + "\n"
 		}
 		if n.SharedRight != nil && len(n.SharedRight) != 0 {
-			out += prefix + "Shared (right): " + fmt.Sprint(n.SharedRight) + "\n"
+			fmt.Println("RIGHT CONTAINS: " + fmt.Sprint(n.SharedRight) + strconv.Itoa(len(n.SharedRight)))
+			out += prefix + "Shared (right): " + strings.Trim(fmt.Sprint(n.SharedRight), "[]") + "\n"
 		}
 
 		return "(\n" + out +
@@ -275,12 +277,13 @@ func Combine(leftnode *Node, rightNode *Node, logicalOperator string) *Node {
 	newNode.LogicalOperator = logicalOperator
 	return &newNode
 }
+
 /*
 Inserts node under the current node (not replacing it), and associates any existing node with an AND combination,
 pushing it to the bottom of the tree.
 The added node itself can be of any kind, i.e., either have a nested structure or be a leaf node.
  */
-func (n *Node) Insert(node *Node, logicalOperator string) *Node {
+/*func (n *Node) Insert(node *Node, logicalOperator string) *Node {
 
 	fmt.Println("Insert into ... ")
 	// If this node is empty, assign new one to it
@@ -302,7 +305,7 @@ func (n *Node) Insert(node *Node, logicalOperator string) *Node {
 		n.Right.Parent = n
 		n.ElementOrder = append(n.ElementOrder, node)
 		return n
-	}
+	}*/
 
 	/*
 	if n.Left == nil {
@@ -323,11 +326,11 @@ func (n *Node) Insert(node *Node, logicalOperator string) *Node {
 	} else if n.Left != nil && n.Right != nil {*/
 		// Delegate to right child node to deal with it ...
 		// TODO: Insert on right side to retain order (should be reviewed for balance, but ok for now)
-		fmt.Println("Delegate to right side ...")
-		return n.Right.Insert(node, logicalOperator)
+		//fmt.Println("Delegate to right side ...")
+		//return n.Right.Insert(node, logicalOperator)
 	//}
 	//return n
-}
+//}
 
 /**
 Adds non-shared values to the node, i.e., values that are not shared across subnodes, but attached to the
@@ -399,13 +402,6 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 		node.ComponentType = componentType
 	}
 
-	/*if parent != nil {
-		fmt.Println("Node is non-root node.")
-		node.Parent = parent
-	} else {
-		fmt.Println("Node is root node.")
-	}*/
-
 	// If leaf node, fill all relevant fields
 	if entry != "" {
 		node.Entry = entry
@@ -475,13 +471,6 @@ func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string
 		log.Println("Assigning component type " + componentType)
 		node.ComponentType = componentType
 	}
-
-	/*if parent != nil {
-		fmt.Println("Node is non-root node.")
-		node.Parent = parent
-	} else {
-		fmt.Println("Node is root node.")
-	}*/
 
 	// If leaf node, fill all relevant fields
 	if entry != "" {

@@ -78,7 +78,11 @@ func main() {
 	//text = "(shared (left [AND] (inner left [OR] inner right)))"
 
 	//text = "(lefty (left (ADND [OR] SGSD) (smalleft [AND] mouse) (inner left [AND] inner right)))"
-	text = "(lefty (left (ADND [OR] SGSD) (smalleft [AND] mouse) (otherLeft [OR] otherRight) inner right ))"
+	//text = "(lefty (left (ADND [OR] SGSD) (smalleft [AND] mouse) (otherLeft [OR] otherRight) inner right ))"
+
+	text = "(Left side information (source) [AND] middle information and [AND] right-side)"
+
+	//text = "( shared left (Left side information [XOR] middle information) shared right)"
 
 	//text = "(left (inner left [AND] inner right [AND] nother) other)"
 
