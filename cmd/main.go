@@ -23,13 +23,13 @@ func main() {
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
-		"Cex(for compliance with the (Act or [XOR] regulations in this part) )."
+		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
+	/*text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
 		"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part) " +
 		"concerning " +
 		"(production [operation] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
-		")"
+		")"*/
 		//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
 	s := parseStatement(text)
@@ -73,6 +73,36 @@ func parseStatement(text string) tree.Statement {
 	}
 	s.DirectObject = result
 
+	result, err = parseDirectObjectProperty(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND {//&&
+		//err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS
+
+		log.Fatal(err.Error())
+	}
+	s.DirectObjectProperty = result
+
+	result, err = parseIndirectObject(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND {//&&
+		//err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS
+
+		log.Fatal(err.Error())
+	}
+	s.IndirectObject = result
+
+	result, err = parseIndirectObjectProperty(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND {//&&
+		//err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS
+
+		log.Fatal(err.Error())
+	}
+	s.IndirectObjectProperty = result
+
+	result,err = parseActivationCondition(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
+		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
+		log.Fatal(err.Error())
+	}
+	s.ActivationConditionSimple = result
 
 	result, err = parseExecutionConstraint(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
@@ -81,12 +111,7 @@ func parseStatement(text string) tree.Statement {
 	}
 	s.ExecutionConstraintSimple = result
 
-	result,err = parseActivationCondition(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
-		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-		log.Fatal(err.Error())
-	}
-	s.ActivationConditionSimple = result
+
 
 
 
@@ -191,11 +216,12 @@ func parseIndirectObject(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.INDIRECT_OBJECT, text)
 }
 
-/*
-func parseIndirectObjectProperty(text string) [][]string {
-	return parseComponentOld(tree.INDIRECT_OBJECT_PROPERTY, text)
+
+func parseIndirectObjectProperty(text string)  (*tree.Node, tree.ParsingError) {
+	return parseComponent(tree.INDIRECT_OBJECT_PROPERTY, text)
 }
 
+/*
 func parseConstitutedEntity(text string) [][]string {
 	return parseComponentOld(tree.CONSTITUTED_ENTITY, text)
 }
@@ -302,46 +328,47 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 		log.Fatal("More than one component " + component + " found in text " + text)
 	}*/
 
+	// Extract component (one or multiple occurrences) from input string based on provided component identifier
 	componentStrings := extractComponent(component, text)
 
+	fmt.Println("Components: " + fmt.Sprint(componentStrings))
 
+	// Initialize output string for parsing
+	componentString := ""
 
-	componentString := "("
-
-	// Create root node
-	//node := tree.Node{}
-
-
+	// [AND]-link different components (if multiple occur in input string)
 	if len(componentStrings) > 1 {
+		// Add leading parenthesis
+		componentString = "("
 		for i, v := range componentStrings {
-			fmt.Println(strconv.Itoa(i) + ": " + v)
+			fmt.Println("Round: " + strconv.Itoa(i) + ": " + v)
+			// Extract and concatenate individual component values but cut leading component identifier
 			componentString += v[len(component):]
 			if i < len(componentStrings)-1 {
+				// Add AND primitive in between if multiple component elements
 				componentString += " " + tree.AND_BRACKETS + " "
 			} else {
+				// Add trailing parenthesis
 				componentString += ")"
 			}
 		}
+		//fmt.Println("Combination finished: " + componentString)
 	} else if len(componentStrings) == 1 {
-		// Single entry
-		componentString = componentStrings[0]
+		// Single entry (cut prefix)
+		componentString = componentStrings[0][len(component):]
+		// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string if not combined
+		componentString = componentString[1:len(componentString)-1]
 	} else {
 		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
 			ErrorMessage: "Component " + component + " was not found in input string"}
 	}
 
-	fmt.Println(component)
-	fmt.Println(componentString)
-
-	//os.Exit(2)
-	// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string
-	componentString = componentString[len(component)+1:len(componentString)-1]
-	// Parse provided expression
-	//componentString = strings.Trim(componentString, "()")
+	fmt.Println("Component Identifier: " + component)
+	fmt.Println("Full string: " + componentString)
 
 	//tree.PrintValueOrder = true
 
-	fmt.Println(componentString)
+	fmt.Println("Preprocessed string: " + componentString)
 
 	node, modifiedInput, err := parser.ParseDepth(componentString, false)
 

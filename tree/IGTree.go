@@ -34,81 +34,101 @@ type Statement struct {
 
 func (s *Statement) String() string {
 	out := ""
+	sep := ": "
+	suffix := "\n"
 	if s.Attributes != nil {
+		out += ATTRIBUTES + sep
 		out += s.Attributes.String()
-		out += " "
+		out += suffix
 	}
 	if s.AttributesProperty != nil {
+		out += ATTRIBUTES_PROPERTY + sep
 		out += s.AttributesProperty.String()
-		out += " "
+		out += suffix
 	}
 	if s.Deontic != nil {
+		out += DEONTIC + sep
 		out += s.Deontic.String()
-		out += " "
+		out += suffix
 	}
 	if s.Aim != nil {
+		out += AIM + sep
 		out += s.Aim.String()
-		out += " "
+		out += suffix
 	}
 	if s.DirectObject != nil {
+		out += DIRECT_OBJECT + sep
 		out += s.DirectObject.String()
-		out += " "
+		out += suffix
 	}
 	if s.DirectObjectProperty != nil {
+		out += DIRECT_OBJECT_PROPERTY + sep
 		out += s.DirectObjectProperty.String()
-		out += " "
+		out += suffix
 	}
 	if s.IndirectObject != nil {
+		out += INDIRECT_OBJECT + sep
 		out += s.IndirectObject.String()
-		out += " "
+		out += suffix
 	}
 	if s.IndirectObjectProperty != nil {
+		out += INDIRECT_OBJECT_PROPERTY + sep
 		out += s.IndirectObjectProperty.String()
-		out += " "
+		out += suffix
 	}
 	if s.ConstitutedEntity != nil {
+		out += CONSTITUTED_ENTITY + sep
 		out += s.ConstitutedEntity.String()
-		out += " "
+		out += suffix
 	}
 	if s.ConstitutedEntityProperty != nil {
+		out += CONSTITUTING_PROPERTIES_PROPERTY + sep
 		out += s.ConstitutedEntityProperty.String()
-		out += " "
+		out += suffix
 	}
 	if s.Modal != nil {
+		out += MODAL + sep
 		out += s.Modal.String()
-		out += " "
+		out += suffix
 	}
 	if s.ConstitutiveFunction != nil {
+		out += CONSTITUTIVE_FUNCTION + sep
 		out += s.ConstitutiveFunction.String()
-		out += " "
+		out += suffix
 	}
 	if s.ConstitutingProperties != nil {
+		out += CONSTITUTING_PROPERTIES + sep
 		out += s.ConstitutingProperties.String()
-		out += " "
+		out += suffix
 	}
 	if s.ConstitutingPropertiesProperty != nil {
+		out += CONSTITUTING_PROPERTIES_PROPERTY + sep
 		out += s.ConstitutingPropertiesProperty.String()
-		out += " "
+		out += suffix
 	}
 	if s.ActivationConditionSimple != nil {
+		out += ACTIVATION_CONDITION + sep
 		out += s.ActivationConditionSimple.String()
-		out += " "
+		out += suffix
 	}
 	if s.ActivationConditionComplex != nil {
+		out += ACTIVATION_CONDITION + sep
 		out += s.ActivationConditionComplex.String()
-		out += " "
+		out += suffix
 	}
 	if s.ExecutionConstraintSimple != nil {
+		out += EXECUTION_CONSTRAINT + sep
 		out += s.ExecutionConstraintSimple.String()
-		out += " "
+		out += suffix
 	}
 	if s.ExecutionConstraintComplex != nil {
+		out += EXECUTION_CONSTRAINT + sep
 		out += s.ExecutionConstraintComplex.String()
-		out += " "
+		out += suffix
 	}
 	if s.OrElse != nil {
 		out += s.OrElse.String()
-		out += " "
+		//out += " "
 	}
 	return out
 }
