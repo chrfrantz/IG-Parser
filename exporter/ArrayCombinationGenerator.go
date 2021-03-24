@@ -47,7 +47,7 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 		for i, ar := range nodeArrays {
 			var p = pos[i]
 			if p >= 0 && p < len(ar) {
-				fmt.Println("Append " + ar[p].String())
+				//fmt.Println("Append " + ar[p].String())
 				out = append(out, ar[p])
 			}
 		}
@@ -57,7 +57,7 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 		stmts[ct] = out
 		ct++
 
-		fmt.Println("Full combo: ", out)
+		//fmt.Println("Full combo: ", out)
 
 		// Reset temporary node array (capturing one atomic statement each time)
 		out = []*tree.Node{}

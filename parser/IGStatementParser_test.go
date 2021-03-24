@@ -30,7 +30,7 @@ func TestStatementParsing(t *testing.T) {
 }
 
 
-func TestSyntheticCompontCombinations(t *testing.T) {
+func TestSyntheticComponentCombinations(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -43,6 +43,8 @@ func TestSyntheticCompontCombinations(t *testing.T) {
 	s := ParseStatement(text)
 
 	fmt.Println(s.String())
+
+	// Count number of elements and check correspondence to references map
 
 	/*expectedOutput := "A: Leaf entry: National Organic Program's Program Manager\n        D: Leaf entry: may\n        I: (\n        Left: Leaf entry: inspect and\n        Operator: AND\n        Right: (\n        ====Shared (left): sustain\n        ====Left: Leaf entry: review\n        ====Operator: AND\n        ====Right: (\n        ========Shared (left): sustain\n        ========Left: Leaf entry: refresh\n        ========Operator: AND\n        ========Right: Leaf entry: drink\n        ========)\n        ====)\n        )\n        Bdir: (\n        Left: (\n        ====Left: Leaf entry: certified production and\n        ====Operator: AND\n        ====Right: Leaf entry: handling operations and\n        ====)\n        Operator: AND\n        Right: Leaf entry: accredited certifying agents\n        )\n        Cex: (\n        Left: Leaf entry: on behalf of the Secretary\n        Operator: AND\n        Right: (\n        ====Shared (left): for compliance with the\n        ====Left: Leaf entry: Act or\n        ====Operator: XOR\n        ====Right: Leaf entry: regulations in this part\n        ====)\n        )\n        "
 

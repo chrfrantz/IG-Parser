@@ -39,7 +39,7 @@ func main() {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents) as well as (other category1 [XOR] category2)) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 	/*text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
@@ -54,17 +54,30 @@ func main() {
 	fmt.Println(s.String())
 
 	//os.Exit(0)
-	leafArrays, _ := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays()
+
+	//fmt.Println(componentRefs)
+
+	//os.Exit(0)
 
 	res := exporter.GenerateNodeArrayPermutations(leafArrays...)
 
+	//fmt.Println("Component references: ", componentRefs)
 
-	for i, s := range res {
+	output := exporter.GenerateGoogleSheetsOutput(res, componentRefs, "650")
+
+	//fmt.Println("\n" + output)
+
+	exporter.WriteToFile("statement.csv", output)
+
+
+
+	/*for i, s := range res {
 		fmt.Println("Statement ", i, ": ", s)
 		for v := range s {
 			fmt.Println("-->", s[v])
 		}
-	}
+	}*/
 
 }
 
