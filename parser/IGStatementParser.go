@@ -241,8 +241,8 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 			} // else don't touch, i.e., leave parentheses in string
 
 			if i < len(componentStrings)-1 {
-				// Add AND primitive in between if multiple component elements
-				componentString += " " + tree.AND_BRACKETS + " "
+				// Add SAND primitive (synthetic linkage) in between if multiple component elements
+				componentString += " " + tree.SAND_BRACKETS + " "
 			} else {
 				// Add trailing parenthesis
 				componentString += ")"

@@ -39,19 +39,22 @@ func main() {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents) as well as (other category1 [XOR] category2)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
+	/*text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
 	"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part) " +
 	"concerning " +
 	"(production [operation] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
-	")"
+	")"*/
 	//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
 	s := parser.ParseStatement(text)
 
-	leafArrays := s.GenerateLeafArrays()
+	fmt.Println(s.String())
+
+	//os.Exit(0)
+	leafArrays, _ := s.GenerateLeafArrays()
 
 	res := exporter.GenerateNodeArrayPermutations(leafArrays...)
 

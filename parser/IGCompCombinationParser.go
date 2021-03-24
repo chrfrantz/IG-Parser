@@ -374,7 +374,8 @@ func ParseDepth(input string, nestedNode bool) (*tree.Node, string, tree.Parsing
 	if len(orderMap) > 0 {
 		for ct < len(input) {
 			if _, ok := orderMap[ct]; ok {
-				nodeTree = tree.Combine(nodeTree, orderMap[ct], tree.AND)//nodeTree.Insert(orderMap[ct], tree.AND)
+				// ... then synthetically link elements
+				nodeTree = tree.Combine(nodeTree, orderMap[ct], tree.SAND)
 				fmt.Println("Added to tree: " + fmt.Sprint(orderMap[ct]))
 			}
 			ct++
@@ -558,6 +559,11 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []s
 			if foundOperator == "" && expression[i:i+4] == tree.OR_BRACKETS {
 				fmt.Println("Detected " + tree.OR_BRACKETS)
 				foundOperator = tree.OR
+			}
+			// Separately test for sAND due to differing length
+			if foundOperator == "" && expression[i:i+6] == tree.SAND_BRACKETS {
+				fmt.Println("Detected " + tree.SAND_BRACKETS)
+				foundOperator = tree.SAND
 			}
 			if foundOperator != "" {
 

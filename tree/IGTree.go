@@ -142,45 +142,116 @@ func (s *Statement) Stringify() string {
 /*
 Generates map of arrays containing pointers to leaf nodes in each component. Key is component name constant (e.g., ATTRIBUTES).
  */
-func (s *Statement) GenerateLeafArrays() [][]*Node {
+func (s *Statement) GenerateLeafArrays() ([][]*Node, map[string]int) {
 
-	/*nodesMap := make(map[string][]*Node)
-	nodesMap[ATTRIBUTES] = s.Attributes.GetLeafNodes()
-	nodesMap[ATTRIBUTES_PROPERTY] = s.AttributesProperty.GetLeafNodes()
-	nodesMap[DEONTIC] = s.Deontic.GetLeafNodes()
-	nodesMap[AIM] = s.Attributes.GetLeafNodes()
-	nodesMap[DIRECT_OBJECT] = s.DirectObject.GetLeafNodes()
-	nodesMap[DIRECT_OBJECT_PROPERTY] = s.DirectObjectProperty.GetLeafNodes()
-	nodesMap[INDIRECT_OBJECT] = s.IndirectObject.GetLeafNodes()
-	nodesMap[INDIRECT_OBJECT_PROPERTY] = s.IndirectObjectProperty.GetLeafNodes()
-	nodesMap[ACTIVATION_CONDITION] = s.ActivationConditionSimple.GetLeafNodes()
-	nodesMap[EXECUTION_CONSTRAINT] = s.ExecutionConstraintSimple.GetLeafNodes()
-	fmt.Println(len(nodesMap[EXECUTION_CONSTRAINT]))*/
+	// Map holding reference from component type (e.g., ATTRIBUTES) to number of entries (relevant for reconstruction)
+	referenceMap := map[string]int{}
 
+	// Counter for overall number of entries
+	ct := 0
+	nodesMap := make([][]*Node, 0)
+
+	// Counter for number of elements in given component
 	i := 0
-	nodesMap := make([][]*Node, 16)
-	nodesMap[i] = s.Attributes.GetLeafNodes()
-	i++
-	nodesMap[i] = s.AttributesProperty.GetLeafNodes()
-	i++
-	nodesMap[i] = s.Deontic.GetLeafNodes()
-	i++
-	nodesMap[i] = s.Aim.GetLeafNodes()
-	i++
-	nodesMap[i] = s.DirectObject.GetLeafNodes()
-	i++
-	nodesMap[i] = s.DirectObjectProperty.GetLeafNodes()
-	i++
-	nodesMap[i] = s.IndirectObject.GetLeafNodes()
-	i++
-	nodesMap[i] = s.IndirectObjectProperty.GetLeafNodes()
-	i++
-	nodesMap[i] = s.ActivationConditionSimple.GetLeafNodes()
-	i++
-	nodesMap[i] = s.ExecutionConstraintSimple.GetLeafNodes()
-	//i++
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.Attributes.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[ATTRIBUTES] = i
 
-	return nodesMap
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.AttributesProperty.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[ATTRIBUTES_PROPERTY] = i
+
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.Deontic.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[DEONTIC] = i
+
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.Aim.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[AIM] = i
+
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.DirectObject.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[DIRECT_OBJECT] = i
+
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.DirectObjectProperty.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[DIRECT_OBJECT_PROPERTY] = i
+
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.IndirectObject.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[INDIRECT_OBJECT] = i
+
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.IndirectObjectProperty.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[INDIRECT_OBJECT_PROPERTY] = i
+
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.ActivationConditionSimple.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[ACTIVATION_CONDITION] = i
+
+	// Counter for number of elements in given component
+	i = 0
+	// Add array of leaf nodes attached to general array
+	for _, v := range s.ExecutionConstraintSimple.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[EXECUTION_CONSTRAINT] = i
+
+	return nodesMap, referenceMap
 }
 
 
@@ -587,29 +658,65 @@ func (n *Node) CountLeaves() int {
 	return leftBreadth + rightBreadth
 }
 
-func (n *Node) GetLeafNodes() []*Node {
+func (n *Node) GetLeafNodes() [][]*Node {
 	if n == nil {
 		// Uninitialized node
 		return nil
 	}
+	returnNode := make([][]*Node, 0)
 	if n.Left == nil && n.Right == nil && n.Entry == "" {
 		// Must be empty node
-		return []*Node{}
+		return returnNode
 	}
 	if n.Left == nil && n.Right == nil && n.Entry != "" {
 		// Must be single leaf node (entry)
-		return []*Node{n}
+		inner := []*Node{n}
+		returnNode = append(returnNode, inner)
+		return returnNode
 	}
-	leftNodes := []*Node{}
-	rightNodes := []*Node{}
+	leftNodes := [][]*Node{}
+	rightNodes := [][]*Node{}
+
+	if n.Left != nil && n.Right != nil {
+		leftNodes = n.Left.GetLeafNodes()
+		rightNodes = n.Right.GetLeafNodes()
+		if n.LogicalOperator == SAND {
+			// Return as collection of node collection
+			// Append individual nodes arrays
+			for _, v := range leftNodes {
+				returnNode = append(returnNode, v)
+			}
+			// Append individual nodes arrays
+			for _, v := range rightNodes {
+				returnNode = append(returnNode, v)
+			}
+			return returnNode
+		} else {
+			nodeArray := make([]*Node, 0)
+			// return as individual nodes
+			for _, v := range leftNodes {
+				nodeArray = append(nodeArray, v...)
+			}
+			for _, v := range rightNodes {
+				nodeArray = append(nodeArray, v...)
+			}
+			returnNode = append(returnNode, nodeArray)
+			return returnNode
+		}
+	}
 	if n.Left != nil {
 		leftNodes = n.Left.GetLeafNodes()
+		for _, v := range leftNodes {
+			returnNode[0] = append(returnNode[0], v...)
+		}
 	}
 	if n.Right != nil {
 		rightNodes = n.Right.GetLeafNodes()
+		for _, v := range rightNodes {
+			returnNode[0] = append(returnNode[0], v...)
+		}
 	}
-	// Combine nodes before return
-	return append(leftNodes, rightNodes...)
+	return returnNode
 }
 
 /*
