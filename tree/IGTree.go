@@ -133,6 +133,60 @@ func (s *Statement) String() string {
 	return out
 }
 
+
+func (s *Statement) Stringify() string {
+	log.Fatal("Stringify() is not yet implemented.")
+	return ""
+}
+
+/*
+Generates map of arrays containing pointers to leaf nodes in each component. Key is component name constant (e.g., ATTRIBUTES).
+ */
+func (s *Statement) GenerateLeafArrays() [][]*Node {
+
+	/*nodesMap := make(map[string][]*Node)
+	nodesMap[ATTRIBUTES] = s.Attributes.GetLeafNodes()
+	nodesMap[ATTRIBUTES_PROPERTY] = s.AttributesProperty.GetLeafNodes()
+	nodesMap[DEONTIC] = s.Deontic.GetLeafNodes()
+	nodesMap[AIM] = s.Attributes.GetLeafNodes()
+	nodesMap[DIRECT_OBJECT] = s.DirectObject.GetLeafNodes()
+	nodesMap[DIRECT_OBJECT_PROPERTY] = s.DirectObjectProperty.GetLeafNodes()
+	nodesMap[INDIRECT_OBJECT] = s.IndirectObject.GetLeafNodes()
+	nodesMap[INDIRECT_OBJECT_PROPERTY] = s.IndirectObjectProperty.GetLeafNodes()
+	nodesMap[ACTIVATION_CONDITION] = s.ActivationConditionSimple.GetLeafNodes()
+	nodesMap[EXECUTION_CONSTRAINT] = s.ExecutionConstraintSimple.GetLeafNodes()
+	fmt.Println(len(nodesMap[EXECUTION_CONSTRAINT]))*/
+
+	i := 0
+	nodesMap := make([][]*Node, 16)
+	nodesMap[i] = s.Attributes.GetLeafNodes()
+	i++
+	nodesMap[i] = s.AttributesProperty.GetLeafNodes()
+	i++
+	nodesMap[i] = s.Deontic.GetLeafNodes()
+	i++
+	nodesMap[i] = s.Aim.GetLeafNodes()
+	i++
+	nodesMap[i] = s.DirectObject.GetLeafNodes()
+	i++
+	nodesMap[i] = s.DirectObjectProperty.GetLeafNodes()
+	i++
+	nodesMap[i] = s.IndirectObject.GetLeafNodes()
+	i++
+	nodesMap[i] = s.IndirectObjectProperty.GetLeafNodes()
+	i++
+	nodesMap[i] = s.ActivationConditionSimple.GetLeafNodes()
+	i++
+	nodesMap[i] = s.ExecutionConstraintSimple.GetLeafNodes()
+	//i++
+
+	return nodesMap
+}
+
+
+
+// NODE
+
 type Node struct {
 	// Linkage to parent
 	Parent *Node
@@ -531,6 +585,31 @@ func (n *Node) CountLeaves() int {
 		rightBreadth = n.Right.CountLeaves()
 	}
 	return leftBreadth + rightBreadth
+}
+
+func (n *Node) GetLeafNodes() []*Node {
+	if n == nil {
+		// Uninitialized node
+		return nil
+	}
+	if n.Left == nil && n.Right == nil && n.Entry == "" {
+		// Must be empty node
+		return []*Node{}
+	}
+	if n.Left == nil && n.Right == nil && n.Entry != "" {
+		// Must be single leaf node (entry)
+		return []*Node{n}
+	}
+	leftNodes := []*Node{}
+	rightNodes := []*Node{}
+	if n.Left != nil {
+		leftNodes = n.Left.GetLeafNodes()
+	}
+	if n.Right != nil {
+		rightNodes = n.Right.GetLeafNodes()
+	}
+	// Combine nodes before return
+	return append(leftNodes, rightNodes...)
 }
 
 /*
