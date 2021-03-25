@@ -431,16 +431,16 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 	result := false
 	// if on the left side
 	if n.Parent.Left == n {
-		fmt.Println("Searching on the right side of node ", n.Parent)
+		//fmt.Println("Searching on the right side of node ", n.Parent)
 		// Search on the right side
 		if n.Parent.Right == targetNode {
-			fmt.Println("Found node on right side")
+			//fmt.Println("Found node on right side")
 			ops = append(ops, n.Parent.LogicalOperator)
 			return true, ops
 		}
 		// if right sibling is non-leaf, delegate
 		if !n.Parent.Right.IsLeafNode() {
-			fmt.Println("Search right side downwards on node ", n.Parent.Right.Left)
+			//fmt.Println("Search right side downwards on node ", n.Parent.Right.Left)
 			// Add first path element (needs to be inverted at the end)
 			ops = append(ops, n.Parent.LogicalOperator)
 			// Delegate search the left child of neighbouring right combination
@@ -451,7 +451,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		}
 	} else 	// if on the right
 	if n.Parent.Right == n {
-		fmt.Println("Searching on the left side of node ", n.Parent)
+		//fmt.Println("Searching on the left side of node ", n.Parent)
 		// Search on the left side
 		if n.Parent.Left == targetNode {
 			fmt.Println("Found node on left side")
@@ -460,7 +460,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		}
 		// if left sibling is non-leaf, delegate
 		if !n.Parent.Left.IsLeafNode() {
-			fmt.Println("Search left side downwards on node ", n.Parent.Left.Left)
+			//fmt.Println("Search left side downwards on node ", n.Parent.Left.Left)
 			// Add first path element (needs to be inverted at the end)
 			ops = append(ops, n.Parent.LogicalOperator)
 			// Delegate search the left child of neighbouring left combination
@@ -472,7 +472,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 	}
 	// If nothing has been found until here, go up in the hierarchy
 	if !result {
-		fmt.Println("Delegating to parent: ", n.Parent.Parent)
+		//fmt.Println("Delegating to parent: ", n.Parent.Parent)
 		// Add first path element (needs to be inverted at the end)
 		ops = append(ops, n.Parent.LogicalOperator)
 		result, ops = FindLogicalLinkage(n.Parent, targetNode, ops)

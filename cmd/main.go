@@ -4,7 +4,6 @@ import (
 	"IG-Parser/exporter"
 	"IG-Parser/parser"
 	"fmt"
-	"os"
 )
 
 //var words = "([a-zA-Z',;]+\\s*)+"
@@ -67,11 +66,13 @@ func main() {
 
 	//fmt.Println("Component references: ", componentRefs)
 
-	exporter.GenerateLogicalOperatorLinkagePerCombination(res)
+	links := exporter.GenerateLogicalOperatorLinkagePerCombination(res)
 
-	os.Exit(0)
+	fmt.Println(links)
 
-	output := exporter.GenerateGoogleSheetsOutput(res, componentRefs, "650")
+	//os.Exit(0)
+
+	output := exporter.GenerateGoogleSheetsOutput(res, componentRefs, links, "650")
 
 	//fmt.Println("\n" + output)
 
