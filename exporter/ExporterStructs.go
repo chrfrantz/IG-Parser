@@ -2,22 +2,17 @@ package exporter
 
 import "IG-Parser/tree"
 
-type LogicalOperatorLinkage struct {
-	// Index in component structure of statement
-	Index int
-	// Source component pointer
-	Component *tree.Node
-	// References to all ids the source component itself occurs in
-	OwnStatements []int
-	// Structure holding target node as key, and array of referenced entries (row id)
-	LinkedStatements map[*tree.Node][]int
-	// Structure holding reference to target component and associated operator (to be used in conjunction with LinkedStatements)
-	LinkedComponentOperator map[*tree.Node][]string
-	// Keeping operators in order of precedence (first = higher precedence)
-	OperatorPrecedence []string
-}
-
-type OperatorLinkages struct {
-	Operator []string
-	Refs []int
+/*
+Returns operators and statement IDs for target node IDs associated with target node in given input
+ */
+func GetLogicalOperatorAndStatementRefs(sourceNode *tree.Node, targetNode *tree.Node, componentRefs map[*tree.Node][]int) ([]string, []int) {
+	// Find link from source to target
+	res, ops := tree.FindLogicalLinkage(sourceNode, targetNode, nil)
+	if res {
+		// Extract IDs for target component
+		ids := componentRefs[targetNode]
+		// Return both operators and target IDs
+		return ops, ids
+	}
+	return nil, nil
 }

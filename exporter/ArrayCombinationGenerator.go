@@ -63,8 +63,6 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 		stmts[ct] = out
 		ct++
 
-		//fmt.Println("Full combo: ", out)
-
 		// Reset temporary node array (capturing one atomic statement each time)
 		out = []*tree.Node{}
 
@@ -74,10 +72,14 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 	return stmts
 }
 
-func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node) []LogicalOperatorLinkage {
-
-	// Structure: Node instance (comparison source), logical operator
-	//compLinks := make(map[*tree.Node]map[string][]int)
+/*
+Generates the statement IDs per component category for quick retrieval
+Input is are statements composed of associated nodes. Structure: [statement ID][component nodes]
+Returns an array of maps of nodes pointing to arrays of associated statement IDs.
+Structure: [column ID of component]map[node reference for each value of component (e.g., Farmer, Certifier)][statement IDs
+where component value apply]
+ */
+func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node) []map[*tree.Node][]int {
 
 	if len(stmts) == 0 {
 		log.Fatal("Empty input - no statement permutations.")
@@ -85,90 +87,44 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node) []Logica
 
 	// Number of components
 	componentCount := len(stmts[0])
-	// Collection of logical linkages
-	compLinks := []LogicalOperatorLinkage{}
+	// Collection of logical linkages ([column ids]map[Node ref component value][row IDs where component value applies])
+	compLinks := make([]map[*tree.Node][]int,0)
 	// Index of component of concern in statement
-	searchIdx := 0
+	columnIdx := 0
 
-	for searchIdx < componentCount {
-		// Instantiate linkage for each component
-		compLink := LogicalOperatorLinkage{Index: searchIdx}
+	for columnIdx < componentCount {
+
+		// Generate map of category values that will hold statement references
+		combinationStructure := make(map[*tree.Node][]int)
+
 		// For each statement (with id and components)
 		for id, comps := range stmts {
 
-
 			// Check for each component (in that statement) - column-wise
 			for compIdx, compVal := range comps {
+
 				// when index is of interest
-				if compIdx == searchIdx {
-					// Assign component reference upon first iteration
-					if compLink.Component == nil {
-						// Link source component
-						compLink.Component = compVal
-						// Search for target component in same column (i.e., same index in any combination)
-					} else if compVal != compLink.Component {
+				if compIdx == columnIdx {
 
-						if compLink.LinkedStatements[compVal] == nil {
-							fmt.Println("Found different component value ", compVal)
-							res, ops := tree.FindLogicalLinkage(compLink.Component, compVal, nil)
-							fmt.Println("Return value: ", res)
-							if res {
-								fmt.Println("Found logical linkage between ", compLink.Component, " and ", compVal, ": ", ops, " in statement, ", id)
-
-								// Create new collection for this particular combination
-								newLink := []int{id}
-								linked := compLink.LinkedStatements
-								if linked == nil {
-									linked = make(map[*tree.Node][]int)
-								}
-								// Add entry for target component
-								linked[compVal] = newLink
-								// Store into main structure for source component
-								compLink.LinkedStatements = linked
-
-								// Store logical operator
-								operatorLink := compLink.LinkedComponentOperator
-								// If operator links are empty
-								if operatorLink == nil {
-									// Create new link
-									operatorLink = make(map[*tree.Node][]string)
-								}
-								// Save new elements
-								operatorLink[compVal] = ops
-								// Store into main structure
-								compLink.LinkedComponentOperator = operatorLink
-							}
-						} else {
-							// Add ID of statement to reference list
-							arr := compLink.LinkedStatements[compVal]
-							arr = append(arr, id)
-							compLink.LinkedStatements[compVal] = arr
-							fmt.Println("Component value ", compVal, " found previously. Stored statement id ", id)
-						}
-
-					} else if compVal == compLink.Component {
-						// else save reference to own id if you observe the same component
-						ownIDs := compLink.OwnStatements
-						if ownIDs == nil {
-							ownIDs = []int{}
-						}
-						// Save the current id
-						ownIDs = append(ownIDs, id)
-						compLink.OwnStatements = ownIDs
+					// Simply collect references per value
+					nodeRefs := combinationStructure[compVal]
+					if nodeRefs == nil {
+						nodeRefs = []int{}
+						// Go through the entire
 					}
-				}
-			}
-		}
-		// Search links
-		compLinks = append(compLinks, compLink)
-		fmt.Println(compLink)
-		searchIdx++
-	}
 
-	i := 0
-	for i < len(compLinks) {
-		fmt.Println(compLinks[i])
-		i++
+					// Add this statement's ID
+					nodeRefs = append(nodeRefs, id)
+					combinationStructure[compVal] = nodeRefs
+				}
+
+			}
+
+		}
+		// Now save statement references for all values of a given component to shared array
+		compLinks = append(compLinks, combinationStructure)
+		// Move to next column (component ID)
+		columnIdx++
 	}
 	return compLinks
 }
