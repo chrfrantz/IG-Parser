@@ -373,6 +373,9 @@ func (n *Node) String() string {
 	}
 }
 
+/*
+Insert left leaf to node
+ */
 func (n *Node) InsertLeftLeaf(entry string) {
 	if n.Left != nil {
 		log.Fatal("Attempting to add left leaf node to node already containing left leaf. Node: " + n.String())
@@ -386,6 +389,9 @@ func (n *Node) InsertLeftLeaf(entry string) {
 	n.Left = &newNode
 }
 
+/*
+Insert right leaf to node
+*/
 func (n *Node) InsertRightLeaf(entry string) {
 	if n.Right != nil {
 		log.Fatal("Attempting to add right leaf node to node already containing right leaf. Node: " + n.String())
@@ -414,9 +420,6 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 	if n.Parent == nil || n.Parent.IsEmptyNode() {
 		log.Fatal("Can't search for related node, since no parent node. Node: ", n)
 	}
-	/*if !n.IsLeafNode() {
-		log.Fatal("Starting node for search needs to be leaf node. Node: ", n)
-	}*/
 
 	// Inherit operators if existing
 	ops := []string{}
@@ -428,6 +431,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 	result := false
 	// if on the left side
 	if n.Parent.Left == n {
+		fmt.Println("Searching on the right side of node ", n.Parent)
 		// Search on the right side
 		if n.Parent.Right == targetNode {
 			fmt.Println("Found node on right side")
@@ -447,6 +451,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		}
 	} else 	// if on the right
 	if n.Parent.Right == n {
+		fmt.Println("Searching on the left side of node ", n.Parent)
 		// Search on the left side
 		if n.Parent.Left == targetNode {
 			fmt.Println("Found node on left side")
@@ -467,12 +472,15 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 	}
 	// If nothing has been found until here, go up in the hierarchy
 	if !result {
-		fmt.Println("Delegating to parent: ", n.Parent)
+		fmt.Println("Delegating to parent: ", n.Parent.Parent)
+		// Add first path element (needs to be inverted at the end)
+		ops = append(ops, n.Parent.LogicalOperator)
 		result, ops = FindLogicalLinkage(n.Parent, targetNode, ops)
 	}
-	// Should not happen
-	fmt.Println("No links between ", sourceNode, " and ", targetNode, " found.")
-	return false, ops
+	if !result {
+		fmt.Println("No links between ", sourceNode, " and ", targetNode, " found.")
+	}
+	return result, ops
 }
 
 /*

@@ -101,6 +101,7 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node) map[*tre
 					if compLink.LinkedStatements[compVal] == nil {
 						fmt.Println("Found different component value ", compVal)
 						res, ops := tree.FindLogicalLinkage(compLink.Component, compVal, nil)
+						fmt.Println("Return value: ", res)
 						if res {
 							fmt.Println("Found logical linkage between ", compLink.Component, " and ", compVal, ": ", ops, " in statement, ", id)
 
@@ -116,8 +117,15 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node) map[*tre
 							compLink.LinkedStatements = linked
 
 							// Store logical operator
-							operatorLink := make(map[*tree.Node][]string)
+							operatorLink := compLink.LinkedComponentOperator
+							// If operator links are empty
+							if operatorLink == nil {
+								// Create new link
+								operatorLink = make(map[*tree.Node][]string)
+							}
+							// Save new elements
 							operatorLink[compVal] = ops
+							// Store into main structure
 							compLink.LinkedComponentOperator = operatorLink
 						}
 					} else {
