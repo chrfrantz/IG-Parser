@@ -382,6 +382,7 @@ func (n *Node) InsertLeftLeaf(entry string) {
 	}
 	newNode := Node{}
 	newNode.Entry = entry
+	newNode.Parent = n
 	n.Left = &newNode
 }
 
@@ -394,7 +395,84 @@ func (n *Node) InsertRightLeaf(entry string) {
 	}
 	newNode := Node{}
 	newNode.Entry = entry
+	newNode.Parent = n
 	n.Right = &newNode
+}
+
+/*
+Returns the logical linkages between source and target node, where
+both are leaf nodes
+ */
+func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) (bool, []string) {
+
+	if sourceNode == nil || targetNode == nil {
+		log.Fatal("No source or target node provided")
+	}
+	// Override source node for search if provided
+	n := sourceNode
+
+	if n.Parent == nil || n.Parent.IsEmptyNode() {
+		log.Fatal("Can't search for related node, since no parent node. Node: ", n)
+	}
+	/*if !n.IsLeafNode() {
+		log.Fatal("Starting node for search needs to be leaf node. Node: ", n)
+	}*/
+
+	// Inherit operators if existing
+	ops := []string{}
+	if opsOnPath != nil {
+		ops = opsOnPath
+	}
+
+	// Switch to signal whether target has been found
+	result := false
+	// if on the left side
+	if n.Parent.Left == n {
+		// Search on the right side
+		if n.Parent.Right == targetNode {
+			fmt.Println("Found node on right side")
+			ops = append(ops, n.Parent.LogicalOperator)
+			return true, ops
+		}
+		// if right sibling is non-leaf, delegate
+		if !n.Parent.Right.IsLeafNode() {
+			fmt.Println("Search right side downwards on node ", n.Parent.Right.Left)
+			// Add first path element (needs to be inverted at the end)
+			ops = append(ops, n.Parent.LogicalOperator)
+			// Delegate search the left child of neighbouring right combination
+			result, ops = FindLogicalLinkage(n.Parent.Right.Left, targetNode, ops)
+			if !result {
+				result, ops = FindLogicalLinkage(n.Parent.Right.Right, targetNode, ops)
+			}
+		}
+	} else 	// if on the right
+	if n.Parent.Right == n {
+		// Search on the left side
+		if n.Parent.Left == targetNode {
+			fmt.Println("Found node on left side")
+			ops = append(ops, n.Parent.LogicalOperator)
+			return true, ops
+		}
+		// if left sibling is non-leaf, delegate
+		if !n.Parent.Left.IsLeafNode() {
+			fmt.Println("Search left side downwards on node ", n.Parent.Left.Left)
+			// Add first path element (needs to be inverted at the end)
+			ops = append(ops, n.Parent.LogicalOperator)
+			// Delegate search the left child of neighbouring left combination
+			result, ops = FindLogicalLinkage(n.Parent.Left.Left, targetNode, ops)
+			if !result {
+				result, ops = FindLogicalLinkage(n.Parent.Left.Right, targetNode, ops)
+			}
+		}
+	}
+	// If nothing has been found until here, go up in the hierarchy
+	if !result {
+		fmt.Println("Delegating to parent: ", n.Parent)
+		result, ops = FindLogicalLinkage(n.Parent, targetNode, ops)
+	}
+	// Should not happen
+	fmt.Println("No links between ", sourceNode, " and ", targetNode, " found.")
+	return false, ops
 }
 
 /*

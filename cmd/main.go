@@ -4,6 +4,7 @@ import (
 	"IG-Parser/exporter"
 	"IG-Parser/parser"
 	"fmt"
+	"os"
 )
 
 //var words = "([a-zA-Z',;]+\\s*)+"
@@ -42,11 +43,13 @@ func main() {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	/*text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
+	text = "A((certifying agent [AND] wife [AND] BANANA)) D(may) I(investigate) " +
 	"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part) " +
 	"concerning " +
 	"(production [operation] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
-	")"*/
+	")"+
+		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+
 	//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
 	s := parser.ParseStatement(text)
@@ -63,6 +66,10 @@ func main() {
 	res := exporter.GenerateNodeArrayPermutations(leafArrays...)
 
 	//fmt.Println("Component references: ", componentRefs)
+
+	exporter.GenerateLogicalOperatorLinkagePerCombination(res)
+
+	os.Exit(0)
 
 	output := exporter.GenerateGoogleSheetsOutput(res, componentRefs, "650")
 

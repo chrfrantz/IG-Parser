@@ -19,12 +19,14 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, stmtI
 	separator := ";"
 	suffix := quote + ", \"" + separator + "\")" + linebreak
 	indexSymbol := "_"
+	stmtIdPrefix := "'"
 	stmtIdSeparator := "."
 
 	// Generate headers
 	if refs != nil && len(refs) != 0 {
 
-		output += prefix + separator
+		output += prefix
+		output += "Statement ID" + separator
 		// Iterate through component reference map
 		for _, v := range tree.IGComponents {
 			i := 0
@@ -52,7 +54,7 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, stmtI
 		// Start new row
 		output += prefix
 		// Add statement ID
-		output += stmtId + stmtIdSeparator + strconv.Itoa(i + 1) + separator
+		output += stmtIdPrefix + stmtId + stmtIdSeparator + strconv.Itoa(i + 1) + separator
 		ct := 0
 		for v := range s {
 			output += s[v].Entry
