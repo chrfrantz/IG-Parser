@@ -390,9 +390,11 @@ func (n *Node) String() string {
 }
 
 /*
-Makes the given node parent of the current (calling node)
+Makes the given node parent of the current (calling node).
+Should only be internally used, since it does not deal with child assignment on parent node.
+Use InsertLeftNode() or InsertRightNode() instead.
  */
-func (n *Node) AssignParent(node *Node) (bool, NodeError) {
+func (n *Node) assignParent(node *Node) (bool, NodeError) {
 	if n == node {
 		errorMsg := "Attempting to make node parent of itself"
 		log.Println(errorMsg)
@@ -421,7 +423,7 @@ func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
 	}
-	entry.AssignParent(n)
+	entry.assignParent(n)
 	n.Left = entry
 	return true, NodeError{ErrorCode: TREE_NO_ERROR}
 }
@@ -445,7 +447,7 @@ func (n *Node) InsertRightNode(entry *Node) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
 	}
-	entry.AssignParent(n)
+	entry.assignParent(n)
 	n.Right = entry
 	return true, NodeError{ErrorCode: TREE_NO_ERROR}
 }
@@ -466,7 +468,7 @@ func (n *Node) InsertLeftLeaf(entry string) (bool, NodeError) {
 	}
 	newNode := Node{}
 	newNode.Entry = entry
-	newNode.AssignParent(n)
+	newNode.assignParent(n)
 	n.Left = &newNode
 	return true, NodeError{ErrorCode: TREE_NO_ERROR}
 }
@@ -487,7 +489,7 @@ func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 	}
 	newNode := Node{}
 	newNode.Entry = entry
-	newNode.AssignParent(n)
+	newNode.assignParent(n)
 	n.Right = &newNode
 	return true, NodeError{ErrorCode: TREE_NO_ERROR}
 }
