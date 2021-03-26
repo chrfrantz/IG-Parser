@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
@@ -196,10 +196,25 @@ type ParsingError struct {
 	ErrorIgnoredElements []string
 }
 
-func (e *ParsingError) Error() string {
-	return fmt.Sprint("Parsing Error " + e.ErrorCode + ": " + e.ErrorMessage +
+func (e *ParsingError) Error() error {
+	return errors.New("Parsing Error " + e.ErrorCode + ": " + e.ErrorMessage +
 		" (Ignored elements: " + strconv.Itoa(len(e.ErrorIgnoredElements)) + ")")
 }
+
+type NodeError struct {
+	ErrorCode string
+	ErrorMessage string
+	ErrorIgnoredElements []string
+}
+
+func (e *NodeError) Error() error {
+	return errors.New("Node Error " + e.ErrorCode + ": " + e.ErrorMessage +
+		" (Ignored elements: " + strconv.Itoa(len(e.ErrorIgnoredElements)) + ")")
+}
+
+const TREE_NO_ERROR = "NO_ERROR"
+const TREE_INVALID_NODE_ADDITION = "INVALID_NODE_ADDITION"
+const TREE_INVALID_NODE_SELF_LINKAGE = "INVALID_NODE_LINKAGE_TO_SELF"
 
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {

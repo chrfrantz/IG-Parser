@@ -270,7 +270,7 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
-		log.Fatal("Error during component parsing: " + err.Error())
+		log.Fatal("Error during component parsing: ", err.Error())
 	}
 
 	// Override missing combination error, since it is not relevant at this level

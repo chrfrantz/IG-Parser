@@ -56,6 +56,14 @@ func main3() {
 }
 
 func main() {
+	root := tree.Node{}
+	root.InsertLeftNode(root)
+
+	root.InsertRightNode(root)
+
+}
+
+func main5() {
 
 
 

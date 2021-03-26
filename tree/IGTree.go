@@ -128,7 +128,6 @@ func (s *Statement) String() string {
 	}
 	if s.OrElse != nil {
 		out += s.OrElse.String()
-		//out += " "
 	}
 	return out
 }
@@ -140,7 +139,20 @@ func (s *Statement) Stringify() string {
 }
 
 /*
-Generates map of arrays containing pointers to leaf nodes in each component. Key is component name constant (e.g., ATTRIBUTES).
+Generates map of arrays containing pointers to leaf nodes in each component.
+Key is an incrementing index, and value is an array of the corresponding nodes.
+It further returns an array containing the component keys alongside the number of leaf nodes per component,
+in order to reconstruct the linkage between the index in the first return value and the components they relate to.
+
+Example: The first return may include two ATTRIBUTES component trees separated by synthetic AND connections (sAND)
+based on different logical combination within the attributes component that are not genuine logical relationships (i.e.,
+not signaled using [AND], [OR], or [XOR], but inferred during parsing based on the occurrence of multiple such combinations
+within an Attributes component expression (e.g., A((Sellers [AND] Buyers) from (Northern [OR] Southern) states)).
+Internally, this would be represented as ((Sellers [AND] Buyers] [sAND] (Northern [OR] Southern))', and returned as separate
+trees with index 0 (Sellers [AND] Buyers) and 1 (Northern [OR] Southern).
+The second return indicates the fact that the first two entries in the first return type instance are of type ATTRIBUTES by holding
+an entry '"ATTRIBUTES": 2', etc.
+
  */
 func (s *Statement) GenerateLeafArrays() ([][]*Node, map[string]int) {
 
@@ -279,6 +291,9 @@ type Node struct {
 	ElementOrder []interface{}
 }
 
+/*
+Counts the number of parents in the tree hierarchy for a given node.
+ */
 func (n *Node) CountParents() int {
 	if n.Parent == nil {
 		return 0
@@ -330,7 +345,8 @@ func (n *Node) Stringify() string {
 var PrintValueOrder = false
 
 /*
-Prints node content
+Prints node content in human-readable form (for printing on console).
+For parseable version, look at Stringify().
  */
 func (n *Node) String() string {
 
@@ -374,35 +390,106 @@ func (n *Node) String() string {
 }
 
 /*
-Insert left leaf to node
+Makes the given node parent of the current (calling node)
  */
-func (n *Node) InsertLeftLeaf(entry string) {
-	if n.Left != nil {
-		log.Fatal("Attempting to add left leaf node to node already containing left leaf. Node: " + n.String())
+func (n *Node) AssignParent(node *Node) (bool, NodeError) {
+	if n == node {
+		errorMsg := "Attempting to make node parent of itself"
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_SELF_LINKAGE, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
-		log.Fatal("Attempting to add left leaf node to populated node (i.e., it has an entry itself). Node: " + n.String())
-	}
-	newNode := Node{}
-	newNode.Entry = entry
-	newNode.Parent = n
-	n.Left = &newNode
+	n.Parent = node
+	return true, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 /*
-Insert right leaf to node
+Insert right subnode to node
 */
-func (n *Node) InsertRightLeaf(entry string) {
-	if n.Right != nil {
-		log.Fatal("Attempting to add right leaf node to node already containing right leaf. Node: " + n.String())
+func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
+	if n.Left != nil {
+		errorMsg := "Attempting to add left node to node already containing left leaf. Node: " + n.String()
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
+	}
+	if n == entry {
+		errorMsg := "Attempting to assign node to itself"
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_SELF_LINKAGE, ErrorMessage: errorMsg}
 	}
 	if n.Entry != "" {
-		log.Fatal("Attempting to add right leaf node to populated node (i.e., it has an entry itself). Node: " + n.String())
+		errorMsg := "Attempting to add left leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
+	}
+	entry.AssignParent(n)
+	n.Left = entry
+	return true, NodeError{ErrorCode: TREE_NO_ERROR}
+}
+
+/*
+Insert right subnode to node
+*/
+func (n *Node) InsertRightNode(entry *Node) (bool, NodeError) {
+	if n.Right != nil {
+		errorMsg := "Attempting to add right node to node already containing right leaf. Node: " + n.String()
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
+	}
+	if n == entry {
+		errorMsg := "Attempting to assign node to itself"
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_SELF_LINKAGE, ErrorMessage: errorMsg}
+	}
+	if n.Entry != "" {
+		errorMsg := "Attempting to add right leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
+	}
+	entry.AssignParent(n)
+	n.Right = entry
+	return true, NodeError{ErrorCode: TREE_NO_ERROR}
+}
+
+/*
+Insert left leaf to node based on string entry
+ */
+func (n *Node) InsertLeftLeaf(entry string) (bool, NodeError) {
+	if n.Left != nil {
+		errorMsg := "Attempting to add left leaf node to node already containing left leaf. Node: " + n.String()
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
+	}
+	if n.Entry != "" {
+		errorMsg := "Attempting to add left leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
 	}
 	newNode := Node{}
 	newNode.Entry = entry
-	newNode.Parent = n
+	newNode.AssignParent(n)
+	n.Left = &newNode
+	return true, NodeError{ErrorCode: TREE_NO_ERROR}
+}
+
+/*
+Insert right leaf to node based on string entry
+*/
+func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
+	if n.Right != nil {
+		errorMsg := "Attempting to add right leaf node to node already containing right leaf. Node: " + n.String()
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
+	}
+	if n.Entry != "" {
+		errorMsg := "Attempting to add right leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
+		log.Println(errorMsg)
+		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
+	}
+	newNode := Node{}
+	newNode.Entry = entry
+	newNode.AssignParent(n)
 	n.Right = &newNode
+	return true, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 /*
@@ -574,14 +661,18 @@ func (n *Node) InsertNonSharedValues(value string) {
 /*
 Inserts a leaf node under a given node and inherits its component type
  */
+/*
 func (n *Node) InsertLeafNode(entry string) *Node {
 	return n.InsertChildNode(entry, "", "", n.ComponentType, nil, nil, "")
 }
 
 func ComponentLeafNode(entry string, componentType string) *Node {
 	return ComponentNode(entry, "", "", componentType, nil, nil, "")
-}
+}*/
 
+/*
+Creates a generic node, with various options
+ */
 func ComponentNode(entry string, leftValue string, rightValue string, componentType string, sharedValueLeft []string, sharedValueRight []string, logicalOperator string) *Node {
 
 	// Validation (Entry cannot be mixed with the other fields)
@@ -638,8 +729,8 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 		node.Entry = entry
 	} else {
 		// if non-leaf, fill all relevant fields
-		node.Left = node.InsertLeafNode(leftValue)
-		node.Right = node.InsertLeafNode(rightValue)
+		node.InsertLeftLeaf(leftValue)
+		node.InsertRightLeaf(rightValue)
 		node.LogicalOperator = logicalOperator
 		node.SharedLeft = sharedValueLeft
 		node.SharedRight = sharedValueRight
@@ -654,6 +745,7 @@ If entry value is specified, the node is presumed to be leaf node; in all other 
 nodes is interpreted as combination, and left and right values are moved into respective leaf nodes.
 Component type name is saved in node.
  */
+/*
 func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string, componentType string, sharedValueLeft []string, sharedValueRight []string, logicalOperator string) *Node {
 	// Validation (Entry cannot be mixed with the other fields)
 	if entry != "" {
@@ -715,7 +807,7 @@ func (n *Node) InsertChildNode(entry string, leftValue string, rightValue string
 		node.SharedRight = sharedValueRight
 	}
 	return &node
-}
+}*/
 
 /*
 Counts the number of leaves of node tree
