@@ -2,6 +2,7 @@ package tree
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -188,19 +189,21 @@ func TestNodeDistanceSearch(t *testing.T) {
 
 	// Left branch
 	// Simple left to right
-	res, ops := FindLogicalLinkage(&leftLeftChildNode, &leftRightChildNode, nil)
+	res, ops, err := FindLogicalLinkage(&leftLeftChildNode, &leftRightChildNode, nil)
 
-	if !res {
+	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
+
+	fmt.Println(ops)
 	if len(ops) != 1 || ops[0] != "123" {
 		t.Fatal("Logical operators are incorrectly determined.")
 	}
 
 	// Simple right to left
-	res, ops = FindLogicalLinkage(&leftRightChildNode, &leftLeftChildNode, nil)
+	res, ops, err = FindLogicalLinkage(&leftRightChildNode, &leftLeftChildNode, nil)
 
-	if !res {
+	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
 	if len(ops) != 1 || ops[0] != "123" {
@@ -209,9 +212,9 @@ func TestNodeDistanceSearch(t *testing.T) {
 
 	// Right branch
 	// Simple left to right
-	res, ops = FindLogicalLinkage(&rightLeftChildNode, &rightRightChildNode, nil)
+	res, ops, err = FindLogicalLinkage(&rightLeftChildNode, &rightRightChildNode, nil)
 
-	if !res {
+	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
 	if len(ops) != 1 || ops[0] != "456" {
@@ -219,9 +222,9 @@ func TestNodeDistanceSearch(t *testing.T) {
 	}
 
 	// Simple right to left
-	res, ops = FindLogicalLinkage(&rightRightChildNode, &rightLeftChildNode, nil)
+	res, ops, err = FindLogicalLinkage(&rightRightChildNode, &rightLeftChildNode, nil)
 
-	if !res {
+	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
 	if len(ops) != 1 || ops[0] != "456" {
@@ -229,11 +232,14 @@ func TestNodeDistanceSearch(t *testing.T) {
 	}
 
 	// Across branches
-	res, ops = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil)
+	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil)
 
-	if !res {
+	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
+
+	fmt.Println(ops)
+
 	if len(ops) != 3 || ops[0] != "123" || ops[1] != "789" || ops[2] != "456" {
 		t.Fatal("Logical operators are incorrectly determined.")
 	}
@@ -245,14 +251,90 @@ func TestNodeDistanceSearch(t *testing.T) {
 	leftSubnode := Node{Entry: "left sub"}
 	rightSubnode := Node{Entry: "right sub"}
 
-	subnode.InsertLeftNode(&leftSubnode)
-	subnode.InsertRightNode(&rightSubnode)
+	res, err = subnode.InsertLeftNode(&leftSubnode)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
 
-	leftRightChildNode.InsertRightNode(&subnode)
+	res, err = subnode.InsertRightNode(&rightSubnode)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	res, err = leftRightChildNode.InsertRightNode(&subnode)
+	if res || err.ErrorCode != TREE_INVALID_NODE_ADDITION {
+		t.Fatal("Should pick up on invalid addition of node into existing node")
+	}
+
+	// Manually clean node
+	leftRightChildNode.Entry = ""
+	res, err = leftRightChildNode.InsertRightNode(&subnode)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Addition of node to empty node should work. Error: ", err)
+	}
+
+	// Assessment should fail due to missing logical operator and left leaf value
+	res, err = leftRightChildNode.Validate()
+	if res || err.ErrorCode != TREE_INVALID_TREE {
+		t.Fatal("Reconfigured tree should throw problem. Error: ", err)
+	}
+
+	// Manually add operator (should still fail)
 	leftRightChildNode.LogicalOperator = "AND"
 
+	// Node-level validation should fail
+	res, err = leftRightChildNode.Validate()
+	if res || err.ErrorCode != TREE_INVALID_TREE {
+		t.Fatal("Reconfigured tree should still throw problem. Error: ", err)
+	}
 
-	res, ops = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil)
+	// Now validate entire tree - which should fail
+	res, err = root.Validate()
+	if res || err.ErrorCode != TREE_INVALID_TREE {
+		t.Fatal("Validation of reconfigured tree from root should throw problem. Error: ", err)
+	}
+
+	// Detect logical operators
+	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil)
+	if res || err.ErrorCode != TREE_INPUT_VALIDATION {
+		t.Fatal("Link between nodes should not be found because of empty nodes.")
+	}
+
+	// Fix node by adding left leaf
+	res, err = leftRightChildNode.InsertLeftLeaf("left sub")
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Reconfigured tree by adding left leaf should not throw problem. Error: ", err)
+	}
+
+	// Should still fail, because of missing operator on right nested node
+	res, err = leftRightChildNode.Validate()
+	if res || err.ErrorCode != TREE_INVALID_TREE {
+		t.Fatal("Reconfigured tree should throw problem on validation due to missing logical operator. Error: ", err)
+	}
+
+	// Adding operator should resolve this
+	leftRightChildNode.Right.LogicalOperator = "OR"
+	res, err = leftRightChildNode.Validate()
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Reconfigured tree should not throw problem. Error: ", err)
+	}
+
+	// Now validate entire tree again - should not fail
+	res, err = root.Validate()
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Reconfigured tree should not throw problem. Error: ", err)
+	}
+
+	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Link between nodes could not be found.")
+	}
+	if len(ops) != 3 || ops[0] != "123" || ops[1] != "AND" || ops[2] != "OR" {
+		t.Fatal("Logical operators are incorrectly detected.")
+	}
+
+	os.Exit(0)
+	res, ops, _ = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil)
 	if !res {
 		t.Fatal("Link between nodes could not be found.")
 	}

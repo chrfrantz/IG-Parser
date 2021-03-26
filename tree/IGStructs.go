@@ -215,6 +215,8 @@ func (e *NodeError) Error() error {
 const TREE_NO_ERROR = "NO_ERROR"
 const TREE_INVALID_NODE_ADDITION = "INVALID_NODE_ADDITION"
 const TREE_INVALID_NODE_SELF_LINKAGE = "INVALID_NODE_LINKAGE_TO_SELF"
+const TREE_INVALID_TREE = "TREE_STRUCTURE_INVALID"
+const TREE_INPUT_VALIDATION = "INPUT_VALIDATION"
 
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {

@@ -498,16 +498,19 @@ func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 Returns the logical linkages between source and target node, where
 both are leaf nodes
  */
-func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) (bool, []string) {
+func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) (bool, []string, NodeError) {
 
 	if sourceNode == nil || targetNode == nil {
-		log.Fatal("No source or target node provided")
+		return false, opsOnPath, NodeError{ErrorCode: TREE_INPUT_VALIDATION, ErrorMessage: "No source or target node provided. " +
+			"This is often the case when navigating tree structures with missing/empty leaves. Consider validating tree to " +
+			"ensure the absence of structural gaps."}
 	}
 	// Override source node for search if provided
 	n := sourceNode
 
 	if n.Parent == nil || n.Parent.IsEmptyNode() {
-		log.Fatal("Can't search for related node, since no parent node. Node: ", n)
+		return false, opsOnPath, NodeError{ErrorCode: TREE_INPUT_VALIDATION,
+			ErrorMessage: fmt.Sprint("Can't search for related node, since no parent node. Node: ", n)}
 	}
 
 	// Inherit operators if existing
@@ -516,6 +519,34 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		ops = opsOnPath
 	}
 
+	// If input is output, just return
+	if sourceNode == targetNode {
+		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+	fmt.Println("Searching for " + targetNode.String() + " on node " + n.String())
+
+
+	// Search immediate nodes
+	if n.Left == targetNode {
+		//fmt.Println("Before operators: ", ops)
+		//ops = append(ops, n.LogicalOperator)
+		fmt.Println("Found target on the left side.")
+		//fmt.Println("Added operator ", n.LogicalOperator)
+		//fmt.Println("Current operators: ", ops)
+		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+	if n.Right == targetNode {
+		//fmt.Println("Before operators: ", ops)
+		//ops = append(ops, n.LogicalOperator)
+		fmt.Println("Found target on the right side.")
+		//fmt.Println("Added operator ", n.LogicalOperator)
+		//fmt.Println("Current operators: ", ops)
+		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+
+	outError := NodeError{}
+	hitParent := false
+
 	// Switch to signal whether target has been found
 	result := false
 	// if on the left side
@@ -523,19 +554,45 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		//fmt.Println("Searching on the right side of node ", n.Parent)
 		// Search on the right side
 		if n.Parent.Right == targetNode {
-			//fmt.Println("Found node on right side")
-			ops = append(ops, n.Parent.LogicalOperator)
-			return true, ops
+			fmt.Println("Found node on right side")
+
+			if len(ops) == 0 {
+				fmt.Println("Added operator ", n.Parent.LogicalOperator)
+				ops = append(ops, n.Parent.LogicalOperator)
+				fmt.Println("Current operators: ", ops)
+			}
+
+			return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
 		}
 		// if right sibling is non-leaf, delegate
 		if !n.Parent.Right.IsLeafNode() {
-			//fmt.Println("Search right side downwards on node ", n.Parent.Right.Left)
-			// Add first path element (needs to be inverted at the end)
-			ops = append(ops, n.Parent.LogicalOperator)
+			// Add first path element
+			if len(ops) == 0 {
+				fmt.Println("Added operator ", n.Parent.LogicalOperator)
+				ops = append(ops, n.Parent.LogicalOperator)
+				fmt.Println("Current operators: ", ops)
+			}
+
+			fmt.Println("Search left side downwards on right node ", n.Parent.Right.Left)
+
+			// Add operator of nested node to search downwards
+			fmt.Println("Added operator ", n.Parent.Right.LogicalOperator)
+			ops = append(ops, n.Parent.Right.LogicalOperator)
+			fmt.Println("Current operators: ", ops)
+
 			// Delegate search the left child of neighbouring right combination
-			result, ops = FindLogicalLinkage(n.Parent.Right.Left, targetNode, ops)
+			result, ops, outError = FindLogicalLinkage(n.Parent.Right.Left, targetNode, ops)
+			if outError.ErrorCode != TREE_NO_ERROR {
+				return result, ops, outError
+			}
+			// Intentionally not checking for errors here, since search on empty is internally permissible
 			if !result {
-				result, ops = FindLogicalLinkage(n.Parent.Right.Right, targetNode, ops)
+				fmt.Println("Search right side downwards on right node ", n.Parent.Right.Right)
+				// Delegate search the right child of neighbouring right combination
+				result, ops, outError = FindLogicalLinkage(n.Parent.Right.Right, targetNode, ops)
+				if outError.ErrorCode != TREE_NO_ERROR {
+					return result, ops, outError
+				}
 			}
 		}
 	} else 	// if on the right
@@ -544,53 +601,95 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		// Search on the left side
 		if n.Parent.Left == targetNode {
 			fmt.Println("Found node on left side")
-			ops = append(ops, n.Parent.LogicalOperator)
-			return true, ops
+
+			if len(ops) == 0 {
+				fmt.Println("Added operator ", n.Parent.LogicalOperator)
+				ops = append(ops, n.Parent.LogicalOperator)
+				fmt.Println("Current operators: ", ops)
+			}
+
+			return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
 		}
 		// if left sibling is non-leaf, delegate
 		if !n.Parent.Left.IsLeafNode() {
-			//fmt.Println("Search left side downwards on node ", n.Parent.Left.Left)
-			// Add first path element (needs to be inverted at the end)
-			ops = append(ops, n.Parent.LogicalOperator)
+			// Add first path element
+			if len(ops) == 0 {
+				fmt.Println("Added operator ", n.Parent.LogicalOperator)
+				ops = append(ops, n.Parent.LogicalOperator)
+				fmt.Println("Current operators: ", ops)
+			}
+
+			fmt.Println("Search left side downwards on left node ", n.Parent.Left.Left)
+
+			// Add operator of nested node to search downwards
+			fmt.Println("Added operator ", n.Parent.Left.LogicalOperator)
+			ops = append(ops, n.Parent.Left.LogicalOperator)
+			fmt.Println("Current operators: ", ops)
+
 			// Delegate search the left child of neighbouring left combination
-			result, ops = FindLogicalLinkage(n.Parent.Left.Left, targetNode, ops)
+			result, ops, outError = FindLogicalLinkage(n.Parent.Left.Left, targetNode, ops)
 			if !result {
-				result, ops = FindLogicalLinkage(n.Parent.Left.Right, targetNode, ops)
+				fmt.Println("Search right side downwards on left node ", n.Parent.Left.Right)
+				// Delegate search the right child of neighbouring left combination
+				result, ops, outError = FindLogicalLinkage(n.Parent.Left.Right, targetNode, ops)
 			}
 		}
 	}
-	// If nothing has been found until here, go up in the hierarchy
-	if !result {
-		//fmt.Println("Delegating to parent: ", n.Parent.Parent)
+	// If nothing has been found until here, go up in the hierarchy - unless we have been there
+	if !result && !hitParent {
+		fmt.Println("Delegating to parent: ", n.Parent.Parent)
 		// Add first path element (needs to be inverted at the end)
+		// Own operator (i.e., in own parent) is appended by default - any other leaf needs to be linked by logical operator
 		ops = append(ops, n.Parent.LogicalOperator)
-		result, ops = FindLogicalLinkage(n.Parent, targetNode, ops)
+		fmt.Println("Added operator ", n.Parent.LogicalOperator)
+		fmt.Println("Current operators: ", ops)
+		// Parent's parent operator
+		ops = append(ops, n.Parent.Parent.LogicalOperator)
+		fmt.Println("Added operator ", n.Parent.Parent.LogicalOperator)
+		fmt.Println("Current operators: ", ops)
+		// Mark whether root node has been reached
+		if n.Parent.Parent.Parent == nil {
+			fmt.Println("Hit ceiling")
+			hitParent = true
+		}
+		if n.Parent.Parent.Left == n.Parent {
+			fmt.Println("Pushing down the right side ... on ", n.Parent.Parent.Right)
+			// Push towards right side
+			ops = append(ops, n.Parent.Parent.Right.LogicalOperator)
+			result, ops, outError = FindLogicalLinkage(n.Parent.Parent.Right, targetNode, ops)
+		} else {
+			fmt.Println("Pushing down the left side ... on ", n.Parent.Parent.Left)
+			// Push towards left side
+			ops = append(ops, n.Parent.Parent.Left.LogicalOperator)
+			result, ops, outError = FindLogicalLinkage(n.Parent.Parent.Left, targetNode, ops)
+		}
 	}
 	if !result {
 		fmt.Println("No links between ", sourceNode, " and ", targetNode, " found.")
+		//ops = append(ops, n.LogicalOperator)
 	}
-	return result, ops
+	return result, ops, outError
 }
 
 /*
 Combines existing nodes into new node and returns newly generated node
  */
-func Combine(leftnode *Node, rightNode *Node, logicalOperator string) *Node {
+func Combine(leftNode *Node, rightNode *Node, logicalOperator string) *Node {
 
-	if leftnode == nil && rightNode == nil {
+	if leftNode == nil && rightNode == nil {
 		log.Fatal("Illegal call to Combine() with nil nodes")
 	}
-	if leftnode == nil || leftnode.IsEmptyNode() {
+	if leftNode == nil || leftNode.IsEmptyNode() {
 		fmt.Println("Combining nodes returns right node (other node is nil or empty)")
 		return rightNode
 	}
 	if rightNode == nil || rightNode.IsEmptyNode() {
 		fmt.Println("Combining nodes returns left node (other node is nil or empty)")
-		return leftnode
+		return leftNode
 	}
 	// In all other cases, create new combination using provided logical operator
 	newNode := Node{}
-	newNode.Left = leftnode
+	newNode.Left = leftNode
 	newNode.Left.Parent = &newNode
 	newNode.Right = rightNode
 	newNode.Right.Parent = &newNode
@@ -738,6 +837,48 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 		node.SharedRight = sharedValueRight
 	}
 	return &node
+}
+
+/*
+Validates all nodes from this node downwards with respect to population as linking node or leaf node.
+ */
+func (n *Node) Validate() (bool, NodeError){
+	if n.Entry == "" && (n.Left == nil || n.Right == nil) {
+		errorMsg := "Non-leaf node, but missing specification of left and right child, " +
+			"or both. Node: " + fmt.Sprint(n.String())
+		return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: errorMsg}
+	}
+	if n.Entry != "" && (n.Left != nil  || n.Right != nil) {
+		errorMsg := "Leaf node, but still has filled left or right node. Node: " + fmt.Sprint(n.String())
+		return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: errorMsg}
+	}
+	if n.Left != nil && n.Right != nil && n.LogicalOperator == "" {
+		errorMsg := "Did not specify logical operator in populated tree. Node: " + fmt.Sprint(n.String())
+		return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: errorMsg}
+	}
+
+	if !n.IsLeafNode() {
+		downwardResult := false
+		error := NodeError{}
+		// Move downwards
+		if n.Left == nil {
+			return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Empty left node"}
+		} else {
+			downwardResult, error = n.Left.Validate()
+		}
+		if !downwardResult {
+			return false, error
+		}
+		if n.Right == nil {
+			return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Empty right node"}
+		} else {
+			downwardResult, error = n.Right.Validate()
+		}
+		if !downwardResult {
+			return false, error
+		}
+	}
+	return true, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 /*
