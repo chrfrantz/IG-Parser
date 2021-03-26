@@ -494,23 +494,151 @@ func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 	return true, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
+
+func FindLogicalLinkage(sourceNode *Node, targetNode *Node) (bool, []string, NodeError) {
+
+	// Test down first
+	foundDownwards, ops, err := searchDownwards(sourceNode, sourceNode, targetNode, []string{})
+	if err.ErrorCode != TREE_NO_ERROR {
+		return false, ops, err
+	}
+	// If found in downwards search, return
+	if foundDownwards {
+		return true, ops, err
+	}
+
+	// Test up
+
+	fmt.Println("Could not find target node ", targetNode, " from start node ", sourceNode)
+	return false, nil, err
+}
+
+func searchDownwards(originNode *Node, startNode *Node, targetNode *Node, opsPath []string) (bool, []string, NodeError) {
+
+	// Check if input node is already target
+	if startNode == targetNode {
+		fmt.Println("Search node ", startNode, " is target node")
+		return true, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+
+	// if leaf and does not match, return false
+	if startNode.IsLeafNode() {
+		fmt.Println("Search node ", startNode, " is leaf, but does not corresponding to the target node. Node: ", targetNode)
+		return false, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+
+	// Carry over input operator
+	ops := []string{}
+	if opsPath != nil {
+		fmt.Println("Inherits operators ", opsPath)
+		ops = append(ops, opsPath...)
+	}
+
+	// Append start node operator
+	ops = append(ops, startNode.LogicalOperator)
+	fmt.Println("Added logical operator ", startNode.LogicalOperator)
+
+	// Predefine response values
+	response := false
+	err := NodeError{ErrorCode: TREE_NO_ERROR}
+
+	// Test left first
+	if startNode.Left != nil && !startNode.Left.IsLeafNode() {
+		fmt.Println("Test left branch ...")
+		response, ops2, err := searchDownwards(originNode, startNode.Left, targetNode, ops)
+		// return lacking success if appearing
+		if err.ErrorCode != TREE_NO_ERROR {
+			return false, ops2, err
+		}
+		// If positive outcome
+		if response {
+			fmt.Println("Found target on left side")
+			return true, ops2, err
+		}
+		// Delegate downwards
+		fmt.Println("- Test left left")
+		response, ops3, err := searchDownwards(originNode, startNode.Left.Left, targetNode, ops2)
+		// return lacking success if appearing
+		if err.ErrorCode != TREE_NO_ERROR {
+			return false, ops3, err
+		}
+		// If positive outcome
+		if response {
+			fmt.Println("Found target on left left side")
+			return true, ops3, err
+		}
+		fmt.Println("- Test left right")
+		response, ops3, err = searchDownwards(originNode, startNode.Left.Right, targetNode, ops2)
+		// return lacking success if appearing
+		if err.ErrorCode != TREE_NO_ERROR {
+			return false, ops3, err
+		}
+		// If positive outcome
+		if response {
+			fmt.Println("Found target on left right side")
+			return true, ops3, err
+		}
+	}
+	// Test right (will only be done if left was not successful
+	if startNode.Right != nil && !startNode.Right.IsLeafNode() {
+		fmt.Println("Testing right branch ...")
+		response, ops2, err := searchDownwards(originNode, startNode.Right, targetNode, ops)
+		// return lacking success if appearing
+		if err.ErrorCode != TREE_NO_ERROR {
+			return false, ops2, err
+		}
+		// If positive outcome
+		if response {
+			fmt.Println("Found target on right side")
+			return true, ops2, err
+		}
+		// Delegate downwards
+		fmt.Println("- Test right left")
+		response, ops3, err := searchDownwards(originNode, startNode.Right.Left, targetNode, ops2)
+		// return lacking success if appearing
+		if err.ErrorCode != TREE_NO_ERROR {
+			return false, ops3, err
+		}
+		// If positive outcome
+		if response {
+			fmt.Println("Found target on right left side")
+			return true, ops3, err
+		}
+		fmt.Println("- Test right right")
+		response, ops3, err = searchDownwards(originNode, startNode.Right.Right, targetNode, ops2)
+		// return lacking success if appearing
+		if err.ErrorCode != TREE_NO_ERROR {
+			return false, ops3, err
+		}
+		// If positive outcome
+		if response {
+			fmt.Println("Found target on right right side")
+			return true, ops3, err
+		}
+	}
+	fmt.Println("Final result: ", response)
+	return response, ops, err
+}
+
 /*
 Returns the logical linkages between source and target node, where
 both are leaf nodes
  */
-func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) (bool, []string, NodeError) {
+/*
+func FindLogLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string, visitedNodes []*Node) (bool, []string, NodeError, []*Node) {
 
 	if sourceNode == nil || targetNode == nil {
 		return false, opsOnPath, NodeError{ErrorCode: TREE_INPUT_VALIDATION, ErrorMessage: "No source or target node provided. " +
 			"This is often the case when navigating tree structures with missing/empty leaves. Consider validating tree to " +
-			"ensure the absence of structural gaps."}
+			"ensure the absence of structural gaps."}, nil
 	}
 	// Override source node for search if provided
 	n := sourceNode
 
 	if n.Parent == nil || n.Parent.IsEmptyNode() {
 		return false, opsOnPath, NodeError{ErrorCode: TREE_INPUT_VALIDATION,
-			ErrorMessage: fmt.Sprint("Can't search for related node, since no parent node. Node: ", n)}
+			ErrorMessage: fmt.Sprint("Can't search for related node, since no parent node. Node: ", n)},
+			[]*Node{n}
 	}
 
 	// Inherit operators if existing
@@ -519,9 +647,19 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		ops = opsOnPath
 	}
 
+	// Return if already visited this node
+	if visitedNodes != nil && NodeInSlice(sourceNode, visitedNodes) {
+		return false, ops, NodeError{ErrorCode: TREE_ALREADY_VISITED}, visitedNodes
+	}
+
+	// Create new array if not already existing
+	if visitedNodes == nil {
+		visitedNodes = []*Node{}
+	}
+
 	// If input is output, just return
 	if sourceNode == targetNode {
-		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
+		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}, []*Node{sourceNode}
 	}
 	fmt.Println("Searching for " + targetNode.String() + " on node " + n.String())
 
@@ -530,18 +668,18 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 	if n.Left == targetNode {
 		//fmt.Println("Before operators: ", ops)
 		//ops = append(ops, n.LogicalOperator)
-		fmt.Println("Found target on the left side.")
+		fmt.Println("=Found target on the left side.")
 		//fmt.Println("Added operator ", n.LogicalOperator)
 		//fmt.Println("Current operators: ", ops)
-		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
+		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}, visitedNodes
 	}
 	if n.Right == targetNode {
 		//fmt.Println("Before operators: ", ops)
 		//ops = append(ops, n.LogicalOperator)
-		fmt.Println("Found target on the right side.")
+		fmt.Println("=Found target on the right side.")
 		//fmt.Println("Added operator ", n.LogicalOperator)
 		//fmt.Println("Current operators: ", ops)
-		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
+		return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}, visitedNodes
 	}
 
 	outError := NodeError{}
@@ -554,7 +692,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		//fmt.Println("Searching on the right side of node ", n.Parent)
 		// Search on the right side
 		if n.Parent.Right == targetNode {
-			fmt.Println("Found node on right side")
+			fmt.Println("=Found node on RIGHT side. Node: ", n.Parent.Right)
 
 			if len(ops) == 0 {
 				fmt.Println("Added operator ", n.Parent.LogicalOperator)
@@ -562,7 +700,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 				fmt.Println("Current operators: ", ops)
 			}
 
-			return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
+			return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}, visitedNodes
 		}
 		// if right sibling is non-leaf, delegate
 		if !n.Parent.Right.IsLeafNode() {
@@ -573,25 +711,28 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 				fmt.Println("Current operators: ", ops)
 			}
 
-			fmt.Println("Search left side downwards on right node ", n.Parent.Right.Left)
+			fmt.Println("=Search LEFT side downwards on RIGHT node ", n.Parent.Right.Left)
 
 			// Add operator of nested node to search downwards
 			fmt.Println("Added operator ", n.Parent.Right.LogicalOperator)
 			ops = append(ops, n.Parent.Right.LogicalOperator)
 			fmt.Println("Current operators: ", ops)
 
+			// Store this node as visited
+			visitedNodes = append(visitedNodes, n)
+
 			// Delegate search the left child of neighbouring right combination
-			result, ops, outError = FindLogicalLinkage(n.Parent.Right.Left, targetNode, ops)
+			result, ops, outError, visitedNodes = FindLogLinkage(n.Parent.Right.Left, targetNode, ops, visitedNodes)
 			if outError.ErrorCode != TREE_NO_ERROR {
-				return result, ops, outError
+				return result, ops, outError, visitedNodes
 			}
 			// Intentionally not checking for errors here, since search on empty is internally permissible
 			if !result {
-				fmt.Println("Search right side downwards on right node ", n.Parent.Right.Right)
+				fmt.Println("=Search RIGHT side downwards on RIGHT node ", n.Parent.Right.Right)
 				// Delegate search the right child of neighbouring right combination
-				result, ops, outError = FindLogicalLinkage(n.Parent.Right.Right, targetNode, ops)
+				result, ops, outError, visitedNodes = FindLogLinkage(n.Parent.Right.Right, targetNode, ops, visitedNodes)
 				if outError.ErrorCode != TREE_NO_ERROR {
-					return result, ops, outError
+					return result, ops, outError, visitedNodes
 				}
 			}
 		}
@@ -600,7 +741,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 		//fmt.Println("Searching on the left side of node ", n.Parent)
 		// Search on the left side
 		if n.Parent.Left == targetNode {
-			fmt.Println("Found node on left side")
+			fmt.Println("=Found node on LEFT side. Node: ", n.Parent.Left)
 
 			if len(ops) == 0 {
 				fmt.Println("Added operator ", n.Parent.LogicalOperator)
@@ -608,7 +749,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 				fmt.Println("Current operators: ", ops)
 			}
 
-			return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}
+			return true, ops, NodeError{ErrorCode: TREE_NO_ERROR}, visitedNodes
 		}
 		// if left sibling is non-leaf, delegate
 		if !n.Parent.Left.IsLeafNode() {
@@ -619,25 +760,28 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 				fmt.Println("Current operators: ", ops)
 			}
 
-			fmt.Println("Search left side downwards on left node ", n.Parent.Left.Left)
+			fmt.Println("=Search LEFT side downwards on LEFT node ", n.Parent.Left.Left)
 
 			// Add operator of nested node to search downwards
 			fmt.Println("Added operator ", n.Parent.Left.LogicalOperator)
 			ops = append(ops, n.Parent.Left.LogicalOperator)
 			fmt.Println("Current operators: ", ops)
 
+			// Store this node as visited
+			visitedNodes = append(visitedNodes, n)
+
 			// Delegate search the left child of neighbouring left combination
-			result, ops, outError = FindLogicalLinkage(n.Parent.Left.Left, targetNode, ops)
+			result, ops, outError, visitedNodes = FindLogLinkage(n.Parent.Left.Left, targetNode, ops, visitedNodes)
 			if !result {
-				fmt.Println("Search right side downwards on left node ", n.Parent.Left.Right)
+				fmt.Println("=Search RIGHT side downwards on LEFT node ", n.Parent.Left.Right)
 				// Delegate search the right child of neighbouring left combination
-				result, ops, outError = FindLogicalLinkage(n.Parent.Left.Right, targetNode, ops)
+				result, ops, outError, visitedNodes = FindLogLinkage(n.Parent.Left.Right, targetNode, ops, visitedNodes)
 			}
 		}
 	}
 	// If nothing has been found until here, go up in the hierarchy - unless we have been there
 	if !result && !hitParent {
-		fmt.Println("Delegating to parent: ", n.Parent.Parent)
+		fmt.Println("=Delegating to parent: ", n.Parent.Parent)
 		// Add first path element (needs to be inverted at the end)
 		// Own operator (i.e., in own parent) is appended by default - any other leaf needs to be linked by logical operator
 		ops = append(ops, n.Parent.LogicalOperator)
@@ -653,23 +797,23 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node, opsOnPath []string) 
 			hitParent = true
 		}
 		if n.Parent.Parent.Left == n.Parent {
-			fmt.Println("Pushing down the right side ... on ", n.Parent.Parent.Right)
+			fmt.Println("=Pushing down the RIGHT side ... on ", n.Parent.Parent.Right)
 			// Push towards right side
 			ops = append(ops, n.Parent.Parent.Right.LogicalOperator)
-			result, ops, outError = FindLogicalLinkage(n.Parent.Parent.Right, targetNode, ops)
+			result, ops, outError, visitedNodes = FindLogLinkage(n.Parent.Parent.Right, targetNode, ops, visitedNodes)
 		} else {
-			fmt.Println("Pushing down the left side ... on ", n.Parent.Parent.Left)
+			fmt.Println("=Pushing down the LEFT side ... on ", n.Parent.Parent.Left)
 			// Push towards left side
 			ops = append(ops, n.Parent.Parent.Left.LogicalOperator)
-			result, ops, outError = FindLogicalLinkage(n.Parent.Parent.Left, targetNode, ops)
+			result, ops, outError, visitedNodes = FindLogLinkage(n.Parent.Parent.Left, targetNode, ops, visitedNodes)
 		}
 	}
 	if !result {
 		fmt.Println("No links between ", sourceNode, " and ", targetNode, " found.")
 		//ops = append(ops, n.LogicalOperator)
 	}
-	return result, ops, outError
-}
+	return result, ops, outError, visitedNodes
+}*/
 
 /*
 Combines existing nodes into new node and returns newly generated node

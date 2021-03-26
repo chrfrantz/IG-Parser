@@ -217,6 +217,16 @@ const TREE_INVALID_NODE_ADDITION = "INVALID_NODE_ADDITION"
 const TREE_INVALID_NODE_SELF_LINKAGE = "INVALID_NODE_LINKAGE_TO_SELF"
 const TREE_INVALID_TREE = "TREE_STRUCTURE_INVALID"
 const TREE_INPUT_VALIDATION = "INPUT_VALIDATION"
+const TREE_ALREADY_VISITED = "NODE_ALREADY_VISITED"
+
+func NodeInSlice(a *Node, list []*Node) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
 
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {

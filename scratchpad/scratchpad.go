@@ -57,9 +57,48 @@ func main3() {
 
 func main() {
 	root := tree.Node{}
-	root.InsertLeftNode(root)
+	root.LogicalOperator = "AND"
 
-	root.InsertRightNode(root)
+	left2 := tree.Node{}
+	left2.LogicalOperator = "OR"
+
+	left2left := tree.Node{}
+	left2left.Entry = "left left"
+
+	left2right := tree.Node{}
+	left2right.Entry = "left right"
+
+	right2 := tree.Node{}
+	right2.LogicalOperator = "XOR"
+
+	right2left := tree.Node{}
+	right2left.Entry = "right left"
+
+	right2right := tree.Node{}
+	right2right.Entry = "right right"
+
+	left2.InsertLeftNode(&left2left)
+	left2.InsertRightNode(&left2right)
+
+	root.InsertLeftNode(&left2)
+
+	right2.InsertLeftNode(&right2left)
+	right2.InsertRightNode(&right2right)
+
+	root.InsertRightNode(&right2)
+
+
+	fmt.Println(root.String())
+
+	result, ops, err := tree.FindLogicalLinkage(&root, &right2right)
+	fmt.Println(result)
+	fmt.Println(ops)
+	fmt.Println(err.ErrorCode)
+
+	result, ops, err = tree.FindLogicalLinkage(&root, &left2right)
+	fmt.Println(result)
+	fmt.Println(ops)
+	fmt.Println(err.ErrorCode)
 
 }
 

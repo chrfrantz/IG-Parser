@@ -1,8 +1,6 @@
 package tree
 
 import (
-	"fmt"
-	"os"
 	"testing"
 )
 
@@ -189,7 +187,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 
 	// Left branch
 	// Simple left to right
-	res, ops, err := FindLogicalLinkage(&leftLeftChildNode, &leftRightChildNode, nil)
+	/*res, ops, err, _ := FindLogicalLinkage(&leftLeftChildNode, &leftRightChildNode, nil, nil)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -201,7 +199,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 	}
 
 	// Simple right to left
-	res, ops, err = FindLogicalLinkage(&leftRightChildNode, &leftLeftChildNode, nil)
+	res, ops, err, _ = FindLogicalLinkage(&leftRightChildNode, &leftLeftChildNode, nil, nil)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -212,7 +210,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 
 	// Right branch
 	// Simple left to right
-	res, ops, err = FindLogicalLinkage(&rightLeftChildNode, &rightRightChildNode, nil)
+	res, ops, err, _ = FindLogicalLinkage(&rightLeftChildNode, &rightRightChildNode, nil, nil)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -222,7 +220,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 	}
 
 	// Simple right to left
-	res, ops, err = FindLogicalLinkage(&rightRightChildNode, &rightLeftChildNode, nil)
+	res, ops, err, _ = FindLogicalLinkage(&rightRightChildNode, &rightLeftChildNode, nil, nil)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -232,7 +230,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 	}
 
 	// Across branches
-	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil)
+	res, ops, err, _ = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil, nil)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -248,8 +246,8 @@ func TestNodeDistanceSearch(t *testing.T) {
 
 	subnode := Node{}
 
-	leftSubnode := Node{Entry: "left sub"}
-	rightSubnode := Node{Entry: "right sub"}
+	leftSubnode := Node{Entry: "left subsub"}
+	rightSubnode := Node{Entry: "right subsub"}
 
 	res, err = subnode.InsertLeftNode(&leftSubnode)
 	if !res || err.ErrorCode != TREE_NO_ERROR {
@@ -295,7 +293,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 	}
 
 	// Detect logical operators
-	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil)
+	res, ops, err, _ = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil, nil)
 	if res || err.ErrorCode != TREE_INPUT_VALIDATION {
 		t.Fatal("Link between nodes should not be found because of empty nodes.")
 	}
@@ -325,7 +323,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 		t.Fatal("Reconfigured tree should not throw problem. Error: ", err)
 	}
 
-	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil)
+	res, ops, err, _ = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil, nil)
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
@@ -333,12 +331,14 @@ func TestNodeDistanceSearch(t *testing.T) {
 		t.Fatal("Logical operators are incorrectly detected.")
 	}
 
-	os.Exit(0)
-	res, ops, _ = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil)
+	fmt.Println("FFFFFFFFFFFFFFFFFFFFFFFFFFF")
+	fmt.Println(root.String())
+
+	res, ops, _, _ = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil, nil)
 	if !res {
 		t.Fatal("Link between nodes could not be found.")
 	}
-	fmt.Println(ops)
+	fmt.Println(ops)*/
 
 }
 
