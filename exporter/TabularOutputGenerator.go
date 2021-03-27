@@ -103,7 +103,13 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 					if otherNode != statement[componentIdx] {
 						fmt.Println("Testing other node: ", otherNode, " with elements ", linkedElement)
 						// find operator
-						res, ops := tree.FindLogicalLinkage(statement[componentIdx], otherNode, nil)
+						res, ops, err := tree.FindLogicalLinkage(statement[componentIdx], otherNode)
+						if err.ErrorCode != tree.TREE_NO_ERROR {
+							errorMsg := fmt.Sprint("Error when parsing retrieving operator linkages: ", err.ErrorMessage)
+							log.Println(errorMsg)
+							fmt.Errorf("&v", errorMsg)
+							return ""
+						}
 						if res {
 							fmt.Println("Node has linkage ", ops)
 							// ... and append to logicalValue column string

@@ -16,7 +16,7 @@ func TestNonCombination(t *testing.T) {
 	fmt.Println(node.String())
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
-		t.Fatal("Parsing throws error where there should be none. Error: " + err.Error())
+		t.Fatal("Parsing throws error where there should be none. Error: ", err.Error())
 	}
 
 	if !node.IsLeafNode() {
@@ -267,7 +267,7 @@ func TestSharedElements(t *testing.T) {
 	node, modified, err := ParseDepth(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
 	}
 
 	// Test return information from parsing
@@ -304,7 +304,7 @@ func TestSharedElementsAndAndCombinationWithInheritance(t *testing.T) {
 	node, modified, err := ParseDepth(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
 	}
 
 	// Test return information from parsing (strips shared elements)
@@ -349,7 +349,7 @@ func TestSharedElementsAndAndCombinationWithInheritanceAppendMode(t *testing.T) 
 	fmt.Println(node.String())
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
 	}
 
 	// Test return information from parsing
@@ -394,7 +394,7 @@ func TestSharedElementsAndAndCombinationWithInheritanceOverrideMode(t *testing.T
 	fmt.Println(node.String())
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
 	}
 
 	// Test return information from parsing (strips shared elements)
@@ -441,7 +441,7 @@ func TestSharedElementsAndAndCombinationWithMissingCombination(t *testing.T) {
 	fmt.Println(node.String())
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Parser has produced error. Error: " + err.Error())
+		t.Fatal("Parser has produced error. Error: ", err.Error())
 	}
 
 	// Test return information from parsing (strips shared elements)
@@ -484,7 +484,7 @@ func TestSharedElementsAndAndCombinationWithoutInheritance(t *testing.T) {
 	node, modified, err := ParseDepth(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error " + err.Error())
+		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
 	}
 
 	// Test return information from parsing (strips shared elements)
@@ -524,7 +524,7 @@ func TestInlineAnnotations(t *testing.T) {
 	node, modified, err := ParseDepth(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Inline annotations (e.g., [dgjslkgjsø]) should not produce error " + err.Error())
+		t.Fatal("Inline annotations (e.g., [dgjslkgjsø]) should not produce error ", err.Error())
 	}
 
 	// Test return information from parsing

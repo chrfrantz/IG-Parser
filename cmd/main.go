@@ -42,7 +42,7 @@ func main() {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	text = "A((certifying agent [AND] borrower)) D(may) I(investigate) " +
+	text = "A((certifying agent [AND] borrower [AND] wife)) D(may) I(investigate) " +
 	"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part) " +
 	"concerning " +
 	"(production [operations] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
