@@ -9,7 +9,7 @@ import (
 
 /*
 Generates all permutations of a given set of input arrays, representing an
-institutional statement alongside its components per entry
+institutional statement alongside its components per entry.
 Output array structure is [statement][component instances of statement]
  */
 func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.Node) {
@@ -74,7 +74,8 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 
 /*
 Generates the statement IDs per component category for quick retrieval
-Input is are statements composed of associated nodes. Structure: [statement ID][component nodes]
+Input is are statements composed of associated nodes.
+Structure: [statement ID][component nodes]
 Returns an array of maps of nodes pointing to arrays of associated statement IDs.
 Structure: [column ID of component]map[node reference for each value of component (e.g., Farmer, Certifier)][statement IDs
 where component value apply]
@@ -103,17 +104,18 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node) []map[*t
 			// Check for each component (in that statement) - column-wise
 			for compIdx, compVal := range comps {
 
-				// when index is of interest
+				// When index is of interest ...
 				if compIdx == columnIdx {
 
-					// Simply collect references per value
+					// ... simply collect references per value
 					nodeRefs := combinationStructure[compVal]
 					if nodeRefs == nil {
+						// by retrieving potentially existing references and ...
 						nodeRefs = []int{}
-						// Go through the entire
+
 					}
 
-					// Add this statement's ID
+					// ... adding this statement's ID
 					nodeRefs = append(nodeRefs, id)
 					combinationStructure[compVal] = nodeRefs
 				}
