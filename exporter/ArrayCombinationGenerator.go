@@ -91,7 +91,6 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node, generate
 		log.Fatal("Empty input - no statement permutations.")
 	}
 
-	rangeSeparator := "-"
 	// Number of components
 	componentCount := len(stmts[0])
 	// Collection of logical linkages ([column ids]map[Node ref component value][row IDs where component value applies])
@@ -115,62 +114,8 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node, generate
 
 					// ... simply collect references per value
 					nodeRefs := combinationStructure[compVal]
-					if nodeRefs == nil {
-						// by retrieving potentially existing references and ...
-						nodeRefs = []string{}
-					}
-
-					addedId := id
-					// Increment reference id if indicated
-					if incrementReferences {
-						addedId += 1
-					}
-					// If generation of ranges is indicated and previous entries exist ...
-					if generateRanges && len(nodeRefs) > 0 {
-						// Retrieve previously added element
-						val := nodeRefs[len(nodeRefs) - 1]
-						if strings.Contains(val, rangeSeparator) {
-							// If range separator symbol is contained, extract prefix
-							firstEndIndex := strings.Index(val, rangeSeparator)
-							// Extract last value in range expression
-							lastValue := val[firstEndIndex+1:len(val)]
-							// Convert to int
-							intVal, err := strconv.Atoi(lastValue)
-							// Prepare for error
-							stopRangeCheck := false
-							if err != nil {
-								log.Println("Extraction of integer from ", val , " did not work.")
-								stopRangeCheck = true
-							}
-							if !stopRangeCheck && intVal == (addedId - 1) {
-								// Generate range structure first-last
-								valueToAdd := val[:firstEndIndex] + rangeSeparator + strconv.Itoa(id)
-								// Overwrite previous entry
-								nodeRefs[len(nodeRefs)-1] = valueToAdd
-							} else {
-								// Create new entry
-								nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
-							}
-						} else {
-							// else simply check if previous value is decrement of to-be-added value
-							stopRangeCheck := false
-							intVal, err := strconv.Atoi(val)
-							if err != nil {
-								log.Println("Extraction of integer from ", val , " did not work.")
-								stopRangeCheck = true
-							}
-							if !stopRangeCheck && intVal == (addedId - 1) {
-								// Overwrite previous entry
-								nodeRefs[len(nodeRefs)-1] = val + rangeSeparator + strconv.Itoa(addedId)
-							} else {
-								// Create new entry
-								nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
-							}
-						}
-					} else {
-						// ... adding this statement's ID
-						nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
-					}
+					// Add id to references, alongside potential range generation and incrementing
+					nodeRefs = GenerateReferenceSlice(nodeRefs, id, generateRanges, incrementReferences)
 					// Adding updated reference list to combination
 					combinationStructure[compVal] = nodeRefs
 				}
@@ -184,5 +129,79 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node, generate
 	return compLinks
 }
 
+// Symbol used to represent ranges (e.g., 5-7)
+const rangeSeparator = "-"
+
+/*
+Add value (id) to existing slice (nodeRefs), either by simple appending, or generation of ranges (e.g., 5-7 instead of
+5,6,7), and optional incrementing of references during generation (e.g., for mapping zero-based input to 1-based output)
+ */
+func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incrementReferences bool) []string{
+	if nodeRefs == nil {
+		// by retrieving potentially existing references and ...
+		nodeRefs = []string{}
+	}
+
+	addedId := id
+	// Increment reference id if indicated
+	if incrementReferences {
+		addedId += 1
+	}
+	fmt.Println("Testing value ", addedId)
+	// If generation of ranges is indicated and previous entries exist ...
+	if generateRanges && len(nodeRefs) > 0 {
+		// Retrieve previously added element
+		val := nodeRefs[len(nodeRefs) - 1]
+		if strings.Contains(val, rangeSeparator) {
+			fmt.Println("Detected existing range ", val)
+			// If range separator symbol is contained, extract prefix
+			firstEndIndex := strings.Index(val, rangeSeparator)
+			// Extract last value in range expression
+			lastValue := val[firstEndIndex+1:len(val)]
+			// Convert to int
+			intVal, err := strconv.Atoi(lastValue)
+			fmt.Println("Last value in range: ", intVal)
+			// Prepare for error
+			stopRangeCheck := false
+			if err != nil {
+				log.Println("Extraction of integer from ", val , " did not work.")
+				stopRangeCheck = true
+			}
+			if !stopRangeCheck && intVal == (addedId - 1) {
+				// Generate range structure first-last
+				valueToAdd := val[:firstEndIndex] + rangeSeparator + strconv.Itoa(addedId)
+				// Overwrite previous entry
+				nodeRefs[len(nodeRefs)-1] = valueToAdd
+				fmt.Println("Replaced previous entry with new value ", valueToAdd)
+			} else {
+				// Create new entry
+				nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
+				fmt.Println("Created new entry ", addedId)
+			}
+		} else {
+			// else simply check if previous value is decrement of to-be-added value
+			stopRangeCheck := false
+			intVal, err := strconv.Atoi(val)
+			if err != nil {
+				log.Println("Extraction of integer from ", val , " did not work.")
+				stopRangeCheck = true
+			}
+			fmt.Println("Checking for previous non-range value ", val)
+			if !stopRangeCheck && intVal == (addedId - 1) {
+				// Overwrite previous entry
+				nodeRefs[len(nodeRefs)-1] = val + rangeSeparator + strconv.Itoa(addedId)
+				fmt.Println("Overwrite existing entry with ", (val + rangeSeparator + strconv.Itoa(addedId)))
+			} else {
+				// Create new entry
+				nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
+				fmt.Println("Created new entry ", addedId)
+			}
+		}
+	} else {
+		// ... adding this statement's ID
+		nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
+	}
+	return nodeRefs
+}
 
 

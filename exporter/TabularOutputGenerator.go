@@ -52,15 +52,15 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 		output += prefix
 		output += "Statement ID" + separator
 		// Iterate through component reference map
-		for _, v := range tree.IGComponents {
+		for _, symbol := range tree.IGComponentSymbols {
 			i := 0
 			// Print headers as often as occurring in input file (stmtCt.e., one header for each column)
-			for i < refs[v] {
-				output += tree.IGComponentNames[v]
+			for i < refs[symbol] {
+				output += tree.IGComponentSymbolNameMap[symbol]
 				// Store symbols for columns including indices in order of occurrence for use in logical operators
-				headerSymbol := v
+				headerSymbol := symbol
 				// Introduce indices if multiple of the same component
-				if refs[v] > 1 {
+				if refs[symbol] > 1 {
 					// Append suffix for header string
 					output += indexSymbol + strconv.Itoa(i + 1)
 					// Append suffix for cached header IDs (for logical operators)
@@ -116,6 +116,10 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 							return ""
 						}
 						if res {
+							fmt.Println("Collapsing adjacent AND operators ...")
+							// Collapse adjacent AND operators
+							ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
+
 							fmt.Println("Node has linkage ", ops)
 							// ... and append to logicalValue column string
 							logicalValue += fmt.Sprint(ops)

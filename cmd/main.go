@@ -35,6 +35,22 @@ func main2() {
 
 }
 
+func main0()  {
+
+	input := []int{1,2,3,4,6,7,8}
+
+	slc := []string{}
+
+	for k, v := range input {
+		fmt.Println("Count: ", k)
+		fmt.Println("Value: ", v)
+		slc = exporter.GenerateReferenceSlice(slc, v, true, true)
+		fmt.Println(slc)
+	}
+
+
+}
+
 func main() {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -66,9 +82,11 @@ func main() {
 
 	fmt.Println("Component references: ", componentRefs)
 
+	fmt.Println("Input arrays: ", res)
+
 	links := exporter.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
-	fmt.Println(links)
+	fmt.Println("Links: ", links)
 
 	//os.Exit(0)
 

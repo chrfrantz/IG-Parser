@@ -417,3 +417,6 @@ func TestNodeCombination(t *testing.T) {
 
 
 }
+
+//Collapse adjacent entries in logical operators - CollapseAdjacentOperators()
+

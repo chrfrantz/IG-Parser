@@ -54,30 +54,23 @@ const (
 )
 
 /*
-type igComponent struct {
-	ComponentName string
-}
-
-func IGComponent(componentName string) *igComponent {
-	i := igComponent{}
-	i.ComponentName = componentName
-	return &i
-}
-
-func (i igComponent) String() string {
-	return i.ComponentName
-}
-/*
-Checks whether component value is valid (i.e., a valid IG Component symbol).
+Indicates whether a given symbol is a valid IG Component symbol
  */
-/*func (c *igComponent) valid() bool {
-	return StringInSlice(c.ComponentName, igComponents)
-}*/
+func validIGComponentSymbol(symbol string) bool {
+	return StringInSlice(symbol, IGComponentSymbols)
+}
+
+/*
+Indicates whether a given name is a valid IG Component name
+ */
+func validIGComponentName(name string) bool {
+	return StringInSlice(name, IGComponentNames)
+}
 
 /*
 IG 2.0 Component Symbols
  */
-var IGComponents = []string{
+var IGComponentSymbols = []string{
 	ATTRIBUTES,
 	ATTRIBUTES_PROPERTY,
 	DEONTIC,
@@ -96,9 +89,30 @@ var IGComponents = []string{
 	CONSTITUTING_PROPERTIES_PROPERTY}
 
 /*
+IG 2.0 Component Symbols
+*/
+var IGComponentNames = []string{
+	NAME_ATTRIBUTES,
+	NAME_ATTRIBUTES_PROPERTY,
+	NAME_DEONTIC,
+	NAME_AIM,
+	NAME_DIRECT_OBJECT,
+	NAME_DIRECT_OBJECT_PROPERTY,
+	NAME_INDIRECT_OBJECT,
+	NAME_INDIRECT_OBJECT_PROPERTY,
+	NAME_ACTIVATION_CONDITION,
+	NAME_EXECUTION_CONSTRAINT,
+	NAME_CONSTITUTED_ENTITY,
+	NAME_CONSTITUTED_ENTITY_PROPERTY,
+	NAME_MODAL,
+	NAME_CONSTITUTIVE_FUNCTION,
+	NAME_CONSTITUTING_PROPERTIES,
+	NAME_CONSTITUTING_PROPERTIES_PROPERTY}
+
+/*
 Map holding mapping from IG 2.0 component symbols to proper component names
  */
-var IGComponentNames = map[string]string{
+var IGComponentSymbolNameMap = map[string]string{
 	ATTRIBUTES: NAME_ATTRIBUTES,
 	ATTRIBUTES_PROPERTY: NAME_ATTRIBUTES_PROPERTY,
 	DEONTIC: NAME_DEONTIC,
@@ -190,6 +204,9 @@ const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 // Indicates ignored elements during parsing
 const PARSING_ERROR_IGNORED_ELEMENTS = "IGNORED_ELEMENTS"
 
+/*
+Error type signaling errors during statement parsing
+ */
 type ParsingError struct {
 	ErrorCode string
 	ErrorMessage string
@@ -201,6 +218,9 @@ func (e *ParsingError) Error() error {
 		" (Ignored elements: " + strconv.Itoa(len(e.ErrorIgnoredElements)) + ")")
 }
 
+/*
+Error type signaling errors during Node tree operations
+ */
 type NodeError struct {
 	ErrorCode string
 	ErrorMessage string
@@ -217,8 +237,44 @@ const TREE_INVALID_NODE_ADDITION = "INVALID_NODE_ADDITION"
 const TREE_INVALID_NODE_SELF_LINKAGE = "INVALID_NODE_LINKAGE_TO_SELF"
 const TREE_INVALID_TREE = "TREE_STRUCTURE_INVALID"
 const TREE_INPUT_VALIDATION = "INPUT_VALIDATION"
-const TREE_ALREADY_VISITED = "NODE_ALREADY_VISITED"
+//const TREE_ALREADY_VISITED = "NODE_ALREADY_VISITED"
 
+/*
+Collapses repeated occurrences of values in a given array (e.g., [AND] [AND] becomes [AND]).
+However, only applies to immediate repetition, not across the entire input
+ */
+func CollapseAdjacentOperators(inputArray []string, valuesToCollapse []string) []string {
+
+	// Output structure
+	outSlice := []string{}
+
+	// Iterate over input
+	for _, v := range inputArray {
+		// If first round, simply append
+		if len(outSlice) == 0 {
+			outSlice = append(outSlice, v)
+			continue
+		}
+		// If last value is the same as this one
+		if outSlice[len(outSlice) - 1] == v {
+			// and in the registered value
+			if StringInSlice(v, valuesToCollapse) {
+				// do nothing
+			} else {
+				// else append
+				outSlice = append(outSlice, v)
+			}
+		} else {
+			// otherwise simply append
+			outSlice = append(outSlice, v)
+		}
+	}
+	return outSlice
+}
+
+/*
+Indicates whether a given node is contained within a slice of nodes
+ */
 func NodeInSlice(a *Node, list []*Node) bool {
 	for _, b := range list {
 		if b == a {
@@ -228,6 +284,9 @@ func NodeInSlice(a *Node, list []*Node) bool {
 	return false
 }
 
+/*
+Indicates whether a particular value is contained in a slice of strings
+ */
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -237,6 +296,9 @@ func StringInSlice(a string, list []string) bool {
 	return false
 }
 
+/*
+Prints a given array in human-readable form (with comma separation)
+ */
 func PrintArray(array []string) string {
 	i := 0
 	out := ""
