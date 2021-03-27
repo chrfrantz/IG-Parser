@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 )
 
 // Separator for main statement ID (e.g., 123) and suffix for introduced substatement (e.g., .1, i.e., 123.1)
@@ -21,9 +20,15 @@ const stmtIdPrefix = "'"
 const logicalOperatorSeparator = ";"
 
 /*
-Generates statement output in Google Sheets format
+Generates statement output in Google Sheets format.
+Input:
+- Atomic statements with corresponding node references [statement][node references]
+- Map with with component name as key and corresponding number of columns in input stmts (i.e., same component can have
+  values across multiple columns)
+- References to entries as indicated by logical operators to produce corresponding linkages (e.g., AND[row1, row2, etc.])
+- ID to be used as prefix for generation of substatement IDs
  */
-func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logicalLinks []map[*tree.Node][]int, stmtId string) string {
+func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string) string {
 	output := ""
 
 	// Quote to terminate input string for Google Sheets interpretation
@@ -80,7 +85,7 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 		// Start new row
 		output += prefix
 		// Add statement ID for specific instance
-		subStmtId := generateStatementID(stmtId, stmtCt+ 1)
+		subStmtId := generateStatementIDint(stmtId, stmtCt + 1)
 		output += stmtIdPrefix + subStmtId + separator
 		ct := 0
 		// String linking all logical operators for a given row
@@ -107,7 +112,7 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 						if err.ErrorCode != tree.TREE_NO_ERROR {
 							errorMsg := fmt.Sprint("Error when parsing retrieving operator linkages: ", err.ErrorMessage)
 							log.Println(errorMsg)
-							fmt.Errorf("&v", errorMsg)
+							fmt.Errorf("%v", errorMsg)
 							return ""
 						}
 						if res {
@@ -125,16 +130,11 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 							for lks := range linkedElement {
 								//fmt.Println("Found pointer from ", statement[componentIdx] ," to ", otherNode , " as ", generateStatementID(stmtId, lks + 1))
 								// Append actual statement id
-								stmtsRefs += generateStatementID(stmtId, linkedElement[lks] + 1)
+								stmtsRefs += generateStatementIDString(stmtId, linkedElement[lks])
 								if lks < len(linkedElement)-1 {
 									stmtsRefs += logicalOperatorStmtRefSeparator
 								}
 							}
-
-							//fmt.Println("Statement references prior to conversion: " + stmtsRefs)
-							// Attempt conversion to ranges
-							//stmtsRefs = convertEnumerationsToRanges(stmtsRefs)
-							//fmt.Println("Statement references after conversion: " + stmtsRefs)
 
 							// Add trailing bracket and column ref (to be reviewed)
 							logicalValue += stmtsRefs + "]" + logicalOperatorSeparator
@@ -168,71 +168,16 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 
 /*
 Generate statement ID from main statement ID and index of iterated substatement
-TODO: Fix that one - it does not yet work
  */
-func generateStatementID(mainID string, subStmtIndex int) string {
-	return mainID + stmtIdSeparator + strconv.Itoa(subStmtIndex)
+func generateStatementIDString(mainID string, subStmtIndex string) string {
+	return mainID + stmtIdSeparator + subStmtIndex
 }
 
-func convertEnumerationsToRanges(enumeration string) string {
-
-	separated := strings.Split(enumeration, logicalOperatorStmtRefSeparator)
-
-	output := ""
-	cachedRange := ""
-	lastRound := ""
-	lastRoundCt := 0
-	for i := range separated {
-		if i == 0 {
-			// Prefill central field and go to next round
-			cachedRange += separated[i]
-			lastRound = separated[i]
-			continue
-		}
-		/*if cachedRange == "" {
-			if output != "" {
-				output += logicalOperatorStmtRefSeparator
-			}
-			// Store first entry
-			cachedRange += separated[i]
-			// cache last round
-			lastRound = separated[i]
-			// Save the last time something was saved
-			lastRoundCt = i
-			continue
-		}*/
-
-		lastRoundSuffix := strings.Split(lastRound, stmtIdSeparator)[1]
-		lastFloat, err := strconv.ParseFloat(lastRoundSuffix, 8)
-		if err != nil {
-			log.Fatal("Error converting ", lastRoundSuffix, " to number.")
-		}
-		fmt.Println(lastFloat)
-		thisRoundSuffix := strings.Split(separated[i], stmtIdSeparator)[1]
-		thisFloat, err := strconv.ParseFloat(thisRoundSuffix, 8)
-		if err != nil {
-			log.Fatal("Error converting ", thisRoundSuffix, " to number.")
-		}
-		fmt.Println(thisFloat)
-
-		if thisFloat-lastFloat > 1 {
-
-			// Store finalized range
-			output += cachedRange
-			if i-lastRoundCt < 2 {
-				output += "-"
-			}
-			output += lastRound + logicalOperatorStmtRefSeparator
-			// Overwrite cache with latest "first element"
-			cachedRange = "" //separated[i]
-			// Store last element
-			lastRound = separated[i]
-			lastRoundCt = i
-		} else {
-			fmt.Println("Difference too small to consider range")
-		}
-	}
-	return output
+/*
+Generate statement ID from main statement ID and index of iterated substatement
+*/
+func generateStatementIDint(mainID string, subStmtIndex int) string {
+	return mainID + stmtIdSeparator + strconv.Itoa(subStmtIndex)
 }
 
 /*

@@ -66,7 +66,7 @@ func main() {
 
 	fmt.Println("Component references: ", componentRefs)
 
-	links := exporter.GenerateLogicalOperatorLinkagePerCombination(res)
+	links := exporter.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println(links)
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 )
 
 /*
@@ -74,29 +75,34 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 
 /*
 Generates the statement IDs per component category for quick retrieval
-Input is are statements composed of associated nodes.
-Structure: [statement ID][component nodes]
-Returns an array of maps of nodes pointing to arrays of associated statement IDs.
+Inputs are statements composed of associated nodes (Structure: [statement][Node references for components].
+In addition, the output can be returned in terms of individual references (e.g., 1,2,3,4, etc.), or as aggregate ranges
+(e.g., 1-4,6,9-13). The latter is usually useful if producing human-readable output.
+If indicated, references can be incremented during aggregation (e.g., 1 is entered as 2, 2 as 3, etc.) This may be
+particularly useful if converting from 0- to 1-based indices.
+Returns an array of maps of nodes pointing to arrays of associated statement IDs, or if generateRanges is activated,
+ranges of statement references, alongside potential incrementing of reference values.
 Structure: [column ID of component]map[node reference for each value of component (e.g., Farmer, Certifier)][statement IDs
 where component value apply]
  */
-func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node) []map[*tree.Node][]int {
+func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node, generateRanges bool, incrementReferences bool) []map[*tree.Node][]string {
 
 	if len(stmts) == 0 {
 		log.Fatal("Empty input - no statement permutations.")
 	}
 
+	rangeSeparator := "-"
 	// Number of components
 	componentCount := len(stmts[0])
 	// Collection of logical linkages ([column ids]map[Node ref component value][row IDs where component value applies])
-	compLinks := make([]map[*tree.Node][]int,0)
+	compLinks := make([]map[*tree.Node][]string,0)
 	// Index of component of concern in statement
 	columnIdx := 0
 
 	for columnIdx < componentCount {
 
 		// Generate map of category values that will hold statement references
-		combinationStructure := make(map[*tree.Node][]int)
+		combinationStructure := make(map[*tree.Node][]string)
 
 		// For each statement (with id and components)
 		for id, comps := range stmts {
@@ -111,17 +117,64 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node) []map[*t
 					nodeRefs := combinationStructure[compVal]
 					if nodeRefs == nil {
 						// by retrieving potentially existing references and ...
-						nodeRefs = []int{}
-
+						nodeRefs = []string{}
 					}
 
-					// ... adding this statement's ID
-					nodeRefs = append(nodeRefs, id)
+					addedId := id
+					// Increment reference id if indicated
+					if incrementReferences {
+						addedId += 1
+					}
+					// If generation of ranges is indicated and previous entries exist ...
+					if generateRanges && len(nodeRefs) > 0 {
+						// Retrieve previously added element
+						val := nodeRefs[len(nodeRefs) - 1]
+						if strings.Contains(val, rangeSeparator) {
+							// If range separator symbol is contained, extract prefix
+							firstEndIndex := strings.Index(val, rangeSeparator)
+							// Extract last value in range expression
+							lastValue := val[firstEndIndex+1:len(val)]
+							// Convert to int
+							intVal, err := strconv.Atoi(lastValue)
+							// Prepare for error
+							stopRangeCheck := false
+							if err != nil {
+								log.Println("Extraction of integer from ", val , " did not work.")
+								stopRangeCheck = true
+							}
+							if !stopRangeCheck && intVal == (addedId - 1) {
+								// Generate range structure first-last
+								valueToAdd := val[:firstEndIndex] + rangeSeparator + strconv.Itoa(id)
+								// Overwrite previous entry
+								nodeRefs[len(nodeRefs)-1] = valueToAdd
+							} else {
+								// Create new entry
+								nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
+							}
+						} else {
+							// else simply check if previous value is decrement of to-be-added value
+							stopRangeCheck := false
+							intVal, err := strconv.Atoi(val)
+							if err != nil {
+								log.Println("Extraction of integer from ", val , " did not work.")
+								stopRangeCheck = true
+							}
+							if !stopRangeCheck && intVal == (addedId - 1) {
+								// Overwrite previous entry
+								nodeRefs[len(nodeRefs)-1] = val + rangeSeparator + strconv.Itoa(addedId)
+							} else {
+								// Create new entry
+								nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
+							}
+						}
+					} else {
+						// ... adding this statement's ID
+						nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
+					}
+					// Adding updated reference list to combination
 					combinationStructure[compVal] = nodeRefs
 				}
-
 			}
-
 		}
 		// Now save statement references for all values of a given component to shared array
 		compLinks = append(compLinks, combinationStructure)
