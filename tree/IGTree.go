@@ -549,6 +549,8 @@ func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []
 
 	// If not successful, recurse upwards, and attempt again, with reference to the explore parent as last node (to prevent repeated exploration)
 	if !response {
+		// Explicit include logical operator if moving upward
+		opsPath = append(opsPath, lastNode.Parent.LogicalOperator)
 		fmt.Println("Search one level higher above ", lastNode.Parent)
 		response, ops, err = searchUpward(originNode, lastNode.Parent, targetNode, opsPath)
 	}

@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -141,7 +142,8 @@ func TestRepeatedNodeAssignment(t *testing.T) {
 }
 
 /*
-Tests the distance function and retrieval of logical operators in between
+Tests the distance function and retrieval of logical operators in between; applies upward, and downward search,
+and across branches
  */
 func TestNodeDistanceSearch(t *testing.T) {
 	root := Node{}
@@ -187,7 +189,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 
 	// Left branch
 	// Simple left to right
-	/*res, ops, err, _ := FindLogicalLinkage(&leftLeftChildNode, &leftRightChildNode, nil, nil)
+	res, ops, err := FindLogicalLinkage(&leftLeftChildNode, &leftRightChildNode)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -199,7 +201,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 	}
 
 	// Simple right to left
-	res, ops, err, _ = FindLogicalLinkage(&leftRightChildNode, &leftLeftChildNode, nil, nil)
+	res, ops, err = FindLogicalLinkage(&leftRightChildNode, &leftLeftChildNode)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -210,7 +212,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 
 	// Right branch
 	// Simple left to right
-	res, ops, err, _ = FindLogicalLinkage(&rightLeftChildNode, &rightRightChildNode, nil, nil)
+	res, ops, err = FindLogicalLinkage(&rightLeftChildNode, &rightRightChildNode)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -219,8 +221,8 @@ func TestNodeDistanceSearch(t *testing.T) {
 		t.Fatal("Logical operators are incorrectly determined.")
 	}
 
-	// Simple right to left
-	res, ops, err, _ = FindLogicalLinkage(&rightRightChildNode, &rightLeftChildNode, nil, nil)
+	// Find adjacent leaves combined by single operator
+	res, ops, err = FindLogicalLinkage(&rightRightChildNode, &rightLeftChildNode)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
@@ -230,22 +232,20 @@ func TestNodeDistanceSearch(t *testing.T) {
 	}
 
 	// Across branches
-	res, ops, err, _ = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil, nil)
+	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode)
 
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
 
-	fmt.Println(ops)
 
 	if len(ops) != 3 || ops[0] != "123" || ops[1] != "789" || ops[2] != "456" {
 		t.Fatal("Logical operators are incorrectly determined.")
 	}
 
-	// Test unbalanced branches
+	// Unbalanced tree structures
 
 	subnode := Node{}
-
 	leftSubnode := Node{Entry: "left subsub"}
 	rightSubnode := Node{Entry: "right subsub"}
 
@@ -292,10 +292,10 @@ func TestNodeDistanceSearch(t *testing.T) {
 		t.Fatal("Validation of reconfigured tree from root should throw problem. Error: ", err)
 	}
 
-	// Detect logical operators
-	res, ops, err, _ = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil, nil)
-	if res || err.ErrorCode != TREE_INPUT_VALIDATION {
-		t.Fatal("Link between nodes should not be found because of empty nodes.")
+	// Detect logical operators across broken tree (should work - nil values are ignored)
+	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Nil nodes may have caused error in search.")
 	}
 
 	// Fix node by adding left leaf
@@ -323,23 +323,97 @@ func TestNodeDistanceSearch(t *testing.T) {
 		t.Fatal("Reconfigured tree should not throw problem. Error: ", err)
 	}
 
-	res, ops, err, _ = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode, nil, nil)
+	// Find links within branch
+	res, ops, err = FindLogicalLinkage(&leftLeftChildNode, &rightSubnode)
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
 	if len(ops) != 3 || ops[0] != "123" || ops[1] != "AND" || ops[2] != "OR" {
-		t.Fatal("Logical operators are incorrectly detected.")
+		t.Fatal("Logical operators are incorrectly detected: ", ops)
 	}
 
-	fmt.Println("FFFFFFFFFFFFFFFFFFFFFFFFFFF")
-	fmt.Println(root.String())
-
-	res, ops, _, _ = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode, nil, nil)
+	// Find links across root from left to right
+	res, ops, _ = FindLogicalLinkage(&leftLeftChildNode, &rightRightChildNode)
 	if !res {
 		t.Fatal("Link between nodes could not be found.")
 	}
-	fmt.Println(ops)*/
+	if len(ops) != 3 || ops[0] != "123" || ops[1] != "789" || ops[2] != "456" {
+		t.Fatal("Logical operators are incorrectly detected: ", ops)
+	}
+
+	// Find links across root from right to left
+	res, ops, _ = FindLogicalLinkage(&rightRightChildNode, &leftLeftChildNode)
+	if !res {
+		t.Fatal("Link between nodes could not be found.")
+	}
+	if len(ops) != 3 || ops[0] != "456" || ops[1] != "789" || ops[2] != "123" {
+		t.Fatal("Logical operators are incorrectly detected: ", ops)
+	}
 
 }
 
-// Test combination of nodes
+/*
+Tests the combination of nodes into new node
+ */
+func TestNodeCombination(t *testing.T) {
+
+	node1 := Node{}
+	leftSubnode1 := Node{Entry: "left subvalue1"}
+	rightSubnode1 := Node{Entry: "right subvalue1"}
+
+	res, err := node1.InsertLeftNode(&leftSubnode1)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	res, err = node1.InsertRightNode(&rightSubnode1)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	node2 := Node{}
+	leftSubnode2 := Node{Entry: "left subvalue2"}
+	rightSubnode2 := Node{Entry: "right subvalue2"}
+
+	res, err = node2.InsertLeftNode(&leftSubnode2)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	res, err = node2.InsertRightNode(&rightSubnode2)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	combinedNode := Combine(&node1, &node2, "AND")
+
+	if combinedNode.LogicalOperator != "AND" {
+		t.Fatal("Logical operator was not correctly assigned in combined node.")
+	}
+
+	if combinedNode.Left != &node1 {
+		t.Fatal("Left node was not correctly assigned in combined node.")
+	}
+
+	if combinedNode.Right != &node2 {
+		t.Fatal("Right node was not correctly assigned in combined node.")
+	}
+
+	if combinedNode.Left.Left.Entry != "left subvalue1" {
+		t.Fatal("Entry value of leaf was not correctly assigned in combined node.")
+	}
+
+	if combinedNode.Left.Right.Entry != "right subvalue1" {
+		t.Fatal("Entry value of leaf was not correctly assigned in combined node.")
+	}
+
+	if combinedNode.Right.Left.Entry != "left subvalue2" {
+		t.Fatal("Entry value of leaf was not correctly assigned in combined node.")
+	}
+
+	if combinedNode.Right.Right.Entry != "right subvalue2" {
+		t.Fatal("Entry value of leaf was not correctly assigned in combined node.")
+	}
+
+
+}
