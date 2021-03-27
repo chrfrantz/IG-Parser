@@ -90,12 +90,14 @@ func main() {
 
 	fmt.Println(root.String())
 
-	result, ops, err := tree.FindLogicalLinkage(&root, &right2right)
+	/*result, ops, err := tree.FindLogicalLinkage(&left2left, &right2right)
 	fmt.Println(result)
 	fmt.Println(ops)
-	fmt.Println(err.ErrorCode)
+	fmt.Println(err.ErrorCode)*/
 
-	result, ops, err = tree.FindLogicalLinkage(&root, &left2right)
+
+
+	result, ops, err := tree.FindLogicalLinkage(&right2, &left2right)
 	fmt.Println(result)
 	fmt.Println(ops)
 	fmt.Println(err.ErrorCode)
