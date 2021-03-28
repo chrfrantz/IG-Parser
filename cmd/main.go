@@ -67,6 +67,8 @@ func main() {
 
 	//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
+	text = "I((drink [AND] drive [AND] drown [AND] pleasure [AND] hijack))"
+
 	s,_ := parser.ParseStatement(text)
 
 	fmt.Println(s.String())
@@ -90,7 +92,7 @@ func main() {
 
 	//os.Exit(0)
 
-	output := exporter.GenerateGoogleSheetsOutput(res, componentRefs, links, "650")
+	output,_ := exporter.GenerateGoogleSheetsOutput(res, componentRefs, links, "650")
 
 	//fmt.Println("\n" + output)
 

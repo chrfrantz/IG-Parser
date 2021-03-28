@@ -29,7 +29,7 @@ Input:
   (e.g., AND[row1, row2, etc.])
 - ID to be used as prefix for generation of substatement IDs (e.g., ID 5 produces substatements 5.1, 5.2, etc.)
  */
-func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string) string {
+func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string) (string, tree.ParsingError) {
 	output := ""
 
 	// Quote to terminate input string for Google Sheets interpretation
@@ -61,6 +61,9 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, componentFrequency map[str
 		//fmt.Println("Header: " + output)
 	}
 
+	// Default error during parsing
+	errorVal := tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+
 	// Generate entries
 	for stmtCt, statement := range stmts {
 		//fmt.Println("Statement ", stmtCt, ": ", statement)
@@ -80,8 +83,11 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, componentFrequency map[str
 			fmt.Println("Source node: ", statement[componentIdx])
 
 			// Now generate logical links expression corresponding to particular entry (component index in statement instance)
-			logicalValue = generateLogicalLinksExpressionForGivenComponentValue(logicalValue, statement,
+			logicalValue, errorVal = generateLogicalLinksExpressionForGivenComponentValue(logicalValue, statement,
 				componentIdx, headerSymbols, logicalLinks, stmtId)
+			if errorVal.ErrorCode != tree.PARSING_NO_ERROR {
+				return output, errorVal
+			}
 
 			// Only append separator if no more elements in the statement (i.e., no further components)
 			ct++
@@ -103,7 +109,7 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, componentFrequency map[str
 		// Append suffix to each row
 		output += suffix
 	}
-	return output
+	return output, errorVal
 }
 
 /*
@@ -150,9 +156,11 @@ substatement IDs used in the link references.
 It returns the link for the particular table entry.
  */
 func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionString string, statement []*tree.Node,
-	componentIdx int, headerSymbols []string, logicalLinks []map[*tree.Node][]string, stmtId string) string {
+	componentIdx int, headerSymbols []string, logicalLinks []map[*tree.Node][]string, stmtId string) (string, tree.ParsingError) {
 	// Check for logical operator linkage based on index
 	linksForElement := logicalLinks[componentIdx]
+
+	fmt.Println("Links for element: ", linksForElement)
 
 	// Check that entries for own component value exist
 	if linksForElement[statement[componentIdx]] != nil {
@@ -167,15 +175,15 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 					errorMsg := fmt.Sprint("Error when parsing retrieving operator linkages: ", err.ErrorMessage)
 					log.Println(errorMsg)
 					fmt.Errorf("%v", errorMsg)
-					return ""
+					return "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION}
 				}
 				if res {
 					fmt.Println("Collapsing adjacent AND operators ...")
 					// Collapse adjacent AND operators
-					ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
+					//ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
 
 					fmt.Println("Node has linkage ", ops)
-					// ... and append to logicalValue column string
+					// ... and append to logical expression column string
 					logicalExpressionString += fmt.Sprint(ops)
 					// Statement component identifier
 					logicalExpressionString += "." + headerSymbols[componentIdx] + "."
@@ -202,7 +210,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 		}
 	}
 	// Return generated logical expression for given component
-	return logicalExpressionString
+	return logicalExpressionString, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*

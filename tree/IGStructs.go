@@ -203,6 +203,8 @@ const PARSING_ERROR_IMBALANCED_PARENTHESES = "UNBALANCED_PARENTHESES"
 const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 // Indicates ignored elements during parsing
 const PARSING_ERROR_IGNORED_ELEMENTS = "IGNORED_ELEMENTS"
+// Indicates problems when generating logical operator references
+const PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION = "LOGICAL_EXPRESSION_GENERATION"
 
 /*
 Error type signaling errors during statement parsing
