@@ -351,7 +351,7 @@ type Node struct {
 	ElementOrder []interface{}
 }
 
-// Sort interface implementation
+// Sort interface implementation for alphabetic ordering (not order of appearance in tree) of nodes
 type ByEntry []*Node
 
 func (e ByEntry) Len() int {
@@ -921,6 +921,21 @@ func (n *Node) CountLeaves() int {
 	return leftBreadth + rightBreadth
 }
 
+/*
+Returns root node of given tree the node is embedded in
+up to the level at which nodes are linked by synthetic AND (sAND).
+ */
+func (n *Node) GetSyntheticRootNode() *Node {
+	if n.Parent == nil || n.Parent.LogicalOperator == SAND {
+		// Assume to be parent if no parent on its own,
+		// or root in synthetic hierarchy if paired with sAND
+		return n
+	} else {
+		// else delegate to parent
+		return n.Parent.GetSyntheticRootNode()
+	}
+}
+
 func (n *Node) GetLeafNodes() [][]*Node {
 	if n == nil {
 		// Uninitialized node
@@ -963,6 +978,7 @@ func (n *Node) GetLeafNodes() [][]*Node {
 			for _, v := range rightNodes {
 				nodeArray = append(nodeArray, v...)
 			}
+			// Appends as first array (second remains empty)
 			returnNode = append(returnNode, nodeArray)
 			return returnNode
 		}

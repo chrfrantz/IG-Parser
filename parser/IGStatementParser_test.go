@@ -175,6 +175,63 @@ func TestLeafArrayGeneration(t *testing.T) {
 	}
 }
 
+func TestSyntheticRootRetrieval(t *testing.T) {
+
+	text := "I(inspect and), I(sustain (review [AND] (refresh [AND] drink)))"
+
+	s, err := ParseStatement(text)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during parsing: ", err.Error())
+	}
+
+	nodeArray, componentIdx := s.GenerateLeafArrays()
+
+	fmt.Println(nodeArray)
+	fmt.Println(componentIdx)
+
+	if len(nodeArray) != 2 {
+		t.Fatal("Wrong number of array entries returned.")
+	}
+
+	// Test basic root detection function
+	if nodeArray[1][0].GetSyntheticRootNode().LogicalOperator != "AND" ||
+		nodeArray[1][0].GetSyntheticRootNode().Left.Entry != "review" ||
+		nodeArray[1][0].GetSyntheticRootNode().Right.LogicalOperator != "AND" {
+		t.Fatal("Root node was wrongly detected.")
+	}
+
+	// Now link both leaves with synthetic AND (sAND)
+	newRoot := tree.Node{}
+	newRoot.LogicalOperator = "XOR"
+	res, errAdd := newRoot.InsertLeftNode(nodeArray[0][0])
+	if !res || errAdd.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Addition of left node failed. Error: ", errAdd)
+	}
+	res, errAdd = newRoot.InsertRightNode(nodeArray[1][0].GetSyntheticRootNode())
+	if !res || errAdd.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Addition of right node failed. Error: ", errAdd)
+	}
+
+	if nodeArray[1][0].GetSyntheticRootNode().LogicalOperator != "XOR" ||
+		nodeArray[1][0].GetSyntheticRootNode().Left.Entry != "inspect and" ||
+		nodeArray[1][0].GetSyntheticRootNode().Right.LogicalOperator != "AND" ||
+		nodeArray[1][0].GetSyntheticRootNode().Right.Left.Entry != "review" ||
+		nodeArray[1][0].GetSyntheticRootNode().Right.Right.Left.Entry != "refresh" ||
+		nodeArray[1][0].GetSyntheticRootNode().Right.Right.Right.Entry != "drink" {
+		t.Fatal("Root node in new node combination was wrongly detected.")
+	}
+
+	newRoot.LogicalOperator = tree.SAND
+
+	if nodeArray[1][0].GetSyntheticRootNode().LogicalOperator != "AND" ||
+		nodeArray[1][0].GetSyntheticRootNode().Left.Entry != "review" ||
+		nodeArray[1][0].GetSyntheticRootNode().Right.LogicalOperator != "AND" {
+		t.Fatal("Root node in new node combination was wrongly detected.")
+	}
+
+}
+
 func TestExcessiveParentheses(t *testing.T) {
 
 	// Test excessive right parentheses

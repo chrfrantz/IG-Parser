@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sort"
 	"strconv"
 )
 
@@ -160,16 +159,35 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 	componentIdx int, headerSymbols []string, logicalLinks []map[*tree.Node][]string, stmtId string) (string, tree.ParsingError) {
 	// Check for logical operator linkage based on index
 	linksForElement := logicalLinks[componentIdx]
-	// Store keys for ordered iteration
-	nodesKeys := []*tree.Node{}
-	for nd := range linksForElement {
-		nodesKeys = append(nodesKeys, nd)
-	}
-	// Sort based on custom sort interface
-	sort.Sort(tree.ByEntry(nodesKeys))
-	fmt.Println("Sorted keys: ", nodesKeys)
-
 	fmt.Println("Links for element: ", linksForElement)
+
+	// Node key array (maintaining order of iteration)
+	nodesKeys := []*tree.Node{}
+
+	if len(linksForElement) > 0 {
+		// Retrieve keys to determine order of iteration
+		var firstKey *tree.Node
+		for nd := range linksForElement {
+			// Assign first key
+			firstKey = nd
+			// Then break out - since that is enough to get entire tree
+			break
+			// ALTERNATIVE: Sorting based on alphabet
+			//nodesKeys = append(nodesKeys, nd)
+		}
+		// Sort by retrieving leaves for the given tree
+		leaves := firstKey.GetSyntheticRootNode().GetLeafNodes()
+		if len(leaves) > 0 {
+			nodesKeys = leaves[0]
+		} else {
+			fmt.Println("No component keys to iterate over for logical relationships")
+		}
+
+		// ALTERNATIVE: Sorting based on alphabet by interface
+		//sort.Sort(tree.ByEntry(nodesKeys))
+
+		fmt.Println("Sorted keys: ", nodesKeys)
+	}
 
 	// Check that entries for own component value exist
 	if linksForElement[statement[componentIdx]] != nil {
@@ -180,7 +198,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 			// Extract references attached to node
 			linkedElement := linksForElement[nodesKey]
 
-			// NOTE: OLD iteration directly on elements leads to inconsistent iteration order
+			// NOTE: OLD iteration directly on elements leads to inconsistent iteration order - LEFT ONLY FOR DOCUMENTATION
 			//for otherNode, linkedElement := range linksForElement {
 
 			// if target node is different ...
@@ -197,7 +215,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 				if res {
 					fmt.Println("Collapsing adjacent AND operators ...")
 					// Collapse adjacent AND operators
-					//ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
+					ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
 
 					fmt.Println("Node has linkage ", ops)
 					// ... and append to logical expression column string
