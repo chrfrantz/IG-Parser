@@ -25,10 +25,11 @@ Input:
 - Atomic statements with corresponding node references [statement][node references]
 - Map with with component name as key and corresponding number of columns in input stmts (i.e., same component can have
   values across multiple columns)
-- References to entries as indicated by logical operators to produce corresponding linkages (e.g., AND[row1, row2, etc.])
-- ID to be used as prefix for generation of substatement IDs
+- References to entries for given nodes as indicated by logical operators, and used to produce corresponding linkages
+  (e.g., AND[row1, row2, etc.])
+- ID to be used as prefix for generation of substatement IDs (e.g., ID 5 produces substatements 5.1, 5.2, etc.)
  */
-func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string) string {
+func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string) string {
 	output := ""
 
 	// Quote to terminate input string for Google Sheets interpretation
@@ -47,33 +48,14 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 	headerSymbols := []string{}
 
 	// Generate headers
-	if refs != nil && len(refs) != 0 {
+	if componentFrequency != nil && len(componentFrequency) != 0 {
 
 		output += prefix
 		output += "Statement ID" + separator
-		// Iterate through component reference map
-		for _, symbol := range tree.IGComponentSymbols {
-			i := 0
-			// Print headers as often as occurring in input file (stmtCt.e., one header for each column)
-			for i < refs[symbol] {
-				output += tree.IGComponentSymbolNameMap[symbol]
-				// Store symbols for columns including indices in order of occurrence for use in logical operators
-				headerSymbol := symbol
-				// Introduce indices if multiple of the same component
-				if refs[symbol] > 1 {
-					// Append suffix for header string
-					output += indexSymbol + strconv.Itoa(i + 1)
-					// Append suffix for cached header IDs (for logical operators)
-					headerSymbol += indexSymbol + strconv.Itoa(i + 1)
-				}
-				// Store key for header used in logical operators
-				headerSymbols = append(headerSymbols, headerSymbol)
-				output += separator
-				i++
-			}
-		}
-		// Cut off last separator
-		output = output[0:len(output)-len(separator)]
+
+		// Iterate through header frequencies and create header row
+		output, headerSymbols = generateHeaderRow(output, componentFrequency, separator)
+
 		// Complete line
 		output += suffix
 		//fmt.Println("Header: " + output)
@@ -92,63 +74,16 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 		logicalValue := ""
 		// Iterate over component index (i.e., column)
 		for componentIdx := range statement {
-			// Print element
+			// Append element value as output for given cell
 			output += statement[componentIdx].Entry
 
 			fmt.Println("Source node: ", statement[componentIdx])
 
-			// Check for logical operator linkage based on index
-			linksForElement := logicalLinks[componentIdx]
+			// Now generate logical links expression corresponding to particular entry (component index in statement instance)
+			logicalValue = generateLogicalLinksExpressionForGivenComponentValue(logicalValue, statement,
+				componentIdx, headerSymbols, logicalLinks, stmtId)
 
-			// Check that entries for own component value exist
-			if linksForElement[statement[componentIdx]] != nil {
-				// Iterate through all component values
-				for otherNode, linkedElement := range linksForElement {
-					// if target node is different ...
-					if otherNode != statement[componentIdx] {
-						fmt.Println("Testing other node: ", otherNode, " with elements ", linkedElement)
-						// find operator
-						res, ops, err := tree.FindLogicalLinkage(statement[componentIdx], otherNode)
-						if err.ErrorCode != tree.TREE_NO_ERROR {
-							errorMsg := fmt.Sprint("Error when parsing retrieving operator linkages: ", err.ErrorMessage)
-							log.Println(errorMsg)
-							fmt.Errorf("%v", errorMsg)
-							return ""
-						}
-						if res {
-							fmt.Println("Collapsing adjacent AND operators ...")
-							// Collapse adjacent AND operators
-							ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
-
-							fmt.Println("Node has linkage ", ops)
-							// ... and append to logicalValue column string
-							logicalValue += fmt.Sprint(ops)
-							// Statement component identifier
-							logicalValue += "." + headerSymbols[componentIdx] + "."
-							// Leading bracket
-							logicalValue +=	"["
-							// Prepare intermediate structure to store statement references
-							stmtsRefs := ""
-
-							fmt.Println("Target node IDs: ", linkedElement)
-							for lks := range linkedElement {
-								//fmt.Println("Found pointer from ", statement[componentIdx] ," to ", otherNode , " as ", generateStatementID(stmtId, lks + 1))
-								// Append actual statement id
-								stmtsRefs += generateStatementIDString(stmtId, linkedElement[lks])
-								if lks < len(linkedElement)-1 {
-									stmtsRefs += logicalOperatorStmtRefSeparator
-								}
-							}
-
-							// Add trailing bracket and column ref (to be reviewed)
-							logicalValue += stmtsRefs + "]" + logicalOperatorSeparator
-						}
-						fmt.Println("Added logical relationships for value ", otherNode, ", elements: ", logicalValue)
-					}
-				}
-			}
-
-			// Only append separator if no more elements
+			// Only append separator if no more elements in the statement (i.e., no further components)
 			ct++
 			if ct < len(statement) {
 				output += separator
@@ -156,6 +91,7 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 			//fmt.Println("-->", statement[componentIdx])
 		}
 
+		// Append the logical expression at the end of each row
 		if logicalValue != "" {
 			// Append separator
 			output += separator
@@ -168,6 +104,105 @@ func GenerateGoogleSheetsOutput(stmts [][]*tree.Node, refs map[string]int, logic
 		output += suffix
 	}
 	return output
+}
+
+/*
+Generates IG 2.0 header row and appends it to given string based on component frequency input. It further returns a slice
+containing header information.
+ */
+func generateHeaderRow(stringToAppendTo string, componentFrequency map[string]int, separator string) (string, []string) {
+
+	// Header symbols to be returned for later use
+	headerSymbols := []string{}
+	// Iterate through component reference map
+	for _, symbol := range tree.IGComponentSymbols {
+		i := 0
+		// Print headers as often as occurring in input file (stmtCt.e., one header for each column)
+		for i < componentFrequency[symbol] {
+			stringToAppendTo += tree.IGComponentSymbolNameMap[symbol]
+			// Store symbols for columns including indices in order of occurrence for use in logical operators
+			headerSymbol := symbol
+			// Introduce indices if multiple of the same component
+			if componentFrequency[symbol] > 1 {
+				// Append suffix for header string
+				stringToAppendTo += indexSymbol + strconv.Itoa(i + 1)
+				// Append suffix for cached header IDs (for logical operators)
+				headerSymbol += indexSymbol + strconv.Itoa(i + 1)
+			}
+			// Store key for header used in logical operators
+			headerSymbols = append(headerSymbols, headerSymbol)
+			stringToAppendTo += separator
+			i++
+		}
+	}
+	// Cut off last separator
+	stringToAppendTo = stringToAppendTo[0:len(stringToAppendTo)-len(separator)]
+	// Return generated string as well as symbol map
+	return stringToAppendTo, headerSymbols
+}
+
+/*
+Generates logical expression string for given component entry for a given statement.
+It relies on the expression string as input, alongside the statement of concern, as well as component index.
+In addition a slice of all header symbols is required (to generate reference to columns in logical expressions),
+as well as the logical links for a given component value. Finally, the statement ID is used to generate the corresponding
+substatement IDs used in the link references.
+It returns the link for the particular table entry.
+ */
+func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionString string, statement []*tree.Node,
+	componentIdx int, headerSymbols []string, logicalLinks []map[*tree.Node][]string, stmtId string) string {
+	// Check for logical operator linkage based on index
+	linksForElement := logicalLinks[componentIdx]
+
+	// Check that entries for own component value exist
+	if linksForElement[statement[componentIdx]] != nil {
+		// Iterate through all component values
+		for otherNode, linkedElement := range linksForElement {
+			// if target node is different ...
+			if otherNode != statement[componentIdx] {
+				fmt.Println("Testing other node: ", otherNode, " with elements ", linkedElement)
+				// find operator
+				res, ops, err := tree.FindLogicalLinkage(statement[componentIdx], otherNode)
+				if err.ErrorCode != tree.TREE_NO_ERROR {
+					errorMsg := fmt.Sprint("Error when parsing retrieving operator linkages: ", err.ErrorMessage)
+					log.Println(errorMsg)
+					fmt.Errorf("%v", errorMsg)
+					return ""
+				}
+				if res {
+					fmt.Println("Collapsing adjacent AND operators ...")
+					// Collapse adjacent AND operators
+					ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
+
+					fmt.Println("Node has linkage ", ops)
+					// ... and append to logicalValue column string
+					logicalExpressionString += fmt.Sprint(ops)
+					// Statement component identifier
+					logicalExpressionString += "." + headerSymbols[componentIdx] + "."
+					// Leading bracket
+					logicalExpressionString +=	"["
+					// Prepare intermediate structure to store statement references
+					stmtsRefs := ""
+
+					fmt.Println("Target node IDs: ", linkedElement)
+					for lks := range linkedElement {
+						//fmt.Println("Found pointer from ", statement[componentIdx] ," to ", otherNode , " as ", generateStatementID(stmtId, lks + 1))
+						// Append actual statement id
+						stmtsRefs += generateStatementIDString(stmtId, linkedElement[lks])
+						if lks < len(linkedElement)-1 {
+							stmtsRefs += logicalOperatorStmtRefSeparator
+						}
+					}
+
+					// Add trailing bracket and column ref (to be reviewed)
+					logicalExpressionString += stmtsRefs + "]" + logicalOperatorSeparator
+				}
+				fmt.Println("Added logical relationships for value ", otherNode, ", elements: ", logicalExpressionString)
+			}
+		}
+	}
+	// Return generated logical expression for given component
+	return logicalExpressionString
 }
 
 /*

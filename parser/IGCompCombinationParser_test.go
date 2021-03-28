@@ -11,7 +11,7 @@ func TestNonCombination(t *testing.T) {
 
 	input := "(inspect and )"
 
-	node, _, err := ParseDepth(input, false)
+	node, _, err := ParseIntoNodeTree(input, false)
 
 	fmt.Println(node.String())
 
@@ -35,7 +35,7 @@ func TestBasicExpression(t *testing.T) {
 	input := "(inspect and [OR] party)"
 
 	// Parse provided expression
-	node, _, err := ParseDepth(input, false)
+	node, _, err := ParseIntoNodeTree(input, false)
 
 	fmt.Println("Returned node: " + node.String())
 
@@ -81,7 +81,7 @@ func TestMissingParenthesesAndLogicalOperator(t *testing.T) {
 	input := "left [AND] right"
 
 	// Parse provided expression
-	_, _, err := ParseDepth(input, false)
+	_, _, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_LOGICAL_OPERATOR_OUTSIDE_COMBINATION {
 		t.Fatal("Parsing does not pick up on invalid operator use in " + input)
@@ -93,7 +93,7 @@ func TestTwoLevelTree(t *testing.T) {
 	input := "((inspect and [OR] party) [AND] sing)"
 
 	// Parse provided expression
-	node, _, err := ParseDepth(input, false)
+	node, _, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing throws error where there should be none.")
@@ -125,7 +125,7 @@ func TestComplexExpression(t *testing.T) {
 	input := "((((inspect and [OR] party) [AND] ((review [XOR] muse) [AND] pray))))"
 
 	// Parse provided expression
-	node, _, err := ParseDepth(input, false)
+	node, _, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing throws error where there should be none.")
@@ -157,7 +157,7 @@ func TestDeepExpression(t *testing.T) {
 	input := "((((inspect and [OR] (party [OR] hoard)) [AND] (((review [AND] (establish [XOR] (identify [AND] detect something))) [XOR] muse) [AND] pray))))"
 
 	// Parse provided expression
-	node, _, err := ParseDepth(input, false)
+	node, _, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing throws error where there should be none.")
@@ -185,7 +185,7 @@ func TestAutomatedAndExpansion(t *testing.T) {
 	input := "(Left side information [AND] middle information and [AND] right-side)"
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing throws error where there should be none.")
@@ -207,7 +207,7 @@ func TestNonCombinationParentheses(t *testing.T) {
 	input := "(Left side information (source) [AND] middle information and [AND] right-side)"
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	fmt.Println(node.String())
 
@@ -231,7 +231,7 @@ func TestMultipleNonCombinationParentheses(t *testing.T) {
 	input := "(Left side (information) source [AND] (middle information and) [AND] right-side)"
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Inline parentheses without embedded combinations (e.g., (dgjslkgjsø)) should not produce error")
@@ -264,7 +264,7 @@ func TestSharedElements(t *testing.T) {
 	input := "( shared left (Left side information [XOR] middle information) shared right)"
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
@@ -301,7 +301,7 @@ func TestSharedElementsAndAndCombinationWithInheritance(t *testing.T) {
 	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_OVERRIDE
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
@@ -344,7 +344,7 @@ func TestSharedElementsAndAndCombinationWithInheritanceAppendMode(t *testing.T) 
 	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	fmt.Println(node.String())
 
@@ -389,7 +389,7 @@ func TestSharedElementsAndAndCombinationWithInheritanceOverrideMode(t *testing.T
 	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	fmt.Println(node.String())
 
@@ -434,7 +434,7 @@ func TestSharedElementsAndAndCombinationWithMissingCombination(t *testing.T) {
 	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	fmt.Println(err.Error())
 
@@ -481,7 +481,7 @@ func TestSharedElementsAndAndCombinationWithoutInheritance(t *testing.T) {
 	input := "( shared left (Left side information [AND] middle information [AND] right information) shared right)"
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
@@ -521,7 +521,7 @@ func TestInlineAnnotations(t *testing.T) {
 	input := "(Left side information [source] [AND] middle information and [AND] right-side)"
 
 	// Parse provided expression
-	node, modified, err := ParseDepth(input, false)
+	node, modified, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Inline annotations (e.g., [dgjslkgjsø]) should not produce error ", err.Error())
@@ -546,7 +546,7 @@ func TestCombinedOperators(t *testing.T) {
 	input := "(Left side information [AND] middle information and [XOR] right-side)"
 
 	// Parse provided expression
-	_, text, err := ParseDepth(input, false)
+	_, text, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
 		t.Fatal("Did not pick up on invalid logical operator combinations on given level")
@@ -563,7 +563,7 @@ func TestAdjacentAndOperators(t *testing.T) {
 	input := "(Left side information [AND] [AND] right-side)"
 
 	// Parse provided expression
-	_, text, err := ParseDepth(input, false)
+	_, text, err := ParseIntoNodeTree(input, false)
 
 	fmt.Println(err.Error())
 
@@ -584,7 +584,7 @@ func TestAdjacentNonAndOperators(t *testing.T) {
 	input := "(Left side information [OR] [XOR] right-side)"
 
 	// Parse provided expression
-	_, text, err := ParseDepth(input, false)
+	_, text, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
 		t.Fatal("Did not pick up on invalid logical operator combinations on given level")
@@ -601,7 +601,7 @@ func TestAdjacentAndAndNonAndOperators(t *testing.T) {
 	input := "(Left side information [OR] [AND] right-side)"
 
 	// Parse provided expression
-	_, text, err := ParseDepth(input, false)
+	_, text, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
 		t.Fatal("Did not pick up on invalid logical operator combinations on given level")
@@ -614,7 +614,7 @@ func TestAdjacentAndAndNonAndOperators(t *testing.T) {
 	input = "(Left side information [AND] [OR] right-side [XOR] something)"
 
 	// Parse provided expression
-	_, text, err = ParseDepth(input, false)
+	_, text, err = ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
 		t.Fatal("Did not pick up on invalid logical operator combinations on given level")
@@ -632,7 +632,7 @@ func TestIncompleteExpression(t *testing.T) {
 	input := "(Left side information [OR] )"
 
 	// Parse provided expression
-	_, text, err := ParseDepth(input, false)
+	_, text, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_EMPTY_LEAF {
 		t.Fatal("Did not pick up on empty leaf value")
@@ -646,7 +646,7 @@ func TestIncompleteExpression(t *testing.T) {
 	input = "(Left side information [OR])"
 
 	// Parse provided expression
-	_, text, err = ParseDepth(input, false)
+	_, text, err = ParseIntoNodeTree(input, false)
 
 	fmt.Println(err.Error())
 
@@ -662,7 +662,7 @@ func TestIncompleteExpression(t *testing.T) {
 	input = "( [OR] right side info )"
 
 	// Parse provided expression
-	_, text, err = ParseDepth(input, false)
+	_, text, err = ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_EMPTY_LEAF {
 		t.Fatal("Did not pick up on empty leaf value")
@@ -676,7 +676,7 @@ func TestIncompleteExpression(t *testing.T) {
 	input = "([OR] right side info )"
 
 	// Parse provided expression
-	_, text, err = ParseDepth(input, false)
+	_, text, err = ParseIntoNodeTree(input, false)
 
 	fmt.Println(err.Error())
 
@@ -695,7 +695,7 @@ func TestUnbalancedParentheses(t *testing.T) {
 	input := "(Left side information [AND] middle information ))"
 
 	// Parse provided expression
-	_, text, err := ParseDepth(input, false)
+	_, text, err := ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_IMBALANCED_PARENTHESES {
 		t.Fatal("Did not pick up on imbalanced parentheses")
@@ -708,7 +708,7 @@ func TestUnbalancedParentheses(t *testing.T) {
 	input = "((( Left side information [AND] middle information ))"
 
 	// Parse provided expression
-	_, text, err = ParseDepth(input, false)
+	_, text, err = ParseIntoNodeTree(input, false)
 
 	if err.ErrorCode != tree.PARSING_ERROR_IMBALANCED_PARENTHESES {
 		t.Fatal("Did not pick up on imbalanced parentheses")

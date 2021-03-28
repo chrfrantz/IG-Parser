@@ -266,7 +266,7 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 
 	fmt.Println("Preprocessed string: " + componentString)
 
-	node, modifiedInput, err := ParseDepth(componentString, false)
+	node, modifiedInput, err := ParseIntoNodeTree(componentString, false)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage

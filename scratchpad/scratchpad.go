@@ -145,7 +145,7 @@ func main5() {
 	text = "(left (inner left [AND] inner right) middle (inner2Left [OR] inner2Right) other)"
 	*/
 	//node := tree.Node{}
-	node, _, err := parser.ParseDepth(text, false)
+	node, _, err := parser.ParseIntoNodeTree(text, false)
 
 
 	fmt.Println(err.Error())

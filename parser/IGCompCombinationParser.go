@@ -44,7 +44,7 @@ func main() {
 	// Create root node
 	//node := tree.Node{}
 	// Parse provided expression
-	node, modifiedInput, _ := ParseDepth(input, false)
+	node, modifiedInput, _ := ParseIntoNodeTree(input, false)
 	// Print resulting tree
 	fmt.Println("Final tree: \n" + node.String())
 	fmt.Println("Corresponding (potentially modified) input string: " + modifiedInput)
@@ -81,7 +81,7 @@ the right-most outer combination (and combinations nested therein) is parsed.
 - Invalid combinations (e.g., missing logical operator) are discarded
 in the processing.
  */
-func ParseDepth(input string, nestedNode bool) (*tree.Node, string, tree.ParsingError) {
+func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.ParsingError) {
 
 	// Return detected combinations, alongside potentially modified input string
 	//if combinations == nil {
@@ -241,7 +241,7 @@ func ParseDepth(input string, nestedNode bool) (*tree.Node, string, tree.Parsing
 					}
 
 					fmt.Println("Go deep on left side: " + left)
-					leftNode, left, err := ParseDepth(left, true)
+					leftNode, left, err := ParseIntoNodeTree(left, true)
 					if err.ErrorCode != tree.PARSING_NO_ERROR {
 						return nil, left, err
 					}
@@ -305,7 +305,7 @@ func ParseDepth(input string, nestedNode bool) (*tree.Node, string, tree.Parsing
 					}
 
 					fmt.Println("Go deep on right side: " + right)
-					rightNode, right, err := ParseDepth(right, true)
+					rightNode, right, err := ParseIntoNodeTree(right, true)
 					if err.ErrorCode != tree.PARSING_NO_ERROR {
 						return nil, right, err
 					}

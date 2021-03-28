@@ -9,7 +9,7 @@ func TestStatementParsing(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
-		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"I(inspect), I(as well as (review [AND] (audit [AND] challenge))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
@@ -55,3 +55,5 @@ func TestSyntheticComponentCombinations(t *testing.T) {
 	// Assess whether it is correctly parsed
 
 }
+
+// Test extraction of leaf arrays

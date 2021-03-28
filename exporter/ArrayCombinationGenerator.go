@@ -191,10 +191,13 @@ func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incr
 				// Overwrite previous entry
 				nodeRefs[len(nodeRefs)-1] = val + rangeSeparator + strconv.Itoa(addedId)
 				fmt.Println("Overwrite existing entry with ", (val + rangeSeparator + strconv.Itoa(addedId)))
-			} else {
+			} else if intVal != addedId {
 				// Create new entry
 				nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
 				fmt.Println("Created new entry ", addedId)
+ 			} else {
+ 				// if old value and current are the same, simply omit if creating ranges, i.e., aggregating
+ 				fmt.Println("Values has not been added, since identical to last value ", intVal)
 			}
 		}
 	} else {
