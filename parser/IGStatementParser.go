@@ -4,6 +4,7 @@ import (
 	"IG-Parser/tree"
 	"fmt"
 	"log"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -155,13 +156,53 @@ func parseExecutionConstraint(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.EXECUTION_CONSTRAINT, text)
 }
 
+/*
+Validates input with respect to parentheses balance.
+ */
+func validateInput(text string) (tree.ParsingError) {
+	// Validate parentheses in input
+	parCount := 0
+	for i, letter := range text {
+
+		switch string(letter) {
+		case "(":
+			parCount++
+		case ")":
+			parCount--
+		}
+		i++
+	}
+	if parCount != 0 {
+		msg := "Please review the parentheses in the input statement. "
+		par := ""
+		parCountAbs := math.Abs(float64(parCount))
+		if parCount == 1 || parCount == -1 {
+			msg += "There is "
+			par = "parenthesis"
+		} else {
+			msg += "There are "
+			par = "parentheses"
+		}
+		if parCount > 0 {
+			// too many left parentheses
+			msg = fmt.Sprint(msg, parCountAbs, " additional opening ", par, " ('(').")
+		} else {
+			// too many right parentheses
+			msg = fmt.Sprint(msg, parCountAbs, " additional closing ", par, " (')').")
+		}
+		log.Println(msg)
+		return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
+	}
+
+	return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+}
 
 /*
 Extracts a component specification from string based on component signature (e.g., A, I, etc.)
 and balanced parentheses.
 If no component is found, an empty string is returned
 */
-func extractComponent(component string, input string) []string {
+func extractComponent(component string, input string) ([]string, tree.ParsingError) {
 
 	// Strings for given component
 	componentStrings := []string{}
@@ -171,13 +212,19 @@ func extractComponent(component string, input string) []string {
 
 	fmt.Println("Looking for component: " + component)
 
+	// Validate input string first
+	err := validateInput(processedString)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return nil, err
+	}
+
 	for { // infinite loop - needs to break out
 		// Find first occurrence of signature
 		startPos := strings.Index(processedString, component + "(")
 
 		if startPos == -1 {
 			//log.Println("Component signature " + component + " not found in input string '" + input + "'")
-			return componentStrings
+			return componentStrings, tree.ParsingError{ErrorCode: tree.TREE_NO_ERROR}
 		}
 
 		// Parentheses count to check for balance
@@ -217,7 +264,10 @@ var combinationPattern = "\\(" + wordsWithParentheses + "(\\[" + logicalOperator
 func parseComponent(component string, text string) (*tree.Node, tree.ParsingError) {
 
 	// Extract component (one or multiple occurrences) from input string based on provided component identifier
-	componentStrings := extractComponent(component, text)
+	componentStrings, err := extractComponent(component, text)
+	if err.ErrorCode != tree.TREE_NO_ERROR {
+		return nil, err
+	}
 
 	fmt.Println("Components: " + fmt.Sprint(componentStrings))
 
