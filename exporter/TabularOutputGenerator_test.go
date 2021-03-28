@@ -79,22 +79,14 @@ func TestTabularOutput(t *testing.T) {
 
 	res := GenerateNodeArrayPermutations(leafArrays...)
 
-	fmt.Println("Component references: ", componentRefs)
-
 	fmt.Println("Input arrays: ", res)
 
 	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
-
-	fmt.Println("Links: ", links)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 7 {
 		t.Fatal("Number of statement reference links is incorrect. Value: ", len(links))
 	}
-
-	fmt.Println(links)
-
-	//os.Exit(0)
 
 	// Read reference file
 	content, error := ioutil.ReadFile("GeneratedGoogleSheetsOutput.test")
@@ -117,8 +109,5 @@ func TestTabularOutput(t *testing.T) {
 		WriteToFile("errorOutput.error", output)
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
-
-
-
 
 }
