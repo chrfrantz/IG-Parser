@@ -13,84 +13,81 @@ func ParseStatement(text string) tree.Statement {
 	s := tree.Statement{}
 
 	result, err := parseAttributes(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
-		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.ATTRIBUTES, err)
 	s.Attributes = result
 
+	result, err = parseAttributesProperty(text)
+	handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
+	s.AttributesProperty = result
+
 	result, err = parseDeontic(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
-		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.DEONTIC, err)
 	s.Deontic = result
 
 	result, err = parseAim(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
-		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.AIM, err)
 	s.Aim = result
 
 	result, err = parseDirectObject(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND { //&&
-		//err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS
-
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.DIRECT_OBJECT, err)
 	s.DirectObject = result
 
 	result, err = parseDirectObjectProperty(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND { //&&
-		//err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS
-
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
 	s.DirectObjectProperty = result
 
 	result, err = parseIndirectObject(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND { //&&
-		//err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS
-
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.INDIRECT_OBJECT, err)
 	s.IndirectObject = result
 
 	result, err = parseIndirectObjectProperty(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND { //&&
-		//err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS
-
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
 	s.IndirectObjectProperty = result
 
 	result, err = parseActivationCondition(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
-		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.ACTIVATION_CONDITION, err)
 	s.ActivationConditionSimple = result
 
 	result, err = parseExecutionConstraint(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND &&
-		err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
-		log.Fatal(err.Error())
-	}
+	handleParsingError(tree.EXECUTION_CONSTRAINT, err)
 	s.ExecutionConstraintSimple = result
 
-	// Switch on number of component patterns (not combinations)
-	/*switch len(bdir) {
-	case 1:		s.DirectObject = tree.ComponentLeafNode(bdir[0][0], tree.DIRECT_OBJECT)
-	case 2: 	log.Fatal("Encountered " + strconv.Itoa(len(bdir)) + " items.")
-	default: 	log.Println("No Direct Object found")
-	}*/
+	result, err = parseConstitutedEntity(text)
+	handleParsingError(tree.CONSTITUTED_ENTITY, err)
+	s.ConstitutedEntity = result
 
-	//fmt.Println(s.String())
+	result, err = parseConstitutedEntityProperty(text)
+	handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
+	s.ConstitutedEntityProperty = result
 
-	//os.Exit(0)
+	result, err = parseModal(text)
+	handleParsingError(tree.MODAL, err)
+	s.Modal = result
+
+	result, err = parseConstitutingFunction(text)
+	handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
+	s.ConstitutiveFunction = result
+
+	result, err = parseConstitutingProperties(text)
+	handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
+	s.ConstitutingProperties = result
+
+	result, err = parseConstitutingPropertiesProperty(text)
+	handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
+	s.ConstitutingPropertiesProperty = result
 
 	return s
+
+}
+
+/*
+Handles parsing error centrally - easier to refine.
+ */
+func handleParsingError(component string, err tree.ParsingError) {
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND {
+		log.Fatal("Error when parsing: ", err)
+	}
 
 }
 
@@ -132,6 +129,10 @@ func parseConstitutedEntity(text string) (*tree.Node, tree.ParsingError) {
 
 func parseConstitutedEntityProperty(text string) (*tree.Node, tree.ParsingError) {
 	return parseComponent(tree.CONSTITUTED_ENTITY_PROPERTY, text)
+}
+
+func parseModal(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponent(tree.MODAL, text)
 }
 
 func parseConstitutingFunction(text string) (*tree.Node, tree.ParsingError) {
