@@ -351,6 +351,21 @@ type Node struct {
 	ElementOrder []interface{}
 }
 
+// Sort interface implementation
+type ByEntry []*Node
+
+func (e ByEntry) Len() int {
+	return len(e)
+}
+
+func (e ByEntry) Less(i, j int) bool {
+	return e[i].Entry < e[j].Entry
+}
+
+func (e ByEntry) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
+}
+
 /*
 Counts the number of parents in the tree hierarchy for a given node.
  */

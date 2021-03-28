@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -159,13 +160,29 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 	componentIdx int, headerSymbols []string, logicalLinks []map[*tree.Node][]string, stmtId string) (string, tree.ParsingError) {
 	// Check for logical operator linkage based on index
 	linksForElement := logicalLinks[componentIdx]
+	// Store keys for ordered iteration
+	nodesKeys := []*tree.Node{}
+	for nd := range linksForElement {
+		nodesKeys = append(nodesKeys, nd)
+	}
+	// Sort based on custom sort interface
+	sort.Sort(tree.ByEntry(nodesKeys))
+	fmt.Println("Sorted keys: ", nodesKeys)
 
 	fmt.Println("Links for element: ", linksForElement)
 
 	// Check that entries for own component value exist
 	if linksForElement[statement[componentIdx]] != nil {
-		// Iterate through all component values
-		for otherNode, linkedElement := range linksForElement {
+		// Iterate through all component values based on ordered keys
+		for _, nodesKey := range nodesKeys {
+			// Extract node
+			otherNode := nodesKey
+			// Extract references attached to node
+			linkedElement := linksForElement[nodesKey]
+
+			// NOTE: OLD iteration directly on elements leads to inconsistent iteration order
+			//for otherNode, linkedElement := range linksForElement {
+
 			// if target node is different ...
 			if otherNode != statement[componentIdx] {
 				fmt.Println("Testing other node: ", otherNode, " with elements ", linkedElement)
