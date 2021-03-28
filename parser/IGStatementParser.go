@@ -10,86 +10,88 @@ import (
 	"strings"
 )
 
-func ParseStatement(text string) tree.Statement {
+func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	s := tree.Statement{}
 
 	result, err := parseAttributes(text)
-	handleParsingError(tree.ATTRIBUTES, err)
+	outErr := handleParsingError(tree.ATTRIBUTES, err)
 	s.Attributes = result
 
 	result, err = parseAttributesProperty(text)
-	handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
+	outErr = handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
 	s.AttributesProperty = result
 
 	result, err = parseDeontic(text)
-	handleParsingError(tree.DEONTIC, err)
+	outErr = handleParsingError(tree.DEONTIC, err)
 	s.Deontic = result
 
 	result, err = parseAim(text)
-	handleParsingError(tree.AIM, err)
+	outErr = handleParsingError(tree.AIM, err)
 	s.Aim = result
 
 	result, err = parseDirectObject(text)
-	handleParsingError(tree.DIRECT_OBJECT, err)
+	outErr = handleParsingError(tree.DIRECT_OBJECT, err)
 	s.DirectObject = result
 
 	result, err = parseDirectObjectProperty(text)
-	handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
+	outErr = handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
 	s.DirectObjectProperty = result
 
 	result, err = parseIndirectObject(text)
-	handleParsingError(tree.INDIRECT_OBJECT, err)
+	outErr = handleParsingError(tree.INDIRECT_OBJECT, err)
 	s.IndirectObject = result
 
 	result, err = parseIndirectObjectProperty(text)
-	handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
+	outErr = handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
 	s.IndirectObjectProperty = result
 
 	result, err = parseActivationCondition(text)
-	handleParsingError(tree.ACTIVATION_CONDITION, err)
+	outErr = handleParsingError(tree.ACTIVATION_CONDITION, err)
 	s.ActivationConditionSimple = result
 
 	result, err = parseExecutionConstraint(text)
-	handleParsingError(tree.EXECUTION_CONSTRAINT, err)
+	outErr = handleParsingError(tree.EXECUTION_CONSTRAINT, err)
 	s.ExecutionConstraintSimple = result
 
 	result, err = parseConstitutedEntity(text)
-	handleParsingError(tree.CONSTITUTED_ENTITY, err)
+	outErr = handleParsingError(tree.CONSTITUTED_ENTITY, err)
 	s.ConstitutedEntity = result
 
 	result, err = parseConstitutedEntityProperty(text)
-	handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
+	outErr = handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
 	s.ConstitutedEntityProperty = result
 
 	result, err = parseModal(text)
-	handleParsingError(tree.MODAL, err)
+	outErr = handleParsingError(tree.MODAL, err)
 	s.Modal = result
 
 	result, err = parseConstitutingFunction(text)
-	handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
+	outErr = handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
 	s.ConstitutiveFunction = result
 
 	result, err = parseConstitutingProperties(text)
-	handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
+	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
 	s.ConstitutingProperties = result
 
 	result, err = parseConstitutingPropertiesProperty(text)
-	handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
+	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
 	s.ConstitutingPropertiesProperty = result
 
-	return s
+	return s, outErr
 
 }
 
 /*
 Handles parsing error centrally - easier to refine.
  */
-func handleParsingError(component string, err tree.ParsingError) {
+func handleParsingError(component string, err tree.ParsingError) tree.ParsingError {
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_COMPONENT_NOT_FOUND {
-		log.Fatal("Error when parsing: ", err)
+		log.Println("Error when parsing component ", component, ": ", err)
+		return err
 	}
 
+	return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 func parseAttributes(text string) (*tree.Node, tree.ParsingError) {

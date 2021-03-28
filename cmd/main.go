@@ -27,7 +27,7 @@ func main2() {
 		")"*/
 		//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
-	s := parser.ParseStatement(text)
+	s,_ := parser.ParseStatement(text)
 
 	fmt.Println("Printing stuff: ")
 
@@ -67,7 +67,7 @@ func main() {
 
 	//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
-	s := parser.ParseStatement(text)
+	s,_ := parser.ParseStatement(text)
 
 	fmt.Println(s.String())
 
