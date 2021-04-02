@@ -260,12 +260,11 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 						// Create nested node and link with parent
 						fmt.Println("Deep parsing: Returned left node is combination; assign as nested node")
 
-						// Link both nodes
-						node.Left = leftNode
-						leftNode.Parent = &node
+						// Link newly identified node with main node
+						node.InsertLeftNode(leftNode)
 
 						// Check for inheriting shared elements on AND nodes
-						inheritSharedElements(leftNode)
+						//inheritSharedElements(leftNode)
 					}
 
 					fmt.Println("Tree after processing left deep: " + node.String())
@@ -324,11 +323,11 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 						// Create nested node and link with parent
 						fmt.Println("Deep parsing: Returned right node is combination; assign as nested node")
 
-						node.Right = rightNode
-						rightNode.Parent = &node
+						// Link newly identified node with main node
+						node.InsertRightNode(rightNode)
 
 						// Check for inheriting shared elements on AND nodes
-						inheritSharedElements(rightNode)
+						//inheritSharedElements(rightNode)
 					}
 
 					fmt.Println("Tree after processing right deep: " + node.String())
@@ -716,9 +715,8 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []s
 Processes potential inheritance of shared element values from parent to child nodes,
 where both parent and child nodes have AND operators
  */
+/*
 func inheritSharedElements(node *tree.Node) {
-	if /*node.LogicalOperator == tree.AND &&
-		node.Parent.LogicalOperator == tree.AND &&*/
 		SHARED_ELEMENT_INHERITANCE_MODE != SHARED_ELEMENT_INHERIT_NOTHING {
 
 		switch SHARED_ELEMENT_INHERITANCE_MODE {
@@ -750,6 +748,7 @@ func inheritSharedElements(node *tree.Node) {
 			"Left: " + fmt.Sprint(node.SharedLeft) + ", Right: " + fmt.Sprint(node.SharedRight))
 	}
 }
+*/
 
 /*
 Extracts left and right shared elements of a combination (e.g., (left shared (left [AND] right) right shared))

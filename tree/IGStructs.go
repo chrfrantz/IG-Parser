@@ -205,6 +205,8 @@ const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 const PARSING_ERROR_IGNORED_ELEMENTS = "IGNORED_ELEMENTS"
 // Indicates problems when generating logical operator references
 const PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION = "LOGICAL_EXPRESSION_GENERATION"
+// Write error
+const PARSING_ERROR_WRITE = "WRITE_ERROR"
 
 /*
 Error type signaling errors during statement parsing

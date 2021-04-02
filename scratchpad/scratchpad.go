@@ -55,7 +55,22 @@ func main3() {
 	fmt.Println(diffs[0].Type.String())
 }
 
-func main() {
+func main(){
+	input := "(( outer left (shared left Left side information) [AND] middle information [AND] right information) shared right)"
+
+	tree.SHARED_ELEMENT_INHERITANCE_MODE = tree.SHARED_ELEMENT_INHERIT_OVERRIDE
+
+	// Parse provided expression
+	node, _, err := parser.ParseIntoNodeTree(input, false)
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		fmt.Println("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
+	}
+
+	fmt.Println(node.String())
+}
+
+func main1b() {
 	root := tree.Node{}
 	root.LogicalOperator = "AND"
 

@@ -265,12 +265,12 @@ func generateStatementIDint(mainID string, subStmtIndex int) string {
 /*
 Writes data to given file - overwrites file if existing
  */
-func WriteToFile(filename string, content string) {
+func WriteToFile(filename string, content string) error {
 
 	// Create file
 	f, err := os.Create(filename)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer f.Close()
 
@@ -280,7 +280,10 @@ func WriteToFile(filename string, content string) {
 	// Write data
 	_, err2 := f.Write(data)
 	if err2 != nil {
-		log.Fatal(err2)
+		return err2
 	}
 	log.Println("Wrote file " + filename)
+
+	// No error
+	return nil
 }

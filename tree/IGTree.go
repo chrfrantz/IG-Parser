@@ -351,6 +351,96 @@ type Node struct {
 	ElementOrder []interface{}
 }
 
+/*
+Returns parents' left shared elements in order of hierarchical (top first).
+ */
+func (n *Node) getParentsLeftSharedElements() []string {
+	if n.Parent != nil && n.Parent.SharedLeft != nil && len(n.Parent.SharedLeft) != 0 {
+		// Recursively return parents' shared elements, followed by respective children ones
+		return append(n.Parent.getParentsLeftSharedElements(), n.Parent.SharedLeft...)
+	}
+	// Return empty structure
+	return []string{}
+}
+
+/*
+Returns parents' right shared elements in order of hierarchical (top first).
+*/
+func (n *Node) getParentsRightSharedElements() []string {
+	if n.Parent != nil && n.Parent.SharedRight != nil && len(n.Parent.SharedRight) != 0 {
+		// Recursively return parents' shared elements, followed by respective children ones
+		return append(n.Parent.getParentsRightSharedElements(), n.Parent.SharedRight...)
+	}
+	// Return empty structure
+	return []string{}
+}
+
+/*
+Returns left shared elements under consideration of SHARED_ELEMENT_INHERITANCE_MODE
+ */
+func (n *Node) GetSharedLeft() []string {
+	switch SHARED_ELEMENT_INHERITANCE_MODE {
+		case SHARED_ELEMENT_INHERIT_OVERRIDE:
+			// Overwrite child with parent shared element values
+			shared := n.getParentsLeftSharedElements()
+			// If no shared components from parents ...
+			if len(shared) == 0 {
+				// ... return own shared components
+				return n.SharedLeft
+			}
+			// else return parents' shared components
+			return n.getParentsLeftSharedElements()
+		case SHARED_ELEMENT_INHERIT_APPEND:
+			if len(n.SharedLeft) != 0 && len(n.getParentsLeftSharedElements()) != 0 {
+				// Append child's to parents' elements
+				return append(n.getParentsLeftSharedElements(), n.SharedLeft...)
+			} else if len(n.SharedLeft) != 0 {
+				// Return own node information
+				return n.SharedLeft
+			} else {
+				// Return parent node information
+				return n.getParentsLeftSharedElements()
+			}
+		case SHARED_ELEMENT_INHERIT_NOTHING:
+			// Simply return own elements
+			return n.SharedLeft
+	}
+	return []string{}
+}
+
+/*
+Returns right shared elements under consideration of SHARED_ELEMENT_INHERITANCE_MODE
+*/
+func (n *Node) GetSharedRight() []string {
+	switch SHARED_ELEMENT_INHERITANCE_MODE {
+	case SHARED_ELEMENT_INHERIT_OVERRIDE:
+		// Overwrite child with parent shared element values
+		shared := n.getParentsRightSharedElements()
+		// If no shared components from parents ...
+		if len(shared) == 0 {
+			// ... return own shared components
+			return n.SharedRight
+		}
+		// else return parents' shared components
+		return n.getParentsRightSharedElements()
+	case SHARED_ELEMENT_INHERIT_APPEND:
+		if len(n.SharedRight) != 0 && len(n.getParentsRightSharedElements()) != 0 {
+			// Append child's to parents' elements
+			return append(n.getParentsRightSharedElements(), n.SharedRight...)
+		} else if len(n.SharedRight) != 0 {
+			// Return own node information
+			return n.SharedRight
+		} else {
+			// Return parent node information
+			return n.getParentsRightSharedElements()
+		}
+	case SHARED_ELEMENT_INHERIT_NOTHING:
+		// Simply return own elements
+		return n.SharedRight
+	}
+	return []string{}
+}
+
 // Sort interface implementation for alphabetic ordering (not order of appearance in tree) of nodes
 type ByEntry []*Node
 
@@ -393,8 +483,8 @@ func (n *Node) Stringify() string {
 	// Walk the tree
 	out := ""
 	// Potential left shared elements
-	if n.SharedLeft != nil && len(n.SharedLeft) != 0 {
-		out += "(" + strings.Trim(fmt.Sprint(n.SharedLeft), "[]") + " "
+	if n.GetSharedLeft() != nil && len(n.GetSharedLeft()) != 0 {
+		out += "(" + strings.Trim(fmt.Sprint(n.GetSharedLeft()), "[]") + " "
 	}
 	// Inner combination
 	out += "("
@@ -410,8 +500,8 @@ func (n *Node) Stringify() string {
 	// Close inner combinations
 	out += ")"
 	// Potential right shared elements
-	if n.SharedRight != nil && len(n.SharedRight) != 0 {
-		out += " " + strings.Trim(fmt.Sprint(n.SharedRight), "[]") + ")"
+	if n.GetSharedRight() != nil && len(n.GetSharedRight()) != 0 {
+		out += " " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]") + ")"
 	}
 	return out
 }
@@ -447,13 +537,13 @@ func (n *Node) String() string {
 			}
 		}
 
-		if n.SharedLeft != nil && len(n.SharedLeft) != 0 {
-			fmt.Println("LEFT CONTAINS: " + fmt.Sprint(n.SharedLeft) + strconv.Itoa(len(n.SharedLeft)))
-			out += prefix + "Shared (left): " + strings.Trim(fmt.Sprint(n.SharedLeft), "[]") + "\n"
+		if n.GetSharedLeft() != nil && len(n.GetSharedLeft()) != 0 {
+			fmt.Println("Own LEFT SHARED value (raw content): " + fmt.Sprint(n.SharedLeft) + ", Count: " + strconv.Itoa(len(n.SharedLeft)))
+			out += prefix + "Shared (left): " + strings.Trim(fmt.Sprint(n.GetSharedLeft()), "[]") + "\n"
 		}
-		if n.SharedRight != nil && len(n.SharedRight) != 0 {
-			fmt.Println("RIGHT CONTAINS: " + fmt.Sprint(n.SharedRight) + strconv.Itoa(len(n.SharedRight)))
-			out += prefix + "Shared (right): " + strings.Trim(fmt.Sprint(n.SharedRight), "[]") + "\n"
+		if n.GetSharedRight() != nil && len(n.GetSharedRight()) != 0 {
+			fmt.Println("Own RIGHT SHARED value (raw content): " + fmt.Sprint(n.SharedRight) + ", Count: " + strconv.Itoa(len(n.SharedRight)))
+			out += prefix + "Shared (right): " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]") + "\n"
 		}
 
 		return "(\n" + out +
@@ -936,6 +1026,9 @@ func (n *Node) GetSyntheticRootNode() *Node {
 	}
 }
 
+/*
+Returns leaf nodes of a given node as arrays of arrays of nodes
+ */
 func (n *Node) GetLeafNodes() [][]*Node {
 	if n == nil {
 		// Uninitialized node
@@ -955,6 +1048,7 @@ func (n *Node) GetLeafNodes() [][]*Node {
 	leftNodes := [][]*Node{}
 	rightNodes := [][]*Node{}
 
+	// If both left and right children nodes exist, return those combined
 	if n.Left != nil && n.Right != nil {
 		leftNodes = n.Left.GetLeafNodes()
 		rightNodes = n.Right.GetLeafNodes()
@@ -983,12 +1077,14 @@ func (n *Node) GetLeafNodes() [][]*Node {
 			return returnNode
 		}
 	}
+	// Process left nodes
 	if n.Left != nil {
 		leftNodes = n.Left.GetLeafNodes()
 		for _, v := range leftNodes {
 			returnNode[0] = append(returnNode[0], v...)
 		}
 	}
+	// Process right nodes
 	if n.Right != nil {
 		rightNodes = n.Right.GetLeafNodes()
 		for _, v := range rightNodes {
