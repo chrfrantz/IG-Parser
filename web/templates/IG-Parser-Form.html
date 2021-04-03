@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Template</title>
+    <link rel="stylesheet" href="/css/default.css">
+</head>
+
+<body>
+    <h1>IG Script Parser</h1>
+
+    <script>
+
+        function CopyToClipboard(containerid) {
+            if (document.selection) {
+                var range = document.body.createTextRange();
+                range.moveToElementText(document.getElementById(containerid));
+                range.select().createTextRange();
+                document.execCommand("copy");
+            } else if (window.getSelection) {
+                var range = document.createRange();
+                range.selectNode(document.getElementById(containerid));
+                window.getSelection().addRange(range);
+                document.execCommand("copy");
+                alert("Text has been copied, now paste in the text-area")
+            }
+        }
+    </script>
+
+    <form method="POST">
+        <label>Original statement:</label><textarea name="rawStatement">{{.RawStmt}}</textarea><br />
+        <label>Annotated statement:</label><textarea name="annotatedStatement">{{.CodedStmt}}</textarea><br />
+        <label>Statement ID:</label><input name="stmtId" type="number" value="{{.StmtId}}"><br />
+        <input type="submit">
+    </form>
+
+    {{if not .Success}}
+        <label>Error: {{.Message}}</label>
+    {{else}}
+        <label>Google Sheets Output (ready to paste):</label><br />
+        <button id="button1" onclick="CopyToClipboard('output')">Click to copy</button>
+    <pre>
+        <div id="output" class="divtext" contentEditable>{{.TabularOutput}}</div>
+    </pre>
+    {{end}}
+</body>
+
+</html>

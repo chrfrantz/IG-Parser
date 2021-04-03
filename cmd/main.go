@@ -5,6 +5,7 @@ import (
 	"IG-Parser/exporter"
 	"IG-Parser/parser"
 	"fmt"
+	"os"
 )
 
 //var words = "([a-zA-Z',;]+\\s*)+"
@@ -59,7 +60,11 @@ func main() {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	output, _ := app.ConvertIGScriptToGoogleSheets(text, "output.csv")
+	fmt.Println(text)
+
+	os.Exit(0)
+
+	output, _ := app.ConvertIGScriptToGoogleSheets(text, 650, "output.csv")
 
 	fmt.Println(output)
 }
@@ -93,7 +98,7 @@ func main3() {
 
 	//os.Exit(0)
 
-	res := exporter.GenerateNodeArrayPermutations(leafArrays...)
+	res, _ := exporter.GenerateNodeArrayPermutations(leafArrays...)
 
 	fmt.Println("Component references: ", componentRefs)
 

@@ -77,7 +77,10 @@ func TestTabularOutput(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays()
 
-	res := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
 
 	fmt.Println("Input arrays: ", res)
 
@@ -111,3 +114,5 @@ func TestTabularOutput(t *testing.T) {
 	}
 
 }
+
+// test with invalid statement and empty input nodes, unbalanced parentheses, missing ID

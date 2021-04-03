@@ -13,7 +13,11 @@ Generates all permutations of a given set of input arrays, representing an
 institutional statement alongside its components per entry.
 Output array structure is [statement][component instances of statement]
  */
-func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.Node) {
+func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.Node, parsingError tree.ParsingError) {
+
+	if len(nodeArrays) == 0 {
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_LEAF, ErrorMessage: "No parseable node found."}
+	}
 
 	n := 1
 	// Determine output parameters
@@ -70,7 +74,7 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 		// Adjust position references
 		pos[len(nodeArrays)-1]++
 	}
-	return stmts
+	return stmts, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
