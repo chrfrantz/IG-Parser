@@ -11,11 +11,16 @@ import (
 	"strconv"
 )
 
+var ANNOTATED_STATEMENT = "(National Organic Program's Program Manager), Cex(on behalf of the Secretary), D(may) I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part))"
+var STATEMENT_ID = "650"
+
 var tmpl *template.Template
 
 type ReturnStruct struct{
 	// Indicates whether operation was successful
 	Success bool;
+	// Indicates whether an error has occurred
+	Error bool;
 	// Message shown to user
 	Message string;
 	// Original unparsed statement
@@ -35,39 +40,55 @@ func init() {
 func parserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		// Just show empty form
-		tmpl.Execute(w, ReturnStruct{Success: true, Message: ""})
+		tmpl.Execute(w, ReturnStruct{Success: false, Message: "", CodedStmt: ANNOTATED_STATEMENT, StmtId: STATEMENT_ID})
 		return
 	}
-	success := false
 	message := ""
 	rawStmt := r.FormValue("rawStatement")
 	codedStmt := r.FormValue("annotatedStatement")
 	stmtId := r.FormValue("stmtId")
-	retStruct := ReturnStruct{Success: success, Message: message, RawStmt: rawStmt, CodedStmt: codedStmt, StmtId: stmtId}
+	retStruct := ReturnStruct{Success: false, Error: false, Message: message, RawStmt: rawStmt, CodedStmt: codedStmt, StmtId: stmtId}
 
 	fmt.Println(retStruct)
 
-	id, err := strconv.Atoi(stmtId)
-	if err != nil {
-		retStruct.Success = false
-		retStruct.Message = err.Error()
-		tmpl.Execute(w, retStruct)
-	}
+	// Check for input statement first
 	if codedStmt == "" {
 		retStruct.Success = false
-		retStruct.Message = "No parseable input data"
+		retStruct.Error = true
+		retStruct.Message = app.ERROR_INPUT_NO_STATEMENT
 		tmpl.Execute(w, retStruct)
+		return
 	} else {
-		output, err := app.ConvertIGScriptToGoogleSheets(codedStmt, id, "")
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
+		// Check for statement ID
+		id, err := strconv.Atoi(stmtId)
+		if err != nil {
 			retStruct.Success = false
-			retStruct.Message = err.ErrorMessage
+			retStruct.Error = true
+			retStruct.Message = app.ERROR_INPUT_STATEMENT_ID
 			tmpl.Execute(w, retStruct)
 			return
 		}
+		// Only then parse input
+		output, err2 := app.ConvertIGScriptToGoogleSheets(codedStmt, id, "")
+		if err2.ErrorCode != tree.PARSING_NO_ERROR {
+			retStruct.Success = false
+			retStruct.Error = true
+			retStruct.CodedStmt = codedStmt
+			switch err2.ErrorCode {
+				case tree.PARSING_ERROR_EMPTY_LEAF:
+					retStruct.Message = app.ERROR_INPUT_NO_STATEMENT
+				default:
+					retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
+			}
+			tmpl.Execute(w, retStruct)
+			return
+		}
+		// Return success if parsing was successful
 		retStruct.Success = true
+		retStruct.CodedStmt = codedStmt
 		retStruct.TabularOutput = output
 		tmpl.Execute(w, retStruct)
+		return
 	}
 }
 
@@ -75,7 +96,7 @@ func main() {
 	http.HandleFunc("/", parserHandler)
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./web/css"))))
 
-	// Make it Heroku-compatible
+	// Make service Heroku-compatible
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

@@ -4,15 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go Template</title>
+    <title>IG-Script Annotation Parser</title>
     <link rel="stylesheet" href="/css/default.css">
 </head>
 
 <body>
-    <h1>IG Script Parser</h1>
-
     <script>
-
         function CopyToClipboard(containerid) {
             if (document.selection) {
                 var range = document.body.createTextRange();
@@ -24,26 +21,46 @@
                 range.selectNode(document.getElementById(containerid));
                 window.getSelection().addRange(range);
                 document.execCommand("copy");
-                alert("Text has been copied, now paste in the text-area")
+                //alert("Text has been copied")
             }
+        }
+
+        function check(target) {
+            let offset = 0
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + offset + 'px';
+
         }
     </script>
 
-    <form method="POST">
-        <label>Original statement:</label><textarea name="rawStatement">{{.RawStmt}}</textarea><br />
-        <label>Annotated statement:</label><textarea name="annotatedStatement">{{.CodedStmt}}</textarea><br />
-        <label>Statement ID:</label><input name="stmtId" type="number" value="{{.StmtId}}"><br />
-        <input type="submit">
-    </form>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <h1>IG-Script Parser</h1>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <div class="form">
+        <form method="POST">
+            <label>Original Statement:</label><textarea name="rawStatement" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
+            <label>Annotated Statement:</label><textarea name="annotatedStatement" onfocusin="check(this)" onkeyup="check(this)">{{.CodedStmt}}</textarea><br />
+            <label>Statement ID:</label><input name="stmtId" type="number" value="{{.StmtId}}"><br />
+            <input value="Generate statements" type="submit">
+            {{if .Error}}
+                <div class="error">
+                    <label>Error: {{.Message}}</label>
+                </div>
+            {{end}}
+        </form>
+    </div>
 
-    {{if not .Success}}
-        <label>Error: {{.Message}}</label>
-    {{else}}
-        <label>Google Sheets Output (ready to paste):</label><br />
-        <button id="button1" onclick="CopyToClipboard('output')">Click to copy</button>
-    <pre>
-        <div id="output" class="divtext" contentEditable>{{.TabularOutput}}</div>
-    </pre>
+    {{if .Success}}
+        <div class="output">
+            <h3>Google Sheets Output:</h3><br />
+            <button class="button1" id="button1" onclick="CopyToClipboard('output')" width="100px">Copy generated statements to clipboard</button>
+
+            <pre>
+                <div id="output" class="divtext" contentEditable>{{.TabularOutput}}</div>
+            </pre>
+        </div>
     {{end}}
 </body>
 

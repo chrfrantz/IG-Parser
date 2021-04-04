@@ -2,22 +2,27 @@
 html, body {
     min-height: 100%;
 }
-body, div, form, input, select, textarea, p {
+body, div, form, input, select, output, textarea, p {
     padding: 0;
-    margin: 0;
+    margin: auto;
     outline: none;
     font-family: Roboto, Arial, sans-serif;
     font-size: 14px;
     color: #666;
     line-height: 22px;
+    display: block;
+    alignment: center;
 }
 h1 {
-    position: absolute;
-    margin: 0;
+    margin: auto;
     line-height: 42px;
     font-size: 42px;
     color: #000;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
 }
 .testbox {
     display: flex;
@@ -33,6 +38,22 @@ form {
     background: #fff;
     box-shadow: 0 0 25px 0 #d6e0f5;
 }
+.output {
+    width: 90%;
+    padding: 20px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 0 25px 0 #d6e0f5;
+}
+
+.button1 {
+    width: 50%;
+}
+
+.error {
+    color: red;
+}
+
 .banner {
     position: relative;
     height: 300px;
@@ -67,10 +88,15 @@ select {
     padding: 7px 0;
     background: transparent;
 }
+
 textarea {
     width: calc(100% - 12px);
     padding: 5px;
+    /*resize: vertical;*/
+    display: block;
+
 }
+
 .item input:hover, .item select:hover, .item textarea:hover {
     border: 1px solid transparent;
     box-shadow: 0 0 6px 0 #d6e0f5;
