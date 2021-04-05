@@ -1,10 +1,12 @@
 package helper
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -52,12 +54,31 @@ func GetDateTimeString() string {
 Creates output redirection for stdout and stderr to file (and console).
 Restores original output association after call of returned function.
  */
-func SaveOutput(filename string) func() {
+func SaveOutput(filename string) (func(), error) {
 
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		folderEnd := strings.LastIndex(filename, "/")
+		if folderEnd != -1 {
+			err = os.MkdirAll(filename[:folderEnd], 0700)
+			if err != nil {
+				log.Println("Failed to create folder " + filename[:folderEnd] +
+					", Error: " + err.Error())
+			} else {
+				log.Println("Created folder " + filename[:folderEnd])
+			}
+		}
+	}
+
+	// Reassign for flexibility
 	outfile := filename
+
+	log.Println("Log file: " + outfile)
 	// Open file with read/write access; create if it does not exist, and clear file if it exists (overwrite),
 	// Also, set general read/write permissions
-	f, _ := os.OpenFile(outfile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	f, err := os.OpenFile(outfile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		return nil, err
+	}
 
 	// Save existing stdout and stderr for later reassignment
 	origStdout := os.Stdout
@@ -67,7 +88,10 @@ func SaveOutput(filename string) func() {
 	mw := io.MultiWriter(origStdout, f)
 
 	// Get pipe reader and writer for redirection
-	r, w, _ := os.Pipe()
+	r, w, err := os.Pipe()
+	if err != nil {
+		return nil, err
+	}
 
 	// Redirect stdout and stderr to pipe writer
 	os.Stdout = w
@@ -89,13 +113,27 @@ func SaveOutput(filename string) func() {
 	// Function to be called once logging finishes (either direct call or defer)
 	return func() {
 		// Close writer, then block on exit channel; allows MultiWriter to finish operation before terminating
-		_ = w.Close()
+		err = w.Close()
+
 		// Reset stdout and stderr
 		os.Stdout = origStdout
 		os.Stderr = origStderr
+
+		// Write any error to standard out to review (only here, since the file may not be writable
+		if err != nil {
+			fmt.Println("Error during closing writer: " +  err.Error())
+		}
+
+		// Send exit signal to channel
 		<-exit
+
 		// Finally, close the outfile after writing has finished
-		_ = f.Close()
-	}
+		err = f.Close()
+
+		// Write any error to standard out to review
+		if err != nil {
+			fmt.Println("Error during closing log file: " +  err.Error())
+		}
+	}, nil
 
 }
