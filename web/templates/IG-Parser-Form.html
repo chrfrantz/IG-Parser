@@ -49,6 +49,11 @@
                     <label>Error: {{.Message}}</label>
                 </div>
             {{end}}
+            {{if ne .TransactionId ""}}
+                <div class="transactionId">
+                    <label>Operation ID: {{.TransactionId}}</label>
+                </div>
+            {{end}}
         </form>
     </div>
 
