@@ -11,18 +11,19 @@ import (
 /*
 Environment variables (port, logging activation)
  */
-const ENV_VAR_PORT = "PORT"
-const ENV_VAR_LOGGING = "LOGGING"
-const ENV_VAR_LOGGING_PATH = "LOGGING_PATH"
+const ENV_VAR_PORT = "IG_PARSER_PORT"
+const ENV_VAR_LOGGING = "IG_PARSER_LOGGING"
+const ENV_VAR_LOGGING_PATH = "IG_PARSER_LOGGING_PATH"
 
 const DEFAULT_PORT = "8080"
 
 func main() {
 
+	// Initializes templating and determines correct relative path for templates and CSS
 	converter.Init()
 
 	http.HandleFunc("/", converter.ConverterHandler)
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./web/css"))))
+	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(converter.RelativePathPrefix + "css"))))
 
 	// Check for custom port
 	port := os.Getenv(ENV_VAR_PORT)

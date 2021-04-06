@@ -1,0 +1,15 @@
+version: '3' 
+services: 
+  web: 
+    build: .
+    restart: always
+    volumes:
+      - "./logs:/logs"
+    environment:
+      IG_PARSER_PORT: "8080"
+      IG_PARSER_LOGGING: "true"
+      IG_PARSER_LOGGING_PATH: "/logs"
+    ports: 
+      - '4040:8080'
+volumes:
+  log_data: {}

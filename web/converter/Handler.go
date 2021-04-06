@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -27,12 +28,30 @@ var Logging = true
 Indicates folder to log to
  */
 var LoggingPath = ""
+/*
+Relative path prefix for all web resources (templates, CSS files)
+ */
+var RelativePathPrefix = ""
 
 /*
 Init needs to be called from main to instantiate templates.
  */
 func Init() {
-	tmpl = template.Must(template.ParseFiles("./web/templates/IG-Parser-Form.html"))
+	dir, err := os.Getwd()
+	if err != nil {
+		// Sensible to terminate in this case
+		log.Fatal(err)
+	}
+	fmt.Println("Working directory: " + dir)
+	// If in docker container
+	if dir == "/" {
+		// relative to web folder
+		RelativePathPrefix = "../"
+	} else {
+		// else started from repository root
+		RelativePathPrefix = "./web/"
+	}
+	tmpl = template.Must(template.ParseFiles(RelativePathPrefix + "templates/IG-Parser-Form.html"))
 }
 
 func ConverterHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +67,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 	stmtId := r.FormValue("stmtId")
 	retStruct := ReturnStruct{Success: false, Error: false, Message: message, RawStmt: rawStmt, CodedStmt: codedStmt, StmtId: stmtId, TransactionId: transactionID}
 
-	// Initiatialize request-specific logfile first
+	// Initialize request-specific logfile first
 	if Logging {
 		log.Println("Logging enabled")
 		tID, filename := helper.GenerateUniqueIdAndFilename()
