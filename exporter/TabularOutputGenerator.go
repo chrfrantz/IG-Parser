@@ -209,7 +209,6 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 				if err.ErrorCode != tree.TREE_NO_ERROR {
 					errorMsg := fmt.Sprint("Error when parsing retrieving operator linkages: ", err.ErrorMessage)
 					log.Println(errorMsg)
-					fmt.Errorf("%v", errorMsg)
 					return "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION}
 				}
 				if res {

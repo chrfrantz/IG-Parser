@@ -2,8 +2,12 @@ package converter
 
 import "IG-Parser/tree"
 
+/*
+This file holds variables (de facto constants) for Web GUI.
+ */
+
 // Default example statement
-var ANNOTATED_STATEMENT = "A,p(Any) A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), D(may) I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part))"
+var ANNOTATED_STATEMENT = "A,p(Regional) A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), D(may) I(inspect and), I(sustain (review [AND] (reward [XOR] sanction))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part))"
 // Default example ID
 var STATEMENT_ID = "650"
 // Help for raw statement field
@@ -11,8 +15,9 @@ var HELP_RAW_STMT = "This entry field is for optional use. You can paste the ori
 // Help for coded statement field
 const HTML_LINEBREAK = "\n"
 var HELP_CODED_STMT = "This entry field should be used to annotate your institutional statement using the IG-Script notation." + HTML_LINEBREAK +
-						"The basic structure of a statement is ComponentSymbol (e.g., 'A'), immediately followed by the coded text in parentheses, e.g., 'A(certifying agent)'." + HTML_LINEBREAK +
-						"Within the coded component, logical combinations of type [AND], [OR], and [XOR] are supported, e.g., 'A(Both (certifying agent [AND] inspector)) ...'. Note the parentheses indicating the combination scope within the component." + HTML_LINEBREAK + HTML_LINEBREAK +
+						"The basic structure of a statement is the component symbol (e.g., 'A'), immediately followed by the coded text in parentheses, e.g., 'A(certifying agent)'." + HTML_LINEBREAK +
+						"Within the coded component, logical combinations of type [AND], [OR], and [XOR] are supported, e.g., 'A(Both (certifying agent [AND] inspector)) ...'. " + HTML_LINEBREAK +
+						"Note the parentheses indicating the combination scope within the component; these need to be explicitly specified for every logical operator (i.e., 'A((first [AND] second))'; 'A(first [AND] second)' will lead to an error)." + HTML_LINEBREAK + HTML_LINEBREAK +
 						//"Features of IG-Script that are not yet supported by this parser include component-level nesting, e.g., 'Cac{A(certifier) I(observes) Bdir(violation)}'\n" +
 						"Supported component symbols include:" + HTML_LINEBREAK +
 						tree.ATTRIBUTES + "() --> " + tree.IGComponentSymbolNameMap[tree.ATTRIBUTES] + HTML_LINEBREAK +

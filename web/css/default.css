@@ -28,6 +28,19 @@ h1 {
     text-align: center;
 }
 
+h2 {
+    margin: auto;
+    line-height: 42px;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 16px;
+    color: #8c8787;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
 .testbox {
     display: flex;
     justify-content: center;
@@ -199,7 +212,7 @@ button:hover {
     margin-left:15px; /* and add a small left margin */
 
     /* basic styles */
-    width:600px;
+    width:700px;
     padding:10px;
     border-radius:10px;
     background:#000;
