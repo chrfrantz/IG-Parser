@@ -4,8 +4,8 @@ import (
 	"IG-Parser/app"
 	"IG-Parser/exporter"
 	"IG-Parser/parser"
+	"IG-Parser/tree"
 	"fmt"
-	"os"
 )
 
 //var words = "([a-zA-Z',;]+\\s*)+"
@@ -60,11 +60,21 @@ func main() {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
+	text = "A((certifying agent [AND] borrower [OR] wife)) M(may) I(investigate) " +
+		"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part) " +
+		"concerning " +
+		"(production [operations] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
+		")"+
+		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+
 	fmt.Println(text)
 
-	os.Exit(0)
+	//os.Exit(0)
 
-	output, _ := app.ConvertIGScriptToGoogleSheets(text, 650, "output.csv")
+	output, err := app.ConvertIGScriptToGoogleSheets(text, 650, "output.csv")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		fmt.Println("Top: " + fmt.Sprint(err.Error()))
+	}
 
 	fmt.Println(output)
 }

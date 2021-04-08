@@ -15,66 +15,114 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 
 	result, err := parseAttributes(text)
 	outErr := handleParsingError(tree.ATTRIBUTES, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.Attributes = result
 
 	result, err = parseAttributesProperty(text)
 	outErr = handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.AttributesProperty = result
 
 	result, err = parseDeontic(text)
 	outErr = handleParsingError(tree.DEONTIC, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.Deontic = result
 
 	result, err = parseAim(text)
 	outErr = handleParsingError(tree.AIM, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.Aim = result
 
 	result, err = parseDirectObject(text)
 	outErr = handleParsingError(tree.DIRECT_OBJECT, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.DirectObject = result
 
 	result, err = parseDirectObjectProperty(text)
 	outErr = handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.DirectObjectProperty = result
 
 	result, err = parseIndirectObject(text)
 	outErr = handleParsingError(tree.INDIRECT_OBJECT, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.IndirectObject = result
 
 	result, err = parseIndirectObjectProperty(text)
 	outErr = handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.IndirectObjectProperty = result
 
 	result, err = parseActivationCondition(text)
 	outErr = handleParsingError(tree.ACTIVATION_CONDITION, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.ActivationConditionSimple = result
 
 	result, err = parseExecutionConstraint(text)
 	outErr = handleParsingError(tree.EXECUTION_CONSTRAINT, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.ExecutionConstraintSimple = result
 
 	result, err = parseConstitutedEntity(text)
 	outErr = handleParsingError(tree.CONSTITUTED_ENTITY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.ConstitutedEntity = result
 
 	result, err = parseConstitutedEntityProperty(text)
 	outErr = handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.ConstitutedEntityProperty = result
 
 	result, err = parseModal(text)
 	outErr = handleParsingError(tree.MODAL, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.Modal = result
 
 	result, err = parseConstitutingFunction(text)
 	outErr = handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.ConstitutiveFunction = result
 
 	result, err = parseConstitutingProperties(text)
 	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.ConstitutingProperties = result
 
 	result, err = parseConstitutingPropertiesProperty(text)
 	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		return s, outErr
+	}
 	s.ConstitutingPropertiesProperty = result
 
 	return s, outErr
@@ -323,7 +371,7 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
-		log.Fatal("Error during component parsing: ", err.Error())
+		log.Println("Error during component parsing: ", err.Error())
 	}
 
 	// Override missing combination error, since it is not relevant at this level
