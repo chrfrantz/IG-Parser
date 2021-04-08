@@ -4,7 +4,14 @@
 # Maintainer: Christopher Frantz (cf@christopherfrantz.org)
 
 # Clears current instance of IG-Parser and redeploys after pulling from git repository.
-# Ensure to run with sudo
+# Ensure to run the script with sudo!
+
+echo "Initiating (re)deployment of latest version of IG-Parser ..."
+
+# Create logs folder if it does not already exist
+if [ ! -d ./logs ]; then
+  mkdir -p ./logs;
+fi
 
 # Tear down current version 
 docker-compose down
