@@ -1,7 +1,9 @@
 <style>
+
 html, body {
     min-height: 100%;
 }
+
 body, div, form, input, select, output, textarea, p {
     padding: 0;
     margin: auto;
@@ -13,6 +15,7 @@ body, div, form, input, select, output, textarea, p {
     display: block;
     alignment: center;
 }
+
 h1 {
     margin: auto;
     line-height: 42px;
@@ -24,6 +27,7 @@ h1 {
     justify-content: center;
     text-align: center;
 }
+
 .testbox {
     display: flex;
     justify-content: center;
@@ -31,6 +35,7 @@ h1 {
     height: inherit;
     padding: 20px;
 }
+
 form {
     width: 90%;
     padding: 20px;
@@ -38,6 +43,7 @@ form {
     background: #fff;
     box-shadow: 0 0 25px 0 #d6e0f5;
 }
+
 .output {
     width: 90%;
     padding: 20px;
@@ -64,6 +70,7 @@ form {
     align-items: center;
     text-align: center;
 }
+
 .banner::after {
     content: "";
     background-color: rgba(0, 0, 0, 0.3);
@@ -71,18 +78,22 @@ form {
     width: 100%;
     height: 100%;
 }
+
 input, select, textarea {
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 3px;
 }
+
 input {
     width: calc(100% - 10px);
     padding: 5px;
 }
+
 input[type="date"] {
     padding: 4px 5px;
 }
+
 select {
     width: 100%;
     padding: 7px 0;
@@ -92,9 +103,8 @@ select {
 textarea {
     width: calc(100% - 12px);
     padding: 5px;
-    /*resize: vertical;*/
+    resize: vertical;
     display: block;
-
 }
 
 .item input:hover, .item select:hover, .item textarea:hover {
@@ -102,33 +112,40 @@ textarea {
     box-shadow: 0 0 6px 0 #d6e0f5;
     color: #d6e0f5;
 }
+
 .item {
     position: relative;
     margin: 10px 0;
 }
+
 input[type="date"]::-webkit-inner-spin-button {
     display: none;
 }
+
 .item i, input[type="date"]::-webkit-calendar-picker-indicator {
     position: absolute;
     font-size: 20px;
     color: #a9a9a9;
 }
+
 .item i {
     right: 2%;
     top: 28px;
     z-index: 1;
 }
+
 [type="date"]::-webkit-calendar-picker-indicator {
     right: 1%;
     z-index: 2;
     opacity: 0;
     cursor: pointer;
 }
+
 .btn-block {
     margin-top: 10px;
     text-align: center;
 }
+
 button {
     width: 150px;
     padding: 10px;
@@ -139,9 +156,11 @@ button {
     color: #fff;
     cursor: pointer;
 }
+
 button:hover {
     background: #6eb8dd;
 }
+
 @media (min-width: 568px) {
     .name-item, .city-item {
         display: flex;
@@ -150,6 +169,51 @@ button:hover {
     }
 }
 
+/* Currently unused */
+.smallentry {
+    width: 10%;
+    /*text-align: left;*/
+    /*alignment: left;*/
+    position: relative;
+    left: -44.5%; /* Position field left, relative to center */
+}
+
+/* Source: https://blog.logrocket.com/creating-beautiful-tooltips-with-only-css/ */
+.tooltip {
+    position:relative; /* making the .tooltip span a container for the tooltip text */
+    border-bottom:1px dashed #000; /* little indicater to indicate it's hoverable */
+}
+
+.tooltip:before {
+    white-space: pre-line; /* ensures the interpretation of line breaks via \n */
+    display: inline-block;
+    content: attr(data-text); /* here's the magic */
+    position:absolute;
+
+    /* vertically center */
+    top:50%;
+    transform:translateY(-40%);
+
+    /* move to right */
+    left:100%;
+    margin-left:15px; /* and add a small left margin */
+
+    /* basic styles */
+    width:600px;
+    padding:10px;
+    border-radius:10px;
+    background:#000;
+    color:#fff;
+    text-align:left;
+
+    display:none; /* hide by default */
+}
+
+.tooltip:hover:before {
+    display:block;
+}
+
+/*
 .tooltip {
     border-bottom: 1px dotted #000000; color: #000000; outline: none;
     cursor: help; text-decoration: none;
@@ -174,6 +238,6 @@ button:hover {
     font-family: Candara, Tahoma, Geneva, sans-serif; font-size: 1.2em; font-weight: bold;
     display: block; padding: 0.2em 0 0.6em 0;
 }
-.classic { padding: 0.8em 1em; }
+.classic { padding: 0.8em 1em; }*/
 
 </style>

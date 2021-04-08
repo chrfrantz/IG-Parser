@@ -2,6 +2,7 @@ package main
 
 import (
 	"IG-Parser/web/converter"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -39,6 +40,8 @@ func main() {
 		converter.Logging = false
 	}
 
+	//converter.Logging = false
+
 	// Check for logging path (if logging is enabled)
 	if converter.Logging == true {
 		logPath := os.Getenv(ENV_VAR_LOGGING_PATH)
@@ -50,6 +53,8 @@ func main() {
 
 	addr := ":" + port
 	log.Printf("Listening on %s ...\n", addr)
+	log.Println("Logging: " + fmt.Sprint(converter.Logging))
+	log.Println("Logging path: " + fmt.Sprint(converter.LoggingPath))
 	log.Fatal(http.ListenAndServe(addr, nil))
 
 }

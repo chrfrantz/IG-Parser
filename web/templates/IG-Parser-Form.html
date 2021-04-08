@@ -40,9 +40,15 @@
     <p>&nbsp;</p>
     <div class="form">
         <form method="POST">
-            <label>Original Statement:</label><textarea name="rawStatement" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
-            <label>Annotated Statement:</label><textarea name="annotatedStatement" onfocusin="check(this)" onkeyup="check(this)">{{.CodedStmt}}</textarea><br />
-            <label>Statement ID:</label><input name="stmtId" type="number" value="{{.StmtId}}"><br />
+            <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
+            <textarea name="rawStatement" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
+
+            <span data-text="{{.CodedStmtHelp}}" class="tooltip">Annotated Statement:</span>
+            <textarea name="annotatedStatement" onfocusin="check(this)" onkeyup="check(this)">{{.CodedStmt}}</textarea><br />
+
+            <span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
+            <input name="stmtId" type="number" value="{{.StmtId}}"><br />
+
             <input value="Generate statements" type="submit">
             {{if .Error}}
                 <div class="error">
@@ -52,7 +58,9 @@
             {{if ne .TransactionId ""}}
                 <div class="transactionId">
                     <label>Request ID: {{.TransactionId}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a class="tooltip" href="mailto:ig-parser@frantz.cloud?subject=%5BIG-Parser%5D%20%5BRequest%20ID%3A%20{{.TransactionId}}%5D&body=Please%20replace%20the%20body%20text%20with%20the%20observations%2C%20questions%2C%20or%20suggestions%20you%20have%20based%20on%20your%20experience%20with%20IG-Parser.If%20you%20observed%20errors%2C%20please%20provide%20a%20description%20(e.g.%2C%20specifying%20what%20you%20expected%20to%20see%2C%20and%20what%20you%20observed%3B%20error%20messages%20you%20received%2C%20etc.).Please%20also%20feel%20free%20to%20provide%20open%20feedback%20or%20suggestions%20for%20further%20improvement.">Report error or other observations<span class="classic">Clicking on this link should open your mail client with a pre-populated mail. </br>Alternatively, right-click on the link, copy the e-mail address, and send a mail manually. Ensure to provide the Request ID in the subject line or body of your mail.</span></a> </label>
+                        <a class="tooltip"
+                           href="mailto:ig-parser@frantz.cloud?subject=%5BIG-Parser%5D%20%5BRequest%20ID%3A%20{{.TransactionId}}%5D&body=Please%20replace%20the%20body%20text%20with%20the%20observations%2C%20questions%2C%20or%20suggestions%20you%20have%20based%20on%20your%20experience%20with%20IG-Parser.If%20you%20observed%20errors%2C%20please%20provide%20a%20description%20(e.g.%2C%20specifying%20what%20you%20expected%20to%20see%2C%20and%20what%20you%20observed%3B%20error%20messages%20you%20received%2C%20etc.).Please%20also%20feel%20free%20to%20provide%20open%20feedback%20or%20suggestions%20for%20further%20improvement."
+                           data-text="{{.ReportHelp}}">Report error or other observations</a> </label>
                 </div>
             {{end}}
         </form>

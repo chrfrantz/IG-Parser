@@ -55,17 +55,34 @@ func Init() {
 }
 
 func ConverterHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		// Just show empty form
-		tmpl.Execute(w, ReturnStruct{Success: false, Message: "", CodedStmt: ANNOTATED_STATEMENT, StmtId: STATEMENT_ID})
-		return
-	}
+
+	// Prepopulate response
 	message := ""
 	transactionID := ""
 	rawStmt := r.FormValue("rawStatement")
 	codedStmt := r.FormValue("annotatedStatement")
 	stmtId := r.FormValue("stmtId")
-	retStruct := ReturnStruct{Success: false, Error: false, Message: message, RawStmt: rawStmt, CodedStmt: codedStmt, StmtId: stmtId, TransactionId: transactionID}
+	retStruct := ReturnStruct{
+		Success: false,
+		Error: false,
+		Message: message,
+		RawStmt: rawStmt,
+		CodedStmt: codedStmt,
+		StmtId: stmtId,
+		TransactionId: transactionID,
+		RawStmtHelp: HELP_RAW_STMT,
+		CodedStmtHelp: HELP_CODED_STMT,
+		StmtIdHelp: HELP_STMT_ID,
+		ReportHelp: HELP_REPORT}
+
+	if r.Method != http.MethodPost {
+		// Just show empty form with prepopulated elements
+		retStruct.CodedStmt = ANNOTATED_STATEMENT
+		retStruct.StmtId = STATEMENT_ID
+
+		tmpl.Execute(w, retStruct)
+		return
+	}
 
 	// Initialize request-specific logfile first
 	if Logging {

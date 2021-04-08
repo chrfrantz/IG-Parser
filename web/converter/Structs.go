@@ -20,4 +20,12 @@ type ReturnStruct struct{
 	TabularOutput string
 	// Transaction ID
 	TransactionId string;
+	// Help message for raw statement
+	RawStmtHelp string;
+	// Help message for coded statement
+	CodedStmtHelp string;
+	// Help message for statement ID
+	StmtIdHelp string;
+	// Help message for report tooltip
+	ReportHelp string;
 }
