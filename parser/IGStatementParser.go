@@ -10,8 +10,43 @@ import (
 	"strings"
 )
 
+// Define constants for parentheses and braces
+const LEFT_PARENTHESIS = "("
+const RIGHT_PARENTHESIS = ")"
+const LEFT_BRACE = "{"
+const RIGHT_BRACE = "}"
+
+
 func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	s := tree.Statement{}
+
+	// Validate input string first with respect to parentheses ...
+	err := validateInput(text, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return tree.Statement{}, err
+	}
+	// ... and braces
+	err = validateInput(text, LEFT_BRACE, RIGHT_BRACE)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return tree.Statement{}, err
+	}
+
+	// Now retrieve component-only and nested statements
+	compAndNestedStmts, err := separateComponentsAndNestedStatements(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return tree.Statement{}, err
+	}
+	fmt.Println("Returned separated components and nested statements: " + fmt.Sprint(compAndNestedStmts))
+	// Extract component-only statement and override input
+	text = compAndNestedStmts[0][0]
+	// Extract potential nested statements
+	nestedStmts := compAndNestedStmts[1]
+	if len(nestedStmts) == 0 {
+		log.Println("No nested statements found.")
+	}
+
+	fmt.Println("Text to be parsed: " + text)
+	// Now parsing on component level
 
 	result, err := parseAttributes(text)
 	outErr := handleParsingError(tree.ATTRIBUTES, err)
@@ -125,6 +160,8 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	}
 	s.ConstitutingPropertiesProperty = result
 
+	fmt.Println(s.String())
+
 	return s, outErr
 
 }
@@ -142,103 +179,212 @@ func handleParsingError(component string, err tree.ParsingError) tree.ParsingErr
 	return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
-func parseAttributes(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.ATTRIBUTES, text)
-}
 
-func parseAttributesProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.ATTRIBUTES_PROPERTY, text)
-}
+// Component prefix (word without spaces and parentheses, but [] brackets)
+var componentPrefix = "([a-zA-Z\\[\\]]+)+"
 
-func parseDeontic(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.DEONTIC, text)
-}
+/*
+Escapes all special symbols to prepare those for input into regex expression
+ */
+func escapeSymbolsForRegex(text string) string {
+	text = strings.ReplaceAll(text, "{", "\\{")
+	text = strings.ReplaceAll(text, "}", "\\}")
+	text = strings.ReplaceAll(text, "(", "\\(")
+	text = strings.ReplaceAll(text, ")", "\\)")
+	text = strings.ReplaceAll(text, "[", "\\[")
+	text = strings.ReplaceAll(text, "]", "\\]")
 
-func parseAim(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.AIM, text)
-}
-
-func parseDirectObject(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.DIRECT_OBJECT, text)
-}
-
-func parseDirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.DIRECT_OBJECT_PROPERTY, text)
-}
-
-func parseIndirectObject(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.INDIRECT_OBJECT, text)
-}
-
-func parseIndirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.INDIRECT_OBJECT_PROPERTY, text)
-}
-
-func parseConstitutedEntity(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.CONSTITUTED_ENTITY, text)
-}
-
-func parseConstitutedEntityProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.CONSTITUTED_ENTITY_PROPERTY, text)
-}
-
-func parseModal(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.MODAL, text)
-}
-
-func parseConstitutingFunction(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.CONSTITUTIVE_FUNCTION, text)
-}
-
-func parseConstitutingProperties(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.CONSTITUTING_PROPERTIES, text)
-}
-
-func parseConstitutingPropertiesProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.CONSTITUTING_PROPERTIES_PROPERTY, text)
-}
-
-func parseActivationCondition(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.ACTIVATION_CONDITION, text)
-}
-
-func parseExecutionConstraint(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(tree.EXECUTION_CONSTRAINT, text)
+	return text
 }
 
 /*
-Validates input with respect to parentheses balance.
+Separates nested statement expressions (including component prefix)
+from individual components (including combinations of components).
+Returns multi-dim array, with element [0][0] containing component-only string,
+and element [1] containing nested statements (potentially multiple)
  */
-func validateInput(text string) (tree.ParsingError) {
+func separateComponentsAndNestedStatements(statement string) ([][]string, tree.ParsingError) {
+
+	// Prepare return structure
+	ret := make([][]string,2)
+
+	// Identify all nested statements
+	nestedStmts, err := identifyNestedStatements(statement)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return nil, err
+	}
+
+	// Contains complete nested statements (with prefix)
+	completeNestedStmts := []string{}
+
+	if len(nestedStmts) > 0 {
+
+		// Iterate through identified nested statements (if any) and remove those from statement
+		for _, v := range nestedStmts {
+			// Prepare pattern to extract nested statements including prefix from overall statement
+			r, err := regexp.Compile(componentPrefix + escapeSymbolsForRegex(v))
+			if err != nil {
+				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
+					ErrorMessage: "Error during pattern extraction in nested statement."}
+			}
+			// Extract nested statement including prefix embedded in overall statement
+			result := r.FindAllStringSubmatch(statement, -1)
+			if len(result) > 0 {
+				// Append extracted nested statements including component prefix
+				completeNestedStmts = append(completeNestedStmts, result[0][0])
+
+				// Remove nested statement from overall statement
+				statement = strings.ReplaceAll(statement, result[0][0], "")
+			} else {
+				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
+					ErrorMessage: "Unable to extract prefix of nested statement " + v}
+			}
+		}
+		// Assign nested statements if found
+		ret[1] = completeNestedStmts
+		fmt.Println("Remaining non-nested input statement (without nested elements): " + statement)
+	} else {
+		fmt.Println("No nested statement found in input: " + statement)
+	}
+
+	// Assign component-only string
+	ret[0] = []string{statement}
+
+	fmt.Println("Array to be returned: " + fmt.Sprint(ret))
+
+	// Return combined structure
+	return ret, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+}
+
+/*
+Identifies nested statement patterns
+ */
+func identifyNestedStatements(statement string) ([]string, tree.ParsingError) {
+
+	// Extract nested statements from input string
+	nestedStatements, err := extractComponent("", statement, LEFT_BRACE, RIGHT_BRACE)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return nil, err
+	}
+
+	fmt.Println("Nested statements: " + fmt.Sprint(nestedStatements))
+
+	return nestedStatements, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+}
+
+func parseAttributes(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.ATTRIBUTES, text)
+}
+
+func parseAttributesProperty(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.ATTRIBUTES_PROPERTY, text)
+}
+
+func parseDeontic(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.DEONTIC, text)
+}
+
+func parseAim(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.AIM, text)
+}
+
+func parseDirectObject(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.DIRECT_OBJECT, text)
+}
+
+func parseDirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.DIRECT_OBJECT_PROPERTY, text)
+}
+
+func parseIndirectObject(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.INDIRECT_OBJECT, text)
+}
+
+func parseIndirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.INDIRECT_OBJECT_PROPERTY, text)
+}
+
+func parseConstitutedEntity(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY, text)
+}
+
+func parseConstitutedEntityProperty(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY_PROPERTY, text)
+}
+
+func parseModal(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.MODAL, text)
+}
+
+func parseConstitutingFunction(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.CONSTITUTIVE_FUNCTION, text)
+}
+
+func parseConstitutingProperties(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES, text)
+}
+
+func parseConstitutingPropertiesProperty(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES_PROPERTY, text)
+}
+
+func parseActivationCondition(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.ACTIVATION_CONDITION, text)
+}
+
+func parseExecutionConstraint(text string) (*tree.Node, tree.ParsingError) {
+	return parseComponentWithParentheses(tree.EXECUTION_CONSTRAINT, text)
+}
+
+/*
+Validates input with respect to parentheses/braces balance.
+Input is text to be tested, as well as left and right parenthesis/braces symbols ((,{, and ),}).
+Parentheses symbols must be consistent, i.e., either both parentheses or braces.
+ */
+func validateInput(text string, leftPar string, rightPar string) (tree.ParsingError) {
+
+	parTypeSingular := ""
+	parTypePlural := ""
+
+	if leftPar == LEFT_BRACE && rightPar == RIGHT_BRACE {
+		parTypeSingular = "braces"
+		parTypePlural = parTypeSingular
+	} else if leftPar == LEFT_PARENTHESIS && rightPar == RIGHT_PARENTHESIS {
+		parTypeSingular = "parenthesis"
+		parTypePlural = "parentheses"
+	} else {
+		return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION,
+			ErrorMessage: "Invalid combination of parentheses/braces during matching (e.g., (}, or {))"}
+	}
 	// Validate parentheses in input
 	parCount := 0
 	for i, letter := range text {
 
 		switch string(letter) {
-		case "(":
+		case leftPar:
 			parCount++
-		case ")":
+		case rightPar:
 			parCount--
 		}
 		i++
 	}
 	if parCount != 0 {
-		msg := "Please review the parentheses in the input statement. "
+		msg := "Please review the " + parTypePlural + " in the input statement. "
 		par := ""
 		parCountAbs := math.Abs(float64(parCount))
 		if parCount == 1 || parCount == -1 {
 			msg += "There is "
-			par = "parenthesis"
+			par = parTypeSingular
 		} else {
 			msg += "There are "
-			par = "parentheses"
+			par = parTypePlural
 		}
 		if parCount > 0 {
-			// too many left parentheses
-			msg = fmt.Sprint(msg, parCountAbs, " additional opening ", par, " ('(').")
+			// too many left parentheses/braces
+			msg = fmt.Sprint(msg, parCountAbs, " additional opening ", par, " ('" + leftPar + "').")
 		} else {
-			// too many right parentheses
-			msg = fmt.Sprint(msg, parCountAbs, " additional closing ", par, " (')').")
+			// too many right parentheses/braces
+			msg = fmt.Sprint(msg, parCountAbs, " additional closing ", par, " ('" + rightPar + "').")
 		}
 		log.Println(msg)
 		return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
@@ -249,10 +395,10 @@ func validateInput(text string) (tree.ParsingError) {
 
 /*
 Extracts a component specification from string based on component signature (e.g., A, I, etc.)
-and balanced parentheses.
+and balanced parentheses/braces.
 If no component is found, an empty string is returned
 */
-func extractComponent(component string, input string) ([]string, tree.ParsingError) {
+func extractComponent(component string, input string, leftPar string, rightPar string) ([]string, tree.ParsingError) {
 
 	// Strings for given component
 	componentStrings := []string{}
@@ -262,19 +408,15 @@ func extractComponent(component string, input string) ([]string, tree.ParsingErr
 
 	fmt.Println("Looking for component: " + component)
 
-	// Validate input string first
-	err := validateInput(processedString)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return nil, err
-	}
+	// Assume that parentheses/braces are checked beforehand
 
 	for { // infinite loop - needs to break out
-		// Find first occurrence of signature
-		startPos := strings.Index(processedString, component + "(")
+		// Find first occurrence of signature in processedString (incrementally iterated by letter)
+		startPos := strings.Index(processedString, component + leftPar)
 
 		if startPos == -1 {
-			//log.Println("Component signature " + component + " not found in input string '" + input + "'")
-			return componentStrings, tree.ParsingError{ErrorCode: tree.TREE_NO_ERROR}
+			// Returns component strings once opening parenthesis symbol is no longer found
+			return componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 		}
 
 		// Parentheses count to check for balance
@@ -285,9 +427,9 @@ func extractComponent(component string, input string) ([]string, tree.ParsingErr
 		for i, letter := range processedString[startPos:] {
 
 			switch string(letter) {
-			case "(":
+			case leftPar:
 				parCount++
-			case ")":
+			case rightPar:
 				parCount--
 				if parCount == 0 {
 					componentStrings = append(componentStrings, processedString[startPos:startPos+i+1])
@@ -301,7 +443,20 @@ func extractComponent(component string, input string) ([]string, tree.ParsingErr
 			}
 		}
 	}
+}
 
+/*
+Parses component based on surrounding parentheses.
+*/
+func parseComponentWithParentheses(component string, input string) (*tree.Node, tree.ParsingError) {
+	return parseComponent(component, input, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
+}
+
+/*
+Parses component based on surrounding braces
+*/
+func parseComponentWithBraces(component string, input string) (*tree.Node, tree.ParsingError) {
+	return parseComponent(component, input, LEFT_BRACE, RIGHT_BRACE)
 }
 
 // Logical operators prepared for regular expression
@@ -311,11 +466,11 @@ var wordsWithParentheses = "([a-zA-Z',;()\\[\\]]+\\s*)+"
 // Pattern of combinations, e.g., ( ... [AND] ... )
 var combinationPattern = "\\(" + wordsWithParentheses + "(\\[" + logicalOperators + "\\]\\s" + wordsWithParentheses + ")+\\)"
 
-func parseComponent(component string, text string) (*tree.Node, tree.ParsingError) {
+func parseComponent(component string, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
 
 	// Extract component (one or multiple occurrences) from input string based on provided component identifier
-	componentStrings, err := extractComponent(component, text)
-	if err.ErrorCode != tree.TREE_NO_ERROR {
+	componentStrings, err := extractComponent(component, text, leftPar, rightPar)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return nil, err
 	}
 
@@ -326,9 +481,13 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 
 	// [AND]-link different components (if multiple occur in input string)
 	if len(componentStrings) > 1 {
-		r, _ := regexp.Compile(combinationPattern)
+		r, err := regexp.Compile(combinationPattern)
+		if err != nil {
+			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
+				ErrorMessage: "Error during pattern extraction in combination expression."}
+		}
 		// Add leading parenthesis
-		componentString = "("
+		componentString = LEFT_PARENTHESIS
 		for i, v := range componentStrings {
 			fmt.Println("Round: " + strconv.Itoa(i) + ": " + v)
 			// Extract and concatenate individual component values but cut leading component identifier
@@ -346,7 +505,7 @@ func parseComponent(component string, text string) (*tree.Node, tree.ParsingErro
 				componentString += " " + tree.SAND_BRACKETS + " "
 			} else {
 				// Add trailing parenthesis
-				componentString += ")"
+				componentString += RIGHT_PARENTHESIS
 			}
 		}
 		//fmt.Println("Combination finished: " + componentString)

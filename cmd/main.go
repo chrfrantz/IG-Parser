@@ -6,6 +6,8 @@ import (
 	"IG-Parser/parser"
 	"IG-Parser/tree"
 	"fmt"
+	"regexp"
+	"strings"
 )
 
 //var words = "([a-zA-Z',;]+\\s*)+"
@@ -54,6 +56,32 @@ func main0()  {
 }
 
 func main() {
+
+	var componentPrefix = "([a-zA-Z\\[\\]]+)+"
+	//v := "\\{A\\(Actor\\) I\\(has applied\\) for Bdir\\(certification\\)\\}"
+	v := "{A(Actor) I(has applied) for Bdir(certification)}"
+
+	v = strings.ReplaceAll(v, "{", "\\{")
+	v = strings.ReplaceAll(v, "}", "\\}")
+	v = strings.ReplaceAll(v, "(", "\\(")
+	v = strings.ReplaceAll(v, ")", "\\)")
+	v = strings.ReplaceAll(v, "[", "\\[")
+	v = strings.ReplaceAll(v, "]", "\\]")
+
+	statement := "A(Actor) D(must) I(comply) with Bdir(provisions) Cac[dfg]{A(Actor) I(has applied) for Bdir(certification)}"
+
+	r, err := regexp.Compile(componentPrefix + "" + v + "")
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	result := r.FindAllStringSubmatch(statement, 1)
+
+	fmt.Println(result[0][0])
+}
+
+func mainx() {
 	text := "(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
