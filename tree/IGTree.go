@@ -26,16 +26,18 @@ type Statement struct {
 	ConstitutingPropertiesProperty *Node
 	// Shared Components
 	ActivationConditionSimple *Node
-	ActivationConditionComplex *Statement
+	ActivationConditionComplex *Node
 	ExecutionConstraintSimple *Node
-	ExecutionConstraintComplex *Statement
-	OrElse *Statement
+	ExecutionConstraintComplex *Node
+	OrElse *Node
 }
 
 func (s *Statement) String() string {
 	out := ""
 	sep := ": "
 	suffix := "\n"
+	complexPrefix := "{\n"
+	complexSuffix := "\n}"
 	if s.Attributes != nil {
 		out += ATTRIBUTES + sep
 		out += s.Attributes.String()
@@ -113,7 +115,7 @@ func (s *Statement) String() string {
 	}
 	if s.ActivationConditionComplex != nil {
 		out += ACTIVATION_CONDITION + sep
-		out += s.ActivationConditionComplex.String()
+		out += complexPrefix + s.ActivationConditionComplex.String() + complexSuffix
 		out += suffix
 	}
 	if s.ExecutionConstraintSimple != nil {
@@ -253,6 +255,19 @@ func (s *Statement) GenerateLeafArrays() ([][]*Node, map[string]int) {
 	}
 	referenceMap[ACTIVATION_CONDITION] = i
 
+	// Check for complex activation conditions
+	if s.ActivationConditionComplex != nil {
+		nodesMap = append(nodesMap, []*Node{s.ActivationConditionComplex})
+		referenceMap[ACTIVATION_CONDITION_REFERENCE] = 1
+	}
+	// Add array of leaf nodes attached to general array
+	/*for _, v := range s.ActivationConditionComplex.GetLeafNodes() {
+		nodesMap = append(nodesMap, v)
+		i++
+		ct++
+	}
+	referenceMap[ACTIVATION_CONDITION] = i*/
+
 	// Counter for number of elements in given component
 	i = 0
 	// Add array of leaf nodes attached to general array
@@ -340,7 +355,7 @@ type Node struct {
 	// Indicates component type
 	ComponentType string
 	// Substantive content of a leaf node
-	Entry string
+	Entry interface{}
 	// Text shared across children to the left of a combination (e.g., (shared info (left val [AND] right val)))
 	SharedLeft []string
 	// Text shared across children to the right of a combination (e.g., ((left val [AND] right val) shared info))
@@ -441,6 +456,18 @@ func (n *Node) GetSharedRight() []string {
 	return []string{}
 }
 
+/*
+Indicates if node has a primitive consisting of string value, or conversely,
+a complex entry consisting of an institutional statement in its own right.
+ */
+func (n *Node) HasPrimitiveEntry() bool {
+	// Check whether the entry is a string
+	if _, ok := n.Entry.(string); ok {
+		return true
+	}
+	return false
+}
+
 // Sort interface implementation for alphabetic ordering (not order of appearance in tree) of nodes
 type ByEntry []*Node
 
@@ -449,7 +476,10 @@ func (e ByEntry) Len() int {
 }
 
 func (e ByEntry) Less(i, j int) bool {
-	return e[i].Entry < e[j].Entry
+	if e[i].HasPrimitiveEntry() && e[j].HasPrimitiveEntry() {
+		return e[i].Entry.(string) < e[j].Entry.(string)
+	}
+	return false
 }
 
 func (e ByEntry) Swap(i, j int) {
@@ -478,7 +508,14 @@ func (n *Node) Stringify() string {
 	}
 	// Leaf node
 	if n.IsLeafNode() {
-		return n.Entry
+		if n.HasPrimitiveEntry() {
+			return n.Entry.(string)
+		} else {
+			// Return string of statement
+			// TODO: REVIEW TO ENSURE IT PRINTS CORRECTLY OR ADJUST TO STRINGIFY()
+			val := n.Entry.(Statement)
+			return val.String()
+		}
 	}
 	// Walk the tree
 	out := ""
@@ -518,7 +555,17 @@ func (n *Node) String() string {
 	if n == nil {
 		return "Node is not initialized."
 	} else if n.IsLeafNode() {
-		return /*n.ComponentType + */"Leaf entry: " + n.Entry //+ "\n"
+		retVal := "Leaf entry: "
+		// TODO: Check for correct printing
+		if n.Entry == nil {
+			return retVal + "nil (detected in String())"
+		} else if n.HasPrimitiveEntry() {
+			return retVal + n.Entry.(string)
+		} else {
+			val := n.Entry.(Statement)
+			return retVal + val.String()
+		}
+		//return /*n.ComponentType + */"Leaf entry: " + n.Entry //+ "\n"
 	} else {
 		out := ""
 
@@ -626,7 +673,7 @@ func (n *Node) InsertLeftLeaf(entry string) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
+	if n.Entry != nil {
 		errorMsg := "Attempting to add left leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -647,7 +694,7 @@ func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
+	if n.Entry != nil {
 		errorMsg := "Attempting to add right leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -962,23 +1009,23 @@ func (n *Node) Validate() (bool, NodeError){
 
 	if !n.IsLeafNode() {
 		downwardResult := false
-		error := NodeError{}
+		err := NodeError{}
 		// Move downwards
 		if n.Left == nil {
 			return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Empty left node"}
 		} else {
-			downwardResult, error = n.Left.Validate()
+			downwardResult, err = n.Left.Validate()
 		}
 		if !downwardResult {
-			return false, error
+			return false, err
 		}
 		if n.Right == nil {
 			return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Empty right node"}
 		} else {
-			downwardResult, error = n.Right.Validate()
+			downwardResult, err = n.Right.Validate()
 		}
 		if !downwardResult {
-			return false, error
+			return false, err
 		}
 	}
 	return true, NodeError{ErrorCode: TREE_NO_ERROR}

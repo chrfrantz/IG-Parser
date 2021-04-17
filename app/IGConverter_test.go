@@ -12,7 +12,7 @@ func TestValidStatement(t *testing.T) {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	_, err := ConvertIGScriptToGoogleSheets(text, 650, "")
+	_, err := ConvertIGScriptToGoogleSheets(text, "650", "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Statement parsing should not fail")
 	}
@@ -28,7 +28,7 @@ func TestInvalidAttributeStatement(t *testing.T) {
 		")"+
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	_, err := ConvertIGScriptToGoogleSheets(text, 650, "")
+	_, err := ConvertIGScriptToGoogleSheets(text, "650", "")
 	if err.ErrorCode == tree.PARSING_NO_ERROR {
 		t.Fatal("Statement parsing should produce error")
 	}

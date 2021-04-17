@@ -160,7 +160,28 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	}
 	s.ConstitutingPropertiesProperty = result
 
-	fmt.Println(s.String())
+	//fmt.Println(s.String())
+
+	fmt.Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
+
+	for _, v := range nestedStmts {
+
+		log.Println("Found nested statement")
+		// Extract nested statement content and parse
+		stmt, errStmt := ParseStatement(v[strings.Index(v, LEFT_BRACE)+1:strings.LastIndex(v, RIGHT_BRACE)])
+		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
+			fmt.Print("Error when parsing nested statements: " + errStmt.ErrorCode)
+			return s, errStmt
+		}
+		if strings.HasPrefix(v, tree.ACTIVATION_CONDITION) {
+			log.Println("Attaching nested activation condition to higher-level statement")
+			// Assign nested statement to higher-level statement
+			// TODO: Check for combination of multiple nested statements
+			s.ActivationConditionComplex = &tree.Node{Entry: stmt}
+		}
+	}
+
+	log.Println("Statement:\n" + s.String())
 
 	return s, outErr
 

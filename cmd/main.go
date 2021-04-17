@@ -6,6 +6,7 @@ import (
 	"IG-Parser/parser"
 	"IG-Parser/tree"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 )
@@ -14,7 +15,7 @@ import (
 //var wordsWithParentheses = "([a-zA-Z',;()]+\\s*)+"
 //var logicalOperators = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
 
-func main2() {
+func main() {
 
 	//text := "National Organic Program's Program Manager, on behalf of the Secretary, may (inspect and [AND] review) (certified production and [AND] handling operations and [AND] accredited certifying agents) for compliance with the (Act or [XOR] regulations in this part)."
 
@@ -31,11 +32,35 @@ func main2() {
 		")"*/
 		//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
-	s,_ := parser.ParseStatement(text)
+	text = "A(Actor) D(must) I((comply [OR] violate)) with Bdir(provisions) Cac[dfg]{A(Actor) I(has (applied and [AND] advocated)) for Bdir(certification)}"
+
+	output, err := app.ConvertIGScriptToGoogleSheets(text, "65", "fun.csv")
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		log.Fatal(err.Error())
+	}
+
+	fmt.Println(output)
+
+	/*
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		log.Fatal(err.Error())
+	}
+
+	log.Println("Step 2: Extracting leaf arrays")
+	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
+	leafArrays, componentRefs := s.GenerateLeafArrays()
 
 	fmt.Println("Printing stuff: ")
 
 	fmt.Println(s.String())
+
+	fmt.Println("Leaf arrays: ")
+	fmt.Println(leafArrays)
+
+	fmt.Println(fmt.Sprint(componentRefs))
+	*/
 
 }
 
@@ -55,7 +80,7 @@ func main0()  {
 
 }
 
-func main() {
+func main00() {
 
 	var componentPrefix = "([a-zA-Z\\[\\]]+)+"
 	//v := "\\{A\\(Actor\\) I\\(has applied\\) for Bdir\\(certification\\)\\}"
@@ -99,7 +124,7 @@ func mainx() {
 
 	//os.Exit(0)
 
-	output, err := app.ConvertIGScriptToGoogleSheets(text, 650, "output.csv")
+	output, err := app.ConvertIGScriptToGoogleSheets(text, "650", "output.csv")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		fmt.Println("Top: " + fmt.Sprint(err.Error()))
 	}
@@ -148,11 +173,11 @@ func main3() {
 
 	//os.Exit(0)
 
-	output,_ := exporter.GenerateGoogleSheetsOutput(res, componentRefs, links, "650")
+	//output,_ := exporter.GenerateGoogleSheetsOutput(res, componentRefs, links, "650")
 
 	//fmt.Println("\n" + output)
 
-	exporter.WriteToFile("statement.csv", output)
+	//exporter.WriteToFile("statement.csv", output)
 
 
 

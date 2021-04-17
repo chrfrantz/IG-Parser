@@ -222,7 +222,10 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 					if left != "" {
 						// If no combinations exist, assign as left leaf
 						fmt.Println("Found leaf on left side: " + left)
-						node.InsertLeftLeaf(left)
+						res, err := node.InsertLeftLeaf(left)
+						if !res {
+							return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
+						}
 					} else {
 						msg := "Empty leaf value on left side: " + left +
 							" (Corresponding right value and operator: " + right + "; " + node.LogicalOperator +
@@ -254,14 +257,20 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 						if left != "" {
 							// If no combinations exist, assign as left leaf
 							fmt.Println("Found leaf on left side: " + left)
-							node.InsertLeftLeaf(left)
+							res, err := node.InsertLeftLeaf(left)
+							if !res {
+								return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
+							}
 						}
 					} else {
 						// Create nested node and link with parent
 						fmt.Println("Deep parsing: Returned left node is combination; assign as nested node")
 
 						// Link newly identified node with main node
-						node.InsertLeftNode(leftNode)
+						res, err := node.InsertLeftNode(leftNode)
+						if !res {
+							return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
+						}
 
 						// Check for inheriting shared elements on AND nodes
 						//inheritSharedElements(leftNode)
@@ -286,7 +295,10 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 					if right != "" {
 						// If no combinations exist, assign as left leaf
 						fmt.Println("Found leaf on right side: " + right)
-						node.InsertRightLeaf(right)
+						res, err := node.InsertRightLeaf(right)
+						if !res {
+							return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
+						}
 					} else {
 						msg := "Empty leaf value on right side: " + right + " (Corresponding left value and operator: " + left + "; " + node.LogicalOperator +
 							");\n processed expression: " + input
@@ -317,14 +329,20 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 						if right != "" {
 							// If no combinations exist, assign as right leaf
 							fmt.Println("Found leaf on right side: " + right)
-							node.InsertRightLeaf(right)
+							res, err := node.InsertRightLeaf(right)
+							if !res {
+								return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
+							}
 						}
 					} else {
 						// Create nested node and link with parent
 						fmt.Println("Deep parsing: Returned right node is combination; assign as nested node")
 
 						// Link newly identified node with main node
-						node.InsertRightNode(rightNode)
+						res, err := node.InsertRightNode(rightNode)
+						if !res {
+							return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
+						}
 
 						// Check for inheriting shared elements on AND nodes
 						//inheritSharedElements(rightNode)
@@ -370,7 +388,7 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 	//fmt.Println("Node order: ")
 	ct := 0
 	// If more than one node ...
-	if len(orderMap) > 0 {
+	if len(orderMap) > 1 {
 		for ct < len(input) {
 			if _, ok := orderMap[ct]; ok {
 				// ... then synthetically link elements
@@ -379,13 +397,13 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 			}
 			ct++
 		}
-	} /*else if len(orderMap) == 1 {
+	} else if len(orderMap) == 1 {
 		// or simply assign last node if only one has been found
 		for _, v := range orderMap {
 			nodeTree = v
 		}
 		fmt.Println("Simple assignment of single node...")
-	}*/
+	}
 
 	fmt.Println("RETURNING FINAL NODE: " + nodeTree.String())
 	return nodeTree, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
