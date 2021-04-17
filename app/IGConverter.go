@@ -4,6 +4,7 @@ import (
 	"IG-Parser/exporter"
 	"IG-Parser/parser"
 	"IG-Parser/tree"
+	"fmt"
 	"log"
 )
 
@@ -23,6 +24,14 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 	}
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	return exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, stmtId, filename)
+	output, statementMap, statementHeader, err := exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, stmtId, "")
+
+	fmt.Println(statementHeader)
+	fmt.Println(statementMap)
+
+	output, _ = exporter.GenerateGoogleSheetsOutput(statementMap, statementHeader, filename)
+
+
+	return output, err
 
 }

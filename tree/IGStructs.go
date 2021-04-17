@@ -61,14 +61,16 @@ const (
 Indicates whether a given symbol is a valid IG Component symbol
  */
 func validIGComponentSymbol(symbol string) bool {
-	return StringInSlice(symbol, IGComponentSymbols)
+	res, _ := StringInSlice(symbol, IGComponentSymbols)
+	return res
 }
 
 /*
 Indicates whether a given name is a valid IG Component name
  */
 func validIGComponentName(name string) bool {
-	return StringInSlice(name, IGComponentNames)
+	res, _ := StringInSlice(name, IGComponentNames)
+	return res
 }
 
 /*
@@ -148,7 +150,8 @@ type igLogicalOperator struct {
 Checks whether operator value is valid (i.e., a valid logical operator symbol).
 */
 func (o *igLogicalOperator) valid() bool {
-	return StringInSlice(o.LogicalOperatorName, IGLogicalOperators)
+	res, _ := StringInSlice(o.LogicalOperatorName, IGLogicalOperators)
+	return res
 }
 
 func (o igLogicalOperator) String() string {
@@ -276,7 +279,8 @@ func CollapseAdjacentOperators(inputArray []string, valuesToCollapse []string) [
 		// If last value is the same as this one
 		if outSlice[len(outSlice) - 1] == v {
 			// and in the registered value
-			if StringInSlice(v, valuesToCollapse) {
+			res, _ := StringInSlice(v, valuesToCollapse)
+			if res {
 				// do nothing
 			} else {
 				// else append
@@ -303,15 +307,64 @@ func NodeInSlice(a *Node, list []*Node) bool {
 }
 
 /*
-Indicates whether a particular value is contained in a slice of strings
+Indicates whether a particular value is contained in a slice of strings,
+and if so, indicates index in slice (else -1).
  */
-func StringInSlice(a string, list []string) bool {
-	for _, b := range list {
+func StringInSlice(a string, list []string) (bool, int) {
+	for i, b := range list {
 		if b == a {
-			return true
+			return true, i
 		}
 	}
-	return false
+	return false, -1
+}
+
+/*
+Merges two slices. Values of the smaller slice are added after the previous shared value
+with the bigger slice. If no last shared entry could be found, the deviating entries will
+be appended at the end.
+ */
+func MergeSlices(array1 []string, array2 []string) []string {
+	result := []string{}
+	arrayToIterate := []string{}
+
+	// Figure out which array is larger
+	if len(array1) >= len(array2) {
+		result = array1
+		arrayToIterate = array2
+	} else {
+		result = array2
+		arrayToIterate = array1
+	}
+
+	// Store last match
+	indexOfLastIdenticalElement := -1
+
+	// Iterate through smaller array
+	for i, v := range arrayToIterate {
+		// See if element of smaller array is already in larger array
+		res, idx := StringInSlice(v, result)
+		if res {
+			// if so, update index of last match
+			indexOfLastIdenticalElement = idx
+		} else {
+			// if it is not first element and some shared elements have been found
+			if i != 0 && indexOfLastIdenticalElement != -1 {
+				// Add element at position following last shared index
+
+				// Append empty element (value does not matter)
+				result = append(result, "placeholder")
+				// Shift content from given position one to the right
+				copy(result[indexOfLastIdenticalElement+2:], result[indexOfLastIdenticalElement+1:])
+				// Insert new element at given position
+				result[indexOfLastIdenticalElement+1] = v
+			} else {
+				// else append at the end of result array
+				result = append(result, v)
+			}
+		}
+	}
+	return result
 }
 
 /*

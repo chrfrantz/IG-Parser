@@ -952,7 +952,8 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 		"; Logical operator: " + logicalOperator + ")")
 	}
 	if logicalOperator != "" {
-		if !StringInSlice(logicalOperator, IGLogicalOperators) {
+		res, _ := StringInSlice(logicalOperator, IGLogicalOperators)
+		if !res {
 			log.Fatal("Logical operator value invalid (Value: " + logicalOperator + ")")
 		}
 	}
