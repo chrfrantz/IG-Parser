@@ -41,19 +41,19 @@ Output:
 - Array of header symbols (used for component linkage references)
 - Array of header symbols names (for human-readable header construction)
  */
-func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string) (string, []map[string]string, []string, []string, tree.ParsingError) {
-	output := ""
+func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string) ([]map[string]string, []string, []string, tree.ParsingError) {
+	//output := ""
 
 	// Quote to terminate input string for Google Sheets interpretation
-	quote := "\""
+	//quote := "\""
 	// Line prefix for Google Sheets
-	prefix := "=SPLIT(" + quote
+	//prefix := "=SPLIT(" + quote
 	// Linebreak at the end of each entry
-	linebreak := "\n"
+	//linebreak := "\n"
 	// Column separator used for Sheets output
 	separator := ";"
 	// Line suffix for Google Sheets
-	suffix := quote + ", \"" + separator + "\")" + linebreak
+	//suffix := quote + ", \"" + separator + "\")" + linebreak
 
 	// Caches column header symbols by component index for reuse in logical operator construction
 	headerSymbols := []string{}
@@ -63,14 +63,14 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 	// Generate headers
 	if componentFrequency != nil && len(componentFrequency) != 0 {
 
-		output += prefix
-		output += stmtIdColHeader + separator
+		//output += prefix
+		//output += stmtIdColHeader + separator
 
 		// Iterate through header frequencies and create header row
-		output, headerSymbols, headerSymbolsNames = generateHeaderRow(output, componentFrequency, separator)
+		_, headerSymbols, headerSymbolsNames = generateHeaderRow("", componentFrequency, separator)
 
 		// Complete line
-		output += suffix
+		//output += suffix
 		//fmt.Println("Header: " + output)
 	}
 
@@ -101,14 +101,14 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 
 		//fmt.Println("Statement ", stmtCt, ": ", statement)
 		// Start new row
-		output += prefix
+		//output += prefix
 		// Add statement ID for specific instance
 		subStmtId := generateStatementIDint(stmtId, stmtCt + 1)
 		// Add statement ID to entryMap
 		entryMap[stmtIdColHeader] = subStmtId
 		// Add to the output
-		output += stmtIdPrefix + subStmtId + separator
-		ct := 0
+		//output += stmtIdPrefix + subStmtId + separator
+		//ct := 0
 		// String linking all logical operators for a given row
 		logicalValue := ""
 		// Iterate over component index (i.e., column)
@@ -121,7 +121,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				// Save entry into entryMap
 				entryMap[headerSymbols[componentIdx]] = statement[componentIdx].Entry.(string)
 				// Add to output
-				output += statement[componentIdx].Entry.(string)
+				//output += statement[componentIdx].Entry.(string)
 			} else {
 				entryVal := statement[componentIdx].Entry
 				fmt.Println("Found complex entry: " + fmt.Sprint(entryVal))
@@ -131,7 +131,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					// Save entry into entryMap
 					entryMap[headerSymbols[componentIdx]] = nestedStmtID
 					// and attach to output
-					output += nestedStmtID
+					//output += nestedStmtID
 				} else {
 					// ... else create new one
 					// Generate ID for component-level nested statement
@@ -150,7 +150,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					// Save entry into entryMap
 					entryMap[headerSymbols[componentIdx]] = nestedStmtId
 					// Add reference to to-be component-level nested statements to output
-					output += nestedStmtId
+					//output += nestedStmtId
 				}
 			}
 			fmt.Println("Source node: ", statement[componentIdx])
@@ -159,39 +159,39 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 			logicalValue, errorVal = generateLogicalLinksExpressionForGivenComponentValue(logicalValue, statement,
 				componentIdx, headerSymbols, logicalLinks, stmtId)
 			if errorVal.ErrorCode != tree.PARSING_NO_ERROR {
-				return output, nil, nil, nil, errorVal
+				return nil, nil, nil, errorVal
 			}
 
 			// Only append separator if no more elements in the statement (i.e., no further components)
-			ct++
-			if ct < len(statement) {
+			//ct++
+			/*if ct < len(statement) {
 				output += separator
-			}
+			}*/
 			//fmt.Println("-->", statement[componentIdx])
 		}
 
 		// Append the logical expression at the end of each row
 		if logicalValue != "" {
 			// Append separator
-			output += separator
+			//output += separator
 			// Add to entryMap
 			entryMap[logLinkColHeader] = logicalValue
 			// Append logical combination column
-			output += logicalValue
+			//output += logicalValue
 			// Reset for next round
 			logicalValue = ""
 		}
 		// Add to entries map for all entries
 		entriesMap = append(entriesMap, entryMap)
 		// Append suffix to each row
-		output += suffix
+		//output += suffix
 	}
 
 		fmt.Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
 	for _, val := range componentNestedStmts {
-		nestedOutput, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt, val.ID, "")
+		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt, val.ID, "")
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return output, nil, nil, nil, errorVal
+			return nil, nil, nil, errorVal
 		}
 		// Add nested entries to top-level list
 		entriesMap = append(entriesMap, nestedMap...)
@@ -201,7 +201,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		// Merge header names to consider nested ones
 		headerSymbolsNames = tree.MergeSlices(headerSymbolsNames, nestedHeadersNames, indexSymbol)
 		// Append component-level nested statement to output
-		output += nestedOutput
+		//output += nestedOutput
 	}
 
 	// Add leading and trailing column headers if not already existing
@@ -249,7 +249,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		headerSymbolsNames = tree.MoveElementToNewPosition(pos, len(headerSymbolsNames)-1, headerSymbolsNames)
 	}
 
-	return output, entriesMap, headerSymbols, headerSymbolsNames,  errorVal
+	return entriesMap, headerSymbols, headerSymbolsNames,  errorVal
 }
 
 /*
@@ -330,7 +330,7 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stm
 
 	log.Println("Step: Generate tabular output")
 	// Export in Google Sheets format
-	_, statementMap, statementHeaders, statementHeaderNames, err := generateTabularStatementOutput(res, componentRefs, links, stmtId)
+	statementMap, statementHeaders, statementHeaderNames, err := generateTabularStatementOutput(res, componentRefs, links, stmtId)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", nil, nil, nil, err
 	}

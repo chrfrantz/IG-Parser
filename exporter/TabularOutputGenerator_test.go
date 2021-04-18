@@ -100,7 +100,7 @@ func TestTabularOutput(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	_, statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -163,7 +163,7 @@ func TestTabularOutputWithNestedComponent(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	_, statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
