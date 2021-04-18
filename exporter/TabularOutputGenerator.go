@@ -186,6 +186,29 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		// Append suffix to each row
 		output += suffix
 	}
+
+	// Add leading and trailing column headers if not already existing
+	res, _ := tree.StringInSlice(stmtIdColHeader, headerSymbols)
+	if !res {
+		// Prefix statement ID header to symbols output
+		headerSymbols = append([]string{stmtIdColHeader}, headerSymbols...)
+	}
+	res, _ = tree.StringInSlice(stmtIdColHeader, headerSymbolsNames)
+	if !res {
+		// Prefix statement ID header to names output
+		headerSymbolsNames = append([]string{stmtIdColHeader}, headerSymbolsNames...)
+	}
+	res, _ = tree.StringInSlice(logLinkColHeader, headerSymbols)
+	if !res {
+		// Append logical operator header to symbols output
+		headerSymbols = append(headerSymbols, logLinkColHeader)
+	}
+	res, _ = tree.StringInSlice(logLinkColHeader, headerSymbolsNames)
+	if !res {
+		// Append logical operator header to names output
+		headerSymbolsNames = append(headerSymbolsNames, logLinkColHeader)
+	}
+
 	fmt.Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
 	for _, val := range componentNestedStmts {
 		nestedOutput, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt, val.ID, "")
@@ -195,28 +218,6 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		// Add nested entries to top-level list
 		entriesMap = append(entriesMap, nestedMap...)
 
-		// Add leading and trailing column headers if not already existing
-		res, _ := tree.StringInSlice(stmtIdColHeader, headerSymbols)
-		if !res {
-			// Prefix statement ID header to symbols output
-			headerSymbols = append([]string{stmtIdColHeader}, headerSymbols...)
-		}
-		res, _ = tree.StringInSlice(stmtIdColHeader, headerSymbolsNames)
-		if !res {
-			// Prefix statement ID header to names output
-			headerSymbolsNames = append([]string{stmtIdColHeader}, headerSymbolsNames...)
-		}
-		res, _ = tree.StringInSlice(logLinkColHeader, headerSymbols)
-		if !res {
-			// Append logical operator header to symbols output
-			headerSymbols = append(headerSymbols, logLinkColHeader)
-		}
-		res, _ = tree.StringInSlice(logLinkColHeader, headerSymbolsNames)
-		if !res {
-			// Append logical operator header to names output
-			headerSymbolsNames = append(headerSymbolsNames, logLinkColHeader)
-		}
-
 		// Merge headers to consider nested ones
 		headerSymbols = tree.MergeSlices(headerSymbols, nestedHeaders)
 		// Merge header names to consider nested ones
@@ -225,6 +226,28 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		output += nestedOutput
 	}
 
+	// Reorder header entries to ensure that Statement ID is first element and Logical Links last
+	// Identify position of Statement ID
+	res, pos := tree.StringInSlice(stmtIdColHeader, headerSymbols)
+	if !res {
+		fmt.Println("Statement ID column not in headers: ", headerSymbols)
+	} else if pos != 0 {
+		// Move element to first position
+		headerSymbols = tree.MoveElementToNewPosition(pos, 0, headerSymbols)
+		// Do the same for the names
+		headerSymbolsNames = tree.MoveElementToNewPosition(pos, 0, headerSymbolsNames)
+	}
+
+	// Do the same for Logical Linkage entry
+	res, pos = tree.StringInSlice(logLinkColHeader, headerSymbols)
+	if !res {
+		fmt.Println("Logical Linkage column not in headers: ", headerSymbols)
+	} else if pos != len(headerSymbols) {
+		// Move element to last position
+		headerSymbols = tree.MoveElementToNewPosition(pos, len(headerSymbols)-1, headerSymbols)
+		// Do the same for the names
+		headerSymbolsNames = tree.MoveElementToNewPosition(pos, len(headerSymbolsNames)-1, headerSymbolsNames)
+	}
 
 	return output, entriesMap, headerSymbols, headerSymbolsNames,  errorVal
 }

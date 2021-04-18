@@ -2,6 +2,7 @@ package tree
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -365,6 +366,35 @@ func MergeSlices(array1 []string, array2 []string) []string {
 		}
 	}
 	return result
+}
+
+/*
+Moves element in array to new position.
+Input:
+- index of element to be moved
+- target index the element is to be moved to
+- array that the operation is performed on
+Output:
+- array with element moved to target position
+ */
+func MoveElementToNewPosition(indexToTakeFrom int, indexToMoveTo int, arrayToOperateOn []string) []string {
+	// Assign array to operate on
+	sourceArray := arrayToOperateOn
+	// Element to be moved
+	val := sourceArray[indexToTakeFrom]
+	// Create array consisting only of array without element to be moved
+	sourceArray = append(sourceArray[:indexToTakeFrom], sourceArray[indexToTakeFrom+1:]...)
+	// Create new array up to position in which element is to be inserted
+	newSlice := make([]string, indexToMoveTo+1)
+	// Copy old sourceArray (without element) into new one
+	copy(newSlice, sourceArray[:indexToMoveTo])
+	// Append element at desired target position
+	newSlice[indexToMoveTo] = val
+	// Fill up remaining elements
+	sourceArray = append(newSlice, sourceArray[indexToMoveTo:]...)
+	fmt.Println("Revised sourceArray:", sourceArray)
+
+	return sourceArray
 }
 
 /*
