@@ -128,7 +128,7 @@ func TestTabularOutputWithNestedComponent(t *testing.T) {
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
-		"Cac{E(Program Manager) F(is) P(approved)}"
+		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

@@ -187,6 +187,23 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		output += suffix
 	}
 
+		fmt.Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
+	for _, val := range componentNestedStmts {
+		nestedOutput, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt, val.ID, "")
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return output, nil, nil, nil, errorVal
+		}
+		// Add nested entries to top-level list
+		entriesMap = append(entriesMap, nestedMap...)
+
+		// Merge headers to consider nested ones
+		headerSymbols = tree.MergeSlices(headerSymbols, nestedHeaders)
+		// Merge header names to consider nested ones
+		headerSymbolsNames = tree.MergeSlices(headerSymbolsNames, nestedHeadersNames)
+		// Append component-level nested statement to output
+		output += nestedOutput
+	}
+
 	// Add leading and trailing column headers if not already existing
 	res, _ := tree.StringInSlice(stmtIdColHeader, headerSymbols)
 	if !res {
@@ -207,23 +224,6 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 	if !res {
 		// Append logical operator header to names output
 		headerSymbolsNames = append(headerSymbolsNames, logLinkColHeader)
-	}
-
-	fmt.Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
-	for _, val := range componentNestedStmts {
-		nestedOutput, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt, val.ID, "")
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return output, nil, nil, nil, errorVal
-		}
-		// Add nested entries to top-level list
-		entriesMap = append(entriesMap, nestedMap...)
-
-		// Merge headers to consider nested ones
-		headerSymbols = tree.MergeSlices(headerSymbols, nestedHeaders)
-		// Merge header names to consider nested ones
-		headerSymbolsNames = tree.MergeSlices(headerSymbolsNames, nestedHeadersNames)
-		// Append component-level nested statement to output
-		output += nestedOutput
 	}
 
 	// Reorder header entries to ensure that Statement ID is first element and Logical Links last
