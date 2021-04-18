@@ -24,12 +24,13 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 	}
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	output, statementMap, statementHeader, err := exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, stmtId, "")
+	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, stmtId, "")
 
 	fmt.Println(statementHeader)
+	fmt.Println(statementHeaderNames)
 	fmt.Println(statementMap)
 
-	output, _ = exporter.GenerateGoogleSheetsOutput(statementMap, statementHeader, filename)
+	output, _ = exporter.GenerateGoogleSheetsOutput(statementMap, statementHeader, statementHeaderNames, filename)
 
 
 	return output, err

@@ -25,14 +25,14 @@ func main() {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	/*text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
+	text = "A((certifying agent [AND] wife)) D(may) I(investigate) " +
 		"Bdir((complaints of noncompliance with the (Act or [OR] regulations of this part) " +
 		"concerning " +
 		"(production [operation] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
-		")"*/
+		")"
 		//"fdlkgjdflg))" // certified as organic by the certifying agent))."
 
-	text = "A(Actor) D(must) I((comply [OR] violate)) with Bdir(provisions) Cac[dfg]{A(Actor) I(has (applied and [AND] advocated)) for Bdir(certification)}"
+	//text = "A(Actor) D(must) I((comply [OR] violate)) with Bdir(provisions) Cac[dfg]{A(Actor) I(has (applied and [AND] advocated)) for Bdir(certification)}"
 
 	output, err := app.ConvertIGScriptToGoogleSheets(text, "65", "fun.csv")
 

@@ -617,7 +617,7 @@ func (n *Node) assignParent(node *Node) (bool, NodeError) {
 }
 
 /*
-Insert right subnode to node
+Insert left subnode to node
 */
 func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
 	if n.Left != nil {
@@ -630,7 +630,7 @@ func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_SELF_LINKAGE, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
+	if n.Entry != nil {
 		errorMsg := "Attempting to add left leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -654,7 +654,7 @@ func (n *Node) InsertRightNode(entry *Node) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_SELF_LINKAGE, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
+	if n.Entry != nil {
 		errorMsg := "Attempting to add right leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -994,12 +994,12 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 Validates all nodes from this node downwards with respect to population as linking node or leaf node.
  */
 func (n *Node) Validate() (bool, NodeError){
-	if n.Entry == "" && (n.Left == nil || n.Right == nil) {
+	if n.Entry == nil && (n.Left == nil || n.Right == nil) {
 		errorMsg := "Non-leaf node, but missing specification of left and right child, " +
 			"or both. Node: " + fmt.Sprint(n.String())
 		return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" && (n.Left != nil  || n.Right != nil) {
+	if n.Entry != nil && (n.Left != nil  || n.Right != nil) {
 		errorMsg := "Leaf node, but still has filled left or right node. Node: " + fmt.Sprint(n.String())
 		return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: errorMsg}
 	}
@@ -1178,5 +1178,12 @@ func (n *Node) IsLeafNode() bool {
 Indicates whether node is empty
  */
 func (n *Node) IsEmptyNode() bool {
-	return n.IsLeafNode() && n.Entry == ""
+	return n.IsLeafNode() && n.Entry == nil
+}
+
+/*
+Indicates if node is nil
+ */
+func (n *Node) IsNil() bool {
+	return n == nil
 }
