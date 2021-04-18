@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -321,51 +322,111 @@ func StringInSlice(a string, list []string) (bool, int) {
 }
 
 /*
-Merges two slices. Values of the smaller slice are added after the previous shared value
-with the bigger slice. If no last shared entry could be found, the deviating entries will
+Merges two slices. Values of the second slice are added after the previous shared value
+in the bigger slice. Checks also for substring matches if subItemSeparator is provided
+(i.e., != ""). If shared entry cannot be found, the deviating entries will
 be appended at the end.
+Similarity of elements is assessed based on matching on leading substring (before subItemSeparator),
+e.g., substring before "_".
+Input:
+- Two arrays to be merged
+- Separator indicating subitem prefix (e.g., before "_") to facilitate match
  */
-func MergeSlices(array1 []string, array2 []string) []string {
-	result := []string{}
-	arrayToIterate := []string{}
+func MergeSlices(array1 []string, array2 []string, subItemSeparator string) []string {
 
-	// Figure out which array is larger
-	if len(array1) >= len(array2) {
-		result = array1
-		arrayToIterate = array2
-	} else {
-		result = array2
-		arrayToIterate = array1
-	}
+	fmt.Println("Slice 1 before merge: ", array1)
+	fmt.Println("Slice 2 before merge: ", array2)
 
-	// Store last match
-	indexOfLastIdenticalElement := -1
+	result := array1
+	arrayToIterate := array2
 
 	// Iterate through smaller array
-	for i, v := range arrayToIterate {
+	for _, v := range arrayToIterate {
 		// See if element of smaller array is already in larger array
-		res, idx := StringInSlice(v, result)
+		res, _ := StringInSlice(v, result)
 		if res {
-			// if so, update index of last match
-			indexOfLastIdenticalElement = idx
-		} else {
-			// if it is not first element and some shared elements have been found
-			if i != 0 && indexOfLastIdenticalElement != -1 {
-				// Add element at position following last shared index
+			// if so, skip addition
+			continue
+		}
 
-				// Append empty element (value does not matter)
-				result = append(result, "placeholder")
-				// Shift content from given position one to the right
-				copy(result[indexOfLastIdenticalElement+2:], result[indexOfLastIdenticalElement+1:])
-				// Insert new element at given position
-				result[indexOfLastIdenticalElement+1] = v
-			} else {
-				// else append at the end of result array
-				result = append(result, v)
-			}
+		// Now perform fuzzy match ...
+
+		// Check whether subitems match based on substring prior subItemSeparator (considers both input and target array entries)
+		lastSimilarElement := FindLastSimilarElement(result, v, subItemSeparator)
+
+		if lastSimilarElement != -1 {
+			fmt.Println("Found last similar element for item ", v, " on position: ", lastSimilarElement)
+
+			// Add element at position following last shared index
+
+			// Append empty element (value does not matter)
+			result = append(result, "placeholder")
+			// Shift content from given position one to the right
+			copy(result[lastSimilarElement+2:], result[lastSimilarElement+1:])
+			// Insert new element at given position
+			result[lastSimilarElement+1] = v
+		} else {
+			fmt.Println("No similar element found for item ", v, ", appending at the end.")
+			// Append at the end of the array
+			result = append(result, v)
 		}
 	}
 	return result
+}
+
+/*
+Returns index of last similar element based on prefix conventions (e.g., I_1, I_2) in input array.
+Input:
+- array to iterate over
+- item to look up
+- string indicative of subitem (indication of "similarity" with other elements)
+
+Returns -1 if no similar item found
+ */
+func FindLastSimilarElement(arrayToIterate []string, itemToTest string, subItemSep string) int {
+
+	// Prepare modified search item for similarity match
+	substringedSearchItem := itemToTest
+	// Check whether subitem separator (e.g., "_") is contained in search item
+	substringedSearchItemIdx := -1
+	if subItemSep != "" {
+		substringedSearchItemIdx = strings.Index(itemToTest, subItemSep)
+	}
+	if substringedSearchItemIdx != -1 {
+		// Remove trailing substring if match exists
+		substringedSearchItem = itemToTest[:substringedSearchItemIdx]
+	}
+	fmt.Println("Input:", itemToTest)
+	fmt.Println("Separator:", subItemSep)
+	fmt.Println("Preprocessed:", substringedSearchItem)
+
+	// Index of last similar item
+	similarIndex := -1
+	for i, v :=range arrayToIterate {
+		targetItem := v
+		// Determine substring on target item
+		targetItemIdx := -1
+		if subItemSep != "" {
+			targetItemIdx = strings.Index(v, subItemSep)
+		}
+		if targetItemIdx != -1 {
+			// Remove trailing substring if match exists
+			targetItem = v[:targetItemIdx]
+			fmt.Println("Preprocessed target item:", targetItem)
+		}
+
+		// If the current value matches search item ...
+		if targetItem == substringedSearchItem {
+			// ... then save the index
+			similarIndex = i
+			fmt.Println("Items match")
+		} else {
+			fmt.Println("Items do not match")
+		}
+	}
+
+	// Return result
+	return similarIndex
 }
 
 /*

@@ -150,12 +150,12 @@ func TestTabularOutputWithNestedComponent(t *testing.T) {
 	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
-	if len(links) != 7 {
-		//t.Fatal("Number of statement reference links is incorrect. Value: ", len(links))
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("GeneratedGoogleSheetsOutput.test")
+	content, error := ioutil.ReadFile("GeneratedGoogleSheetsOutputComponentLevelNesting1.test")
 	if error != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
 	}

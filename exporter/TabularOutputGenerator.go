@@ -197,9 +197,9 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		entriesMap = append(entriesMap, nestedMap...)
 
 		// Merge headers to consider nested ones
-		headerSymbols = tree.MergeSlices(headerSymbols, nestedHeaders)
+		headerSymbols = tree.MergeSlices(headerSymbols, nestedHeaders, indexSymbol)
 		// Merge header names to consider nested ones
-		headerSymbolsNames = tree.MergeSlices(headerSymbolsNames, nestedHeadersNames)
+		headerSymbolsNames = tree.MergeSlices(headerSymbolsNames, nestedHeadersNames, indexSymbol)
 		// Append component-level nested statement to output
 		output += nestedOutput
 	}

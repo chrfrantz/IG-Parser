@@ -23,15 +23,18 @@ func TestValidIGSymbol(t *testing.T) {
 
 }
 
+/*
+Tests merging of arrays without consideration of subitems
+ */
 func TestMergeSlices(t *testing.T) {
 
 	// Array2 has the same size
 	array1 := []string{"First", "Second", "Third", "Fourth", "Fifth"}
 	array2 := []string{"First", "Second", "Second-and-half", "Fourth", "Sixth"}
 
-	res := MergeSlices(array1, array2)
+	res := MergeSlices(array1, array2, "")
 
-	expected := []string{"First", "Second", "Second-and-half", "Third", "Fourth", "Sixth", "Fifth"}
+	expected := []string{"First", "Second", "Third", "Fourth", "Fifth", "Second-and-half", "Sixth"}
 
 	if fmt.Sprint(res) != fmt.Sprint(expected) {
 		t.Error("Generated array does not reflect expected output (Expected: " +
@@ -42,9 +45,82 @@ func TestMergeSlices(t *testing.T) {
 	array1 = []string{"First", "Second", "Third", "Fourth", "Fifth"}
 	array2 = []string{"First", "Second", "Second-and-half", "Fourth", "Sixth", "Seventh"}
 
-	res = MergeSlices(array1, array2)
+	res = MergeSlices(array1, array2, "")
 
-	expected = []string{"First", "Second", "Third", "Second-and-half", "Fourth", "Fifth", "Sixth", "Seventh"}
+	expected = []string{"First", "Second", "Third", "Fourth", "Fifth", "Second-and-half", "Sixth", "Seventh"}
+
+	if fmt.Sprint(res) != fmt.Sprint(expected) {
+		t.Error("Generated array does not reflect expected output (Expected: " +
+			fmt.Sprint(expected) + ", actual: " + fmt.Sprint(res))
+	}
+
+}
+
+/*
+Tests the merging of slices under consideration of matching based on sub item separator.
+ */
+func TestMergeSlicesWithMatching(t *testing.T) {
+
+	array1 := []string{"First", "Second", "Third", "Fourth", "Fifth"}
+	array2 := []string{"First", "Second", "Second-and-half", "Fourth", "Sixth"}
+
+	res := MergeSlices(array1, array2, "-")
+
+	expected := []string{"First", "Second", "Second-and-half", "Third", "Fourth", "Fifth", "Sixth"}
+
+	if fmt.Sprint(res) != fmt.Sprint(expected) {
+		t.Error("Generated array does not reflect expected output (Expected: " +
+			fmt.Sprint(expected) + ", actual: " + fmt.Sprint(res))
+	}
+}
+
+func TestFindLastSimilarElement(t *testing.T) {
+
+	array1 := []string{"First", "Second", "Third", "Fourth", "Fifth"}
+	item := "Second_1"
+
+	idx := FindLastSimilarElement(array1, item, "_")
+
+	fmt.Println(idx)
+
+	if idx != 1 {
+		t.Error("Did not correctly identify similar element. Expected: 1, Actual", idx)
+	}
+
+	// Test on subitem in input array
+	array1 = []string{"First", "Second", "Second_2", "Third", "Fourth", "Fifth"}
+	item = "Second_1"
+
+	idx = FindLastSimilarElement(array1, item, "_")
+
+	fmt.Println(idx)
+
+	if idx != 2 {
+		t.Error("Did not correctly identify similar element. Expected: 1, Actual", idx)
+	}
+
+	// Test on identical subitem in input array should yield same result
+	array1 = []string{"First", "Second", "Second_1", "Third", "Fourth", "Fifth"}
+	item = "Second_1"
+
+	idx = FindLastSimilarElement(array1, item, "_")
+
+	fmt.Println(idx)
+
+	if idx != 2 {
+		t.Error("Did not correctly identify similar element. Expected: 1, Actual", idx)
+	}
+
+}
+
+func TestMergeSlicesSubItemMatch(t *testing.T) {
+
+	array1 := []string{"First", "Second", "Third", "Fourth", "Fifth"}
+	array2 := []string{"First", "Second_1", "Second_2", "Fourth", "Sixth"}
+
+	res := MergeSlices(array1, array2, "_")
+
+	expected := []string{"First", "Second", "Second_1", "Second_2", "Third", "Fourth", "Fifth", "Sixth"}
 
 	if fmt.Sprint(res) != fmt.Sprint(expected) {
 		t.Error("Generated array does not reflect expected output (Expected: " +
