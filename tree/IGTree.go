@@ -1175,6 +1175,14 @@ func (n *Node) IsLeafNode() bool {
 }
 
 /*
+Indicates whether node contains combination.
+*/
+func (n *Node) IsCombination() bool {
+	return n.Entry == nil && !n.Left.IsNil() &&
+		!n.Right.IsNil() && n.LogicalOperator != ""
+}
+
+/*
 Indicates whether node is empty
  */
 func (n *Node) IsEmptyNode() bool {
