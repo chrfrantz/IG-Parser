@@ -105,7 +105,7 @@ func TestTabularOutput(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "sanity")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -168,7 +168,7 @@ func TestTabularOutputWithNestedComponent(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "sanity")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}

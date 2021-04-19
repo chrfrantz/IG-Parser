@@ -293,7 +293,7 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 					// Trim content first
 					right = strings.Trim(right, " ")
 					if right != "" {
-						// If no combinations exist, assign as left leaf
+						// If no combinations exist, assign as right leaf
 						fmt.Println("Found leaf on right side: " + right)
 						res, err := node.InsertRightLeaf(right)
 						if !res {

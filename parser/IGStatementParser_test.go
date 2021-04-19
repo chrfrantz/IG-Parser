@@ -102,6 +102,7 @@ func TestLeafArrayGeneration(t *testing.T) {
 		t.Fatal("Wrong number of array elements in generated leaf component array: ", len(nodeArray))
 	}
 
+	// Attributes
 	element := nodeArray[0]
 
 	if len(element) != 1 || element[0].Entry != "National Organic Program's Program Manager" {
@@ -262,7 +263,7 @@ func TestExcessiveParentheses(t *testing.T) {
 
 }
 
-func TestComponentLevelNestedStatement(t *testing.T) {
+func TestComponentTwoLevelNestedStatement(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -288,6 +289,7 @@ func TestComponentLevelNestedStatement(t *testing.T) {
 		t.Fatal("Wrong number of array elements in generated leaf component array: ", len(nodeArray), "Contents: ", nodeArray)
 	}
 
+	// Attributes
 	element := nodeArray[0]
 
 	if len(element) != 1 || element[0].Entry != "National Organic Program's Program Manager" {
@@ -334,6 +336,367 @@ func TestComponentLevelNestedStatement(t *testing.T) {
 
 	// activation condition
 	element = nodeArray[5]
+
+	if element[0].HasPrimitiveEntry() {
+		t.Fatal("Did detect activation condition as primitive entry")
+	}
+
+	if !element[0].Entry.(tree.Statement).Attributes.HasPrimitiveEntry() {
+		t.Fatal("Did not detect attribute as primitive entry")
+	}
+
+	if element[0].Entry.(tree.Statement).Attributes.Entry == nil {
+		t.Fatal("Did detect attribute entry as nil")
+	}
+
+	if element[0].Entry.(tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
+		t.Fatal("Incorrectly detected attribute in nested activation condition")
+	}
+
+	if element[0].Entry.(tree.Statement).Aim.Entry.(string) != "suspects" {
+		t.Fatal("Incorrectly detected attribute in nested activation condition")
+	}
+
+	// Test for nested elements
+	nestedStmt := element[0].Entry.(tree.Statement)
+	leaves, _ := nestedStmt.GenerateLeafArrays()
+	if len(leaves) != 4 {
+		t.Fatal("Did not leaf elements of first-order nested statement correctly")
+	}
+
+	if !element[0].Entry.(tree.Statement).ActivationConditionSimple.IsNil() {
+		t.Fatal("Simple activation condition field of nested statement should be nil")
+	}
+
+	// Test for second-order nested statements
+	if element[0].Entry.(tree.Statement).ActivationConditionComplex.IsNil() {
+		t.Fatal("Complex activation condition field of nested statement should not be nil")
+	}
+
+	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "NOP Manager" {
+		t.Fatal("Did not correctly detect second-order nested activation condition element")
+	}
+
+	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "orders" {
+		t.Fatal("Did not correctly detect second-order nested activation condition element")
+	}
+
+	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).DirectObject.Entry != "review" {
+		t.Fatal("Did not correctly detect second-order nested activation condition element")
+	}
+
+	nestedStmt = element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
+	leaves, _ = nestedStmt.GenerateLeafArrays()
+	if len(leaves) != 3 {
+		t.Fatal("Did not leaf elements of second-order nested statement correctly")
+	}
+
+	// execution constraint
+	element = nodeArray[6]
+
+	if len(element) != 1 || element[0].Entry != "on behalf of the Secretary" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect. Element values: ", element)
+	}
+
+	// execution constraint
+	element = nodeArray[7]
+
+	if len(element) != 2 || element[0].Entry != "Act or" || element[1].Entry != "regulations in this part" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	fmt.Println(componentIdx)
+
+	// All fields and activation condition reference should be filled
+	if componentIdx[tree.ATTRIBUTES] != 1 || componentIdx[tree.DIRECT_OBJECT] != 1 ||
+		componentIdx[tree.EXECUTION_CONSTRAINT] != 2 || componentIdx[tree.DEONTIC] != 1 ||
+		componentIdx[tree.AIM] != 2 || componentIdx[tree.ACTIVATION_CONDITION_REFERENCE] != 1 {
+		t.Fatal("Component element count is incorrect.")
+	}
+
+	// All unused fields should be empty (including simple activation condition)
+	if componentIdx[tree.CONSTITUTED_ENTITY] != 0 || componentIdx[tree.CONSTITUTED_ENTITY_PROPERTY] != 0 ||
+		componentIdx[tree.CONSTITUTIVE_FUNCTION] != 0 || componentIdx[tree.CONSTITUTING_PROPERTIES] != 0 ||
+		componentIdx[tree.CONSTITUTING_PROPERTIES_PROPERTY] != 0 || componentIdx[tree.ACTIVATION_CONDITION] != 0 {
+		t.Fatal("Component element count is not empty for some elements.")
+	}
+
+}
+
+/*
+Tests for component-level nesting in activation condition and separate simple combination (coexistence).
+ */
+func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"Cac{A(Programme Manager) I(suspects) Bdir(violations) Cac{A(NOP Manager) I(orders) Bdir(review)}}" +
+		"Cac((regular precondition [AND] another precondition))"
+
+	s, err := ParseStatement(text)
+
+	fmt.Println(s.String())
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during parsing: ", err.Error())
+	}
+
+	nodeArray, componentIdx := s.GenerateLeafArrays()
+
+	if nodeArray == nil {
+		t.Fatal("Generated array should not be empty.")
+	}
+
+	if len(nodeArray) != 9 {
+		t.Fatal("Wrong number of array elements in generated leaf component array: ", len(nodeArray), "Contents: ", nodeArray)
+	}
+
+	// Attribute
+	element := nodeArray[0]
+
+	if len(element) != 1 || element[0].Entry != "National Organic Program's Program Manager" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// Deontic
+	element = nodeArray[1]
+
+	if len(element) != 1 || element[0].Entry != "may" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// first aim entry
+	element = nodeArray[2]
+
+	if len(element) != 1 || element[0].Entry != "inspect and" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// second aim array
+	element = nodeArray[3]
+
+	if len(element) != 3 || element[0].Entry != "review" ||
+		element[1].Entry != "refresh" || element[2].Entry != "drink" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// second aim array
+	element = nodeArray[3]
+
+	if len(element) != 3 || element[0].Entry != "review" ||
+		element[1].Entry != "refresh" || element[2].Entry != "drink" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// object
+	element = nodeArray[4]
+
+	if len(element) != 3 || element[0].Entry != "certified production and" ||
+		element[1].Entry != "handling operations and" || element[2].Entry != "accredited certifying agents" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// simple activation condition
+	element = nodeArray[5]
+	if !element[0].HasPrimitiveEntry() {
+		t.Fatal("Did not detect activation condition as primitive entry")
+	}
+
+	if element[0].IsNil() {
+		t.Fatal("Node should not be nil")
+	}
+
+	if element[0].IsEmptyNode() {
+		t.Fatal("Node should not be empty")
+	}
+
+	if !element[0].IsLeafNode() {
+		t.Fatal("Node should not be leaf node")
+	}
+
+	if element[0].Entry.(string) != "regular precondition" {
+		t.Fatal("Left nested element in activation condition not correctly identified")
+	}
+
+	if !element[1].IsLeafNode() {
+		t.Fatal("Node should not be leaf node")
+	}
+
+	if element[1].Entry.(string) != "another precondition" {
+		t.Fatal("Left nested element in activation condition not correctly identified")
+	}
+
+	if element[0].Parent.LogicalOperator != tree.AND {
+		t.Fatal("Logical operator linking both simple activation conditions is incorrect:", element[0].Parent.LogicalOperator)
+	}
+
+	// complex activation condition
+	element = nodeArray[6]
+
+	if !element[0].Entry.(tree.Statement).Attributes.HasPrimitiveEntry() {
+		t.Fatal("Did not detect attribute as primitive entry")
+	}
+
+	if element[0].Entry.(tree.Statement).Attributes.Entry == nil {
+		t.Fatal("Did detect attribute entry as nil")
+	}
+
+	if element[0].Entry.(tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
+		t.Fatal("Incorrectly detected attribute in nested activation condition")
+	}
+
+	if element[0].Entry.(tree.Statement).Aim.Entry.(string) != "suspects" {
+		t.Fatal("Incorrectly detected attribute in nested activation condition")
+	}
+
+	// Test for nested elements
+	nestedStmt := element[0].Entry.(tree.Statement)
+	leaves, _ := nestedStmt.GenerateLeafArrays()
+	if len(leaves) != 4 {
+		t.Fatal("Did not leaf elements of first-order nested statement correctly")
+	}
+
+	if !element[0].Entry.(tree.Statement).ActivationConditionSimple.IsNil() {
+		t.Fatal("Simple activation condition field of nested statement should be nil")
+	}
+
+	// Test for second-order nested statements
+	if element[0].Entry.(tree.Statement).ActivationConditionComplex.IsNil() {
+		t.Fatal("Complex activation condition field of nested statement should not be nil")
+	}
+
+	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "NOP Manager" {
+		t.Fatal("Did not correctly detect second-order nested activation condition element")
+	}
+
+	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "orders" {
+		t.Fatal("Did not correctly detect second-order nested activation condition element")
+	}
+
+	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).DirectObject.Entry != "review" {
+		t.Fatal("Did not correctly detect second-order nested activation condition element")
+	}
+
+	nestedStmt = element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
+	leaves, _ = nestedStmt.GenerateLeafArrays()
+	if len(leaves) != 3 {
+		t.Fatal("Did not leaf elements of second-order nested statement correctly")
+	}
+
+	// execution constraint
+	element = nodeArray[7]
+
+	if len(element) != 1 || element[0].Entry != "on behalf of the Secretary" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect. Element values: ", element)
+	}
+
+	// execution constraint
+	element = nodeArray[8]
+
+	if len(element) != 2 || element[0].Entry != "Act or" || element[1].Entry != "regulations in this part" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	fmt.Println(componentIdx)
+
+	// All fields and activation condition reference should be filled
+	if componentIdx[tree.ATTRIBUTES] != 1 || componentIdx[tree.DIRECT_OBJECT] != 1 ||
+		componentIdx[tree.EXECUTION_CONSTRAINT] != 2 || componentIdx[tree.DEONTIC] != 1 ||
+		componentIdx[tree.AIM] != 2 || componentIdx[tree.ACTIVATION_CONDITION] != 1 ||
+		componentIdx[tree.ACTIVATION_CONDITION_REFERENCE] != 1 {
+		t.Fatal("Component element count is incorrect.")
+	}
+
+	// All unused fields should be empty (including simple activation condition)
+	if componentIdx[tree.CONSTITUTED_ENTITY] != 0 || componentIdx[tree.CONSTITUTED_ENTITY_PROPERTY] != 0 ||
+		componentIdx[tree.CONSTITUTIVE_FUNCTION] != 0 || componentIdx[tree.CONSTITUTING_PROPERTIES] != 0 ||
+		componentIdx[tree.CONSTITUTING_PROPERTIES_PROPERTY] != 0 {
+		t.Fatal("Component element count is not empty for some elements.")
+	}
+
+}
+
+/*
+Tests multiple complex activation conditions in a statement
+ */
+func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"Cac{A(Programme Manager) I(suspects) Bdir(violations) Cac{A(NOP Manager) I(orders) Bdir(review)}}" +
+		"Cac{E(Program Manager) F(is) P(qualified)}"
+
+	s, err := ParseStatement(text)
+
+	fmt.Println(s.String())
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during parsing: ", err.Error())
+	}
+
+	nodeArray, componentIdx := s.GenerateLeafArrays()
+
+	if nodeArray == nil {
+		t.Fatal("Generated array should not be empty.")
+	}
+
+	if len(nodeArray) != 8 {
+		t.Fatal("Wrong number of array elements in generated leaf component array: ", len(nodeArray), "Contents: ", nodeArray)
+	}
+
+	// Attributes
+	element := nodeArray[0]
+
+	if len(element) != 1 || element[0].Entry != "National Organic Program's Program Manager" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// Deontic
+	element = nodeArray[1]
+
+	if len(element) != 1 || element[0].Entry != "may" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// first aim entry
+	element = nodeArray[2]
+
+	if len(element) != 1 || element[0].Entry != "inspect and" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// second aim array
+	element = nodeArray[3]
+
+	if len(element) != 3 || element[0].Entry != "review" ||
+		element[1].Entry != "refresh" || element[2].Entry != "drink" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// second aim array
+	element = nodeArray[3]
+
+	if len(element) != 3 || element[0].Entry != "review" ||
+		element[1].Entry != "refresh" || element[2].Entry != "drink" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// object
+	element = nodeArray[4]
+
+	if len(element) != 3 || element[0].Entry != "certified production and" ||
+		element[1].Entry != "handling operations and" || element[2].Entry != "accredited certifying agents" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// activation condition
+	element = nodeArray[5]
+
+	fmt.Println(element)
 
 	if element[0].HasPrimitiveEntry() {
 		t.Fatal("Did detect activation condition as primitive entry")

@@ -114,9 +114,9 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		// Iterate over component index (i.e., column)
 		for componentIdx := range statement {
 			// Append element value as output for given cell
-			if statement[componentIdx].Entry == nil {
+			if statement[componentIdx].IsEmptyNode() {
 				// Empty entry
-				fmt.Println("Found nil entry")
+				fmt.Println("Found empty node")
 			} else if statement[componentIdx].HasPrimitiveEntry() {
 				// Save entry into entryMap
 				entryMap[headerSymbols[componentIdx]] = statement[componentIdx].Entry.(string)
@@ -151,6 +151,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					entryMap[headerSymbols[componentIdx]] = nestedStmtId
 					// Add reference to to-be component-level nested statements to output
 					//output += nestedStmtId
+					fmt.Println("Parsing: Added nested statement (ID:", nestedStmtID, ", Val:", entryVal)
 				}
 			}
 			fmt.Println("Source node: ", statement[componentIdx])
@@ -316,6 +317,8 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stm
 	log.Println("Step: Extracting leaf arrays")
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := statement.GenerateLeafArrays()
+
+	log.Println("Generated leaf arrays: ", leafArrays, " component: ", componentRefs)
 
 	log.Println("Step: Generate permutations of leaf arrays (atomic statements)")
 	// Generate all permutations of logically-linked components to produce statements

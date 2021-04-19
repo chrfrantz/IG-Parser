@@ -84,7 +84,7 @@ func (s *Statement) String() string {
 		out += suffix
 	}
 	if s.ConstitutedEntityProperty != nil {
-		out += CONSTITUTING_PROPERTIES_PROPERTY + sep
+		out += CONSTITUTED_ENTITY_PROPERTY + sep
 		out += s.ConstitutedEntityProperty.String()
 		out += suffix
 	}

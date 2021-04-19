@@ -34,6 +34,14 @@ func main() {
 
 	//text = "A(Actor) D(must) I((comply [OR] violate)) with Bdir(provisions) Cac[dfg]{A(Actor) I(has (applied and [AND] advocated)) for Bdir(certification)}"
 
+	text = "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"Cac{A(Programme Manager) I(suspects) Bdir(violations)}" +
+		"Cac{E(Program Manager) F(is) P(qualified)}"
+
 	output, err := app.ConvertIGScriptToGoogleSheets(text, "65", "fun.csv")
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

@@ -177,7 +177,15 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 			log.Println("Attaching nested activation condition to higher-level statement")
 			// Assign nested statement to higher-level statement
 			// TODO: Check for combination of multiple nested statements
-			s.ActivationConditionComplex = &tree.Node{Entry: stmt}
+			// If already a statement assignment to complex element, ...
+			if s.ActivationConditionComplex != nil {
+				// ... combine both
+				s.ActivationConditionComplex = tree.Combine(s.ActivationConditionComplex, &tree.Node{Entry: stmt}, tree.AND)
+			} else {
+				// ... else simply assign first element
+				s.ActivationConditionComplex = &tree.Node{Entry: stmt}
+			}
+
 		}
 	}
 
