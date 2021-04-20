@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 /*
@@ -124,23 +123,8 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	} else {
-		// Check for statement ID
-		id, err := strconv.Atoi(stmtId)
-		if err != nil {
-			retStruct.Success = false
-			retStruct.Error = true
-			retStruct.Message = app.ERROR_INPUT_STATEMENT_ID
-			tmpl.Execute(w, retStruct)
-
-			// Final comment in log
-			fmt.Println("Error: " + fmt.Sprint(err))
-			// Ensure logging is terminated
-			terminateOutput()
-
-			return
-		}
 		// Convert input
-		output, err2 := app.ConvertIGScriptToGoogleSheets(codedStmt, id, "")
+		output, err2 := app.ConvertIGScriptToGoogleSheets(codedStmt, stmtId, "")
 		if err2.ErrorCode != tree.PARSING_NO_ERROR {
 			retStruct.Success = false
 			retStruct.Error = true
