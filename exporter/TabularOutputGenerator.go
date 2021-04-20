@@ -20,6 +20,10 @@ const indexSymbol = "_"
 const stmtIdPrefix = "'"
 // Separator for logical operator expressions (e.g., OR[650.1,650.2]|AND[123.1,123.2])
 const logicalOperatorSeparator = ";"
+// Left bracket for logical combination expressions
+const logicalCombinationLeft = "["
+// Right bracket for logical combination expressions
+const logicalCombinationRight = "]"
 // Left brace surrounding identifier for component-level nested statements
 const componentNestedLeft = "{"
 // Right brace surrounding identifier for component-level nested statements
@@ -38,7 +42,7 @@ type IdentifiedStmt struct {
 }
 
 /*
-Generates array of statement maps corresponding to identified elements format.
+Generates array of statement maps corresponding to identified elements format. Includes parsing of nested statements.
 Input:
 - Atomic statements with corresponding node references [statement][node references]
 - Map with with component name as key and corresponding number of columns in input stmts (i.e., same component can have
@@ -87,9 +91,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 	// Default error during parsing
 	errorVal := tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 
-	// Prepare nested statement structure
-
-
+	// Structures for nested statements
 
 	// Map containing inverse index for all observed statements to IDs
 	componentNestedStmtsMap := make(map[*tree.Node]string)
@@ -133,29 +135,21 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				//output += statement[componentIdx].Entry.(string)
 			} else {
 				// Nested statements are stored for later processing, but assigned IDs and references added to calling row
-				fmt.Println("Found complex entry: " + fmt.Sprint(statement[componentIdx]))
+				fmt.Println("Found complex entry (nested statement): " + fmt.Sprint(statement[componentIdx]))
 				// Check for statement combination (i.e., node combination)
-
-				if statement[componentIdx].IsCombination() {
-					fmt.Println("Detected statement combination")
-					// Assume that it is single statement
-					//entryVal := statement[componentIdx]
-
-				} else {
-					fmt.Println("Detected individual nested statement")
-					// Assume that it is single statement
-					//entryVal := statement[componentIdx].Entry.(tree.Statement)
-				}
 
 				// Add entry to array (assuming single nested statement)
 				entryVals := []*tree.Node{statement[componentIdx]}
 
 				// Check if combination contained; if so, flatten, and override
 				if entryVals[0].IsCombination() {
+					fmt.Println("Detected statement combination")
 					// If combination of statements, retrieve all elements
 					stmts := entryVals[0].GetLeafNodes()
 					// Flatten array and override entry values for iteration
 					entryVals = flatten(stmts)
+				} else {
+					fmt.Println("Detected individual nested statement")
 				}
 
 				// Iterate over all nested statements
@@ -178,7 +172,6 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 							stmtIdSeparator +
 							strconv.Itoa(nestedStatementIdx)
 
-						fmt.Println("Created ID: " + nestedStmtId)
 						// Added component-level nested statement
 						componentNestedStmts = append(componentNestedStmts,
 							IdentifiedStmt{nestedStmtId, entryVal})
@@ -189,7 +182,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						// Prepare reference to to-be component-level nested statements to output
 						idToReferenceInCell = nestedStmtId
 						//output += nestedStmtId
-						fmt.Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Val:", entryVal)
+						fmt.Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Val:", entryVal, ")")
 					}
 
 					// Save entry into entryMap for calling row
@@ -240,7 +233,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		//output += suffix
 	}
 
-		fmt.Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
+	fmt.Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
 	for _, val := range componentNestedStmts {
 
 		fmt.Println("Nested Statement to parse, ID:", val.ID, ", Stmt:", val.NestedStmt)
@@ -250,6 +243,8 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, nil, nil, errorVal
 		}
+
+		// Add linkages between statements (statement-level combinations)
 
 		// Determine linkages to fellow nested statements
 		stmtLinksString, err := generateLogicalLinksExpressionForStatements(val.NestedStmt, componentNestedStmts)
@@ -263,14 +258,8 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		}
 
 		// Add Logical linkage header if not already existing
-		res, _ := tree.StringInSlice(logLinkColHeaderStmts, nestedHeaders)
-		if !res {
-			nestedHeaders = append(nestedHeaders, logLinkColHeaderStmts)
-		}
-		res, _ = tree.StringInSlice(logLinkColHeaderStmts, nestedHeadersNames)
-		if !res {
-			nestedHeadersNames = append(nestedHeadersNames, logLinkColHeaderStmts)
-		}
+		nestedHeaders = addElementIfNotExisting(logLinkColHeaderStmts, nestedHeaders)
+		nestedHeadersNames = addElementIfNotExisting(logLinkColHeaderStmts, nestedHeadersNames)
 
 		// Add nested entries to top-level list
 		entriesMap = append(entriesMap, nestedMap...)
@@ -283,56 +272,22 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		//output += nestedOutput
 	}
 
-	// Add leading and trailing column headers if not already existing
-	res, _ := tree.StringInSlice(stmtIdColHeader, headerSymbols)
-	if !res {
-		// Prefix statement ID header to symbols output
-		headerSymbols = append([]string{stmtIdColHeader}, headerSymbols...)
-	}
-	res, _ = tree.StringInSlice(stmtIdColHeader, headerSymbolsNames)
-	if !res {
-		// Prefix statement ID header to names output
-		headerSymbolsNames = append([]string{stmtIdColHeader}, headerSymbolsNames...)
-	}
-	res, _ = tree.StringInSlice(logLinkColHeaderComps, headerSymbols)
-	if !res {
-		// Append logical operator header to symbols output
-		headerSymbols = append(headerSymbols, logLinkColHeaderComps)
-	}
-	res, _ = tree.StringInSlice(logLinkColHeaderComps, headerSymbolsNames)
-	if !res {
-		// Append logical operator header to names output
-		headerSymbolsNames = append(headerSymbolsNames, logLinkColHeaderComps)
-	}
-
-	// Reorder header entries to ensure that Statement ID is first element and Logical Links last
-	// Identify position of Statement ID
-	res, pos := tree.StringInSlice(stmtIdColHeader, headerSymbols)
-	if !res {
-		fmt.Println("Statement ID column not in headers: ", headerSymbols)
-	} else if pos != 0 {
-		// Move element to first position
-		headerSymbols = tree.MoveElementToNewPosition(pos, 0, headerSymbols)
-		// Do the same for the names
-		headerSymbolsNames = tree.MoveElementToNewPosition(pos, 0, headerSymbolsNames)
-	}
-
-	// Do the same for Logical Linkage entry
-	res, pos = tree.StringInSlice(logLinkColHeaderComps, headerSymbols)
-	if !res {
-		fmt.Println("Logical Linkage column not in headers: ", headerSymbols)
-	} else if pos != len(headerSymbols) {
-		// Move element to last position
-		headerSymbols = tree.MoveElementToNewPosition(pos, len(headerSymbols)-1, headerSymbols)
-		// Do the same for the names
-		headerSymbolsNames = tree.MoveElementToNewPosition(pos, len(headerSymbolsNames)-1, headerSymbolsNames)
-	}
+	// Organise headers
+	// Move Statement ID to first position
+	headerSymbols = moveElementToFirstPosition(stmtIdColHeader, headerSymbols, true)
+	headerSymbolsNames = moveElementToFirstPosition(stmtIdColHeader, headerSymbolsNames, true)
+	// Add statement logical linkages to second-last position
+	headerSymbols = moveElementToLastPosition(logLinkColHeaderStmts, headerSymbols, true)
+	headerSymbolsNames = moveElementToLastPosition(logLinkColHeaderStmts, headerSymbolsNames, true)
+	// Add component logical linkages to last position
+	headerSymbols = moveElementToLastPosition(logLinkColHeaderComps, headerSymbols, true)
+	headerSymbolsNames = moveElementToLastPosition(logLinkColHeaderComps, headerSymbolsNames, true)
 
 	return entriesMap, headerSymbols, headerSymbolsNames, errorVal
 }
 
 /*
-Resolves all logical linkages to other statements and returns those as compound logical expression (e.g., [AND][{65}.1]
+Resolves all logical linkages to other statements and returns those as compound logical expression (e.g., [AND][{65}.1],[AND][{65}.2])
  */
 func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNestedStmts []IdentifiedStmt) (string, tree.ParsingError) {
 	logicalExpressionString := ""
@@ -365,11 +320,11 @@ func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNeste
 				// ... and append to logical expression column string
 				logicalExpressionString += fmt.Sprint(ops)
 				// Leading bracket
-				logicalExpressionString += "["
+				logicalExpressionString += logicalCombinationLeft
 
 				fmt.Println("Target node IDs: ", targetID)
 				// Add trailing bracket and column ref (to be reviewed)
-				logicalExpressionString += targetID + "]"
+				logicalExpressionString += targetID + logicalCombinationRight
 			}
 
 		}
@@ -604,7 +559,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						// Statement component identifier
 						logicalExpressionString += "." + headerSymbols[componentIdx] + "."
 						// Leading bracket
-						logicalExpressionString += "["
+						logicalExpressionString += logicalCombinationLeft
 						// Prepare intermediate structure to store statement references
 						stmtsRefs := ""
 
@@ -619,7 +574,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						}
 
 						// Add trailing bracket and column ref (to be reviewed)
-						logicalExpressionString += stmtsRefs + "]" + logicalOperatorSeparator
+						logicalExpressionString += stmtsRefs + logicalCombinationRight + logicalOperatorSeparator
 					}
 					fmt.Println("Added logical relationships for value", otherNode, ", elements:", logicalExpressionString)
 				} else {
