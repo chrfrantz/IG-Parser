@@ -1195,3 +1195,29 @@ Indicates if node is nil
 func (n *Node) IsNil() bool {
 	return n == nil
 }
+
+/*
+Applies statement parsing function to all entries below a given node.
+ */
+func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) ParsingError {
+	if n.IsNil() {
+		return ParsingError{ErrorCode: PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Attempted to parse nil element."}
+	}
+	if !n.IsEmptyNode() && n.Entry != nil {
+
+		// Execute actual function
+		newEntry, err := function(n.Entry.(string))
+		if err.ErrorCode != PARSING_NO_ERROR {
+			return err
+		}
+		// and reassign parsed element
+		n.Entry = newEntry
+	}
+	if !n.Left.IsNil() {
+		n.Left.ParseAllEntries(function)
+	}
+	if !n.Right.IsNil() {
+		n.Right.ParseAllEntries(function)
+	}
+	return ParsingError{ErrorCode: PARSING_NO_ERROR}
+}

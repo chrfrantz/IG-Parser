@@ -147,7 +147,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					// If combination of statements, retrieve all elements
 					stmts := entryVals[0].GetLeafNodes()
 					// Flatten array and override entry values for iteration
-					entryVals = flatten(stmts)
+					entryVals = tree.Flatten(stmts)
 				} else {
 					fmt.Println("Detected individual nested statement")
 				}

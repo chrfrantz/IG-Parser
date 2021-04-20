@@ -31,6 +31,9 @@ func TestNode_IsEmptyNode(t *testing.T) {
 func TestTreeCreation(t *testing.T) {
 
 	root := Node{}
+	if !root.IsEmptyNode() {
+		t.Fatal("Node has not been correctly detected as empty.")
+	}
 
 	leftNode := Node{}
 	leftNode.LogicalOperator = "123"
@@ -58,6 +61,10 @@ func TestTreeCreation(t *testing.T) {
 		t.Fatal("Insertion of left right node should not have failed")
 	}
 
+	if !leftNode.IsCombination() {
+		t.Fatal("Combination has not been detected.")
+	}
+
 	rightLeftChildNode := Node{Entry: "Right left data"}
 	rightRightChildNode := Node{Entry: "Right right data"}
 
@@ -68,6 +75,10 @@ func TestTreeCreation(t *testing.T) {
 	res, err = rightNode.InsertRightNode(&rightRightChildNode)
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Insertion of right right node should not have failed")
+	}
+
+	if !rightNode.IsCombination() {
+		t.Fatal("Combination has not been detected.")
 	}
 
 	// Check for values and correct parent assignment
@@ -437,8 +448,7 @@ func TestNodeCombination(t *testing.T) {
 		t.Fatal("Entry value of leaf was not correctly assigned in combined node.")
 	}
 
-
 }
 
-//Collapse adjacent entries in logical operators - CollapseAdjacentOperators()
 
+//Collapse adjacent entries in logical operators - CollapseAdjacentOperators()

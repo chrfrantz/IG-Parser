@@ -10,12 +10,6 @@ import (
 	"strings"
 )
 
-// Define constants for parentheses and braces
-const LEFT_PARENTHESIS = "("
-const RIGHT_PARENTHESIS = ")"
-const LEFT_BRACE = "{"
-const RIGHT_BRACE = "}"
-
 
 func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	s := tree.Statement{}
@@ -43,6 +37,10 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	nestedStmts := compAndNestedStmts[1]
 	if len(nestedStmts) == 0 {
 		log.Println("No nested statements found.")
+	}
+	nestedCombos := compAndNestedStmts[2]
+	if len(nestedCombos) == 0 {
+		log.Println("No nested statement combination candidates found.")
 	}
 
 	fmt.Println("Text to be parsed: " + text)
@@ -164,6 +162,10 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 
 	fmt.Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
 
+	if len(nestedStmts) > 0 {
+		log.Println("Found nested statements ...")
+	}
+
 	for _, v := range nestedStmts {
 
 		log.Println("Found nested statement")
@@ -176,10 +178,10 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 		if strings.HasPrefix(v, tree.ACTIVATION_CONDITION) {
 			log.Println("Attaching nested activation condition to higher-level statement")
 			// Assign nested statement to higher-level statement
-			// TODO: Check for combination of multiple nested statements
+
 			// If already a statement assignment to complex element, ...
 			if s.ActivationConditionComplex != nil {
-				// ... combine both
+				// ... combine both (with implicit AND)
 				s.ActivationConditionComplex = tree.Combine(s.ActivationConditionComplex, &tree.Node{Entry: stmt}, tree.AND)
 			} else {
 				// ... else simply assign first element
@@ -189,7 +191,74 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 		}
 	}
 
-	log.Println("Statement:\n" + s.String())
+	fmt.Println("Testing for nested statement combinations in " + fmt.Sprint(nestedCombos))
+
+	if len(nestedCombos) > 0 {
+		log.Println("Found nested statement combinations ...")
+	}
+
+	for _, v := range nestedCombos {
+
+		log.Println("Found nested statement combination candidate", v)
+
+		combo, _, errStmt := ParseIntoNodeTree(v, false, LEFT_BRACE, RIGHT_BRACE)
+		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
+			fmt.Print("Error when parsing nested statements: " + errStmt.ErrorCode)
+			return s, errStmt
+		}
+
+		// Check whether all leaves have the same prefix
+		flatCombo := tree.Flatten(combo.GetLeafNodes())
+		sharedPrefix := ""
+		for _, node := range flatCombo {
+			entry := node.Entry.(string)
+			fmt.Println("Entry to parse of component type: " + entry)
+			// Extract prefix for node
+			prefix := entry[:strings.Index(entry, LEFT_BRACE)]
+			if sharedPrefix == "" {
+				// Cache it if not already done
+				sharedPrefix = prefix
+				continue
+			}
+			// Check if it deviates from previously cached element
+			if prefix != sharedPrefix {
+				return s, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION,
+					ErrorMessage: "Invalid combination of component-level nested statements. Expected component: " +
+					sharedPrefix + ", but found: " + prefix}
+			}
+		}
+
+		// Parse all entries in tree from string to statement
+		err := combo.ParseAllEntries(func(oldValue string) (tree.Statement, tree.ParsingError) {
+			stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1:strings.LastIndex(oldValue, RIGHT_BRACE)])
+			if errStmt.ErrorCode != tree.PARSING_NO_ERROR{
+				return stmt, errStmt
+			}
+			return stmt, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+		})
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return s, err
+		}
+
+		log.Println("Assigning nested tree structure", combo)
+
+		// Assign to parsed statement combination to statement tree
+		if strings.HasPrefix(sharedPrefix, tree.ACTIVATION_CONDITION) {
+			log.Println("Attaching nested activation condition to higher-level statement")
+			// Assign nested statement to higher-level statement
+
+			// If already a statement assignment to complex element, ...
+			if s.ActivationConditionComplex != nil {
+				// ... combine both
+				s.ActivationConditionComplex = tree.Combine(s.ActivationConditionComplex, combo, tree.AND)
+			} else {
+				// ... else simply assign entire subtree generated from the statement combination
+				s.ActivationConditionComplex = combo
+			}
+		}
+	}
+
+	log.Println("Statement (after assigning sub elements):\n" + s.String())
 
 	return s, outErr
 
@@ -229,13 +298,14 @@ func escapeSymbolsForRegex(text string) string {
 /*
 Separates nested statement expressions (including component prefix)
 from individual components (including combinations of components).
-Returns multi-dim array, with element [0][0] containing component-only string,
-and element [1] containing nested statements (potentially multiple)
+Returns multi-dim array, with element [0][0] containing component-only statement (no nested structure),
+and element [1] containing nested statements (potentially multiple),
+and element [2] containing potential statement combinations.
  */
 func separateComponentsAndNestedStatements(statement string) ([][]string, tree.ParsingError) {
 
 	// Prepare return structure
-	ret := make([][]string,2)
+	ret := make([][]string,3)
 
 	// Identify all nested statements
 	nestedStmts, err := identifyNestedStatements(statement)
@@ -245,6 +315,9 @@ func separateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 
 	// Contains complete nested statements (with prefix)
 	completeNestedStmts := []string{}
+
+	// Holds candidates for nested combinations
+	nestedCombos := []string{}
 
 	if len(nestedStmts) > 0 {
 
@@ -261,16 +334,24 @@ func separateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 			if len(result) > 0 {
 				// Append extracted nested statements including component prefix
 				completeNestedStmts = append(completeNestedStmts, result[0][0])
+				fmt.Println("Added candidate for single nested statement:", result[0][0])
 
 				// Remove nested statement from overall statement
 				statement = strings.ReplaceAll(statement, result[0][0], "")
 			} else {
-				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
-					ErrorMessage: "Unable to extract prefix of nested statement " + v}
+				// Save for parsing as combination
+				nestedCombos = append(nestedCombos, v)
+				fmt.Println("Added candidate for statement combination:", v)
+
+				// Remove nested statement combination from overall statement
+				statement = strings.ReplaceAll(statement, v, "")
+				/*return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
+					ErrorMessage: "Unable to extract prefix of nested statement " + v}*/
 			}
 		}
 		// Assign nested statements if found
 		ret[1] = completeNestedStmts
+		ret[2] = nestedCombos
 		fmt.Println("Remaining non-nested input statement (without nested elements): " + statement)
 	} else {
 		fmt.Println("No nested statement found in input: " + statement)
@@ -555,7 +636,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 
 	fmt.Println("Preprocessed string: " + componentString)
 
-	node, modifiedInput, err := ParseIntoNodeTree(componentString, false)
+	node, modifiedInput, err := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage

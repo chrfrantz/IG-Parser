@@ -44,7 +44,7 @@ func main() {
 	// Create root node
 	//node := tree.Node{}
 	// Parse provided expression
-	node, modifiedInput, _ := ParseIntoNodeTree(input, false)
+	node, modifiedInput, _ := ParseIntoNodeTree(input, false, "(", ")")
 	// Print resulting tree
 	fmt.Println("Final tree: \n" + node.String())
 	fmt.Println("Corresponding (potentially modified) input string: " + modifiedInput)
@@ -81,11 +81,31 @@ the right-most outer combination (and combinations nested therein) is parsed.
 - Invalid combinations (e.g., missing logical operator) are discarded
 in the processing.
  */
-func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.ParsingError) {
+func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar string) (*tree.Node, string, tree.ParsingError) {
+
+	// Check for parentheses
+	if leftPar == "" || rightPar == "" {
+		return nil, "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION, ErrorMessage: "Missing parentheses specification when parsing into tree."}
+	}
+
+	if leftPar == LEFT_BRACE && rightPar != RIGHT_BRACE {
+		return nil, "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION,
+			ErrorMessage: "Invalid parentheses specification when parsing into tree (Left: " + leftPar + ", Right: " + rightPar + ")"}
+	}
+
+	if leftPar == LEFT_PARENTHESIS && rightPar != RIGHT_PARENTHESIS {
+		return nil, "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION,
+			ErrorMessage: "Invalid parentheses specification when parsing into tree (Left: " + leftPar + ", Right: " + rightPar + ")"}
+	}
+
+	if leftPar != LEFT_PARENTHESIS && leftPar != LEFT_BRACE {
+		return nil, "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION,
+			ErrorMessage: "Invalid parentheses specification when parsing into tree (Left: " + leftPar + ", Right: " + rightPar + ")"}
+	}
 
 	// Return detected combinations, alongside potentially modified input string
 	//if combinations == nil {
-		combinations, _, input, err := detectCombinations(input)
+		combinations, _, input, err := detectCombinations(input, leftPar, rightPar)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, input, err
 		}
@@ -207,7 +227,7 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 				fmt.Println("Tree before deep parsing: " + node.String())
 
 				// Left side (potentially modifying input string)
-				leftCombos, leftNonShared, left, err := detectCombinations(left)
+				leftCombos, leftNonShared, left, err := detectCombinations(left, leftPar, rightPar)
 				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 					log.Println("Error when parsing left side: " + err.ErrorMessage)
 					return &node, input, err
@@ -244,7 +264,7 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 					}
 
 					fmt.Println("Go deep on left side: " + left)
-					leftNode, left, err := ParseIntoNodeTree(left, true)
+					leftNode, left, err := ParseIntoNodeTree(left, true, leftPar, rightPar)
 					if err.ErrorCode != tree.PARSING_NO_ERROR {
 						return nil, left, err
 					}
@@ -280,7 +300,7 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 				}
 
 				// Right side (potentially modifying input string)
-				rightCombos, rightNonShared, right, err := detectCombinations(right)
+				rightCombos, rightNonShared, right, err := detectCombinations(right, leftPar, rightPar)
 				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
 					log.Println("Error when parsing right side: " + err.ErrorMessage)
 					return &node, input, err
@@ -316,7 +336,7 @@ func ParseIntoNodeTree(input string, nestedNode bool) (*tree.Node, string, tree.
 					}
 
 					fmt.Println("Go deep on right side: " + right)
-					rightNode, right, err := ParseIntoNodeTree(right, true)
+					rightNode, right, err := ParseIntoNodeTree(right, true, leftPar, rightPar)
 					if err.ErrorCode != tree.PARSING_NO_ERROR {
 						return nil, right, err
 					}
@@ -425,7 +445,27 @@ Default syntactic form of input: "( leftSide [OPERATOR] rightSide )", where
 [OPERATOR] is one of the logical operators (including brackets), and left
 and right side are either text or combinations themselves.
  */
-func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []string, string, tree.ParsingError) {
+func detectCombinations(expression string, leftPar string, rightPar string) (map[int]map[int]tree.Boundaries, []string, string, tree.ParsingError) {
+
+	// Check for parentheses
+	if leftPar == "" || rightPar == "" {
+		return nil, nil, "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION, ErrorMessage: "Missing parentheses specification for detection of combinations."}
+	}
+
+	if leftPar == LEFT_BRACE && rightPar != RIGHT_BRACE {
+		return nil, nil, "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION,
+			ErrorMessage: "Invalid parentheses specification when parsing into tree (Left: " + leftPar + ", Right: " + rightPar + ")"}
+	}
+
+	if leftPar == LEFT_PARENTHESIS && rightPar != RIGHT_PARENTHESIS {
+		return nil, nil, "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION,
+			ErrorMessage: "Invalid parentheses specification when parsing into tree (Left: " + leftPar + ", Right: " + rightPar + ")"}
+	}
+
+	if leftPar != LEFT_PARENTHESIS && leftPar != LEFT_BRACE {
+		return nil, nil, "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION,
+			ErrorMessage: "Invalid parentheses specification when parsing into tree (Left: " + leftPar + ", Right: " + rightPar + ")"}
+	}
 
 	// Tracks current parsing level
 	level := 0
@@ -437,9 +477,9 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []s
 	for i, letter := range expression {
 
 		switch string(letter) {
-		case "(":
+		case leftPar:
 			parCount++
-		case ")":
+		case rightPar:
 			parCount--
 		}
 		i++
@@ -469,11 +509,27 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []s
 	// Holds all non-shared elements across entire expression (to be returned with identified combinations)
 	nonSharedElements := []string{}
 
+	// Parsing-independent parentheses (i.e., (, )) count for assessment parsing mode when parsing nested statements
+	// Values greater 0 indicate that parsing is in component-level nesting territory; important to differentiate scope
+	// for nested statement parsing (i.e., {stmt1 [AND] stmt2}, vs. {A(...) I(first [AND] second) Cac()} [AND] ...
+	// to avoid picking up nested logical operator within component-level nesting scope
+	generalParCount := 0
+
 	fmt.Println("Testing expression " + expression)
 	for i, letter := range expression {
 
+		// Register parenthesis count independent from main parsing
 		switch string(letter) {
-		case "(":
+		case LEFT_PARENTHESIS:
+			// Increase (to signal operation inside component-level combinations)
+			generalParCount++
+		case RIGHT_PARENTHESIS:
+			// Reduce
+			generalParCount--
+		}
+
+		switch string(letter) {
+		case leftPar:
 			// Increase level
 			level++
 			fmt.Println("Expression start detected (Level " + strconv.Itoa(level) + ")")
@@ -492,7 +548,7 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []s
 			}
 			// Count parentheses to detect uneven matching
 			parCount++
-		case ")":
+		case rightPar:
 			fmt.Println("Expression end detected (Level " + strconv.Itoa(level) + ")")
 			// Check if there are repetitions
 			for k, _ := range foundOperators { // key: operator, value:
@@ -582,6 +638,15 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []s
 				fmt.Println("Detected " + tree.SAND_BRACKETS)
 				foundOperator = tree.SAND
 			}
+			// If parsing for statement combinations, suppress operators if within component-level nesting scope
+			if foundOperator != "" && leftPar == LEFT_BRACE && rightPar == RIGHT_BRACE && generalParCount != 0 {
+				// Suppress registration of combination
+				foundOperator = ""
+				fmt.Println("Statement-level parsing: Suppressing nested logical operator " +
+					foundOperator + " during statement-level parsing")
+			}
+
+			// Perform proper handling of operator
 			if foundOperator != "" {
 
 				fmt.Println("Found logical operator " + foundOperator + " on level " + strconv.Itoa(level))
@@ -624,10 +689,10 @@ func detectCombinations(expression string) (map[int]map[int]tree.Boundaries, []s
 						" times on level " + strconv.Itoa(level) + "), even though looking for terminating parenthesis.")
 					if foundOperator == tree.AND && foundOperators[foundOperator][level] > 1 { // if AND operator and multiple on the same level
 						// Consider injecting a left parenthesis before the expression and add mixfix ") " before logical operator, e.g., "( left ... [AND] right ... ) [AND] ..."
-						expression = expression[:levelMap[level][levelIdx].Left] + "(" + expression[levelMap[level][levelIdx].Left:i-1] + ") " + expression[i:]
+						expression = expression[:levelMap[level][levelIdx].Left] + leftPar + expression[levelMap[level][levelIdx].Left:i-1] + rightPar + " " + expression[i:]
 						log.Println("Multiple [AND] operators found. Reconstructed nested structure by introducing parentheses, now: " + expression)
 						log.Println("Rerunning all parsing on combination to capture nested AND combinations")
-						return detectCombinations(expression)
+						return detectCombinations(expression, leftPar, rightPar)
 					} else {
 						return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS,
 							ErrorMessage: "Error: Duplicate non-[AND] operators (or mix of [AND] and non-[AND] operators) on level " + strconv.Itoa(level) +

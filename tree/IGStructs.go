@@ -226,6 +226,11 @@ const PARSING_ERROR_WRITE = "WRITE_ERROR"
 const PARSING_ERROR_INVALID_PARENTHESES_COMBINATION = "INVALID_PARENTHESES_COMBINATIONS"
 // Error during regex compilation
 const PARSING_ERROR_PATTERN_EXTRACTION = "PATTERN_EXTRACTION_ERROR"
+// Detecting combinations of nested statements with varying component references
+// (e.g., {Cac{stmt1} [AND] Cex{stmt2}}, but should be{Cac{stmt1} [AND] Cac{stmt2}})
+const PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION = "INVALID_TYPE_COMBINATIONS_IN_NESTED_STATEMENT_COMBINATIONS"
+// Indicates that operations was imposed on nil element
+const PARSING_ERROR_NIL_ELEMENT = "INVALID_PARSING_OF_NIL_ELEMENT"
 
 /*
 Error type signaling errors during statement parsing
@@ -472,4 +477,17 @@ func PrintArray(array []string) string {
 		i++
 	}
 	return out
+}
+
+/*
+Flatten input structure into simple array.
+*/
+func Flatten(input [][]*Node) []*Node {
+	output := []*Node{}
+	for _, v := range input {
+		for _, v2 := range v {
+			output = append(output, v2)
+		}
+	}
+	return output
 }

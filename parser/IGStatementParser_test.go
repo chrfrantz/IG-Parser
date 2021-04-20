@@ -3,6 +3,7 @@ package parser
 import (
 	"IG-Parser/tree"
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -702,51 +703,51 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 		t.Fatal("Did detect activation condition as primitive entry")
 	}
 
-	if !element[0].Entry.(tree.Statement).Attributes.HasPrimitiveEntry() {
-		t.Fatal("Did not detect attribute as primitive entry")
+	if !element[0].Left.Entry.(tree.Statement).Attributes.HasPrimitiveEntry() {
+		t.Fatal("Did not detect attribute as primitive entry (Entry:", element[0].Entry, ")")
 	}
 
-	if element[0].Entry.(tree.Statement).Attributes.Entry == nil {
+	if element[0].Left.Entry.(tree.Statement).Attributes.Entry == nil {
 		t.Fatal("Did detect attribute entry as nil")
 	}
 
-	if element[0].Entry.(tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
+	if element[0].Left.Entry.(tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
 		t.Fatal("Incorrectly detected attribute in nested activation condition")
 	}
 
-	if element[0].Entry.(tree.Statement).Aim.Entry.(string) != "suspects" {
+	if element[0].Left.Entry.(tree.Statement).Aim.Entry.(string) != "suspects" {
 		t.Fatal("Incorrectly detected attribute in nested activation condition")
 	}
 
 	// Test for nested elements
-	nestedStmt := element[0].Entry.(tree.Statement)
+	nestedStmt := element[0].Left.Entry.(tree.Statement)
 	leaves, _ := nestedStmt.GenerateLeafArrays()
 	if len(leaves) != 4 {
 		t.Fatal("Did not leaf elements of first-order nested statement correctly")
 	}
 
-	if !element[0].Entry.(tree.Statement).ActivationConditionSimple.IsNil() {
+	if !element[0].Left.Entry.(tree.Statement).ActivationConditionSimple.IsNil() {
 		t.Fatal("Simple activation condition field of nested statement should be nil")
 	}
 
 	// Test for second-order nested statements
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.IsNil() {
+	if element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.IsNil() {
 		t.Fatal("Complex activation condition field of nested statement should not be nil")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "NOP Manager" {
+	if element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "NOP Manager" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "orders" {
+	if element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "orders" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).DirectObject.Entry != "review" {
+	if element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).DirectObject.Entry != "review" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	nestedStmt = element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
+	nestedStmt = element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
 	leaves, _ = nestedStmt.GenerateLeafArrays()
 	if len(leaves) != 3 {
 		t.Fatal("Did not leaf elements of second-order nested statement correctly")
@@ -781,5 +782,78 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 		componentIdx[tree.CONSTITUTING_PROPERTIES_PROPERTY] != 0 || componentIdx[tree.ACTIVATION_CONDITION] != 0 {
 		t.Fatal("Component element count is not empty for some elements.")
 	}
+
+}
+
+/*
+Tests parsing of nested statement combinations
+ */
+func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
+
+	input := "{Cac{E(Program Manager) F(is) P(qualified)} [AND] " +
+		"{Cac{E(Program Participant2) F(is2) P(employed2)} [XOR] " +
+		"Cac{E(Program Participant) F(is) P(employed)}}}"
+
+	combo, _, errStmt := ParseIntoNodeTree(input, false, LEFT_BRACE, RIGHT_BRACE)
+	if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Error("Error when parsing nested statements: " + errStmt.ErrorCode)
+	}
+
+	// Check whether all leaves have the same prefix
+	flatCombo := tree.Flatten(combo.GetLeafNodes())
+	sharedPrefix := ""
+	for _, node := range flatCombo {
+		entry := node.Entry.(string)
+		// Extract prefix for node
+		prefix := entry[:strings.Index(entry, LEFT_BRACE)]
+		if sharedPrefix == "" {
+			// Cache it if not already done
+			sharedPrefix = prefix
+			continue
+		}
+		// Check if it deviates from previously cached element
+		if prefix != sharedPrefix {
+			t.Error("Invalid combination of component-level nested statements. Expected component: " +
+				sharedPrefix + ", but found: " + prefix)
+		}
+	}
+
+	if len(tree.Flatten(combo.GetLeafNodes())) != 3 {
+		t.Fatal("Wrong number of parsed string nodes.")
+	}
+
+	// Parse all entries in tree from string to statement
+	err := combo.ParseAllEntries(func(oldValue string) (tree.Statement, tree.ParsingError) {
+		stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1 : strings.LastIndex(oldValue, RIGHT_BRACE)])
+		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
+			return stmt, errStmt
+		}
+		return stmt, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	})
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Conversion of string entries to parsed statements failed:", err.Error())
+	}
+
+	if len(tree.Flatten(combo.GetLeafNodes())) != 3 {
+		t.Fatal("Wrong number of parsed string nodes.")
+	}
+
+	fmt.Println(combo.String())
+
+	if combo.Left.Entry.(tree.Statement).ConstitutedEntity.Entry != "Program Manager" ||
+		combo.Left.Entry.(tree.Statement).ConstitutingProperties.Entry != "qualified" ||
+		combo.Left.Entry.(tree.Statement).ConstitutiveFunction.Entry != "is" ||
+		combo.LogicalOperator != "AND" ||
+		combo.Right.LogicalOperator != "XOR" ||
+		combo.Right.Left.Entry.(tree.Statement).ConstitutedEntity.Entry != "Program Participant2" ||
+		combo.Right.Left.Entry.(tree.Statement).ConstitutiveFunction.Entry != "is2" ||
+		combo.Right.Left.Entry.(tree.Statement).ConstitutingProperties.Entry != "employed2" ||
+		combo.Right.Right.Entry.(tree.Statement).ConstitutedEntity.Entry != "Program Participant" ||
+		combo.Right.Right.Entry.(tree.Statement).ConstitutiveFunction.Entry != "is" ||
+		combo.Right.Right.Entry.(tree.Statement).ConstitutingProperties.Entry != "employed" {
+
+			t.Fatal("Parsing into statements failed.")
+	}
+
 
 }

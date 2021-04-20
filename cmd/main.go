@@ -40,8 +40,9 @@ func main() {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		"Cac{A(Programme Manager) I((suspects [AND] assesses)) Bdir(violations)}" +
-		"Cac{E(Program Manager) F(is) P(qualified)}" +
-		"Cac{E(Program Participant) F(is) P(employed)}"
+		"{Cac{E(Program Manager) F(is) P(qualified)} [AND] " +
+		"{Cac{E(Program Participant2) F(is2) P(employed2)} [XOR] " +
+		"Cac{E(Program Participant) F(is) P(employed)}}}"
 
 	_, err := app.ConvertIGScriptToGoogleSheets(text, "65", "fun.csv")
 

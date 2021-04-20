@@ -1,36 +1,8 @@
 package exporter
 
 import (
-	"IG-Parser/tree"
 	"testing"
 )
-
-/*
-Tests basic flattening of two-dimensional array
- */
-func TestFlatten(t *testing.T) {
-
-	t.Fatal("Test to be completed - not yet done.")
-
-	arr := make([][]*tree.Node, 4, 4)
-
-	/*arr[0][0] = &tree.Node{Entry: "First"}
-	arr[0][1] = &tree.Node{Entry: "Second"}
-	arr[1][0] = &tree.Node{Entry: "Third"}
-	arr[1][1] = &tree.Node{Entry: "Fourth"}
-*/
-
-	arr2 := flatten(arr)
-
-	if len(arr2) != 4 ||
-		arr2[0].Entry != "First" ||
-		arr2[1].Entry != "Second" ||
-		arr2[2].Entry != "Third" ||
-		arr2[3].Entry != "Fourth" {
-		t.Fatal("Array has not been correctly flattened")
-	}
-
-}
 
 /*
 Tests basic addition of element to array

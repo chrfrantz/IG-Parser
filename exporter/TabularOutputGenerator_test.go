@@ -60,6 +60,9 @@ func TestHeaderRowGeneration(t *testing.T) {
 
 }
 
+/*
+Tests basic tabular output without statement-level nesting - only component-level combinations.
+ */
 func TestTabularOutput(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -122,12 +125,16 @@ func TestTabularOutput(t *testing.T) {
 
 }
 
+/*
+Tests multi-level nesting on statements, i.e., activation with own activation condition
+ */
 func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// This is the tricky lines, specifically the second Cac{}
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
 
 	s,err := parser.ParseStatement(text)
@@ -185,13 +192,19 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 
 }
 
+/*
+Tests tabular output with combination of two-level statement-level nested component and
+simple activation condition (to be linked by implicit AND).
+ */
 func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Simple activation condition
 		"Cac(Upon approval)" +
+		// Complex activation condition, including two-level nesting (Cac{Cac{}})
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
 
 	s,err := parser.ParseStatement(text)
@@ -249,13 +262,18 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 
 }
 
+/*
+Tests combination of two nested activation conditions (single level)
+ */
 func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Activation condition 1
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
+		// Activation condition 2
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
 	s,err := parser.ParseStatement(text)
@@ -313,6 +331,9 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 
 }
 
+/*
+Tests combination of three nested activation conditions (single level), including embedded component-level nesting
+ */
 func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -349,6 +370,217 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 
 	// Read reference file
 	content, error := ioutil.ReadFile("TestOutputThreeNestedComplexComponents.test")
+	if error != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		WriteToFile("errorOutput.error", output)
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests partial AND-linked statement-level combinations, expects the inference of implicit AND to non-linked complex component
+ */
+func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Proper combination
+		"{Cac{E(Program Manager) F(is) P(approved)} [AND] " +
+		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}} " +
+		// Implicitly linked nested statement
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Error("Error during parsing of statement")
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays()
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, error := ioutil.ReadFile("TestOutputNestedComplexCombinationsImplicitAnd.test")
+	if error != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		WriteToFile("errorOutput.error", output)
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests partial XOR-linked statement-level combinations, expects the inference of implicit AND to non-linked complex component
+ */
+func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Complex expression with XOR linkage
+		"{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}} " +
+		// should be automatically linked using AND
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Error("Error during parsing of statement")
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays()
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, error := ioutil.ReadFile("TestOutputNestedComplexCombinationsXor.test")
+	if error != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		WriteToFile("errorOutput.error", output)
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests statement-level combinations, alongside embedded component-level combinations to ensure the
+filtering of within-statement component-level combinations are filtered prior to statement assembly.
+ */
+func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		// This is the tricky line, the multiple aims
+		"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		// non-linked additional activation condition (should be linked by implicit AND)
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Error("Error during parsing of statement")
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays()
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, error := ioutil.ReadFile("TestOutputNestedStatementCombinationsAndComponentCombinations.test")
 	if error != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
 	}
