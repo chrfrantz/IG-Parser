@@ -39,16 +39,17 @@ func main() {
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
-		"Cac{A(Programme Manager) I(suspects) Bdir(violations)}" +
-		"Cac{E(Program Manager) F(is) P(qualified)}"
+		"Cac{A(Programme Manager) I((suspects [AND] assesses)) Bdir(violations)}" +
+		"Cac{E(Program Manager) F(is) P(qualified)}" +
+		"Cac{E(Program Participant) F(is) P(employed)}"
 
-	output, err := app.ConvertIGScriptToGoogleSheets(text, "65", "fun.csv")
+	_, err := app.ConvertIGScriptToGoogleSheets(text, "65", "fun.csv")
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Println(output)
+	//fmt.Println(output)
 
 	/*
 	s, err := parser.ParseStatement(text)
