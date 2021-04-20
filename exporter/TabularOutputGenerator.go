@@ -273,6 +273,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 	}
 
 	// Organise headers
+
 	// Move Statement ID to first position
 	headerSymbols = moveElementToFirstPosition(stmtIdColHeader, headerSymbols, true)
 	headerSymbolsNames = moveElementToFirstPosition(stmtIdColHeader, headerSymbolsNames, true)

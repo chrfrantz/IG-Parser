@@ -37,7 +37,7 @@ func moveElementToFirstPosition(elementToMove string, arrayToModify []string, ad
 			// Simply add ...
 			arrayToModify = append(arrayToModify, elementToMove)
 			// ... and call function again
-			return moveElementToLastPosition(elementToMove, arrayToModify, false)
+			return moveElementToFirstPosition(elementToMove, arrayToModify, false)
 		}
 	} else if pos != len(arrayToModify) {
 		// Move element to first position
