@@ -8,131 +8,110 @@ import (
 )
 
 type Statement struct {
+
 	// Regulative Statement
-	Attributes *Node
-	AttributesProperty *Node
-	Deontic *Node
-	Aim *Node
-	DirectObject *Node
-	DirectObjectProperty *Node
-	IndirectObject *Node
-	IndirectObjectProperty *Node
+	Attributes                            *Node
+	AttributesPropertySimple              *Node
+	AttributesPropertyComplex             *Node
+	Deontic                               *Node
+	Aim                                   *Node
+	DirectObject                          *Node
+	DirectObjectPropertySimple            *Node
+	DirectObjectPropertyComplex           *Node
+	IndirectObject                        *Node
+	IndirectObjectPropertySimple          *Node
+	IndirectObjectPropertyComplex         *Node
+
 	//Constitutive Statement
-	ConstitutedEntity *Node
-	ConstitutedEntityProperty *Node
-	Modal *Node
-	ConstitutiveFunction *Node
-	ConstitutingProperties *Node
-	ConstitutingPropertiesProperty *Node
+	ConstitutedEntity                     *Node
+	ConstitutedEntityPropertySimple       *Node
+	ConstitutedEntityPropertyComplex      *Node
+	Modal                                 *Node
+	ConstitutiveFunction                  *Node
+	ConstitutingProperties                *Node
+	ConstitutingPropertiesPropertySimple  *Node
+	ConstitutingPropertiesPropertyComplex *Node
+
 	// Shared Components
-	ActivationConditionSimple *Node
-	ActivationConditionComplex *Statement
-	ExecutionConstraintSimple *Node
-	ExecutionConstraintComplex *Statement
-	OrElse *Statement
+	ActivationConditionSimple             *Node
+	ActivationConditionComplex            *Node
+	ExecutionConstraintSimple             *Node
+	ExecutionConstraintComplex            *Node
+	OrElse                                *Node
 }
 
 func (s *Statement) String() string {
 	out := ""
-	sep := ": "
-	suffix := "\n"
-	if s.Attributes != nil {
-		out += ATTRIBUTES + sep
-		out += s.Attributes.String()
-		out += suffix
-	}
-	if s.AttributesProperty != nil {
-		out += ATTRIBUTES_PROPERTY + sep
-		out += s.AttributesProperty.String()
-		out += suffix
-	}
-	if s.Deontic != nil {
-		out += DEONTIC + sep
-		out += s.Deontic.String()
-		out += suffix
-	}
-	if s.Aim != nil {
-		out += AIM + sep
-		out += s.Aim.String()
-		out += suffix
-	}
-	if s.DirectObject != nil {
-		out += DIRECT_OBJECT + sep
-		out += s.DirectObject.String()
-		out += suffix
-	}
-	if s.DirectObjectProperty != nil {
-		out += DIRECT_OBJECT_PROPERTY + sep
-		out += s.DirectObjectProperty.String()
-		out += suffix
-	}
-	if s.IndirectObject != nil {
-		out += INDIRECT_OBJECT + sep
-		out += s.IndirectObject.String()
-		out += suffix
-	}
-	if s.IndirectObjectProperty != nil {
-		out += INDIRECT_OBJECT_PROPERTY + sep
-		out += s.IndirectObjectProperty.String()
-		out += suffix
-	}
-	if s.ConstitutedEntity != nil {
-		out += CONSTITUTED_ENTITY + sep
-		out += s.ConstitutedEntity.String()
-		out += suffix
-	}
-	if s.ConstitutedEntityProperty != nil {
-		out += CONSTITUTING_PROPERTIES_PROPERTY + sep
-		out += s.ConstitutedEntityProperty.String()
-		out += suffix
-	}
-	if s.Modal != nil {
-		out += MODAL + sep
-		out += s.Modal.String()
-		out += suffix
-	}
-	if s.ConstitutiveFunction != nil {
-		out += CONSTITUTIVE_FUNCTION + sep
-		out += s.ConstitutiveFunction.String()
-		out += suffix
-	}
-	if s.ConstitutingProperties != nil {
-		out += CONSTITUTING_PROPERTIES + sep
-		out += s.ConstitutingProperties.String()
-		out += suffix
-	}
-	if s.ConstitutingPropertiesProperty != nil {
-		out += CONSTITUTING_PROPERTIES_PROPERTY + sep
-		out += s.ConstitutingPropertiesProperty.String()
-		out += suffix
-	}
-	if s.ActivationConditionSimple != nil {
-		out += ACTIVATION_CONDITION + sep
-		out += s.ActivationConditionSimple.String()
-		out += suffix
-	}
-	if s.ActivationConditionComplex != nil {
-		out += ACTIVATION_CONDITION + sep
-		out += s.ActivationConditionComplex.String()
-		out += suffix
-	}
-	if s.ExecutionConstraintSimple != nil {
-		out += EXECUTION_CONSTRAINT + sep
-		out += s.ExecutionConstraintSimple.String()
-		out += suffix
-	}
-	if s.ExecutionConstraintComplex != nil {
-		out += EXECUTION_CONSTRAINT + sep
-		out += s.ExecutionConstraintComplex.String()
-		out += suffix
-	}
-	if s.OrElse != nil {
-		out += s.OrElse.String()
-	}
+
+	out = s.printComponent(out, s.Attributes, ATTRIBUTES, false)
+	out = s.printComponent(out, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false)
+	out = s.printComponent(out, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY, true)
+	out = s.printComponent(out, s.Deontic, DEONTIC, false)
+	out = s.printComponent(out, s.Aim, AIM, false)
+	out = s.printComponent(out, s.DirectObject, DIRECT_OBJECT, false)
+	out = s.printComponent(out, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false)
+	out = s.printComponent(out, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY, true)
+	out = s.printComponent(out, s.IndirectObject, INDIRECT_OBJECT, false)
+	out = s.printComponent(out, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false)
+	out = s.printComponent(out, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY, true)
+
+	out = s.printComponent(out, s.ActivationConditionSimple, ACTIVATION_CONDITION, false)
+	out = s.printComponent(out, s.ActivationConditionComplex, ACTIVATION_CONDITION, true)
+	out = s.printComponent(out, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false)
+	out = s.printComponent(out, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT, true)
+
+	out = s.printComponent(out, s.ConstitutedEntity, CONSTITUTED_ENTITY, false)
+	out = s.printComponent(out, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false)
+	out = s.printComponent(out, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY, true)
+	out = s.printComponent(out, s.Modal, MODAL, false)
+	out = s.printComponent(out, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false)
+	out = s.printComponent(out, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false)
+	out = s.printComponent(out, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false)
+	out = s.printComponent(out, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY, true)
+	
+    out = s.printComponent(out, s.OrElse, OR_ELSE, true)
+
 	return out
 }
 
+/*
+Appends component information for output string
+Input:
+- input string to append output to
+- Node whose content is to be appended
+- Symbol associated with component
+- Indicator whether component is complex
 
+Returns string for printing
+ */
+func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol string, complex bool) string {
+
+	sep := ": "
+	suffix := "\n"
+	complexPrefix := "{\n"
+	complexSuffix := "\n}"
+
+	// If node is not nil
+	if node != nil {
+		// Print symbol
+		inputString += nodeSymbol + sep
+		// Add core content
+		if complex {
+			// Complex (i.e., nested) node output
+			inputString += complexPrefix + node.String() + complexSuffix
+		} else {
+			// Simple output
+			inputString += node.String()
+		}
+		// Append suffix
+		inputString += suffix
+	}
+	return inputString
+}
+
+/*
+Stringifies institutional statement
+ */
 func (s *Statement) Stringify() string {
 	log.Fatal("Stringify() is not yet implemented.")
 	return ""
@@ -160,172 +139,96 @@ func (s *Statement) GenerateLeafArrays() ([][]*Node, map[string]int) {
 	referenceMap := map[string]int{}
 
 	// Counter for overall number of entries
-	ct := 0
 	nodesMap := make([][]*Node, 0)
 
-	// Counter for number of elements in given component
-	i := 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.Attributes.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[ATTRIBUTES] = i
+	// Regulative components
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Attributes, ATTRIBUTES, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY, true)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Deontic, DEONTIC, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Aim, AIM, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObject, DIRECT_OBJECT, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY, true)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObject, INDIRECT_OBJECT, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY, true)
 
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.AttributesProperty.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[ATTRIBUTES_PROPERTY] = i
+	// Context
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionSimple, ACTIVATION_CONDITION, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionComplex, ACTIVATION_CONDITION_REFERENCE, true)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT_REFERENCE, true)
 
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.Deontic.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[DEONTIC] = i
+	// Constitutive components
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntity, CONSTITUTED_ENTITY, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY, true)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Modal, MODAL, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY, true)
 
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.Aim.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[AIM] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.DirectObject.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[DIRECT_OBJECT] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.DirectObjectProperty.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[DIRECT_OBJECT_PROPERTY] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.IndirectObject.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[INDIRECT_OBJECT] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.IndirectObjectProperty.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[INDIRECT_OBJECT_PROPERTY] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.ActivationConditionSimple.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[ACTIVATION_CONDITION] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.ExecutionConstraintSimple.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[EXECUTION_CONSTRAINT] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.ConstitutedEntity.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[CONSTITUTED_ENTITY] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.ConstitutedEntityProperty.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[CONSTITUTED_ENTITY_PROPERTY] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.Modal.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[MODAL] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.ConstitutiveFunction.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[CONSTITUTIVE_FUNCTION] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.ConstitutingProperties.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[CONSTITUTING_PROPERTIES] = i
-
-	// Counter for number of elements in given component
-	i = 0
-	// Add array of leaf nodes attached to general array
-	for _, v := range s.ConstitutingPropertiesProperty.GetLeafNodes() {
-		nodesMap = append(nodesMap, v)
-		i++
-		ct++
-	}
-	referenceMap[CONSTITUTING_PROPERTIES_PROPERTY] = i
+	// Shared components
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.OrElse, OR_ELSE, true)
 
 	return nodesMap, referenceMap
 }
 
+/*
+Generates a leaf array for a given component under consideration of node as being of simple or complex nature.
+Appends to existing structure if provided (i.e., not nil)
+Input:
+- maps of nodes potentially including existing nodes for other components. Will be created internally if nil.
+- reference map that indexes the number of nodes associated with a specific component (to retain association).
+  Will be created internally if nil.
+- Reference to component node for which leaf elements are to be extracted
+- Component symbol associated with component
+- Indicator whether element embedded in node is complex (i.e., nested statement)
+
+Returns:
+- Node map of nodes associated with components
+- Reference map counting number of components
+ */
+func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, componentNode *Node, componentSymbol string, complex bool) ([][]*Node, map[string]int) {
+
+	if componentNode == nil {
+		fmt.Println("No component node found - returning unmodified node and reference map ...")
+		return nodesMap, referenceMap
+	}
+
+	// Initialize data structures if nil
+	if nodesMap == nil {
+		nodesMap = make([][]*Node, 1)
+	}
+
+	if referenceMap == nil {
+		referenceMap = make(map[string]int, 1)
+	}
+
+	// Check for complex content
+	if complex {
+		// Embed nested statement in node structure, before adding to node map
+		nodesMap = append(nodesMap, []*Node{componentNode})
+
+		// since statements can be combined, they are returned as a single element
+		referenceMap[componentSymbol] = 1
+	} else {
+		// Counter for number of elements in given component
+		i := 0
+		// Add array of leaf nodes attached to general array
+		for _, v := range componentNode.GetLeafNodes() {
+			nodesMap = append(nodesMap, v)
+			i++
+		}
+		// Add number of nodes referring to a particular component
+		referenceMap[componentSymbol] = i
+	}
+
+	// Return modified or generated structures
+	return nodesMap, referenceMap
+}
 
 
 // NODE
@@ -340,7 +243,7 @@ type Node struct {
 	// Indicates component type
 	ComponentType string
 	// Substantive content of a leaf node
-	Entry string
+	Entry interface{}
 	// Text shared across children to the left of a combination (e.g., (shared info (left val [AND] right val)))
 	SharedLeft []string
 	// Text shared across children to the right of a combination (e.g., ((left val [AND] right val) shared info))
@@ -441,6 +344,18 @@ func (n *Node) GetSharedRight() []string {
 	return []string{}
 }
 
+/*
+Indicates if node has a primitive consisting of string value, or conversely,
+a complex entry consisting of an institutional statement in its own right.
+ */
+func (n *Node) HasPrimitiveEntry() bool {
+	// Check whether the entry is a string
+	if _, ok := n.Entry.(string); ok {
+		return true
+	}
+	return false
+}
+
 // Sort interface implementation for alphabetic ordering (not order of appearance in tree) of nodes
 type ByEntry []*Node
 
@@ -449,7 +364,10 @@ func (e ByEntry) Len() int {
 }
 
 func (e ByEntry) Less(i, j int) bool {
-	return e[i].Entry < e[j].Entry
+	if e[i].HasPrimitiveEntry() && e[j].HasPrimitiveEntry() {
+		return e[i].Entry.(string) < e[j].Entry.(string)
+	}
+	return false
 }
 
 func (e ByEntry) Swap(i, j int) {
@@ -478,7 +396,14 @@ func (n *Node) Stringify() string {
 	}
 	// Leaf node
 	if n.IsLeafNode() {
-		return n.Entry
+		if n.HasPrimitiveEntry() {
+			return n.Entry.(string)
+		} else {
+			// Return string of statement
+			// TODO: REVIEW TO ENSURE IT PRINTS CORRECTLY OR ADJUST TO STRINGIFY()
+			val := n.Entry.(Statement)
+			return val.String()
+		}
 	}
 	// Walk the tree
 	out := ""
@@ -518,7 +443,17 @@ func (n *Node) String() string {
 	if n == nil {
 		return "Node is not initialized."
 	} else if n.IsLeafNode() {
-		return /*n.ComponentType + */"Leaf entry: " + n.Entry //+ "\n"
+		retVal := "Leaf entry: "
+		// TODO: Check for correct printing
+		if n.Entry == nil {
+			return retVal + "nil (detected in String())"
+		} else if n.HasPrimitiveEntry() {
+			return retVal + n.Entry.(string)
+		} else {
+			val := n.Entry.(Statement)
+			return retVal + val.String()
+		}
+		//return /*n.ComponentType + */"Leaf entry: " + n.Entry //+ "\n"
 	} else {
 		out := ""
 
@@ -570,7 +505,7 @@ func (n *Node) assignParent(node *Node) (bool, NodeError) {
 }
 
 /*
-Insert right subnode to node
+Insert left subnode to node
 */
 func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
 	if n.Left != nil {
@@ -583,7 +518,7 @@ func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_SELF_LINKAGE, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
+	if n.Entry != nil {
 		errorMsg := "Attempting to add left leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -607,7 +542,7 @@ func (n *Node) InsertRightNode(entry *Node) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_SELF_LINKAGE, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
+	if n.Entry != nil {
 		errorMsg := "Attempting to add right leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -626,7 +561,7 @@ func (n *Node) InsertLeftLeaf(entry string) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
+	if n.Entry != nil {
 		errorMsg := "Attempting to add left leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -647,7 +582,7 @@ func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" {
+	if n.Entry != nil {
 		errorMsg := "Attempting to add right leaf node to populated node (i.e., it has an entry itself). Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -905,7 +840,8 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 		"; Logical operator: " + logicalOperator + ")")
 	}
 	if logicalOperator != "" {
-		if !StringInSlice(logicalOperator, IGLogicalOperators) {
+		res, _ := StringInSlice(logicalOperator, IGLogicalOperators)
+		if !res {
 			log.Fatal("Logical operator value invalid (Value: " + logicalOperator + ")")
 		}
 	}
@@ -946,12 +882,12 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 Validates all nodes from this node downwards with respect to population as linking node or leaf node.
  */
 func (n *Node) Validate() (bool, NodeError){
-	if n.Entry == "" && (n.Left == nil || n.Right == nil) {
+	if n.Entry == nil && (n.Left == nil || n.Right == nil) {
 		errorMsg := "Non-leaf node, but missing specification of left and right child, " +
 			"or both. Node: " + fmt.Sprint(n.String())
 		return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: errorMsg}
 	}
-	if n.Entry != "" && (n.Left != nil  || n.Right != nil) {
+	if n.Entry != nil && (n.Left != nil  || n.Right != nil) {
 		errorMsg := "Leaf node, but still has filled left or right node. Node: " + fmt.Sprint(n.String())
 		return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: errorMsg}
 	}
@@ -962,23 +898,23 @@ func (n *Node) Validate() (bool, NodeError){
 
 	if !n.IsLeafNode() {
 		downwardResult := false
-		error := NodeError{}
+		err := NodeError{}
 		// Move downwards
 		if n.Left == nil {
 			return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Empty left node"}
 		} else {
-			downwardResult, error = n.Left.Validate()
+			downwardResult, err = n.Left.Validate()
 		}
 		if !downwardResult {
-			return false, error
+			return false, err
 		}
 		if n.Right == nil {
 			return false, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Empty right node"}
 		} else {
-			downwardResult, error = n.Right.Validate()
+			downwardResult, err = n.Right.Validate()
 		}
 		if !downwardResult {
-			return false, error
+			return false, err
 		}
 	}
 	return true, NodeError{ErrorCode: TREE_NO_ERROR}
@@ -1127,8 +1063,49 @@ func (n *Node) IsLeafNode() bool {
 }
 
 /*
+Indicates whether node contains combination.
+*/
+func (n *Node) IsCombination() bool {
+	return n.Entry == nil && !n.Left.IsNil() &&
+		!n.Right.IsNil() && n.LogicalOperator != ""
+}
+
+/*
 Indicates whether node is empty
  */
 func (n *Node) IsEmptyNode() bool {
-	return n.IsLeafNode() && n.Entry == ""
+	return n.IsLeafNode() && n.Entry == nil
+}
+
+/*
+Indicates if node is nil
+ */
+func (n *Node) IsNil() bool {
+	return n == nil
+}
+
+/*
+Applies statement parsing function to all entries below a given node.
+ */
+func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) ParsingError {
+	if n.IsNil() {
+		return ParsingError{ErrorCode: PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Attempted to parse nil element."}
+	}
+	if !n.IsEmptyNode() && n.Entry != nil {
+
+		// Execute actual function
+		newEntry, err := function(n.Entry.(string))
+		if err.ErrorCode != PARSING_NO_ERROR {
+			return err
+		}
+		// and reassign parsed element
+		n.Entry = newEntry
+	}
+	if !n.Left.IsNil() {
+		n.Left.ParseAllEntries(function)
+	}
+	if !n.Right.IsNil() {
+		n.Right.ParseAllEntries(function)
+	}
+	return ParsingError{ErrorCode: PARSING_NO_ERROR}
 }

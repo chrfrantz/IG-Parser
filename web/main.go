@@ -51,6 +51,9 @@ func main() {
 		}
 	}
 
+	// Manual override for local testing
+	converter.LoggingPath = "./logs"
+
 	addr := ":" + port
 	log.Printf("Listening on %s ...\n", addr)
 	log.Println("Logging: " + fmt.Sprint(converter.Logging))

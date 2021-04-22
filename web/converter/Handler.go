@@ -9,29 +9,44 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 /*
 Template reference
  */
 var tmpl *template.Template
+
 /*
 Dummy function in case logging is not activated
 */
-var terminateOutput = func() {}
+var terminateOutput = func(string) error {
+	return nil
+}
+
 /*
 Indicates whether logging occurs
  */
 var Logging = true
+
 /*
 Indicates folder to log to
  */
 var LoggingPath = ""
+
 /*
 Relative path prefix for all web resources (templates, CSS files)
  */
 var RelativePathPrefix = ""
+
+/*
+Success suffix
+ */
+const SUCCESS_SUFFIX = ".success"
+
+/*
+Error suffix
+ */
+const ERROR_SUFFIX = ".error"
 
 /*
 Init needs to be called from main to instantiate templates.
@@ -99,9 +114,10 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		// Perform the file redirection
 		var err error
 		terminateOutput, err = helper.SaveOutput(LoggingPath + filename)
+
 		fmt.Println("TRANSACTION ID: " + retStruct.TransactionId)
 		if err != nil {
-			fmt.Println("Error when redirecting output: " + err.Error())
+			fmt.Println("Error when initializing logging: " + err.Error())
 		}
 	}
 
@@ -120,27 +136,15 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		// Final comment in log
 		fmt.Println("Error: No input to parse.")
 		// Ensure logging is terminated
-		terminateOutput()
+		err := terminateOutput(ERROR_SUFFIX)
+		if err != nil {
+			log.Println("Error when finalizing log file: ", err.Error())
+		}
 
 		return
 	} else {
-		// Check for statement ID
-		id, err := strconv.Atoi(stmtId)
-		if err != nil {
-			retStruct.Success = false
-			retStruct.Error = true
-			retStruct.Message = app.ERROR_INPUT_STATEMENT_ID
-			tmpl.Execute(w, retStruct)
-
-			// Final comment in log
-			fmt.Println("Error: " + fmt.Sprint(err))
-			// Ensure logging is terminated
-			terminateOutput()
-
-			return
-		}
 		// Convert input
-		output, err2 := app.ConvertIGScriptToGoogleSheets(codedStmt, id, "")
+		output, err2 := app.ConvertIGScriptToGoogleSheets(codedStmt, stmtId, "")
 		if err2.ErrorCode != tree.PARSING_NO_ERROR {
 			retStruct.Success = false
 			retStruct.Error = true
@@ -156,7 +160,10 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 			// Final comment in log
 			fmt.Println("Error: " + fmt.Sprint(err2))
 			// Ensure logging is terminated
-			terminateOutput()
+			err := terminateOutput(ERROR_SUFFIX)
+			if err != nil {
+				log.Println("Error when finalizing log file: ", err.Error())
+			}
 
 			return
 		}
@@ -169,7 +176,10 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		// Final comment in log
 		fmt.Println("Success")
 		// Ensure logging is terminated
-		terminateOutput()
+		err := terminateOutput(SUCCESS_SUFFIX)
+		if err != nil {
+			log.Println("Error when finalizing log file: ", err.Error())
+		}
 
 		return
 	}

@@ -2,7 +2,9 @@ package tree
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -24,8 +26,12 @@ const (
 	NAME_INDIRECT_OBJECT_PROPERTY = "Indirect Object Property"
 	ACTIVATION_CONDITION = "Cac"
 	NAME_ACTIVATION_CONDITION = "Activation Condition"
+	ACTIVATION_CONDITION_REFERENCE = "Cac-Ref"
+	NAME_ACTIVATION_CONDITION_REFERENCE = "Activation Condition Reference"
 	EXECUTION_CONSTRAINT = "Cex"
 	NAME_EXECUTION_CONSTRAINT = "Execution Constraint"
+	EXECUTION_CONSTRAINT_REFERENCE = "Cex-Ref"
+	NAME_EXECUTION_CONSTRAINT_REFERENCE = "Execution Constraint Reference"
 	CONSTITUTED_ENTITY = "E"
 	NAME_CONSTITUTED_ENTITY = "Constituted Entity"
 	CONSTITUTED_ENTITY_PROPERTY = "E,p"
@@ -38,6 +44,8 @@ const (
 	NAME_CONSTITUTING_PROPERTIES = "Constituting Properties"
 	CONSTITUTING_PROPERTIES_PROPERTY = "P,p"
 	NAME_CONSTITUTING_PROPERTIES_PROPERTY = "Constituting Properties Properties"
+	OR_ELSE = "O"
+	NAME_OR_ELSE = "Or else"
 	SAND = "sAND"
 	AND = "AND"
 	OR = "OR"
@@ -57,14 +65,16 @@ const (
 Indicates whether a given symbol is a valid IG Component symbol
  */
 func validIGComponentSymbol(symbol string) bool {
-	return StringInSlice(symbol, IGComponentSymbols)
+	res, _ := StringInSlice(symbol, IGComponentSymbols)
+	return res
 }
 
 /*
 Indicates whether a given name is a valid IG Component name
  */
 func validIGComponentName(name string) bool {
-	return StringInSlice(name, IGComponentNames)
+	res, _ := StringInSlice(name, IGComponentNames)
+	return res
 }
 
 /*
@@ -80,13 +90,16 @@ var IGComponentSymbols = []string{
 	INDIRECT_OBJECT,
 	INDIRECT_OBJECT_PROPERTY,
 	ACTIVATION_CONDITION,
+	ACTIVATION_CONDITION_REFERENCE,
 	EXECUTION_CONSTRAINT,
+	EXECUTION_CONSTRAINT_REFERENCE,
 	CONSTITUTED_ENTITY,
 	CONSTITUTED_ENTITY_PROPERTY,
 	MODAL,
 	CONSTITUTIVE_FUNCTION,
 	CONSTITUTING_PROPERTIES,
-	CONSTITUTING_PROPERTIES_PROPERTY}
+	CONSTITUTING_PROPERTIES_PROPERTY,
+    OR_ELSE}
 
 /*
 IG 2.0 Component Symbols
@@ -101,13 +114,16 @@ var IGComponentNames = []string{
 	NAME_INDIRECT_OBJECT,
 	NAME_INDIRECT_OBJECT_PROPERTY,
 	NAME_ACTIVATION_CONDITION,
+	NAME_ACTIVATION_CONDITION_REFERENCE,
 	NAME_EXECUTION_CONSTRAINT,
+	NAME_EXECUTION_CONSTRAINT_REFERENCE,
 	NAME_CONSTITUTED_ENTITY,
 	NAME_CONSTITUTED_ENTITY_PROPERTY,
 	NAME_MODAL,
 	NAME_CONSTITUTIVE_FUNCTION,
 	NAME_CONSTITUTING_PROPERTIES,
-	NAME_CONSTITUTING_PROPERTIES_PROPERTY}
+	NAME_CONSTITUTING_PROPERTIES_PROPERTY,
+    NAME_OR_ELSE}
 
 /*
 Map holding mapping from IG 2.0 component symbols to proper component names
@@ -122,13 +138,16 @@ var IGComponentSymbolNameMap = map[string]string{
 	INDIRECT_OBJECT: NAME_INDIRECT_OBJECT,
 	INDIRECT_OBJECT_PROPERTY: NAME_INDIRECT_OBJECT_PROPERTY,
 	ACTIVATION_CONDITION: NAME_ACTIVATION_CONDITION,
+	ACTIVATION_CONDITION_REFERENCE: NAME_ACTIVATION_CONDITION_REFERENCE,
 	EXECUTION_CONSTRAINT: NAME_EXECUTION_CONSTRAINT,
+	EXECUTION_CONSTRAINT_REFERENCE: NAME_EXECUTION_CONSTRAINT_REFERENCE,
 	CONSTITUTED_ENTITY: NAME_CONSTITUTED_ENTITY,
 	CONSTITUTED_ENTITY_PROPERTY: NAME_CONSTITUTED_ENTITY_PROPERTY,
 	MODAL: NAME_MODAL,
 	CONSTITUTIVE_FUNCTION: NAME_CONSTITUTIVE_FUNCTION,
 	CONSTITUTING_PROPERTIES: NAME_CONSTITUTING_PROPERTIES,
-	CONSTITUTING_PROPERTIES_PROPERTY: NAME_CONSTITUTING_PROPERTIES_PROPERTY}
+	CONSTITUTING_PROPERTIES_PROPERTY: NAME_CONSTITUTING_PROPERTIES_PROPERTY,
+	OR_ELSE: NAME_OR_ELSE}
 
 type igLogicalOperator struct {
 	LogicalOperatorName string
@@ -138,7 +157,8 @@ type igLogicalOperator struct {
 Checks whether operator value is valid (i.e., a valid logical operator symbol).
 */
 func (o *igLogicalOperator) valid() bool {
-	return StringInSlice(o.LogicalOperatorName, IGLogicalOperators)
+	res, _ := StringInSlice(o.LogicalOperatorName, IGLogicalOperators)
+	return res
 }
 
 func (o igLogicalOperator) String() string {
@@ -207,6 +227,15 @@ const PARSING_ERROR_IGNORED_ELEMENTS = "IGNORED_ELEMENTS"
 const PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION = "LOGICAL_EXPRESSION_GENERATION"
 // Write error
 const PARSING_ERROR_WRITE = "WRITE_ERROR"
+// Invalid parentheses/braces combinations
+const PARSING_ERROR_INVALID_PARENTHESES_COMBINATION = "INVALID_PARENTHESES_COMBINATIONS"
+// Error during regex compilation
+const PARSING_ERROR_PATTERN_EXTRACTION = "PATTERN_EXTRACTION_ERROR"
+// Detecting combinations of nested statements with varying component references
+// (e.g., {Cac{stmt1} [AND] Cex{stmt2}}, but should be{Cac{stmt1} [AND] Cac{stmt2}})
+const PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION = "INVALID_TYPE_COMBINATIONS_IN_NESTED_STATEMENT_COMBINATIONS"
+// Indicates that operations was imposed on nil element
+const PARSING_ERROR_NIL_ELEMENT = "INVALID_PARSING_OF_NIL_ELEMENT"
 
 /*
 Error type signaling errors during statement parsing
@@ -262,7 +291,8 @@ func CollapseAdjacentOperators(inputArray []string, valuesToCollapse []string) [
 		// If last value is the same as this one
 		if outSlice[len(outSlice) - 1] == v {
 			// and in the registered value
-			if StringInSlice(v, valuesToCollapse) {
+			res, _ := StringInSlice(v, valuesToCollapse)
+			if res {
 				// do nothing
 			} else {
 				// else append
@@ -289,15 +319,153 @@ func NodeInSlice(a *Node, list []*Node) bool {
 }
 
 /*
-Indicates whether a particular value is contained in a slice of strings
+Indicates whether a particular value is contained in a slice of strings,
+and if so, indicates index in slice (else -1).
  */
-func StringInSlice(a string, list []string) bool {
-	for _, b := range list {
+func StringInSlice(a string, list []string) (bool, int) {
+	for i, b := range list {
 		if b == a {
-			return true
+			return true, i
 		}
 	}
-	return false
+	return false, -1
+}
+
+/*
+Merges two slices. Values of the second slice are added after the previous shared value
+in the bigger slice. Checks also for substring matches if subItemSeparator is provided
+(i.e., != ""). If shared entry cannot be found, the deviating entries will
+be appended at the end.
+Similarity of elements is assessed based on matching on leading substring (before subItemSeparator),
+e.g., substring before "_".
+Input:
+- Two arrays to be merged
+- Separator indicating subitem prefix (e.g., before "_") to facilitate match
+ */
+func MergeSlices(array1 []string, array2 []string, subItemSeparator string) []string {
+
+	fmt.Println("Slice 1 before merge: ", array1)
+	fmt.Println("Slice 2 before merge: ", array2)
+
+	result := array1
+	arrayToIterate := array2
+
+	// Iterate through smaller array
+	for _, v := range arrayToIterate {
+		// See if element of smaller array is already in larger array
+		res, _ := StringInSlice(v, result)
+		if res {
+			// if so, skip addition
+			continue
+		}
+
+		// Now perform fuzzy match ...
+
+		// Check whether subitems match based on substring prior subItemSeparator (considers both input and target array entries)
+		lastSimilarElement := FindLastSimilarElement(result, v, subItemSeparator)
+
+		if lastSimilarElement != -1 {
+			fmt.Println("Found last similar element for item ", v, " on position: ", lastSimilarElement)
+
+			// Add element at position following last shared index
+
+			// Append empty element (value does not matter)
+			result = append(result, "placeholder")
+			// Shift content from given position one to the right
+			copy(result[lastSimilarElement+2:], result[lastSimilarElement+1:])
+			// Insert new element at given position
+			result[lastSimilarElement+1] = v
+		} else {
+			fmt.Println("No similar element found for item ", v, ", appending at the end.")
+			// Append at the end of the array
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+/*
+Returns index of last similar element based on prefix conventions (e.g., I_1, I_2) in input array.
+Input:
+- array to iterate over
+- item to look up
+- string indicative of subitem (indication of "similarity" with other elements)
+
+Returns -1 if no similar item found
+ */
+func FindLastSimilarElement(arrayToIterate []string, itemToTest string, subItemSep string) int {
+
+	// Prepare modified search item for similarity match
+	substringedSearchItem := itemToTest
+	// Check whether subitem separator (e.g., "_") is contained in search item
+	substringedSearchItemIdx := -1
+	if subItemSep != "" {
+		substringedSearchItemIdx = strings.Index(itemToTest, subItemSep)
+	}
+	if substringedSearchItemIdx != -1 {
+		// Remove trailing substring if match exists
+		substringedSearchItem = itemToTest[:substringedSearchItemIdx]
+	}
+	fmt.Println("Input:", itemToTest)
+	fmt.Println("Separator:", subItemSep)
+	fmt.Println("Preprocessed:", substringedSearchItem)
+
+	// Index of last similar item
+	similarIndex := -1
+	for i, v :=range arrayToIterate {
+		targetItem := v
+		// Determine substring on target item
+		targetItemIdx := -1
+		if subItemSep != "" {
+			targetItemIdx = strings.Index(v, subItemSep)
+		}
+		if targetItemIdx != -1 {
+			// Remove trailing substring if match exists
+			targetItem = v[:targetItemIdx]
+			fmt.Println("Preprocessed target item:", targetItem)
+		}
+
+		// If the current value matches search item ...
+		if targetItem == substringedSearchItem {
+			// ... then save the index
+			similarIndex = i
+			fmt.Println("Items match")
+		} else {
+			fmt.Println("Items do not match")
+		}
+	}
+
+	// Return result
+	return similarIndex
+}
+
+/*
+Moves element in array to new position.
+Input:
+- index of element to be moved
+- target index the element is to be moved to
+- array that the operation is performed on
+Output:
+- array with element moved to target position
+ */
+func MoveElementToNewPosition(indexToTakeFrom int, indexToMoveTo int, arrayToOperateOn []string) []string {
+	// Assign array to operate on
+	sourceArray := arrayToOperateOn
+	// Element to be moved
+	val := sourceArray[indexToTakeFrom]
+	// Create array consisting only of array without element to be moved
+	sourceArray = append(sourceArray[:indexToTakeFrom], sourceArray[indexToTakeFrom+1:]...)
+	// Create new array up to position in which element is to be inserted
+	newSlice := make([]string, indexToMoveTo+1)
+	// Copy old sourceArray (without element) into new one
+	copy(newSlice, sourceArray[:indexToMoveTo])
+	// Append element at desired target position
+	newSlice[indexToMoveTo] = val
+	// Fill up remaining elements
+	sourceArray = append(newSlice, sourceArray[indexToMoveTo:]...)
+	fmt.Println("Revised sourceArray:", sourceArray)
+
+	return sourceArray
 }
 
 /*
@@ -314,4 +482,17 @@ func PrintArray(array []string) string {
 		i++
 	}
 	return out
+}
+
+/*
+Flatten input structure into simple array.
+*/
+func Flatten(input [][]*Node) []*Node {
+	output := []*Node{}
+	for _, v := range input {
+		for _, v2 := range v {
+			output = append(output, v2)
+		}
+	}
+	return output
 }
