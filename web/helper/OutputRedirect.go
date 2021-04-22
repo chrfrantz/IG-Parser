@@ -53,8 +53,9 @@ func GetDateTimeString() string {
 /*
 Creates output redirection for stdout and stderr to file (and console).
 Restores original output association after call of returned function.
+Returned function allows specification of suffix appended to filename.
  */
-func SaveOutput(filename string) (func(), error) {
+func SaveOutput(filename string) (func(string) error, error) {
 
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		folderEnd := strings.LastIndex(filename, "/")
@@ -111,7 +112,7 @@ func SaveOutput(filename string) (func(), error) {
 	}()
 
 	// Function to be called once logging finishes (either direct call or defer)
-	return func() {
+	return func(suffix string) error {
 		// Close writer, then block on exit channel; allows MultiWriter to finish operation before terminating
 		err = w.Close()
 
@@ -119,9 +120,10 @@ func SaveOutput(filename string) (func(), error) {
 		os.Stdout = origStdout
 		os.Stderr = origStderr
 
-		// Write any error to standard out to review (only here, since the file may not be writable
+		// Write any error to standard out to review (only here, since the file may not be writable)
 		if err != nil {
-			fmt.Println("Error during closing writer: " +  err.Error())
+			fmt.Println("Error during closing writer: " + err.Error())
+			return err
 		}
 
 		// Send exit signal to channel
@@ -129,11 +131,25 @@ func SaveOutput(filename string) (func(), error) {
 
 		// Finally, close the outfile after writing has finished
 		err = f.Close()
-
 		// Write any error to standard out to review
 		if err != nil {
-			fmt.Println("Error during closing log file: " +  err.Error())
+			fmt.Println("Error during closing log file: " + err.Error())
+			return err
 		}
+
+		// Rename file if suffix is provided
+		if suffix != "" {
+			err = os.Rename(f.Name(), f.Name()+suffix)
+			// Write any error to standard out to review
+			if err != nil {
+				fmt.Println("Error during renaming of log file: " + err.Error())
+				return err
+			}
+		}
+
+		// No error
+		return nil
+
 	}, nil
 
 }
