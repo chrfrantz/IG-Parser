@@ -58,7 +58,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		return s, outErr
 	}
-	s.AttributesProperty = result
+	s.AttributesPropertySimple = result
 
 	result, err = parseDeontic(text)
 	outErr = handleParsingError(tree.DEONTIC, err)
@@ -86,7 +86,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		return s, outErr
 	}
-	s.DirectObjectProperty = result
+	s.DirectObjectPropertySimple = result
 
 	result, err = parseIndirectObject(text)
 	outErr = handleParsingError(tree.INDIRECT_OBJECT, err)
@@ -100,7 +100,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		return s, outErr
 	}
-	s.IndirectObjectProperty = result
+	s.IndirectObjectPropertySimple = result
 
 	result, err = parseActivationCondition(text)
 	outErr = handleParsingError(tree.ACTIVATION_CONDITION, err)
@@ -128,7 +128,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		return s, outErr
 	}
-	s.ConstitutedEntityProperty = result
+	s.ConstitutedEntityPropertySimple = result
 
 	result, err = parseModal(text)
 	outErr = handleParsingError(tree.MODAL, err)
@@ -156,7 +156,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		return s, outErr
 	}
-	s.ConstitutingPropertiesProperty = result
+	s.ConstitutingPropertiesPropertySimple = result
 
 	//fmt.Println(s.String())
 
