@@ -42,13 +42,14 @@ Exceptions to this rule are discussed in the context of combinations).
 
 The scope of a component is specified by opening and closing parentheses.
 
-All components of a statement are annotated correspondingly, without concern for order, or repetition. Multiple 
-component annotations of the same kind. Multiple Attributes, 
+All components of a statement are annotated correspondingly, without concern for order, or repetition. 
+The parser further tolerates multiple component annotations of the same kind. Multiple Attributes, 
 for example (e.g., `A(Farmer) D(must) I(comply) A(Certifier)`, are effectively interpreted as a combination (i.e., 
-`(Farmer [AND] Certifier)`) in the parsing process.  
+`A((Farmer [AND] Certifier)) D(must) I(comply)`) in the parsing process.  
 
-Any symbols outside the annotations and combinations are ignored. The parser is
-thus robust against non-annotated text.
+Any symbols outside the annotations and combinations are ignored by the parser.
+
+The parser supports a fixed set of component type symbols that uniquely identify a given component type.
 
 _Supported Component Type Symbols:_
 
@@ -64,6 +65,7 @@ _Supported Component Type Symbols:_
 * `Cex` - Execution Constraint
 * `E` - Constituted Entity
 * `E,p` - Constituted Entity Property
+* `M` - Modal
 * `F` - Constitutive Function 
 * `P` - Constituting Properties
 * `P,p` - Constituting Properties Property
@@ -98,6 +100,8 @@ Supported logical operators:
 * `[OR]` - inclusive disjunction (i.e., "and/or")
 * `[XOR]` - exclusive disjunction (i.e., "either or")
 
+Invalid operators (e.g., `[AN]`) will be ignored in the parsing process.
+
 #### Nested Statements
 
 Selected components can be substituted by statements entirely. 
@@ -106,31 +110,57 @@ on its own. The syntax is as follows:
 
 `componentSymbol{ componentSymbol(naturalLanguageText) ... }`
 
+As before, components are annotated using parentheses, and are now augmented 
+with braces that delineate the nested statements.
+
 Essentially, a fully annotated statement (e.g., `A(), I(), Cex()`) is 
 framed by the statement annotation (e.g., `Cac{ A(), I(), Cex() }`).
 
 Nesting can occur to arbitrary depth, i.e., a nested statement 
-can contain another nested statement, e.g., `Cac{ A(), I(), Cac{ A(), I(), Cac() } }` 
+can contain another nested statement, e.g., `Cac{ A(), I(), Cac{ A(), I(), Cac() } }`, 
+and can further include combinations as introduced in the following.
+
+It is important to note that component-level nesting is limited to specific 
+component types and properties.
+
+Components for which nested statements are supported:
+
+* `A,p` - Attributes Property
+* `Bdir,p` - Direct Object Property
+* `Bind,p` - Indirect Object Property
+* `Cac` - Activation Condition
+* `Cex` - Execution Constraint
+* `E,p` - Constituted Entity Property
+* `P,p` - Constituting Properties Property
+* `O` - Or else
 
 #### Nested Statement Combinations
 
 Nested statements can, analogous to components, be combined to an 
 arbitrary depth and using the same logical operators as for component
-combinations. The only constraint is that only components of the same 
-kind can be combined.  
+combinations. Two constraints are to be considered: 
 
-The following example would be accepted:
+* Combinations of statements need to be surrounded by braces (i.e., `{` and `}`).
+* Only components of the same kind can be combined.
 
-`{ Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() }}`
+The following example correctly reflects the combination of two nested AND-combined 
+activation conditions:
 
-* Note the outer braces surrounding the individual nested statements.
+`{ Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() } }`
 
-The following example will result in an error due to missing outer braces:
+This example, in contrast, will fail (note the differing component types `Cac` and `Cex`): 
+
+`{ Cac{ A(), I(), Cex() } [AND] Cex{ A(), I(), Cex() } }`
+
+Another important aspect are the outer braces surrounding the nested statement 
+combination, i.e., form a `{ ... [AND] ... }` pattern (where logical operators can vary, of course).
+
+Unlike the first example, the following one will result in an error due to missing outer braces:
 
 `Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() }`
 
-Non-nested and nested components can be used in the same statement 
-(e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` )
+Note that non-nested and nested components can be used in the same statement 
+(e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ), and are implicitly AND-combined.
 
 ### General Comments
 
@@ -138,12 +168,12 @@ Non-nested and nested components can be used in the same statement
   * `A(Operator) D(must) I(comply) Bdir(with regulations)`
   * `A(Operator) D(must) I((comply [AND] respond)) Bdir(with/to regulations)`
   * `A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), 
-D(may) I(inspect and), I(sustain (review [AND] (revise [AND] resubmit))) 
+D(may) I(inspect and), I((review [AND] (revise [AND] resubmit))) 
 Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) 
 Cex(for compliance with the (Act or [XOR] regulations in this part)) 
 Cac{A(Programme Manager) I((suspects [AND] assesses)) Bdir(violations)}`
 
-* Note the explicit specification of the combination using parentheses (i.e., `A(( actor1 [XOR] actor2 ))`); 
+* Reminder: Note the explicit specification of the combination using parentheses (i.e., `A(( actor1 [XOR] actor2 ))`); 
   unscoped combinations lead to errors (i.e., `A( actor1 [XOR] actor2 )`). 
   The same applies for braces used for statement-level combinations, i.e., 
   `{Cac{A(actor1) I(complies) Cac(at all time)} [OR] Cac{A(actor1) I(complies) Cac(at all time)}}`.
