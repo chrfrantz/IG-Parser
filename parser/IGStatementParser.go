@@ -204,40 +204,67 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		// Wrap statement into node (since individual statement)
 		stmtNode := tree.Node{Entry: stmt}
 
+		// Checks are ordered with property variants (e.g., Bdir,p) before component variants (e.g., Bdir) to avoid wrong match
+
 		if strings.HasPrefix(v, tree.ATTRIBUTES_PROPERTY) {
 			log.Println("Attaching nested attributes property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.AttributesPropertyComplex = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, &stmtNode)
+			continue
 		}
 		if strings.HasPrefix(v, tree.DIRECT_OBJECT_PROPERTY) {
 			log.Println("Attaching nested direct object property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.DirectObjectPropertyComplex = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, &stmtNode)
+			continue
+		}
+		if strings.HasPrefix(v, tree.DIRECT_OBJECT) {
+			log.Println("Attaching nested direct object to higher-level statement")
+			// Assign nested statement to higher-level statement
+			stmtToAttachTo.DirectObjectComplex = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, &stmtNode)
+			continue
 		}
 		if strings.HasPrefix(v, tree.INDIRECT_OBJECT_PROPERTY) {
 			log.Println("Attaching nested indirect object property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.IndirectObjectPropertyComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, &stmtNode)
+			continue
+		}
+		if strings.HasPrefix(v, tree.INDIRECT_OBJECT) {
+			log.Println("Attaching nested indirect object to higher-level statement")
+			// Assign nested statement to higher-level statement
+			stmtToAttachTo.IndirectObjectComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, &stmtNode)
+			continue
 		}
 		if strings.HasPrefix(v, tree.ACTIVATION_CONDITION) {
 			log.Println("Attaching nested activation condition to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.ActivationConditionComplex = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, &stmtNode)
+			continue
 		}
 		if strings.HasPrefix(v, tree.EXECUTION_CONSTRAINT) {
 			log.Println("Attaching nested execution constraint to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.ExecutionConstraintComplex = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, &stmtNode)
+			continue
 		}
 		if strings.HasPrefix(v, tree.CONSTITUTED_ENTITY_PROPERTY) {
 			log.Println("Attaching nested constituted entity property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.ConstitutedEntityPropertyComplex = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, &stmtNode)
+			continue
 		}
 		if strings.HasPrefix(v, tree.CONSTITUTING_PROPERTIES_PROPERTY) {
 			log.Println("Attaching nested constituting properties property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.ConstitutingPropertiesPropertyComplex = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, &stmtNode)
+			continue
+		}
+		if strings.HasPrefix(v, tree.CONSTITUTING_PROPERTIES) {
+			log.Println("Attaching nested constituting properties to higher-level statement")
+			// Assign nested statement to higher-level statement
+			stmtToAttachTo.ConstitutingPropertiesComplex = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, &stmtNode)
+			continue
 		}
 		if strings.HasPrefix(v, tree.OR_ELSE) {
 			log.Println("Attaching nested or else to higher-level statement")
@@ -298,40 +325,68 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 
 		log.Println("Assigning nested tree structure", combo)
 
+		// Checks are ordered with property variants (e.g., Bdir,p) before component variants (e.g., Bdir) to avoid wrong match
+
 		if strings.HasPrefix(sharedPrefix, tree.ATTRIBUTES_PROPERTY) {
 			log.Println("Attaching nested attributes property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.AttributesPropertyComplex = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, combo)
+			continue
 		}
 		if strings.HasPrefix(sharedPrefix, tree.DIRECT_OBJECT_PROPERTY) {
 			log.Println("Attaching nested direct object property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.DirectObjectPropertyComplex = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, combo)
+			continue
+		}
+		if strings.HasPrefix(sharedPrefix, tree.DIRECT_OBJECT) {
+			log.Println("Attaching nested direct object to higher-level statement")
+			// Assign nested statement to higher-level statement
+			stmtToAttachTo.DirectObjectComplex = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, combo)
+			continue
 		}
 		if strings.HasPrefix(sharedPrefix, tree.INDIRECT_OBJECT_PROPERTY) {
 			log.Println("Attaching nested indirect object property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.IndirectObjectPropertyComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, combo)
+			continue
 		}
+		if strings.HasPrefix(sharedPrefix, tree.INDIRECT_OBJECT) {
+			log.Println("Attaching nested indirect object to higher-level statement")
+			// Assign nested statement to higher-level statement
+			stmtToAttachTo.IndirectObjectComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, combo)
+			continue
+		}
+
 		if strings.HasPrefix(sharedPrefix, tree.ACTIVATION_CONDITION) {
 			log.Println("Attaching nested activation condition to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.ActivationConditionComplex = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, combo)
+			continue
 		}
 		if strings.HasPrefix(sharedPrefix, tree.EXECUTION_CONSTRAINT) {
 			log.Println("Attaching nested execution constraint to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.ExecutionConstraintComplex = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, combo)
+			continue
 		}
 		if strings.HasPrefix(sharedPrefix, tree.CONSTITUTED_ENTITY_PROPERTY) {
 			log.Println("Attaching nested constituted entity property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.ConstitutedEntityPropertyComplex = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, combo)
+			continue
 		}
 		if strings.HasPrefix(sharedPrefix, tree.CONSTITUTING_PROPERTIES_PROPERTY) {
 			log.Println("Attaching nested constituting properties property to higher-level statement")
 			// Assign nested statement to higher-level statement
 			stmtToAttachTo.ConstitutingPropertiesPropertyComplex = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, combo)
+			continue
+		}
+		if strings.HasPrefix(sharedPrefix, tree.CONSTITUTING_PROPERTIES) {
+			log.Println("Attaching nested constituting properties to higher-level statement")
+			// Assign nested statement to higher-level statement
+			stmtToAttachTo.ConstitutingPropertiesComplex = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, combo)
+			continue
 		}
 		if strings.HasPrefix(sharedPrefix, tree.OR_ELSE) {
 			log.Println("Attaching nested or else to higher-level statement")

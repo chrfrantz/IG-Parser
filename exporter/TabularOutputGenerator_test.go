@@ -19,7 +19,6 @@ func TestHeaderRowGeneration(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 	s, err := parser.ParseStatement(text)
-
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
@@ -72,7 +71,7 @@ func TestTabularOutput(t *testing.T) {
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Error("Error during parsing of statement")
+		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
 	fmt.Println(s.String())
@@ -95,9 +94,9 @@ func TestTabularOutput(t *testing.T) {
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("TestOutputSimpleNoNesting.test")
-	if error != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNesting.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
@@ -119,7 +118,10 @@ func TestTabularOutput(t *testing.T) {
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
 
@@ -139,7 +141,7 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Error("Error during parsing of statement")
+		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
 	fmt.Println(s.String())
@@ -162,9 +164,9 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("TestOutputTwoLevelComplexNesting.test")
-	if error != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	content, err2 := ioutil.ReadFile("TestOutputTwoLevelComplexNesting.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
@@ -186,7 +188,10 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
 
@@ -209,7 +214,7 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Error("Error during parsing of statement")
+		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
 	fmt.Println(s.String())
@@ -232,9 +237,9 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("TestOutputSimpleAndTwoLevelComplexNesting.test")
-	if error != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	content, err2 := ioutil.ReadFile("TestOutputSimpleAndTwoLevelComplexNesting.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
@@ -256,7 +261,10 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
 
@@ -278,7 +286,7 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Error("Error during parsing of statement")
+		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
 	fmt.Println(s.String())
@@ -301,9 +309,9 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("TestOutputTwoNestedComplexComponents.test")
-	if error != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	content, err2 := ioutil.ReadFile("TestOutputTwoNestedComplexComponents.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
@@ -325,7 +333,10 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
 
@@ -346,7 +357,7 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Error("Error during parsing of statement")
+		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
 	fmt.Println(s.String())
@@ -369,9 +380,9 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("TestOutputThreeNestedComplexComponents.test")
-	if error != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	content, err2 := ioutil.ReadFile("TestOutputThreeNestedComplexComponents.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
@@ -393,7 +404,10 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
 
@@ -416,7 +430,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Error("Error during parsing of statement")
+		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
 	fmt.Println(s.String())
@@ -439,9 +453,9 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("TestOutputNestedComplexCombinationsImplicitAnd.test")
-	if error != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	content, err2 := ioutil.ReadFile("TestOutputNestedComplexCombinationsImplicitAnd.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
@@ -463,7 +477,10 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
 
@@ -486,7 +503,7 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Error("Error during parsing of statement")
+		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
 	fmt.Println(s.String())
@@ -509,9 +526,9 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("TestOutputNestedComplexCombinationsXor.test")
-	if error != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	content, err2 := ioutil.ReadFile("TestOutputNestedComplexCombinationsXor.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
@@ -533,7 +550,10 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
 
@@ -557,7 +577,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Error("Error during parsing of statement")
+		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
 	fmt.Println(s.String())
@@ -580,9 +600,9 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	}
 
 	// Read reference file
-	content, error := ioutil.ReadFile("TestOutputNestedStatementCombinationsAndComponentCombinations.test")
-	if error != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", error.Error())
+	content, err2 := ioutil.ReadFile("TestOutputNestedStatementCombinationsAndComponentCombinations.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
@@ -604,11 +624,115 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
 
 }
+
+/*
+Tests statement-level combinations on multiple components, alongside selected embedded component-level,
+alongside combination with non-nested components
+*/
+func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDifferentComponents(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		// This is another nested component - should have implicit link to regular Bdir
+		"Bdir{A(farmers) that I((apply [OR] plan to apply)) for Bdir(organic farming status)}" +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		// This is the tricky line, the multiple aims
+		"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		// non-linked additional activation condition (should be linked by implicit AND)
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays()
+
+	fmt.Println("Generated Component References: ", componentRefs)
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 9 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputMultipleNestedStatementsAndSimpleComponentsAcrossDifferentComponents.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests statement-level combinations with incompatible component symbols
+*/
+func TestTabularOutputWithStatementCombinationsOfIncompatibleComponents(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		// This combination mixes the previous Cac with Cex - and should fail
+		"Cex{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		// non-linked additional activation condition (should be linked by implicit AND)
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	_, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION {
+		t.Fatal("Parser should have picked up on invalid component combinations.")
+	}
+
+}
+
 
 // ensure ordering of column headers
 
