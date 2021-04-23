@@ -1,6 +1,8 @@
 # IG-Parser
 Parser for IG 2.0 Statements based on the IG Script Notation. 
 
+Contact: Christopher Frantz (christopher.frantz@ntnu.no)
+
 ## Overview
 
 IG-Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used by direct invocation, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to syntactic principles and essential features of IG Script, followed by deployment instructions are shown at the bottom. 
@@ -9,7 +11,7 @@ The conceptual background for the Institutional Grammar 2.0 is provided [here](h
 
 ## IG Script
 
-IG Script is a notation introduced in the context of the [Institutional Grammar 2.0](https://doi.org/10.1111/padm.12719) (IG 2.0) that aims at a deep structural representation of legal statements alongside selected levels of expressiveness. While IG 2.0 highlights the conceptual background, the objective of IG Script is to provide an accessible, but formal approach to provide a format-independent representation of institutional statements. While the parser currently only supports export in tabular format, future refinements will include other formats (e.g.,  XML, JSON, YAML).
+IG Script is a notation introduced in the context of the [Institutional Grammar 2.0](https://doi.org/10.1111/padm.12719) (IG 2.0) that aims at a deep structural representation of legal statements alongside selected levels of expressiveness. While IG 2.0 highlights the conceptual background, the objective of IG Script is to provide an accessible, but formal approach to provide a format-independent representation of institutional statements. While the parser currently only supports export in tabular format, future refinements will include other formats (e.g.,  XML, JSON, YAML). While this introduction focuses on the operational use, syntactic and semantic foundations are provided [elsewhere](https://github.com/InstitutionalGrammar/IG-2.0-Resources).
 
 ### Principles of IG Script Syntax
 
