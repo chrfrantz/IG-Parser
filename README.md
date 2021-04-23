@@ -3,19 +3,13 @@ Parser for IG 2.0 Statements based on the IG Script Notation.
 
 ## Overview
 
-IG-Parser is a parser for IG Script, a formal notation for the representation institutional statements 
-(e.g., policy statements) used in the Institutional Grammar 2.0. 
-The parser can be used by direct invocation, as well as via a web interface 
-that produces tabular output of parsed statements (currently supporting Google Sheets format). 
-Deployment instructions are shown at the bottom. 
+IG-Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used by direct invocation, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to syntactic principles and essential features of IG Script, followed by deployment instructions are shown at the bottom. 
+
+The conceptual background for the Institutional Grammar 2.0 is provided [here](https://doi.org/10.1111/padm.12719), alongside supplementary operational [coding guidelines](https://arxiv.org/abs/2008.08937).
 
 ## IG Script
 
-IG Script is a notation introduced in the context of the Institutional Grammar 2.0 (IG 2.0) that aims at a deep 
-structural representation of legal statements alongside selected levels of expressiveness. While IG 2.0 highlights the 
-conceptual background, the objective of IG Script is to provide an accessible, but formal approach to provide a 
-format-independent representation of institutional statements. While the parser currently only supports export in 
-tabular format, future refinements will include other formats (e.g.,  XML, JSON, YAML).
+IG Script is a notation introduced in the context of the [Institutional Grammar 2.0](https://doi.org/10.1111/padm.12719) (IG 2.0) that aims at a deep structural representation of legal statements alongside selected levels of expressiveness. While IG 2.0 highlights the conceptual background, the objective of IG Script is to provide an accessible, but formal approach to provide a format-independent representation of institutional statements. While the parser currently only supports export in tabular format, future refinements will include other formats (e.g.,  XML, JSON, YAML).
 
 ### Principles of IG Script Syntax
 
@@ -25,7 +19,7 @@ IG Script centers around a set of fundamental primitives that can be combined to
 * Component combinations
 * Nested statements
 * Nested statement combinations
-* Semantic Annotations (not yet supported)
+* Semantic Annotations (not yet supported in output)
 
 #### Component Annotations
 
@@ -126,11 +120,14 @@ component types and properties.
 Components for which nested statements are supported:
 
 * `A,p` - Attributes Property
+* `Bdir` - Direct Object
 * `Bdir,p` - Direct Object Property
+* `Bind` - Indirect Object
 * `Bind,p` - Indirect Object Property
 * `Cac` - Activation Condition
 * `Cex` - Execution Constraint
 * `E,p` - Constituted Entity Property
+* `P` - Constituting Properties
 * `P,p` - Constituting Properties Property
 * `O` - Or else
 
@@ -162,21 +159,40 @@ Unlike the first example, the following one will result in an error due to missi
 Note that non-nested and nested components can be used in the same statement 
 (e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ), and are implicitly AND-combined.
 
-### General Comments
+#### Semantic Annotations
 
-* Examples
+In addition to the parsing of component annotations and combinations of various kinds, the parser further supports semantic annotations of components according to the taxonomies outlined in the [Institutional Grammar 2.0 Codebook](https://arxiv.org/abs/2008.08937).
+
+The syntax is `compononentSymbol[semanticAnnotation](component content)`, i.e., any component can be augmented with `[semantic annotation content]`, e.g., `Cac[context=state](Upon certification)`.
+
+Note that semantic annotations are not yet supported by the parser.
+
+### Examples
+
+In the following, you will find selected examples that highlight the practical use of the features introduced above.
+
+* Simple regulative statement: 
   * `A(Operator) D(must) I(comply) Bdir(with regulations)`
+* Component combination: 
   * `A(Operator) D(must) I((comply [AND] respond)) Bdir(with/to regulations)`
-  * `A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), 
-D(may) I(inspect and), I((review [AND] (revise [AND] resubmit))) 
-Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) 
-Cex(for compliance with the (Act or [XOR] regulations in this part)) 
-Cac{A(Programme Manager) I((suspects [AND] assesses)) Bdir(violations)}`
+* Component-level nesting: 
+  * `A(Farmer) D(must) I(comply) with Bdir(provisions) Cac{A(Farmer) I(has lodged) for Bdir(application) Bdir,p(certification)}`
+* Component-level nesting over multiple levels: 
+  * `A(Farmer) D(must) I(comply) with Bdir(Organic Farming provisions) Cac{A(Farmer) I(has lodged) for Bdir(application) Bdir,p(certification) Cex(successfully) with the Bind(Organic Farming Program) Cac{E(Organic Program) F(covers) P,p(relevant) P(region)}}`
+* Component-level nesting on various components (e.g., Bdir and Cac) and combinations of nested statements (Cac): 
+  * `A(Program Manager) D(may) I(administer) Bdir(sanctions) {Cac{A(Program Manager) I(suspects) Bdir{A(farmer) I((violates [OR] does not comply)) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}`
+* Complex statement showcasing combined use of all features across various levels: 
+  * `A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), D(may) I(inspect), I((review [AND] (revise [AND] resubmit))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) if {Cac{A(Programme Manager) I((suspects [OR] establishes)) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}`
+<!--* Semantic annotations: `A,p(Certified) A(organic farmers) D(must) I(submit) Bdir(report) to Bind(Organic Program Representative) Cac[context=tim](at the end of each year).`-->
 
-* Reminder: Note the explicit specification of the combination using parentheses (i.e., `A(( actor1 [XOR] actor2 ))`); 
-  unscoped combinations lead to errors (i.e., `A( actor1 [XOR] actor2 )`). 
-  The same applies for braces used for statement-level combinations, i.e., 
-  `{Cac{A(actor1) I(complies) Cac(at all time)} [OR] Cac{A(actor1) I(complies) Cac(at all time)}}`.
+* Common issues:
+  * Parentheses/braces need to match. The parser calls out if a mismatch exists. 
+  * Explicit specification of combinations using parentheses/braces is necessary. 
+    * This example works: `A(( actor1 [XOR] actor2 ))` 
+    * This one does not: `A( actor1 [XOR] actor2 )`, due to unscoped combinations.
+    * The same applies for braces used for statement-level combinations, i.e., 
+  `{Cac{A(actor1) I(complies) Cac(at all time)} [OR] Cac{A(actor1) I(complies) Cac(at all time)}}` will parse successfully.
+  * In nested statements, only components of the same kind can be logically linked (e.g., `{Cac{ ... } [AND] Cac{ ... }}` will parse; `{Cac{ ... } [AND] Bdir{ ... }}` will not parse).
 
 ## Deployment
 
