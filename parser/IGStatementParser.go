@@ -12,6 +12,10 @@ import (
 
 
 func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
+
+	// Remove line breaks
+	text = cleanInput(text)
+
 	s := tree.Statement{}
 
 	// Validate input string first with respect to parentheses ...

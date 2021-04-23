@@ -495,16 +495,16 @@ func FindLastSimilarElement(arrayToIterate []string, itemToTest string, subItemS
 		if targetItemIdx != -1 {
 			// Remove trailing substring if match exists
 			targetItem = v[:targetItemIdx]
-			fmt.Println("Preprocessed target item:", targetItem)
+			//fmt.Println("Preprocessed target item:", targetItem)
 		}
 
 		// If the current value matches search item ...
 		if targetItem == substringedSearchItem {
 			// ... then save the index
 			similarIndex = i
-			fmt.Println("Items match")
+			//fmt.Println("Items match")
 		} else {
-			fmt.Println("Items do not match")
+			//fmt.Println("Items do not match")
 		}
 	}
 

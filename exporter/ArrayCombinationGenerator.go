@@ -62,7 +62,7 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 				out = append(out, ar[p])
 			}
 		}
-		fmt.Println("Wrote atomic statement ", ct)
+		//fmt.Println("Wrote atomic statement ", ct)
 
 		// Assign generated statement to return data structure
 		stmts[ct] = out
