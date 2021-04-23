@@ -857,3 +857,57 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 
 
 }
+
+/*
+Tests parsing of special characters in regular and nested components
+*/
+func TestSpecialCharacters(t *testing.T) {
+
+	input := "A(A&dsisgj=) I(=#) Bdir((l$ef% [AND] Ri@g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg£jd*s)) Cac{A(/sd-g$s%d) D(s%k£g=js) I(s§d€kl/g#j!ds)}"
+
+	s, err := ParseStatement(input)
+
+	fmt.Println(s.String())
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during parsing: ", err.Error())
+	}
+
+
+	if s.Attributes.Entry != "A&dsisgj=" {
+		t.Fatal("Failed to detect Attributes")
+	}
+
+	if s.Aim.Entry != "=#" {
+		t.Fatal("Failed to detect Aim")
+	}
+
+	if s.DirectObject.Left.Entry != "l$ef%" {
+		t.Fatal("Failed to detect Direct object left")
+	}
+
+	if s.DirectObject.Right.Entry != "Ri@g¤#" {
+		t.Fatal("Failed to detect Direct object right")
+	}
+
+	if s.IndirectObject.Left.Entry != "`?a€v" {
+		t.Fatal("Failed to detect Indirect object left")
+	}
+
+	if s.IndirectObject.Right.Entry != "(dg/sg) !sdg£jd*s" {
+		t.Fatal("Failed to detect Indirect object right")
+	}
+
+	if s.ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "/sd-g$s%d" {
+		t.Fatal("Failed to detect nested Attribute")
+	}
+
+	if s.ActivationConditionComplex.Entry.(tree.Statement).Deontic.Entry != "s%k£g=js" {
+		t.Fatal("Failed to detect nested Deontic")
+	}
+
+	if s.ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "s§d€kl/g#j!ds" {
+		t.Fatal("Failed to detect nested Aim")
+	}
+
+}

@@ -298,6 +298,9 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 		flatCombo := tree.Flatten(combo.GetLeafNodes())
 		sharedPrefix := ""
 		for _, node := range flatCombo {
+			if node.Entry == nil {
+				return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Nested combination returned nil element."}
+			}
 			entry := node.Entry.(string)
 			fmt.Println("Entry to parse of component type: " + entry)
 			// Extract prefix for node
@@ -437,7 +440,7 @@ func handleParsingError(component string, err tree.ParsingError) tree.ParsingErr
 
 
 // Component prefix (word without spaces and parentheses, but [] brackets)
-var componentPrefix = "([a-zA-Z\\[\\]]+)+"
+var componentPrefix = "([a-zA-Z{}\\[\\]]+)+"
 
 /*
 Escapes all special symbols to prepare those for input into regex expression
@@ -449,6 +452,7 @@ func escapeSymbolsForRegex(text string) string {
 	text = strings.ReplaceAll(text, ")", "\\)")
 	text = strings.ReplaceAll(text, "[", "\\[")
 	text = strings.ReplaceAll(text, "]", "\\]")
+	text = strings.ReplaceAll(text, "$", "\\$")
 
 	return text
 }
@@ -482,6 +486,7 @@ func separateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 		// Iterate through identified nested statements (if any) and remove those from statement
 		for _, v := range nestedStmts {
 			// Prepare pattern to extract nested statements including prefix from overall statement
+			// by combining generic prefix with preprocessed specific input
 			r, err := regexp.Compile(componentPrefix + escapeSymbolsForRegex(v))
 			if err != nil {
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
@@ -728,11 +733,13 @@ func parseComponentWithBraces(component string, input string) (*tree.Node, tree.
 }
 
 // Logical operators prepared for regular expression
-var logicalOperators = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
-// Word pattern for regular expressions (including parentheses, spaces, square brackets, etc.)
-var wordsWithParentheses = "([a-zA-Z',;()\\[\\]]+\\s*)+"
+const logicalOperators = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
+// Special symbols
+const specialSymbols = "',;+\\-*/%&=$£€¤§\"#!`"
+// Word pattern for regular expressions (including parentheses, spaces, square brackets, +, -, /, *, %, &, =, currency symbols, etc.)
+const wordsWithParentheses = "([a-zA-Z" + specialSymbols + "(){}\\[\\]]+\\s*)+"
 // Pattern of combinations, e.g., ( ... [AND] ... )
-var combinationPattern = "\\(" + wordsWithParentheses + "(\\[" + logicalOperators + "\\]\\s" + wordsWithParentheses + ")+\\)"
+const combinationPattern = "\\(" + wordsWithParentheses + "(\\[" + logicalOperators + "\\]\\s" + wordsWithParentheses + ")+\\)"
 
 func parseComponent(component string, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
 
