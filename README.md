@@ -5,9 +5,9 @@ Contact: Christopher Frantz (christopher.frantz@ntnu.no)
 
 ## Overview
 
-IG-Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used by direct invocation, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to syntactic principles and essential features of IG Script, followed by deployment instructions are shown at the bottom. 
+IG-Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used by direct invocation, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to syntactic principles and essential features of IG Script, followed by a set of examples showcasing all features. As a final aspect, deployment instructions for IG Parser are provided. 
 
-The conceptual background for the Institutional Grammar 2.0 is provided [here](https://doi.org/10.1111/padm.12719), alongside supplementary operational [coding guidelines](https://arxiv.org/abs/2008.08937).
+The conceptual background of the Institutional Grammar 2.0 is provided [here](https://doi.org/10.1111/padm.12719), augmented with supplementary operational [coding guidelines](https://arxiv.org/abs/2008.08937).
 
 ## IG Script
 
