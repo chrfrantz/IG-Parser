@@ -61,7 +61,7 @@ func main(){
 	tree.SHARED_ELEMENT_INHERITANCE_MODE = tree.SHARED_ELEMENT_INHERIT_OVERRIDE
 
 	// Parse provided expression
-	node, _, err := parser.ParseIntoNodeTree(input, false)
+	node, _, err := parser.ParseIntoNodeTree(input, false, "(", ")")
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		fmt.Println("Shared elements, e.g., '(left shared (left [AND] right) right shared)', should not produce error ", err.Error())
@@ -160,7 +160,7 @@ func main5() {
 	text = "(left (inner left [AND] inner right) middle (inner2Left [OR] inner2Right) other)"
 	*/
 	//node := tree.Node{}
-	node, _, err := parser.ParseIntoNodeTree(text, false)
+	node, _, err := parser.ParseIntoNodeTree(text, false, "(", ")")
 
 
 	fmt.Println(err.Error())

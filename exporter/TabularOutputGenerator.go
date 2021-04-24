@@ -513,9 +513,13 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 			//nodesKeys = append(nodesKeys, nd)
 		}
 		// Sort by retrieving leaves for the given tree
-		leaves := firstKey.GetSyntheticRootNode().GetLeafNodes()
-		if len(leaves) > 0 {
-			nodesKeys = leaves[0]
+		if firstKey != nil {
+			leaves := firstKey.GetSyntheticRootNode().GetLeafNodes()
+			if len(leaves) > 0 {
+				nodesKeys = leaves[0]
+			} else {
+				fmt.Println("No component keys to iterate over for logical relationships")
+			}
 		} else {
 			fmt.Println("No component keys to iterate over for logical relationships")
 		}

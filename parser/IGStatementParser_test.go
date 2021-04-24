@@ -863,7 +863,7 @@ Tests parsing of special characters in regular and nested components
 */
 func TestSpecialCharacters(t *testing.T) {
 
-	input := "A(A&dsisgj=) I(=#) Bdir((l$ef% [AND] Ri@g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg£jd*s)) Cac{A(/sd-g$s%d) D(s%k£g=js) I(s§d€kl/g#j!ds)}"
+	input := "A(A&dsisgj=) I(=#) Bdir((l$ef% [AND] Ri@g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg£jd*s)) Cac{A(/sd-g$s%d) D(s%k£g=js) I(s§d€k+l/g#j!ds)}"
 
 	s, err := ParseStatement(input)
 
@@ -906,7 +906,7 @@ func TestSpecialCharacters(t *testing.T) {
 		t.Fatal("Failed to detect nested Deontic")
 	}
 
-	if s.ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "s§d€kl/g#j!ds" {
+	if s.ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "s§d€k+l/g#j!ds" {
 		t.Fatal("Failed to detect nested Aim")
 	}
 

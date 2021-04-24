@@ -701,7 +701,6 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 	fmt.Println("Added logical operator ", startNode.LogicalOperator)
 
 	// Predefine response values
-	response := false
 	err := NodeError{ErrorCode: TREE_NO_ERROR}
 
 	// Test left first - it must not be nil, and not be the last explored node (i.e., a left child of the currently explored one)
@@ -779,8 +778,8 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 			return true, ops3, err
 		}
 	}
-	fmt.Println("Final result: ", response)
-	return response, ops, err
+	fmt.Println("Final result: false")
+	return false, ops, err
 }
 
 /*

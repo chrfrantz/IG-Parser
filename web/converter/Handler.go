@@ -95,7 +95,11 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		retStruct.CodedStmt = ANNOTATED_STATEMENT
 		retStruct.StmtId = STATEMENT_ID
 
-		tmpl.Execute(w, retStruct)
+		err := tmpl.Execute(w, retStruct)
+		if err != nil {
+			log.Println("Error processing default template:", err.Error())
+			http.Error(w, "Could not process request.", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -131,14 +135,18 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		retStruct.Success = false
 		retStruct.Error = true
 		retStruct.Message = app.ERROR_INPUT_NO_STATEMENT
-		tmpl.Execute(w, retStruct)
+		err := tmpl.Execute(w, retStruct)
+		if err != nil {
+			log.Println("Error generating error response for empty input:", err.Error())
+			http.Error(w, "Could not process request.", http.StatusInternalServerError)
+		}
 
 		// Final comment in log
 		fmt.Println("Error: No input to parse.")
 		// Ensure logging is terminated
-		err := terminateOutput(ERROR_SUFFIX)
-		if err != nil {
-			log.Println("Error when finalizing log file: ", err.Error())
+		err2 := terminateOutput(ERROR_SUFFIX)
+		if err2 != nil {
+			log.Println("Error when finalizing log file: ", err2.Error())
 		}
 
 		return
@@ -155,7 +163,11 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 			default:
 				retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
 			}
-			tmpl.Execute(w, retStruct)
+			err3 := tmpl.Execute(w, retStruct)
+			if err3 != nil {
+				log.Println("Error processing default template:", err3.Error())
+				http.Error(w, "Could not process request.", http.StatusInternalServerError)
+			}
 
 			// Final comment in log
 			fmt.Println("Error: " + fmt.Sprint(err2))
@@ -171,14 +183,18 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		retStruct.Success = true
 		retStruct.CodedStmt = codedStmt
 		retStruct.TabularOutput = output
-		tmpl.Execute(w, retStruct)
+		err := tmpl.Execute(w, retStruct)
+		if err != nil {
+			log.Println("Error processing default template:", err.Error())
+			http.Error(w, "Could not process request.", http.StatusInternalServerError)
+		}
 
 		// Final comment in log
 		fmt.Println("Success")
 		// Ensure logging is terminated
-		err := terminateOutput(SUCCESS_SUFFIX)
-		if err != nil {
-			log.Println("Error when finalizing log file: ", err.Error())
+		err3 := terminateOutput(SUCCESS_SUFFIX)
+		if err3 != nil {
+			log.Println("Error when finalizing log file: ", err3.Error())
 		}
 
 		return

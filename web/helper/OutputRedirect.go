@@ -30,7 +30,7 @@ func GenerateRandomID(length int) string {
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	// Instantiate random number generator
-	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Draw from string charset
 	b := make([]byte, length)
