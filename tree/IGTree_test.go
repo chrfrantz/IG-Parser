@@ -451,4 +451,392 @@ func TestNodeCombination(t *testing.T) {
 }
 
 
+/*
+Test for inheriting shared elements using the append inheritance mode.
+ */
+func TestExtractInheritAppend(t *testing.T) {
+
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
+
+	root := Node{}
+	root.SharedLeft = []string{"Shared top left"}
+	root.SharedRight = []string{"Shared top right"}
+
+	leftChild := Node{LogicalOperator: "AND"}
+	leftChild.SharedLeft = []string{"Shared middle left"}
+
+	leftLeftChild := Node{Entry: "left left"}
+	_, err := leftChild.InsertLeftNode(&leftLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	leftRightChild := Node{Entry: "left right"}
+	_, err = leftChild.InsertRightNode(&leftRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertLeftNode(&leftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightChild := Node{LogicalOperator: "XOR"}
+	rightChild.SharedRight = []string{"Shared middle right"}
+
+	rightLeftChild := Node{Entry: "right left"}
+	_, err = rightChild.InsertLeftNode(&rightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightChild := Node{Entry: "right right"}
+	_, err = rightChild.InsertRightNode(&rightRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertRightNode(&rightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	fmt.Println(root.String())
+
+	if len(leftLeftChild.GetSharedLeft()) != 2 {
+		t.Fatal("Left left child does not have the correct number of shared left elements")
+	}
+
+	if leftLeftChild.GetSharedLeft()[0] != "Shared top left" {
+		t.Fatal("Left left child's first element is incorrect.")
+	}
+
+	if leftLeftChild.GetSharedLeft()[1] != "Shared middle left" {
+		t.Fatal("Left left child's second element is incorrect.")
+	}
+
+	if len(rightLeftChild.GetSharedRight()) != 2 {
+		t.Fatal("Right left child does not have the correct number of shared right elements: ", rightLeftChild.GetSharedRight())
+	}
+
+	if rightLeftChild.GetSharedRight()[0] != "Shared top right" {
+		t.Fatal("Right left child's first element is incorrect.")
+	}
+
+	if rightLeftChild.GetSharedRight()[1] != "Shared middle right" {
+		t.Fatal("Left left child's second element is incorrect.")
+	}
+
+}
+
+/*
+Test for inheriting shared elements using the overrid inheritance mode.
+*/
+func TestExtractInheritOverride(t *testing.T) {
+
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_OVERRIDE
+
+	root := Node{}
+	root.SharedLeft = []string{"Shared top left"}
+	root.SharedRight = []string{"Shared top right"}
+
+	leftChild := Node{LogicalOperator: "AND"}
+	leftChild.SharedLeft = []string{"Shared middle left"}
+
+	leftLeftChild := Node{Entry: "left left"}
+	_, err := leftChild.InsertLeftNode(&leftLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	leftRightChild := Node{Entry: "left right"}
+	_, err = leftChild.InsertRightNode(&leftRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertLeftNode(&leftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightChild := Node{LogicalOperator: "XOR"}
+	rightChild.SharedRight = []string{"Shared middle right"}
+
+	rightLeftChild := Node{Entry: "right left"}
+	_, err = rightChild.InsertLeftNode(&rightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightChild := Node{Entry: "right right"}
+	_, err = rightChild.InsertRightNode(&rightRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertRightNode(&rightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	fmt.Println(root.String())
+
+	if len(leftLeftChild.GetSharedLeft()) != 2 {
+		t.Fatal("Left left child does not have the correct number of shared left elements")
+	}
+
+	if leftLeftChild.GetSharedLeft()[0] != "Shared top left" {
+		t.Fatal("Left left child's first element is incorrect.")
+	}
+
+	if leftLeftChild.GetSharedLeft()[1] != "Shared middle left" {
+		t.Fatal("Left left child's second element is incorrect.")
+	}
+
+	if len(rightLeftChild.GetSharedRight()) != 2 {
+		t.Fatal("Right left child does not have the correct number of shared right elements: ", rightLeftChild.GetSharedRight())
+	}
+
+	if rightLeftChild.GetSharedRight()[0] != "Shared top right" {
+		t.Fatal("Right left child's first element is incorrect.")
+	}
+
+	if rightLeftChild.GetSharedRight()[1] != "Shared middle right" {
+		t.Fatal("Left left child's second element is incorrect.")
+	}
+
+}
+
+/*
+Test for inheriting shared elements using the override inheritance mode, even if child node is present
+*/
+func TestExtractInheritOverrideChildElement(t *testing.T) {
+
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_OVERRIDE
+
+	root := Node{}
+	root.SharedLeft = []string{"Shared top left"}
+	root.SharedRight = []string{"Shared top right"}
+
+	leftChild := Node{LogicalOperator: "AND"}
+	leftChild.SharedLeft = []string{"Shared middle left"}
+
+	leftLeftChild := Node{Entry: "left left"}
+	_, err := leftChild.InsertLeftNode(&leftLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	leftRightChild := Node{Entry: "left right"}
+	_, err = leftChild.InsertRightNode(&leftRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertLeftNode(&leftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightChild := Node{LogicalOperator: "XOR"}
+	rightChild.SharedRight = []string{"Shared middle right"}
+
+	rightLeftChild := Node{Entry: "right left"}
+	_, err = rightChild.InsertLeftNode(&rightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightChild := Node{Entry: "right right"}
+	_, err = rightChild.InsertRightNode(&rightRightChild)
+	rightRightChild.SharedRight = []string{"lower right"}
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertRightNode(&rightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	fmt.Println(root.String())
+
+	if len(leftLeftChild.GetSharedLeft()) != 2 {
+		t.Fatal("Left left child does not have the correct number of shared left elements")
+	}
+
+	if leftLeftChild.GetSharedLeft()[0] != "Shared top left" {
+		t.Fatal("Left left child's first element is incorrect.")
+	}
+
+	if leftLeftChild.GetSharedLeft()[1] != "Shared middle left" {
+		t.Fatal("Left left child's second element is incorrect.")
+	}
+
+	if len(rightLeftChild.GetSharedRight()) != 2 {
+		t.Fatal("Right left child does not have the correct number of shared right elements: ", rightLeftChild.GetSharedRight())
+	}
+
+	if rightLeftChild.GetSharedRight()[0] != "Shared top right" {
+		t.Fatal("Right left child's first element is incorrect.")
+	}
+
+	if rightLeftChild.GetSharedRight()[1] != "Shared middle right" {
+		t.Fatal("Left left child's second element is incorrect.")
+	}
+
+}
+
+/*
+Test for inheriting shared elements using the no inheritance mode, even if child node is present
+*/
+func TestExtractInheritNoOverride(t *testing.T) {
+
+	// Nothing is inherited, only content of leaf node
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_NOTHING
+
+	root := Node{}
+	root.SharedLeft = []string{"Shared top left"}
+	root.SharedRight = []string{"Shared top right"}
+
+	leftChild := Node{LogicalOperator: "AND"}
+	leftChild.SharedLeft = []string{"Shared middle left"}
+
+	leftLeftChild := Node{Entry: "left left"}
+	_, err := leftChild.InsertLeftNode(&leftLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	leftRightChild := Node{Entry: "left right"}
+	_, err = leftChild.InsertRightNode(&leftRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertLeftNode(&leftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightChild := Node{LogicalOperator: "XOR"}
+	rightChild.SharedRight = []string{"Shared middle right"}
+
+	rightLeftChild := Node{Entry: "right left"}
+	// special case of leaf-level shared entry
+	rightLeftChild.SharedRight = []string{"right left leaf shared entry"}
+	_, err = rightChild.InsertLeftNode(&rightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightChild := Node{Entry: "right right"}
+	_, err = rightChild.InsertRightNode(&rightRightChild)
+	rightRightChild.SharedRight = []string{"lower right"}
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertRightNode(&rightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	fmt.Println(root.String())
+
+	if len(leftLeftChild.GetSharedLeft()) != 0 {
+		t.Fatal("Left left child does not have the correct number of shared left elements: ", leftLeftChild.GetSharedLeft())
+	}
+
+	if len(rightLeftChild.GetSharedRight()) != 1 {
+		t.Fatal("Right left child does not have the correct number of shared right elements: ", rightLeftChild.GetSharedRight())
+	}
+
+	if rightLeftChild.GetSharedRight()[0] != "right left leaf shared entry" {
+		t.Fatal("Right left child's first element is incorrect.")
+	}
+
+}
+
+/*
+Test for inheriting shared elements using the inheritance from next higher combination, even if child node is present
+*/
+func TestExtractInheritFromNextHigherCombination(t *testing.T) {
+
+	// Only elements from next-higher combination are inherited (including leaf-level elements)
+	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_FROM_COMBINATION
+
+	root := Node{}
+	root.SharedLeft = []string{"Shared top left"}
+	root.SharedRight = []string{"Shared top right"}
+
+	leftChild := Node{LogicalOperator: "AND"}
+	leftChild.SharedLeft = []string{"Shared middle left"}
+
+	leftLeftChild := Node{Entry: "left left"}
+	_, err := leftChild.InsertLeftNode(&leftLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	leftRightChild := Node{Entry: "left right"}
+	_, err = leftChild.InsertRightNode(&leftRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertLeftNode(&leftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightChild := Node{LogicalOperator: "XOR"}
+	rightChild.SharedRight = []string{"Shared middle right"}
+
+	rightLeftChild := Node{Entry: "right left"}
+	// special case of leaf-level shared entry
+	rightLeftChild.SharedRight = []string{"right left leaf shared entry"}
+	_, err = rightChild.InsertLeftNode(&rightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightChild := Node{Entry: "right right"}
+	_, err = rightChild.InsertRightNode(&rightRightChild)
+	rightRightChild.SharedRight = []string{"lower right"}
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertRightNode(&rightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	fmt.Println(root.String())
+
+	if len(leftLeftChild.GetSharedLeft()) != 1 {
+		t.Fatal("Left left child does not have the correct number of shared left elements: ", leftLeftChild.GetSharedLeft())
+	}
+
+	if leftLeftChild.GetSharedLeft()[0] != "Shared middle left" {
+		t.Fatal("Left left child's first element is incorrect.")
+	}
+
+	if len(rightLeftChild.GetSharedRight()) != 2 {
+		t.Fatal("Right left child does not have the correct number of shared right elements: ", rightLeftChild.GetSharedRight())
+	}
+
+	if rightLeftChild.GetSharedRight()[0] != "Shared middle right" {
+		t.Fatal("Right left child's first element is incorrect.")
+	}
+
+	if rightLeftChild.GetSharedRight()[1] != "right left leaf shared entry" {
+		t.Fatal("Right left child's second element is incorrect.")
+	}
+
+}
+
 //Collapse adjacent entries in logical operators - CollapseAdjacentOperators()

@@ -69,6 +69,9 @@ func TestTabularOutput(t *testing.T) {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
@@ -128,6 +131,78 @@ func TestTabularOutput(t *testing.T) {
 }
 
 /*
+Tests basic tabular output without statement-level nesting - only component-level combinations,
+but including shared elements in output.
+*/
+func TestTabularOutputWithSharedElements(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+
+	// With shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays()
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 7 {
+		t.Fatal("Number of statement reference links is incorrect. Value: ", len(links))
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingWithSharedElements.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
 Tests multi-level nesting on statements, i.e., activation with own activation condition
  */
 func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
@@ -138,6 +213,9 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// This is the tricky lines, specifically the second Cac{}
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
+
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -212,6 +290,9 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 		// Complex activation condition, including two-level nesting (Cac{Cac{}})
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
 
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
@@ -284,6 +365,9 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 		// Activation condition 2
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
@@ -354,6 +438,9 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}" +
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -428,6 +515,9 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 		// Implicitly linked nested statement
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
@@ -500,6 +590,9 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}} " +
 		// should be automatically linked using AND
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -575,6 +668,9 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 		// non-linked additional activation condition (should be linked by implicit AND)
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
@@ -634,6 +730,85 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 }
 
 /*
+Tests statement-level combinations, alongside embedded component-level combinations to ensure the
+filtering of within-statement component-level combinations are filtered prior to statement assembly.
+Includes generation of output with shared elements.
+ */
+func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWithSharedElements(t *testing.T) {
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		// This is the tricky line, the multiple aims
+		"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		// non-linked additional activation condition (should be linked by implicit AND)
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	// With shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays()
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputNestedStatementCombinationsAndComponentCombinationsWithSharedElements.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+
+/*
 Tests statement-level combinations on multiple components, alongside selected embedded component-level,
 alongside combination with non-nested components
 */
@@ -650,6 +825,9 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 		"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
 		// non-linked additional activation condition (should be linked by implicit AND)
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

@@ -330,6 +330,8 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 			return err
 		}
 
+		//TODO: Check whether combinations are actually filled, or just empty nodes (e.g., { Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() } })
+
 		log.Println("Assigning nested tree structure", combo)
 
 		// Checks are ordered with property variants (e.g., Bdir,p) before component variants (e.g., Bdir) to avoid wrong match
@@ -364,7 +366,6 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 			stmtToAttachTo.IndirectObjectComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, combo)
 			continue
 		}
-
 		if strings.HasPrefix(sharedPrefix, tree.ACTIVATION_CONDITION) {
 			log.Println("Attaching nested activation condition to higher-level statement")
 			// Assign nested statement to higher-level statement

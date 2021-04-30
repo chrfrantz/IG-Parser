@@ -17,6 +17,8 @@ Returns Google Sheets output as string, and error (defaults to tree.PARSING_NO_E
 func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename string) (string, tree.ParsingError) {
 
 	log.Println("Step: Parse input statement")
+	// Explicitly activate printing of shared elements
+	exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Parse IGScript statement into tree
 	s, err := parser.ParseStatement(statement)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

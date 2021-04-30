@@ -43,6 +43,8 @@ type IdentifiedStmt struct {
 
 /*
 Generates array of statement maps corresponding to identified elements format. Includes parsing of nested statements.
+Consider the specification of INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT variable to indicate whether shared elements
+are to be included in output.
 Input:
 - Atomic statements with corresponding node references [statement][node references]
 - Map with with component name as key and corresponding number of columns in input stmts (i.e., same component can have
@@ -129,8 +131,28 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				fmt.Println("Found empty node")
 			} else if statement[componentIdx].HasPrimitiveEntry() {
 				// Regular leaf entry (i.e., component)
+
+				// Provide default values for left and right elements (potentially used hereafter)
+				leftString := ""
+				rightString := ""
+				// If shared elements are to be included (based on configuration, extract those ...
+				if INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT {
+					// Prepare left and right shared elements by stringifying
+					leftString = stringifySlices(statement[componentIdx].GetSharedLeft())
+					if leftString != "" {
+						// Append whitespace
+						leftString += " "
+					}
+					rightString = stringifySlices(statement[componentIdx].GetSharedRight())
+					if rightString != "" {
+						// Add preceding whitespace
+						rightString = " " + rightString
+					}
+				}
 				// Save entry value into entryMap for given statement and component column
-				entryMap[headerSymbols[componentIdx]] = statement[componentIdx].Entry.(string)
+				entryMap[headerSymbols[componentIdx]] = leftString +
+					statement[componentIdx].Entry.(string) +
+					rightString
 				// Add to output
 				//output += statement[componentIdx].Entry.(string)
 			} else {
@@ -253,7 +275,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		}
 
 		// Add identified linkages to nestedMap (i.e., for all atomic statements)
-		for i, _ := range nestedMap {
+		for i := range nestedMap {
 			nestedMap[i][logLinkColHeaderStmts] = stmtLinksString
 		}
 

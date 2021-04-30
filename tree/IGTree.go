@@ -270,6 +270,9 @@ func (n *Node) getParentsLeftSharedElements() []string {
 	if n.Parent != nil && n.Parent.SharedLeft != nil && len(n.Parent.SharedLeft) != 0 {
 		// Recursively return parents' shared elements, followed by respective children ones
 		return append(n.Parent.getParentsLeftSharedElements(), n.Parent.SharedLeft...)
+	} else if n.Parent != nil {
+		// Return only parents' shared elements
+		return n.Parent.getParentsLeftSharedElements()
 	}
 	// Return empty structure
 	return []string{}
@@ -282,6 +285,9 @@ func (n *Node) getParentsRightSharedElements() []string {
 	if n.Parent != nil && n.Parent.SharedRight != nil && len(n.Parent.SharedRight) != 0 {
 		// Recursively return parents' shared elements, followed by respective children ones
 		return append(n.Parent.getParentsRightSharedElements(), n.Parent.SharedRight...)
+	} else if n.Parent != nil {
+		// Return only parents' shared elements
+		return n.Parent.getParentsRightSharedElements()
 	}
 	// Return empty structure
 	return []string{}
@@ -303,15 +309,28 @@ func (n *Node) GetSharedLeft() []string {
 			// else return parents' shared components
 			return n.getParentsLeftSharedElements()
 		case SHARED_ELEMENT_INHERIT_APPEND:
-			if len(n.SharedLeft) != 0 && len(n.getParentsLeftSharedElements()) != 0 {
+			parentsSharedLeft := n.getParentsLeftSharedElements()
+			if len(n.SharedLeft) != 0 && len(parentsSharedLeft) != 0 {
 				// Append child's to parents' elements
-				return append(n.getParentsLeftSharedElements(), n.SharedLeft...)
+				return append(parentsSharedLeft, n.SharedLeft...)
 			} else if len(n.SharedLeft) != 0 {
 				// Return own node information
 				return n.SharedLeft
 			} else {
 				// Return parent node information
 				return n.getParentsLeftSharedElements()
+			}
+		case SHARED_ELEMENT_INHERIT_FROM_COMBINATION:
+			if !n.IsCombination() && n.Parent != nil {
+				if n.SharedLeft != nil {
+					// Return parent and own shared left information
+					return append(n.Parent.GetSharedLeft(), n.SharedLeft...)
+				}
+				// Return parent left shared
+				return n.Parent.GetSharedLeft()
+			} else {
+				// Return shared left (may be of combination of leaf node)
+				return n.SharedLeft
 			}
 		case SHARED_ELEMENT_INHERIT_NOTHING:
 			// Simply return own elements
@@ -336,15 +355,28 @@ func (n *Node) GetSharedRight() []string {
 		// else return parents' shared components
 		return n.getParentsRightSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
-		if len(n.SharedRight) != 0 && len(n.getParentsRightSharedElements()) != 0 {
+		parentsSharedRight := n.getParentsRightSharedElements()
+		if len(n.SharedRight) != 0 && len(parentsSharedRight) != 0 {
 			// Append child's to parents' elements
-			return append(n.getParentsRightSharedElements(), n.SharedRight...)
+			return append(parentsSharedRight, n.SharedRight...)
 		} else if len(n.SharedRight) != 0 {
 			// Return own node information
 			return n.SharedRight
 		} else {
 			// Return parent node information
 			return n.getParentsRightSharedElements()
+		}
+	case SHARED_ELEMENT_INHERIT_FROM_COMBINATION:
+		if !n.IsCombination() && n.Parent != nil {
+			if n.SharedRight != nil {
+				// Return parent and own shared right information
+				return append(n.Parent.GetSharedRight(), n.SharedRight...)
+			}
+			// Return parent right shared
+			return n.Parent.GetSharedRight()
+		} else {
+			// Return shared right (may be of combination of leaf node)
+			return n.SharedRight
 		}
 	case SHARED_ELEMENT_INHERIT_NOTHING:
 		// Simply return own elements
