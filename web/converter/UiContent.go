@@ -9,8 +9,7 @@ This file holds variables (de facto constants) for Web GUI.
  */
 
 // Default example statement
-var ANNOTATED_STATEMENT = "A,p(Regional) A(Managers), Cex(on behalf of the Secretary), D(may) I(inspect), I((review [AND] (reward [XOR] sanction))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) under the condition that Cac{A(Operations) I(were (non-compliant [OR] violated)) Bdir(organic farming provisions)}."
-
+var ANNOTATED_STATEMENT = "A,p(Regional) A(Managers), Cex(on behalf of the Secretary), D(may) I((review [AND] (reward [XOR] sanction))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) under the condition that Cac{A(Operations) I(were (non-compliant [OR] violated)) Bdir(organic farming provisions)}."
 		//"A,p(Regional) A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), D(may) I(inspect and), I((review [AND] (reward [XOR] sanction))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part))"
 // Default example ID
 var STATEMENT_ID = "650"
