@@ -687,16 +687,16 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 				if modeMap[level] == tree.PARSING_MODE_RIGHT {
 					log.Println("Found additional operator [" + foundOperator + "] (now " + strconv.Itoa(foundOperators[foundOperator][level]) +
 						" times on level " + strconv.Itoa(level) + "), even though looking for terminating parenthesis.")
-					if foundOperator == tree.AND && foundOperators[foundOperator][level] > 1 { // if AND operator and multiple on the same level
+					if foundOperators[foundOperator][level] > 1 { // if AND operator and multiple on the same level
 						// Consider injecting a left parenthesis before the expression and add mixfix ") " before logical operator, e.g., "( left ... [AND] right ... ) [AND] ..."
 						expression = expression[:levelMap[level][levelIdx].Left] + leftPar + expression[levelMap[level][levelIdx].Left:i-1] + rightPar + " " + expression[i:]
-						log.Println("Multiple [AND] operators found. Reconstructed nested structure by introducing parentheses, now: " + expression)
-						log.Println("Rerunning all parsing on combination to capture nested AND combinations")
+						log.Println("Multiple [AND], [OR], or [XOR] operators found. Reconstructed nested structure by introducing parentheses, now: " + expression)
+						log.Println("Rerunning all parsing on combination to capture nested AND, OR, XOR combinations")
 						return detectCombinations(expression, leftPar, rightPar)
 					} else {
 						return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS,
-							ErrorMessage: "Error: Duplicate non-[AND] operators (or mix of [AND] and non-[AND] operators) on level " + strconv.Itoa(level) +
-								" in single expression (Expression: " + expression + ")"}
+							ErrorMessage: "Error: Mix of different logical operators on level " + strconv.Itoa(level) +
+								" in single expression (Expression: " + expression + "). Use parentheses to indicate precedence."}
 					}
 				}
 

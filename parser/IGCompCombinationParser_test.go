@@ -203,6 +203,73 @@ func TestAutomatedAndExpansion(t *testing.T) {
 	}
 }
 
+/*
+Tests the parser's ability to handle multiple OR operators on the same level
+*/
+func TestAutomatedOrExpansion(t *testing.T) {
+
+	input := "(Left side information [OR] middle information and [OR] right-side)"
+
+	// Parse provided expression
+	node, modified, err := ParseIntoNodeTree(input, false, "(", ")")
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing throws error where there should be none.")
+	}
+
+	// Test return information from parsing
+	if modified != "((Left side information [OR] middle information and) [OR] right-side)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}
+
+	// Test reconstruction from tree
+	if node.Stringify() != "((Left side information [OR] middle information and) [OR] right-side)" {
+		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
+	}
+}
+
+/*
+Tests the parser's ability to handle multiple XOR operators on the same level
+*/
+func TestAutomatedXorExpansion(t *testing.T) {
+
+	input := "(Left side information [XOR] middle information and [XOR] right-side)"
+
+	// Parse provided expression
+	node, modified, err := ParseIntoNodeTree(input, false, "(", ")")
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing throws error where there should be none.")
+	}
+
+	// Test return information from parsing
+	if modified != "((Left side information [XOR] middle information and) [XOR] right-side)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}
+
+	// Test reconstruction from tree
+	if node.Stringify() != "((Left side information [XOR] middle information and) [XOR] right-side)" {
+		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
+	}
+}
+
+/*
+Tests the parser's ability to prevent mixed operators on the same level
+*/
+func TestMixedOperatorsOnSameLevel(t *testing.T) {
+
+	input := "(Left side information [AND] middle information and [OR] right-side)"
+
+	// Parse provided expression
+	_, _, err := ParseIntoNodeTree(input, false, "(", ")")
+
+	// Should fail based on mixed operators
+	if err.ErrorCode != tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS {
+		t.Fatal("Parsing throws error where there should be none. Error: ", err.ErrorCode)
+	}
+
+}
+
 func TestNonCombinationParentheses(t *testing.T) {
 
 	input := "(Left side information (source) [AND] middle information and [AND] right-side)"
