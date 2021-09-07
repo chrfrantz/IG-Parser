@@ -10,7 +10,9 @@ import (
 	"strings"
 )
 
-
+/*
+Parses statement tree from input string.
+ */
 func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 
 	// Remove line breaks
@@ -192,7 +194,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 }
 
 /*
-Parses nested statements (but not combinations) and attached those to the top-level statement
+Parses nested statements (but not combinations) and attaches those to the top-level statement
  */
 func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string) (tree.ParsingError) {
 	for _, v := range nestedStmts {
@@ -280,7 +282,7 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 }
 
 /*
-Parses nested statement combinations and attached those to the top-level statement
+Parses nested statement combinations and attaches those to the top-level statement
 */
 func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedCombos []string) (tree.ParsingError) {
 
@@ -444,22 +446,6 @@ func handleParsingError(component string, err tree.ParsingError) tree.ParsingErr
 var componentPrefix = "([a-zA-Z{}\\[\\]]+)+"
 
 /*
-Escapes all special symbols to prepare those for input into regex expression
- */
-func escapeSymbolsForRegex(text string) string {
-	text = strings.ReplaceAll(text, "{", "\\{")
-	text = strings.ReplaceAll(text, "}", "\\}")
-	text = strings.ReplaceAll(text, "(", "\\(")
-	text = strings.ReplaceAll(text, ")", "\\)")
-	text = strings.ReplaceAll(text, "[", "\\[")
-	text = strings.ReplaceAll(text, "]", "\\]")
-	text = strings.ReplaceAll(text, "$", "\\$")
-	text = strings.ReplaceAll(text, "+", "\\+")
-
-	return text
-}
-
-/*
 Separates nested statement expressions (including component prefix)
 from individual components (including combinations of components).
 Returns multi-dim array, with element [0][0] containing component-only statement (no nested structure),
@@ -536,8 +522,9 @@ Identifies nested statement patterns
  */
 func identifyNestedStatements(statement string) ([]string, tree.ParsingError) {
 
+	// TODO: Review
 	// Extract nested statements from input string
-	nestedStatements, err := extractComponent("", statement, LEFT_BRACE, RIGHT_BRACE)
+	nestedStatements, err := ExtractComponentContent("", statement, LEFT_BRACE, RIGHT_BRACE) //, "", "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return nil, err
 	}
@@ -622,8 +609,8 @@ func validateInput(text string, leftPar string, rightPar string) (tree.ParsingEr
 	parTypePlural := ""
 
 	if leftPar == LEFT_BRACE && rightPar == RIGHT_BRACE {
-		parTypeSingular = "braces"
-		parTypePlural = parTypeSingular
+		parTypeSingular = "brace"
+		parTypePlural = "braces"
 	} else if leftPar == LEFT_PARENTHESIS && rightPar == RIGHT_PARENTHESIS {
 		parTypeSingular = "parenthesis"
 		parTypePlural = "parentheses"
@@ -669,11 +656,11 @@ func validateInput(text string, leftPar string, rightPar string) (tree.ParsingEr
 }
 
 /*
-Extracts a component specification from string based on component signature (e.g., A, I, etc.)
+Extracts a component content from string based on component signature (e.g., A, I, etc.)
 and balanced parentheses/braces.
-If no component is found, an empty string is returned
+If no component content is found, an empty string is returned.
 */
-func extractComponent(component string, input string, leftPar string, rightPar string) ([]string, tree.ParsingError) {
+func ExtractComponentContent(component string, input string, leftPar string, rightPar string) ([]string, tree.ParsingError) {
 
 	// Strings for given component
 	componentStrings := []string{}
@@ -685,11 +672,42 @@ func extractComponent(component string, input string, leftPar string, rightPar s
 
 	// Assume that parentheses/braces are checked beforehand
 
+	// Validate component identifier presence (if component is specified as part of parameter)
+	if component != "" && strings.Index(processedString, component) == -1 {
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND}
+	}
+
+	// Start position
+	startPos := -1
+
+	// Search number of entries
+	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+	// + escapeSymbolsForRegex(input)
+	if err != nil {
+		log.Fatal("Error", err.Error())
+	}
+
 	for { // infinite loop - needs to break out
+
+		//// OLD STRING-BASED PARSING OF COMPONENTS
 		// Find first occurrence of signature in processedString (incrementally iterated by letter)
-		startPos := strings.Index(processedString, component + leftPar)
+		/*startPos := strings.Index(processedString, component + leftPar)
 
 		if startPos == -1 {
+			// Returns component strings once opening parenthesis symbol is no longer found
+			return componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+		}*/
+
+		//// NEW REGEX-BASED PARSING (TO CONSIDER ANNOTATIONS AND SUFFICES)
+		// Return index of found element
+		result := r.FindAllStringIndex(processedString, -1)
+
+		//fmt.Println(result)
+
+		if len(result) > 0 {
+			startPos = result[0][0]
+			fmt.Println("Start position: ", startPos)
+		} else {
 			// Returns component strings once opening parenthesis symbol is no longer found
 			return componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 		}
@@ -697,6 +715,7 @@ func extractComponent(component string, input string, leftPar string, rightPar s
 		// Parentheses count to check for balance
 		parCount := 0
 
+		// Switch to stop parsing
 		stop := false
 
 		for i, letter := range processedString[startPos:] {
@@ -707,8 +726,16 @@ func extractComponent(component string, input string, leftPar string, rightPar s
 			case rightPar:
 				parCount--
 				if parCount == 0 {
-					componentStrings = append(componentStrings, processedString[startPos:startPos+i+1])
-					fmt.Println("Added string " + processedString[startPos:startPos+i+1])
+					// Store candidate string before cutting off potential leading component identifier (if nested statement)
+					candidateString := processedString[startPos:startPos+i+1]
+					if leftPar == LEFT_BRACE {
+						// Remove anything before left brace (component identifier)
+						// TODO FIX to consider annotations and suffix if needed
+						cutIdx := strings.Index(candidateString, LEFT_BRACE)
+						candidateString = candidateString[cutIdx:]
+					}
+					componentStrings = append(componentStrings, candidateString)
+					fmt.Println("Added string " + candidateString)
 					processedString = processedString[startPos+i+1:]
 					stop = true
 				}
@@ -717,6 +744,57 @@ func extractComponent(component string, input string, leftPar string, rightPar s
 				break
 			}
 		}
+	}
+}
+
+/*
+Extracts suffix (e.g., ,p1) and annotations (e.g., [ctx=time]), and content from IG-Script-coded input.
+It takes component identifier and raw coded information as input, as well as left and right parenthesis symbols (e.g., (,) or {,}).
+Returns suffix as first element, annotations string as second, and component content as third element.
+TODO: Make this more efficient
+ */
+func ExtractSuffixAndAnnotations(component string, input string, leftPar string, rightPar string) (string, string, string){//[]string, tree.ParsingError) {
+
+	// Remove component name from input
+	strippedInput := strings.ReplaceAll(input, component, "")
+
+	//// Component prefix pattern (framed [] brackets, but can contain symbols including ,=;{}())
+	componentPrefix := "\\[([0-9a-zA-Z,=;{}\\[\\]\\(\\)])+\\]+\\" + leftPar
+	r, err := regexp.Compile(componentPrefix)
+	// + escapeSymbolsForRegex(input)
+	if err != nil {
+		log.Fatal("Error", err.Error())
+	}
+	// Search for annotation pattern on input (without leading component identifier)
+	result := r.FindAllStringSubmatch(strippedInput, -1)
+
+	fmt.Println(len(result))
+
+	if len(result) > 0 {
+		// If annotations are found ...
+		res := result[0][0]
+		// Extract semantic annotation string
+		res = res[:len(res)-1]
+		fmt.Println(res)
+		pos := strings.Index(strippedInput, res)
+		// Extract component name suffix (e.g., 1)
+		suffix := strippedInput[:pos]
+		fmt.Println("Suffix:", suffix)
+		reconstructedComponent := component + strings.ReplaceAll(strippedInput, suffix + res, "")
+		fmt.Println(reconstructedComponent)
+		// Return suffix and annotations
+		return suffix, res, reconstructedComponent
+	} else {
+		// ... if no annotations are found ...
+		// Identifier start position for content
+		contentStartPos := strings.Index(strippedInput, leftPar)
+		// Extract suffix
+		suffix := strippedInput[:contentStartPos]
+		fmt.Println("Suffix:", suffix)
+		reconstructedComponent := component + strings.ReplaceAll(strippedInput, suffix, "")
+		fmt.Println(reconstructedComponent)
+		// Return only suffix
+		return suffix, "", reconstructedComponent
 	}
 }
 
@@ -743,10 +821,11 @@ const wordsWithParentheses = "([a-zA-Z" + specialSymbols + "(){}\\[\\]]+\\s*)+"
 // Pattern of combinations, e.g., ( ... [AND] ... )
 const combinationPattern = "\\(" + wordsWithParentheses + "(\\[" + logicalOperators + "\\]\\s" + wordsWithParentheses + ")+\\)"
 
+//TODO Check whether ExtractComponent() works
 func parseComponent(component string, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
 
 	// Extract component (one or multiple occurrences) from input string based on provided component identifier
-	componentStrings, err := extractComponent(component, text, leftPar, rightPar)
+	componentStrings, err := ExtractComponentContent(component, text, leftPar, rightPar)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return nil, err
 	}

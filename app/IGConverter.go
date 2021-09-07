@@ -34,7 +34,6 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 
 	output, _ = exporter.GenerateGoogleSheetsOutput(statementMap, statementHeader, statementHeaderNames, filename)
 
-
 	return output, err
 
 }

@@ -214,8 +214,6 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					}
 					// Append current value in any case
 					entryMap[headerSymbols[componentIdx]] += idToReferenceInCell
-
-
 				}
 			}
 			fmt.Println("Source/calling node: ", statement[componentIdx])
