@@ -911,3 +911,179 @@ func TestSpecialCharacters(t *testing.T) {
 	}
 
 }
+
+
+
+/*
+Tests extraction of suffix and annotation in statements in which only a single component of a given type is present.
+*/
+func TestExtractSuffixAndAnnotationsSingleComponentValue(t *testing.T) {
+
+	// Single component entry
+	text := "A1[annotation=(left,right)](content)"
+
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	if suffix != "1" {
+		t.Fatal("Suffix should be 1 (from first element), but is:", suffix)
+	}
+
+	if annotation != "[annotation=(left,right)]" {
+		t.Fatal("Annotation should be [annotation=(left,right)] (from first element), but is:", annotation)
+	}
+
+	if content != "A(content)" {
+		t.Fatal("Content should have been raw component entry without suffix or annotation of first element, but is:", content)
+	}
+
+	fmt.Println("Suffix:", suffix, "; Annotation:", annotation, "; Content:", content)
+
+}
+
+/*
+Tests extraction of suffix only in statements in which single component of a given type is present.
+*/
+func TestExtractSuffixOnlySingleComponentValue(t *testing.T) {
+
+	// Single component entry
+	text := "A1(content)"
+
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	if suffix != "1" {
+		t.Fatal("Suffix should be 1 (from first element), but is:", suffix)
+	}
+
+	if annotation != "" {
+		t.Fatal("Annotation should be empty, but is:", annotation)
+	}
+
+	if content != "A(content)" {
+		t.Fatal("Content should have been raw component entry without suffix or annotation of first element, but is:", content)
+	}
+
+	fmt.Println("Suffix:", suffix, "; Annotation:", annotation, "; Content:", content)
+
+}
+
+/*
+Tests extraction of annotation only in statements in which single component of a given type is present.
+*/
+func TestExtractAnnotationOnlySingleComponentValue(t *testing.T) {
+
+	// Single component entry
+	text := "A[abc=(left;right)](content)"
+
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	if suffix != "" {
+		t.Fatal("Suffix should be empty, but is:", suffix)
+	}
+
+	if annotation != "[abc=(left;right)]" {
+		t.Fatal("Annotation should be [abc=(left;right)], but is:", annotation)
+	}
+
+	if content != "A(content)" {
+		t.Fatal("Content should have been raw component entry without suffix or annotation of first element, but is:", content)
+	}
+
+	fmt.Println("Suffix:", suffix, "; Annotation:", annotation, "; Content:", content)
+
+}
+
+/*
+Tests extraction of annotation only in statements with special characters.
+*/
+func TestExtractAnnotationOnlyWithSpecialCharacters(t *testing.T) {
+
+	// Single component entry
+	text := "A[a bc=(left|right)](content)"
+
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	if suffix != "" {
+		t.Fatal("Suffix should be empty, but is:", suffix)
+	}
+
+	if annotation != "[a bc=(left|right)]" {
+		t.Fatal("Annotation should be [a bc=(left|right)], but is:", annotation)
+	}
+
+	if content != "A(content)" {
+		t.Fatal("Content should have been raw component entry without suffix or annotation of first element, but is:", content)
+	}
+
+	fmt.Println("Suffix:", suffix, "; Annotation:", annotation, "; Content:", content)
+
+}
+
+/*
+Tests extraction of suffix and annotations in statements with special characters.
+*/
+func TestExtractSuffixOnlyWithSpecialCharacters(t *testing.T) {
+
+	// Single component entry
+	text := "A2#|(cont$ent)"
+
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	if suffix != "2#|" {
+		t.Fatal("Suffix should be empty, but is:", suffix)
+	}
+
+	if annotation != "" {
+		t.Fatal("Annotation should be empty, but is:", annotation)
+	}
+
+	if content != "A(cont$ent)" {
+		t.Fatal("Content should have been raw component entry without suffix or annotation of first element, but is:", content)
+	}
+
+	fmt.Println("Suffix:", suffix, "; Annotation:", annotation, "; Content:", content)
+
+}
+
+/*
+Tests extraction of suffix and annotations in statements with special characters.
+*/
+func TestExtractSuffixAndAnnotationWithSpecialCharacters(t *testing.T) {
+
+	// Single component entry
+	text := "A2#|[a bc=(le#ft|righ$t)](cont$ent)"
+
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	if suffix != "2#|" {
+		t.Fatal("Suffix should be empty, but is:", suffix)
+	}
+
+	if annotation != "[a bc=(le#ft|righ$t)]" {
+		t.Fatal("Annotation should be [abc=(left;right)], but is:", annotation)
+	}
+
+	if content != "A(cont$ent)" {
+		t.Fatal("Content should have been raw component entry without suffix or annotation of first element, but is:", content)
+	}
+
+	fmt.Println("Suffix:", suffix, "; Annotation:", annotation, "; Content:", content)
+
+}

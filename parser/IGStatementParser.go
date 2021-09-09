@@ -442,9 +442,6 @@ func handleParsingError(component string, err tree.ParsingError) tree.ParsingErr
 }
 
 
-// Component prefix (word without spaces and parentheses, but [] brackets)
-var componentPrefix = "([a-zA-Z{}\\[\\]]+)+"
-
 /*
 Separates nested statement expressions (including component prefix)
 from individual components (including combinations of components).
@@ -475,7 +472,7 @@ func separateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 		for _, v := range nestedStmts {
 			// Prepare pattern to extract nested statements including prefix from overall statement
 			// by combining generic prefix with preprocessed specific input
-			r, err := regexp.Compile(componentPrefix + escapeSymbolsForRegex(v))
+			r, err := regexp.Compile(NESTED_COMPONENT_SYNTAX + escapeSymbolsForRegex(v))
 			if err != nil {
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
 					ErrorMessage: "Error during pattern extraction in nested statement."}
@@ -681,7 +678,7 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 	startPos := -1
 
 	// Search number of entries
-	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?\\" + leftPar)
 	// + escapeSymbolsForRegex(input)
 	if err != nil {
 		log.Fatal("Error", err.Error())
@@ -750,51 +747,71 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 /*
 Extracts suffix (e.g., ,p1) and annotations (e.g., [ctx=time]), and content from IG-Script-coded input.
 It takes component identifier and raw coded information as input, as well as left and right parenthesis symbols (e.g., (,) or {,}).
-Returns suffix as first element, annotations string as second, and component content as third element.
+Returns suffix as first element, annotations string as second, and component content (including identifier) as third element.
+IMPORTANT: This function will only extract the suffix and annotation for the first element of a given component type found in the input string.
 TODO: Make this more efficient
  */
-func ExtractSuffixAndAnnotations(component string, input string, leftPar string, rightPar string) (string, string, string){//[]string, tree.ParsingError) {
+func extractSuffixAndAnnotations(component string, input string, leftPar string, rightPar string) (string, string, string, tree.ParsingError) {
 
-	// Remove component name from input
-	strippedInput := strings.ReplaceAll(input, component, "")
+	// Remove component name from input (search for component name and left parenthesis, and substitute by left parenthesis only
+	// (to avoid replacing component identifiers in content)
+	strippedInput := strings.ReplaceAll(input, component + leftPar, leftPar)
 
-	//// Component prefix pattern (framed [] brackets, but can contain symbols including ,=;{}())
-	componentPrefix := "\\[([0-9a-zA-Z,=;{}\\[\\]\\(\\)])+\\]+\\" + leftPar
-	r, err := regexp.Compile(componentPrefix)
+	// Component annotation pattern
+	r, err := regexp.Compile(COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 	// + escapeSymbolsForRegex(input)
 	if err != nil {
 		log.Fatal("Error", err.Error())
 	}
 	// Search for annotation pattern on input (without leading component identifier)
-	result := r.FindAllStringSubmatch(strippedInput, -1)
+	result := r.FindAllStringSubmatch(strippedInput, 1)
 
-	fmt.Println(len(result))
+	fmt.Println("Number of annotations:", len(result))
 
 	if len(result) > 0 {
+		fmt.Println("Found annotation in component ...")
 		// If annotations are found ...
 		res := result[0][0]
 		// Extract semantic annotation string
 		res = res[:len(res)-1]
-		fmt.Println(res)
+		//fmt.Println("Annotations:", res)
 		pos := strings.Index(strippedInput, res)
-		// Extract component name suffix (e.g., 1)
-		suffix := strippedInput[:pos]
-		fmt.Println("Suffix:", suffix)
-		reconstructedComponent := component + strings.ReplaceAll(strippedInput, suffix + res, "")
-		fmt.Println(reconstructedComponent)
+		suffix := ""
+		// Only attempt to extract suffix if there is actually one
+		if pos > len(component) {
+			// Extract component name suffix (e.g., 1), but remove component identifier
+			suffix = strippedInput[len(component):pos]
+			//fmt.Println("Suffix:", suffix)
+		}
+		//reconstructedComponent := component + strings.ReplaceAll(strippedInput, suffix + res, "")
+		reconstructedComponent, err := ExtractComponentContent(component, strings.ReplaceAll(strippedInput, suffix + res, ""), leftPar, rightPar)
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return "", "", "", err
+		}
+		fmt.Println("Reconstructed statement:", reconstructedComponent)
 		// Return suffix and annotations
-		return suffix, res, reconstructedComponent
+		return suffix, res, reconstructedComponent[0], tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 	} else {
+		fmt.Println("No annotations found ...")
 		// ... if no annotations are found ...
 		// Identifier start position for content
 		contentStartPos := strings.Index(strippedInput, leftPar)
-		// Extract suffix
-		suffix := strippedInput[:contentStartPos]
-		fmt.Println("Suffix:", suffix)
-		reconstructedComponent := component + strings.ReplaceAll(strippedInput, suffix, "")
-		fmt.Println(reconstructedComponent)
+		suffix := ""
+		// Component identifier is suppressed if suffix is found
+		compIdentifier := ""
+		// Only attempt to extract suffix if there is actually one
+		if contentStartPos > len(component) {
+			// Extract suffix (e.g., 1), but remove component identifier
+			suffix = strippedInput[len(component):contentStartPos]
+			//fmt.Println("Suffix:", suffix)
+		} else {
+			// Add component identifier for reconstructed content string if no suffix is found
+			compIdentifier = component
+		}
+		reconstructedComponent := compIdentifier + strings.ReplaceAll(strippedInput, suffix, "")
+		fmt.Println("Reconstructed statement:", reconstructedComponent)
 		// Return only suffix
-		return suffix, "", reconstructedComponent
+		return suffix, "", reconstructedComponent, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 	}
 }
 
@@ -812,17 +829,10 @@ func parseComponentWithBraces(component string, input string) (*tree.Node, tree.
 	return parseComponent(component, input, LEFT_BRACE, RIGHT_BRACE)
 }
 
-// Logical operators prepared for regular expression
-const logicalOperators = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
-// Special symbols
-const specialSymbols = "',;+\\-*/%&=$£€¤§\"#!`"
-// Word pattern for regular expressions (including parentheses, spaces, square brackets, +, -, /, *, %, &, =, currency symbols, etc.)
-const wordsWithParentheses = "([a-zA-Z" + specialSymbols + "(){}\\[\\]]+\\s*)+"
-// Pattern of combinations, e.g., ( ... [AND] ... )
-const combinationPattern = "\\(" + wordsWithParentheses + "(\\[" + logicalOperators + "\\]\\s" + wordsWithParentheses + ")+\\)"
 
-//TODO Check whether ExtractComponent() works
 func parseComponent(component string, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
+
+	fmt.Println("Parsing:", component)
 
 	// Extract component (one or multiple occurrences) from input string based on provided component identifier
 	componentStrings, err := ExtractComponentContent(component, text, leftPar, rightPar)
@@ -837,6 +847,8 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 
 	// [AND]-link different components (if multiple occur in input string)
 	if len(componentStrings) > 1 {
+		fmt.Println("Component combination for component", component)
+		fmt.Println("Component content", componentStrings)
 		r, err := regexp.Compile(combinationPattern)
 		if err != nil {
 			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
@@ -846,15 +858,32 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		componentString = LEFT_PARENTHESIS
 		for i, v := range componentStrings {
 			fmt.Println("Round: " + strconv.Itoa(i) + ": " + v)
+
+			// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
+			componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, v, leftPar, rightPar)
+			if err.ErrorCode != tree.PARSING_NO_ERROR {
+				return nil, err
+			}
+
+			fmt.Println("Suffix:", componentSuffix)
+			fmt.Println("Annotations:", componentAnnotation)
+			fmt.Println("Content:", componentContent)
+
 			// Extract and concatenate individual component values but cut leading component identifier
-			componentString += v[len(component):]
-			// Identify whether combination embedded in input string
-			result := r.FindAllStringSubmatch(componentString, -1)
+			componentWithoutIdentifier := componentContent[len(component):]
+			// Identify whether combination embedded in input string element
+			result := r.FindAllStringSubmatch(componentWithoutIdentifier, -1)
 			fmt.Println(result)
+			fmt.Println("Length:", len(result))
+			fmt.Println("Component string before: ", componentWithoutIdentifier)
 			if len(result) == 0 {
 				// If no combination embedded in combination component, strip leading and trailing parentheses prior to combining
-				componentString = componentString[1:len(componentString)-1]
+				componentWithoutIdentifier = componentWithoutIdentifier[1:len(componentWithoutIdentifier)-1]
 			} // else don't touch, i.e., leave parentheses in string
+			fmt.Println("Component string after: ", componentWithoutIdentifier)
+
+			// Append processed element (i.e., removed identifier, checked for nested combinations)
+			componentString += componentWithoutIdentifier
 
 			if i < len(componentStrings)-1 {
 				// Add SAND primitive (synthetic linkage) in between if multiple component elements
@@ -866,8 +895,21 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		}
 		//fmt.Println("Combination finished: " + componentString)
 	} else if len(componentStrings) == 1 {
+
+		// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
+		componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, componentStrings[0], leftPar, rightPar)
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return nil, err
+		}
+
+		fmt.Println("Suffix:", componentSuffix)
+		fmt.Println("Annotations:", componentAnnotation)
+		fmt.Println("Content:", componentContent)
+
 		// Single entry (cut prefix)
-		componentString = componentStrings[0][len(component):]
+		componentString = componentContent[len(component):]
+		fmt.Println("Single component for component ", component)
+		fmt.Println("Component content", componentString)
 		// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string if not combined
 		componentString = componentString[1:len(componentString)-1]
 	} else {

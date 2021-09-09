@@ -99,14 +99,16 @@ func main() {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		"Cac{A(Programme Manager) I(suspects) Bdir(violations) Cac{A(NOP Manager) I(orders) Bdir(review)}}"
 
-	text = //"A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
-		//"D(may) " +
-		//"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+	text = "A1[gsdkgjsl](National Organic Program's Program Manager), A(Banana) Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I1(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		//"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		//"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		//"Cac{A(Programme Manager) I(suspects) Bdir(violations)}"
 		"Cac,p[gklsjg]{A(Programme Manager) I(suspects) Bdir(violations) Cac{A(NOP Manager) I(orders) Bdir(review)}}"
 
+	text = "A1(content) A[annotation](content2) A2(more content) A#pd$[another| annotation](even $more| content)"
+	//text = "A1[dsgjlks](A&dsisgj=), A1(sdgjlks[operato]) "
 
 	/*
 	nestedStatements, err := parser.ExtractComponentContent("", text, parser.LEFT_BRACE, parser.RIGHT_BRACE)
@@ -116,15 +118,19 @@ func main() {
 
 	fmt.Println("Nested statements: " + fmt.Sprint(nestedStatements))*/
 
-	one, two, three :=  parser.ExtractSuffixAndAnnotations("Cac", text, "{", "}")
+	/*one, two, three :=  parser.extractSuffixAndAnnotations("Cac", text, "{", "}")
 
 	fmt.Println("First:", one)
 	fmt.Println("Second:", two)
 	fmt.Println("Third:", three)
 
-	//s, err := parser.ParseStatement(text)
+	 */
 
-	//fmt.Println(s.String())
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(s.String())
 }
 
 func main100() {
@@ -166,7 +172,7 @@ func main100() {
 		//startPos := strings.Index(processedString, component + leftPar)
 
 		// Search number of entries
-		r, err := regexp.Compile(componentSyntax + parser.COMPONENT_SUFFIX_SYNTAX + parser.COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+		r, err := regexp.Compile(componentSyntax + parser.COMPONENT_SUFFIX_SYNTAX + parser.COMPONENT_ANNOTATION_SYNTAX + "?\\" + leftPar)
 		// + escapeSymbolsForRegex(input)
 		if err != nil {
 			log.Fatal("Error", err.Error())

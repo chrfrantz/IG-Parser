@@ -57,7 +57,7 @@ Parses combinations in string. The syntactic form of input is:
 "( leftSide [OPERATOR] rightSide )", where [OPERATOR] is one
 of the logical operators [AND], [OR], [XOR] (including brackets),
 and left and right side are either text or combinations themselves.
-For [AND] operators, an arbitrary number of expressions can be combined;
+For all logical operators, an arbitrary number of expressions can be combined;
 in this case the function will decompose those into nested structures
 (e.g., expanding "( expr1 [AND] expr2 [AND] expr3 )" into
 "(( expr1 [AND] expr2 ) [AND] expr3)"), with precedence for left combinations.
