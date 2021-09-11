@@ -1007,7 +1007,7 @@ Tests extraction of annotation only in statements with special characters.
 func TestExtractAnnotationOnlyWithSpecialCharacters(t *testing.T) {
 
 	// Single component entry
-	text := "A[a bc=(left|right)](content)"
+	text := "A[abc=(left|right)](content)"
 
 	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1018,8 +1018,8 @@ func TestExtractAnnotationOnlyWithSpecialCharacters(t *testing.T) {
 		t.Fatal("Suffix should be empty, but is:", suffix)
 	}
 
-	if annotation != "[a bc=(left|right)]" {
-		t.Fatal("Annotation should be [a bc=(left|right)], but is:", annotation)
+	if annotation != "[abc=(left|right)]" {
+		t.Fatal("Annotation should be [abc=(left|right)], but is:", annotation)
 	}
 
 	if content != "A(content)" {
@@ -1044,7 +1044,7 @@ func TestExtractSuffixOnlyWithSpecialCharacters(t *testing.T) {
 	}
 
 	if suffix != "2#|" {
-		t.Fatal("Suffix should be empty, but is:", suffix)
+		t.Fatal("Suffix should be 2#|, but is:", suffix)
 	}
 
 	if annotation != "" {
@@ -1065,7 +1065,7 @@ Tests extraction of suffix and annotations in statements with special characters
 func TestExtractSuffixAndAnnotationWithSpecialCharacters(t *testing.T) {
 
 	// Single component entry
-	text := "A2#|[a bc=(le#ft|righ$t)](cont$ent)"
+	text := "A2#|[abc=(le#ft|righ$t)](cont$ent)"
 
 	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1076,7 +1076,7 @@ func TestExtractSuffixAndAnnotationWithSpecialCharacters(t *testing.T) {
 		t.Fatal("Suffix should be empty, but is:", suffix)
 	}
 
-	if annotation != "[a bc=(le#ft|righ$t)]" {
+	if annotation != "[abc=(le#ft|righ$t)]" {
 		t.Fatal("Annotation should be [abc=(left;right)], but is:", annotation)
 	}
 

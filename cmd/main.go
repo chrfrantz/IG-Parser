@@ -110,6 +110,14 @@ func main() {
 	text = "A1(content) A[annotation](content2) A2(more content) A#pd$[another| annotation](even $more| content)"
 	//text = "A1[dsgjlks](A&dsisgj=), A1(sdgjlks[operato]) "
 
+	//"A1[role=origin](actor)
+	text = "Cac1[role=recipient]{A2(actor2) I(helps) Bdir1(someone)}"
+	text = "Cac1{A2(actor2) I(helps) Bdir1(someone)}"
+	//text = "Cac((Cac1[role=recipient]{A2(actor2) I(helps) Bdir1(someone)} [AND] Cac2[gov=monitor]{A(actor3) I(aims) at Bdir(support)}))"
+
+	text = "Cac1[leftAnno]{A1[annotation=(left,right)](content) A2[annot](content2)}"
+
+	//text = "A5(content) I2(aim) Cex1[glskdgjlks](constraint)"
 	/*
 	nestedStatements, err := parser.ExtractComponentContent("", text, parser.LEFT_BRACE, parser.RIGHT_BRACE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

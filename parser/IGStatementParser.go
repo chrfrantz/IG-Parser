@@ -197,10 +197,62 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 Parses nested statements (but not combinations) and attaches those to the top-level statement
  */
 func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string) (tree.ParsingError) {
+
 	for _, v := range nestedStmts {
 
 		log.Println("Found nested statement")
 		// Extract nested statement content and parse
+
+		component := ""
+
+		// Identify embedded component identifier - parse properties before main components to avoid wrongful mapping
+		if strings.HasPrefix(v, tree.ATTRIBUTES_PROPERTY) {
+			log.Println("Identified nested attributes property")
+			component = tree.ATTRIBUTES_PROPERTY
+		} else if strings.HasPrefix(v, tree.DIRECT_OBJECT_PROPERTY) {
+			log.Println("Identified nested direct object property")
+			component = tree.DIRECT_OBJECT_PROPERTY
+		} else if strings.HasPrefix(v, tree.DIRECT_OBJECT) {
+			log.Println("Identified nested direct object")
+			component = tree.DIRECT_OBJECT
+		} else if strings.HasPrefix(v, tree.INDIRECT_OBJECT_PROPERTY) {
+			log.Println("Identified nested indirect object property")
+			component = tree.INDIRECT_OBJECT_PROPERTY
+		} else if strings.HasPrefix(v, tree.INDIRECT_OBJECT) {
+			log.Println("Identified nested indirect object")
+			component = tree.INDIRECT_OBJECT
+		} else if strings.HasPrefix(v, tree.ACTIVATION_CONDITION) {
+			log.Println("Identified nested activation condition")
+			component = tree.ACTIVATION_CONDITION
+		} else if strings.HasPrefix(v, tree.EXECUTION_CONSTRAINT) {
+			log.Println("Identified nested execution constraint")
+			component = tree.EXECUTION_CONSTRAINT
+		} else if strings.HasPrefix(v, tree.CONSTITUTED_ENTITY_PROPERTY) {
+			log.Println("Identified nested constituted entity property")
+			component = tree.CONSTITUTED_ENTITY_PROPERTY
+		} else if strings.HasPrefix(v, tree.CONSTITUTING_PROPERTIES_PROPERTY) {
+			log.Println("Identified nested constituting properties property")
+			component = tree.CONSTITUTING_PROPERTIES_PROPERTY
+		} else if strings.HasPrefix(v, tree.CONSTITUTING_PROPERTIES) {
+			log.Println("Identified nested constituting properties")
+			component = tree.CONSTITUTING_PROPERTIES
+		} else if strings.HasPrefix(v, tree.OR_ELSE) {
+			log.Println("Identified nested or else")
+			component = tree.OR_ELSE
+		}
+
+		// Extracting suffices and annotations
+		suffix, annotation, content, err := extractSuffixAndAnnotations(component, v, LEFT_BRACE, RIGHT_BRACE)
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			fmt.Print("Error during extraction of suffices and annotations: " + err.ErrorCode)
+			return err
+		}
+
+		fmt.Println("Nested Stmt Component Identifier:", component)
+		fmt.Println("Nested Stmt Suffix:", suffix)
+		fmt.Println("Nested Stmt Annotation:", annotation)
+		fmt.Println("Nested Stmt Content:", content)
+
 		stmt, errStmt := ParseStatement(v[strings.Index(v, LEFT_BRACE)+1:strings.LastIndex(v, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
 			fmt.Print("Error when parsing nested statements: " + errStmt.ErrorCode)
@@ -210,72 +262,53 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		// Wrap statement into node (since individual statement)
 		stmtNode := tree.Node{Entry: stmt}
 
+		// Identify component the coded information is to be attached to
 		// Checks are ordered with property variants (e.g., Bdir,p) before component variants (e.g., Bdir) to avoid wrong match
-
-		if strings.HasPrefix(v, tree.ATTRIBUTES_PROPERTY) {
-			log.Println("Attaching nested attributes property to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.AttributesPropertyComplex = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.DIRECT_OBJECT_PROPERTY) {
-			log.Println("Attaching nested direct object property to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.DirectObjectPropertyComplex = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.DIRECT_OBJECT) {
-			log.Println("Attaching nested direct object to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.DirectObjectComplex = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.INDIRECT_OBJECT_PROPERTY) {
-			log.Println("Attaching nested indirect object property to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.IndirectObjectPropertyComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.INDIRECT_OBJECT) {
-			log.Println("Attaching nested indirect object to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.IndirectObjectComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.ACTIVATION_CONDITION) {
-			log.Println("Attaching nested activation condition to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ActivationConditionComplex = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.EXECUTION_CONSTRAINT) {
-			log.Println("Attaching nested execution constraint to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ExecutionConstraintComplex = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.CONSTITUTED_ENTITY_PROPERTY) {
-			log.Println("Attaching nested constituted entity property to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutedEntityPropertyComplex = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.CONSTITUTING_PROPERTIES_PROPERTY) {
-			log.Println("Attaching nested constituting properties property to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutingPropertiesPropertyComplex = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.CONSTITUTING_PROPERTIES) {
-			log.Println("Attaching nested constituting properties to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutingPropertiesComplex = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, &stmtNode)
-			continue
-		}
-		if strings.HasPrefix(v, tree.OR_ELSE) {
-			log.Println("Attaching nested or else to higher-level statement")
-			// Assign nested statement to higher-level statement
-			stmtToAttachTo.OrElse = attachComplexComponent(stmtToAttachTo.OrElse, &stmtNode)
+		switch component {
+			case tree.ATTRIBUTES_PROPERTY:
+				log.Println("Attaching nested attributes property to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.AttributesPropertyComplex = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, &stmtNode)
+			case tree.DIRECT_OBJECT_PROPERTY:
+				log.Println("Attaching nested direct object property to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.DirectObjectPropertyComplex = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, &stmtNode)
+			case tree.DIRECT_OBJECT:
+				log.Println("Attaching nested direct object to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.DirectObjectComplex = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, &stmtNode)
+			case tree.INDIRECT_OBJECT_PROPERTY:
+				log.Println("Attaching nested indirect object property to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.IndirectObjectPropertyComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, &stmtNode)
+			case tree.INDIRECT_OBJECT:
+				log.Println("Attaching nested indirect object to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.IndirectObjectComplex = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, &stmtNode)
+			case tree.ACTIVATION_CONDITION:
+				log.Println("Attaching nested activation condition to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.ActivationConditionComplex = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, &stmtNode)
+			case tree.EXECUTION_CONSTRAINT:
+				log.Println("Attaching nested execution constraint to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.ExecutionConstraintComplex = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, &stmtNode)
+			case tree.CONSTITUTED_ENTITY_PROPERTY:
+				log.Println("Attaching nested constituted entity property to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.ConstitutedEntityPropertyComplex = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, &stmtNode)
+			case tree.CONSTITUTING_PROPERTIES_PROPERTY:
+				log.Println("Attaching nested constituting properties property to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.ConstitutingPropertiesPropertyComplex = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, &stmtNode)
+			case tree.CONSTITUTING_PROPERTIES:
+				log.Println("Attaching nested constituting properties to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.ConstitutingPropertiesComplex = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, &stmtNode)
+			case tree.OR_ELSE:
+				log.Println("Attaching nested or else to higher-level statement")
+				// Assign nested statement to higher-level statement
+				stmtToAttachTo.OrElse = attachComplexComponent(stmtToAttachTo.OrElse, &stmtNode)
 		}
 	}
 	return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
@@ -322,6 +355,18 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 
 		// Parse all entries in tree from string to statement (walks through entire tree linked to node)
 		err := combo.ParseAllEntries(func(oldValue string) (tree.Statement, tree.ParsingError) {
+
+			// Extracting suffices and annotations
+			suffix, annotation, content, err := extractSuffixAndAnnotations("", oldValue, LEFT_BRACE, RIGHT_BRACE)
+			if err.ErrorCode != tree.PARSING_NO_ERROR {
+				fmt.Print("Error during extraction of suffices and annotations: " + err.ErrorCode)
+				return tree.Statement{}, tree.ParsingError{}
+			}
+
+			fmt.Println("Nested Combo Stmt Suffix:", suffix)
+			fmt.Println("Nested Combo Stmt Annotation:", annotation)
+			fmt.Println("Nested Combo Stmt Content:", content)
+
 			stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1:strings.LastIndex(oldValue, RIGHT_BRACE)])
 			if errStmt.ErrorCode != tree.PARSING_NO_ERROR{
 				return stmt, errStmt
@@ -452,7 +497,7 @@ and element [2] containing potential statement combinations.
 func separateComponentsAndNestedStatements(statement string) ([][]string, tree.ParsingError) {
 
 	// Prepare return structure
-	ret := make([][]string,3)
+	ret := make([][]string, 3)
 
 	// Identify all nested statements
 	nestedStmts, err := identifyNestedStatements(statement)
@@ -696,13 +741,18 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 		}*/
 
 		//// NEW REGEX-BASED PARSING (TO CONSIDER ANNOTATIONS AND SUFFICES)
+		fmt.Println("String to be searched for component:", processedString)
 		// Return index of found element
 		result := r.FindAllStringIndex(processedString, -1)
+		resultContent := r.FindString(processedString)
 
-		//fmt.Println(result)
+		fmt.Println("Index:", result)
+		fmt.Println("Content:", resultContent)
+
 
 		if len(result) > 0 {
-			startPos = result[0][0]
+			// Start search after potential suffix and annotation elements
+			startPos = result[0][0] + len(resultContent) - len(leftPar)
 			fmt.Println("Start position: ", startPos)
 		} else {
 			// Returns component strings once opening parenthesis symbol is no longer found
@@ -724,16 +774,11 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 				parCount--
 				if parCount == 0 {
 					// Store candidate string before cutting off potential leading component identifier (if nested statement)
-					candidateString := processedString[startPos:startPos+i+1]
-					if leftPar == LEFT_BRACE {
-						// Remove anything before left brace (component identifier)
-						// TODO FIX to consider annotations and suffix if needed
-						cutIdx := strings.Index(candidateString, LEFT_BRACE)
-						candidateString = candidateString[cutIdx:]
-					}
+					candidateString := resultContent[:len(resultContent)-len(leftPar)] + processedString[startPos:startPos+i+1]
 					componentStrings = append(componentStrings, candidateString)
 					fmt.Println("Added string " + candidateString)
-					processedString = processedString[startPos+i+1:]
+					// String to be processed in next round is beyond identified component
+					processedString = processedString[startPos-len(resultContent)-len(leftPar)+len(candidateString):]
 					stop = true
 				}
 			}
@@ -753,10 +798,10 @@ TODO: Make this more efficient
  */
 func extractSuffixAndAnnotations(component string, input string, leftPar string, rightPar string) (string, string, string, tree.ParsingError) {
 
-	// Remove component name from input (search for component name and left parenthesis, and substitute by left parenthesis only
-	// (to avoid replacing component identifiers in content)
-	strippedInput := strings.ReplaceAll(input, component + leftPar, leftPar)
-
+	fmt.Println("Component:", component)
+	fmt.Println("Input:", input)
+	strippedInput := input // leave input unchanged
+	
 	// Component annotation pattern
 	r, err := regexp.Compile(COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 	// + escapeSymbolsForRegex(input)
@@ -781,9 +826,7 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 		if pos > len(component) {
 			// Extract component name suffix (e.g., 1), but remove component identifier
 			suffix = strippedInput[len(component):pos]
-			//fmt.Println("Suffix:", suffix)
 		}
-		//reconstructedComponent := component + strings.ReplaceAll(strippedInput, suffix + res, "")
 		reconstructedComponent, err := ExtractComponentContent(component, strings.ReplaceAll(strippedInput, suffix + res, ""), leftPar, rightPar)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return "", "", "", err
@@ -798,17 +841,9 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 		contentStartPos := strings.Index(strippedInput, leftPar)
 		suffix := ""
 		// Component identifier is suppressed if suffix is found
-		compIdentifier := ""
-		// Only attempt to extract suffix if there is actually one
-		if contentStartPos > len(component) {
-			// Extract suffix (e.g., 1), but remove component identifier
-			suffix = strippedInput[len(component):contentStartPos]
-			//fmt.Println("Suffix:", suffix)
-		} else {
-			// Add component identifier for reconstructed content string if no suffix is found
-			compIdentifier = component
-		}
-		reconstructedComponent := compIdentifier + strings.ReplaceAll(strippedInput, suffix, "")
+		// Extract suffix (e.g., 1), but remove component identifier
+		suffix = strippedInput[len(component):contentStartPos]
+		reconstructedComponent := strings.Replace(strippedInput, suffix, "", 1)
 		fmt.Println("Reconstructed statement:", reconstructedComponent)
 		// Return only suffix
 		return suffix, "", reconstructedComponent, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
@@ -840,7 +875,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		return nil, err
 	}
 
-	fmt.Println("Components: " + fmt.Sprint(componentStrings))
+	fmt.Println("Components (Count:", len(componentStrings), "):", fmt.Sprint(componentStrings))
 
 	// Initialize output string for parsing
 	componentString := ""
@@ -875,12 +910,12 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			result := r.FindAllStringSubmatch(componentWithoutIdentifier, -1)
 			fmt.Println(result)
 			fmt.Println("Length:", len(result))
-			fmt.Println("Component string before: ", componentWithoutIdentifier)
+			fmt.Println("Component string before:", componentWithoutIdentifier)
 			if len(result) == 0 {
 				// If no combination embedded in combination component, strip leading and trailing parentheses prior to combining
 				componentWithoutIdentifier = componentWithoutIdentifier[1:len(componentWithoutIdentifier)-1]
 			} // else don't touch, i.e., leave parentheses in string
-			fmt.Println("Component string after: ", componentWithoutIdentifier)
+			fmt.Println("Component string after:", componentWithoutIdentifier)
 
 			// Append processed element (i.e., removed identifier, checked for nested combinations)
 			componentString += componentWithoutIdentifier
@@ -896,6 +931,8 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		//fmt.Println("Combination finished: " + componentString)
 	} else if len(componentStrings) == 1 {
 
+		fmt.Println("Component strings:", componentStrings)
+
 		// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
 		componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, componentStrings[0], leftPar, rightPar)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -908,7 +945,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 
 		// Single entry (cut prefix)
 		componentString = componentContent[len(component):]
-		fmt.Println("Single component for component ", component)
+		fmt.Println("Single component for component", component)
 		fmt.Println("Component content", componentString)
 		// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string if not combined
 		componentString = componentString[1:len(componentString)-1]
@@ -928,7 +965,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
-		log.Println("Error during component parsing: ", err.Error())
+		log.Println("Error during component parsing:", err.Error())
 	}
 
 	// Override missing combination error, since it is not relevant at this level

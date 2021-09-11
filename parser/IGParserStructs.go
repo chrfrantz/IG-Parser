@@ -21,15 +21,17 @@ const wordsWithParentheses = "([a-zA-Z" + specialSymbols + "(){}\\[\\]]+\\s*)+"
 // Pattern of combinations, e.g., ( ... [AND] ... )
 const combinationPattern = "\\(" + wordsWithParentheses + "(\\[" + logicalOperators + "\\]\\s" + wordsWithParentheses + ")+\\)"
 
-// Regex for component annotations (e.g., semantic labels, such as "[monitor]" in "A[monitor](Program Manager)")
-const COMPONENT_ANNOTATION_SYNTAX = "(\\[([0-9a-zA-Z" + specialSymbols + "\\s{}\\[\\]\\(\\)])+\\])"
+// Regex for component annotations (e.g., semantic labels, such as "[monitor]" in "A[monitor](Program Manager)") - no whitespace is allowed in annotations
+const COMPONENT_ANNOTATION_SYNTAX = "(\\[([0-9a-zA-Z" + specialSymbols + "{}\\[\\]\\(\\)])+\\])"
 // Regex for component suffix (e.g., "1" in "A1")
 const COMPONENT_SUFFIX_SYNTAX = "[a-zA-Z,0-9" + specialSymbols + "]*"
 // Regex for complete component
 //const COMPONENT_SYNTAX_COMPLETE = "([a-zA-Z,]+)+" + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX
 
 // Nested component prefix (word without spaces and parentheses, but [] brackets) TODO: Check for integration with other Suffix and Annotation regex
-var NESTED_COMPONENT_SYNTAX = "([a-zA-Z{}\\[\\]]+)+"
+const NESTED_COMPONENT_SYNTAX = COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?"
+
+//"([a-zA-Z{}\\[\\]]+)+"
 
 /*
 Escapes all special symbols to prepare those for input into regex expression
