@@ -120,6 +120,36 @@ func main() {
 	//text = "A1[annotation1](content1) A2[annotation2](content2) A3(content3)"
 
 	//text = "A5(content) I2(aim) Cex1[glskdgjlks](constraint)"
+
+
+	//A1((attr1 [AND] attr2))
+	text = "A1[glksdjgl](attr) A,p(general prop), A,p1(specific prop) I(action) Bdir,p(klgjdsklg) Bdir(dsgskjg) Bdir,p1(dslkgjslkg) Bdir1(dsgjls)"
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		fmt.Errorf("%v", "Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	linkMap := parser.ExtractLinkBetweenProperties(s)
+
+	fmt.Println("Identified links:", linkMap)
+
+/*
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays()
+
+	fmt.Println("Component References:", componentRefs)
+
+	res, err := exporter.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		fmt.Errorf("%v", "Unexpected error during array generation.")
+	}
+
+	fmt.Println("Results:", res)
+*/
+
 	/*
 	nestedStatements, err := parser.ExtractComponentContent("", text, parser.LEFT_BRACE, parser.RIGHT_BRACE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -136,11 +166,11 @@ func main() {
 
 	 */
 
-	s, err := parser.ParseStatement(text)
+	/*s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(s.String())
+	fmt.Println(s.String())*/
 }
 
 func main100() {
