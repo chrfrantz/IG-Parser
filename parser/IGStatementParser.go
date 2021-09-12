@@ -711,6 +711,7 @@ func validateInput(text string, leftPar string, rightPar string) (tree.ParsingEr
 Extracts a component content from string based on component signature (e.g., A, I, etc.)
 and balanced parentheses/braces. Tolerates presence of suffices and annotations
 If no component content is found, an empty string is returned.
+Tests against mistaken parsing of property variant of a component (e.g., A,p() instead of A()).
 */
 func ExtractComponentContent(component string, input string, leftPar string, rightPar string) ([]string, tree.ParsingError) {
 
@@ -753,7 +754,7 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 		//// NEW REGEX-BASED PARSING (TO CONSIDER ANNOTATIONS AND SUFFICES)
 		fmt.Println("String to be searched for component:", processedString)
 		// Return index of found element
-		result := r.FindAllStringIndex(processedString, -1)
+		result := r.FindAllStringIndex(processedString, 1)
 		resultContent := r.FindString(processedString)
 
 		//fmt.Println("Index:", result)
@@ -784,10 +785,26 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 				if parCount == 0 {
 					// Store candidate string before cutting off potential leading component identifier (if nested statement)
 					candidateString := resultContent[:len(resultContent)-len(leftPar)] + processedString[startPos:startPos+i+1]
-					componentStrings = append(componentStrings, candidateString)
-					fmt.Println("Added string " + candidateString)
+					if !strings.HasSuffix(component, tree.PROPERTY_SYNTAX_SUFFIX) && strings.HasPrefix(candidateString, component + tree.PROPERTY_SYNTAX_SUFFIX) {
+						// Don't consider if properties component is found (e.g., A,p(...)), but main component is sought (e.g., A(...)).
+						fmt.Println("Ignoring found element due to ambiguous matching with property of component (Match: " +
+							component + tree.PROPERTY_SYNTAX_SUFFIX + ", Component: " + component + ")")
+					} else {
+						componentStrings = append(componentStrings, candidateString)
+						fmt.Println("Added string " + candidateString)
+					}
 					// String to be processed in next round is beyond identified component
-					processedString = processedString[startPos-len(resultContent)-len(leftPar)+len(candidateString):]
+					// This includes starting position of parentheses, but moves back to include component identifier,
+					// suffix, annotation, parenthesis, extracted content string, closing parenthesis
+					//processedString = processedString[startPos-len(resultContent)-len(leftPar)+len(candidateString):]
+					//processedString = processedString[startPos-len(component)-len(resultContent)-len(leftPar)+len(candidateString)+len(rightPar):]
+					idx := strings.Index(processedString, candidateString)
+					if idx == -1 {
+						return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR,
+							ErrorMessage: "Extracted expression cannot be found in processed string (Search string: " + candidateString + ")"}
+					}
+					// Cut found string and leave remainder for further processing
+					processedString = processedString[idx + len(candidateString):]
 					stop = true
 				}
 			}
@@ -802,7 +819,9 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 Extracts suffix (e.g., ,p1) and annotations (e.g., [ctx=time]), and content from IG-Script-coded input.
 It takes component identifier and raw coded information as input, as well as left and right parenthesis symbols (e.g., (,) or {,}).
 Returns suffix as first element, annotations string as second, and component content (including identifier) as third element.
-IMPORTANT: This function will only extract the suffix and annotation for the first element of a given component type found in the input string.
+IMPORTANT:
+- This function will only extract the suffix and annotation for the first element of a given component type found in the input string.
+- This function will not prevent wrongful extraction of property components instead of first-order components. This is handled in #ExtractComponentContent.
 TODO: Make this more efficient
  */
 func extractSuffixAndAnnotations(component string, input string, leftPar string, rightPar string) (string, string, string, tree.ParsingError) {
@@ -835,6 +854,7 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 		if pos > len(component) {
 			// Extract component name suffix (e.g., 1), but remove component identifier
 			suffix = strippedInput[len(component):pos]
+			// Does not guard against mistaken choice of property variants of components (e.g., A,p instead of A) - is handled in #ExtractComponentContent.
 		}
 		reconstructedComponent, err := ExtractComponentContent(component, strings.ReplaceAll(strippedInput, suffix + res, ""), leftPar, rightPar)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -852,6 +872,7 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 		// Component identifier is suppressed if suffix is found
 		// Extract suffix (e.g., 1), but remove component identifier
 		suffix = strippedInput[len(component):contentStartPos]
+		// Does not guard against mistaken choice of property variants of components (e.g., A,p instead of A) - is handled in #ExtractComponentContent.
 		reconstructedComponent := strings.Replace(strippedInput, suffix, "", 1)
 		fmt.Println("Reconstructed statement:", reconstructedComponent)
 		// Return only suffix

@@ -912,6 +912,43 @@ func TestSpecialCharacters(t *testing.T) {
 
 }
 
+/*
+Tests whether parser does not mistakenly pick up component properties (e.g., A,p) as components (e.g., A).
+ */
+func TestUnambiguousExtractionOfComponentAndRelatedProperties(t *testing.T) {
+
+	input := "A,p(property) A,p1(another prop) A(value)"
+
+	s, err := ParseStatement(input)
+
+	fmt.Println(s.String())
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during parsing: ", err.Error())
+	}
+
+	if s.Attributes.CountLeaves() != 1 {
+		t.Fatal("Attributes count should be 1, but is:", s.Attributes.CountLeaves())
+	}
+
+	if s.Attributes.Entry.(string) != "value" {
+		t.Fatal("Attributes should be 'value', but is:", s.Attributes.Entry.(string))
+	}
+
+	if s.AttributesPropertySimple.CountLeaves() != 2 {
+		t.Fatal("Attributes Properties count should be 2, but is:", s.AttributesPropertySimple.CountLeaves())
+	}
+
+	if s.AttributesPropertySimple.Left.Entry.(string) != "property" {
+		t.Fatal("Left Attributes Property should be 'property', but is:", s.AttributesPropertySimple.Left.Entry.(string))
+	}
+
+	if s.AttributesPropertySimple.Right.Entry.(string) != "another prop" {
+		t.Fatal("Right Attributes Property should be 'another prop', but is:", s.AttributesPropertySimple.Right.Entry.(string))
+	}
+
+}
+
 
 
 /*
