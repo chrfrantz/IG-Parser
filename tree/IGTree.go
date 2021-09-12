@@ -261,6 +261,10 @@ type Node struct {
 	LogicalOperator string
 	// Implicitly holds element order by keeping non-shared elements and references to nodes in order of addition
 	ElementOrder []interface{}
+	// Suffix for distinctive references to related component instances (e.g., A,p1 pointing to A1)
+	Suffix interface{}
+	// Annotations for element - to be stored without surrounding brackets
+	Annotations interface{}
 }
 
 /*
@@ -487,13 +491,30 @@ func (n *Node) String() string {
 		retVal := "Leaf entry: "
 		// TODO: Check for correct printing
 		if n.Entry == nil {
-			return retVal + "nil (detected in String())"
+			retVal = retVal + "nil (detected in String())"
 		} else if n.HasPrimitiveEntry() {
-			return retVal + n.Entry.(string)
+			retVal = retVal + n.Entry.(string)
+			// Assumes that suffix and annotations are in string form
+			if n.Suffix != nil {
+				retVal = retVal + " (Suffix: " + n.Suffix.(string) + ")"
+			}
+			if n.Annotations != nil {
+				retVal = retVal + " (Annotation: " + n.Annotations.(string) + ")"
+			}
 		} else {
+			// if not a string
 			val := n.Entry.(Statement)
-			return retVal + val.String()
+			retVal = retVal + val.String()
+			// Assumes that suffix and annotations are in string format for nodes that have nested statements
+			// TODO: see whether that needs to be adjusted
+			if n.Suffix != nil {
+				retVal = retVal + " (Suffix: " + n.Suffix.(string) + ")"
+			}
+			if n.Annotations != nil {
+				retVal = retVal + " (Annotation: " + n.Annotations.(string) + ")"
+			}
 		}
+		return retVal
 		//return /*n.ComponentType + */"Leaf entry: " + n.Entry //+ "\n"
 	} else {
 		out := ""
@@ -511,6 +532,15 @@ func (n *Node) String() string {
 				out += prefix + "Non-Shared: " + fmt.Sprintf("%v", n.ElementOrder[i]) + "\n"
 				i++
 			}
+		}
+
+		// Assumes that suffix and annotations are in string format for nodes that have nested statements
+		// TODO: see whether that needs to be adjusted
+		if n.Suffix != nil {
+			out = " (Suffix: " + n.Suffix.(string) + ")"
+		}
+		if n.Annotations != nil {
+			out = " (Annotation: " + n.Annotations.(string) + ")"
 		}
 
 		if n.GetSharedLeft() != nil && len(n.GetSharedLeft()) != 0 {

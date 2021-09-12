@@ -262,6 +262,16 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		// Wrap statement into node (since individual statement)
 		stmtNode := tree.Node{Entry: stmt}
 
+		// Attach suffix if it exists
+		if suffix != "" {
+			stmtNode.Suffix = suffix
+		}
+
+		// Attach annotation if it exists
+		if annotation != "" {
+			stmtNode.Annotations = annotation
+		}
+
 		// Identify component the coded information is to be attached to
 		// Checks are ordered with property variants (e.g., Bdir,p) before component variants (e.g., Bdir) to avoid wrong match
 		switch component {
@@ -699,7 +709,7 @@ func validateInput(text string, leftPar string, rightPar string) (tree.ParsingEr
 
 /*
 Extracts a component content from string based on component signature (e.g., A, I, etc.)
-and balanced parentheses/braces.
+and balanced parentheses/braces. Tolerates presence of suffices and annotations
 If no component content is found, an empty string is returned.
 */
 func ExtractComponentContent(component string, input string, leftPar string, rightPar string) ([]string, tree.ParsingError) {
@@ -746,9 +756,8 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 		result := r.FindAllStringIndex(processedString, -1)
 		resultContent := r.FindString(processedString)
 
-		fmt.Println("Index:", result)
-		fmt.Println("Content:", resultContent)
-
+		//fmt.Println("Index:", result)
+		//fmt.Println("Content:", resultContent)
 
 		if len(result) > 0 {
 			// Start search after potential suffix and annotation elements
@@ -864,7 +873,12 @@ func parseComponentWithBraces(component string, input string) (*tree.Node, tree.
 	return parseComponent(component, input, LEFT_BRACE, RIGHT_BRACE)
 }
 
-
+/*
+Generic entry point to parse individual components of a given statement.
+Input is component symbol of interest, full statements, as well as delimiting parentheses signaling parsing for atomic
+or nested components.
+Returns the parsed node.
+ */
 func parseComponent(component string, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
 
 	fmt.Println("Parsing:", component)
@@ -880,7 +894,11 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	// Initialize output string for parsing
 	componentString := ""
 
-	// [AND]-link different components (if multiple occur in input string)
+	// Collected suffices and annotations for all identified elements
+	suffices := []string{}
+	annotations := []string{}
+
+	// [sAND]-link different components (if multiple occur in input string)
 	if len(componentStrings) > 1 {
 		fmt.Println("Component combination for component", component)
 		fmt.Println("Component content", componentStrings)
@@ -901,7 +919,11 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			}
 
 			fmt.Println("Suffix:", componentSuffix)
+			// Store suffices
+			suffices = append(suffices, componentSuffix)
 			fmt.Println("Annotations:", componentAnnotation)
+			// Store annotations
+			annotations = append(annotations, componentAnnotation)
 			fmt.Println("Content:", componentContent)
 
 			// Extract and concatenate individual component values but cut leading component identifier
@@ -940,7 +962,11 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		}
 
 		fmt.Println("Suffix:", componentSuffix)
+		// Store suffices
+		suffices = append(suffices, componentSuffix)
 		fmt.Println("Annotations:", componentAnnotation)
+		// Store annotations
+		annotations = append(annotations, componentAnnotation)
 		fmt.Println("Content:", componentContent)
 
 		// Single entry (cut prefix)
@@ -962,6 +988,23 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	fmt.Println("Preprocessed string: " + componentString)
 
 	node, modifiedInput, err := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
+
+	// Attach suffix and annotations by iterating over generated nodes
+	nodes := node.GetLeafNodes()
+
+	//fmt.Println("Leaves before suffix and annotation addition:", nodes)
+	fmt.Println("Attaching suffices", suffices, "and annotations", annotations, "to parsed nodes.")
+	// Suffices and annotations must have the same number of entries as nodes
+	if len(suffices) > 0 {
+		for i, v := range nodes {
+			if suffices[i] != "" {
+				v[0].Suffix = suffices[i]
+			}
+			if annotations[i] != "" {
+				v[0].Annotations = annotations[i]
+			}
+		}
+	}
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage

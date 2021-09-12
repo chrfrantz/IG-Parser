@@ -115,7 +115,9 @@ func main() {
 	text = "Cac1{A2(actor2) I(helps) Bdir1(someone)}"
 	//text = "Cac((Cac1[role=recipient]{A2(actor2) I(helps) Bdir1(someone)} [AND] Cac2[gov=monitor]{A(actor3) I(aims) at Bdir(support)}))"
 
-	text = "Cac1[leftAnno]{A1[annotation=(left,right)](content) A2[annot](content2)}"
+	text = "Cac1[leftAnno]{A1[annotation=(left,right)](content) A2[annot](content2)} Cac2[rightAnno]{A5(actor)}"
+
+	//text = "A1[annotation1](content1) A2[annotation2](content2) A3(content3)"
 
 	//text = "A5(content) I2(aim) Cex1[glskdgjlks](constraint)"
 	/*

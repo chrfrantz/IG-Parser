@@ -1087,3 +1087,122 @@ func TestExtractSuffixAndAnnotationWithSpecialCharacters(t *testing.T) {
 	fmt.Println("Suffix:", suffix, "; Annotation:", annotation, "; Content:", content)
 
 }
+
+/*
+Tests whether complete statements are parsed and suffices and annotations stored accordingly in the underlying node structure.
+ */
+func TestNodeParsingOfSuffixAndAnnotationsAtomicStatement(t *testing.T) {
+
+	text := "A1[annotation1](content1) A2[annotation2](content2) A3(content3) I4[annotation=(left,right)](aim1)"
+
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	// Check Attributes
+
+	if stmt.Attributes.GetLeafNodes()[0][0].Suffix != "1" {
+		t.Fatal("Suffix should be 1, but is:", stmt.Attributes.GetLeafNodes()[0][0].Suffix)
+	}
+
+	if stmt.Attributes.GetLeafNodes()[1][0].Suffix != "2" {
+		t.Fatal("Suffix should be 2, but is:", stmt.Attributes.GetLeafNodes()[1][0].Suffix)
+	}
+
+	if stmt.Attributes.GetLeafNodes()[2][0].Suffix != "3" {
+		t.Fatal("Suffix should be 3, but is:", stmt.Attributes.GetLeafNodes()[2][0].Suffix)
+	}
+
+	if stmt.Attributes.GetLeafNodes()[0][0].Annotations != "[annotation1]" {
+		t.Fatal("Suffix should be [annotation1], but is:", stmt.Attributes.GetLeafNodes()[0][0].Annotations)
+	}
+
+	if stmt.Attributes.GetLeafNodes()[1][0].Annotations != "[annotation2]" {
+		t.Fatal("Suffix should be [annotation2], but is:", stmt.Attributes.GetLeafNodes()[1][0].Annotations)
+	}
+
+	if stmt.Attributes.GetLeafNodes()[2][0].Annotations != nil {
+		t.Fatal("Suffix should be nil, but is:", stmt.Attributes.GetLeafNodes()[2][0].Annotations)
+	}
+
+	// Check Aim
+
+	if stmt.Aim.GetLeafNodes()[0][0].Suffix != "4" {
+		t.Fatal("Suffix should be 4, but is:", stmt.Aim.GetLeafNodes()[0][0].Suffix)
+	}
+
+	if stmt.Aim.GetLeafNodes()[0][0].Annotations != "[annotation=(left,right)]" {
+		t.Fatal("Suffix should be [annotation=(left,right)], but is:", stmt.Aim.GetLeafNodes()[0][0].Annotations)
+	}
+
+}
+
+/*
+Tests whether complete statements are parsed and suffices and annotations stored accordingly in the underlying node structure.
+This test specifically looks at nested statements
+*/
+func TestNodeParsingOfSuffixAndAnnotationsNestedStatement(t *testing.T) {
+
+	text := "Cac1[leftAnno]{A1[annotation=(left,right)](content) A2[annot](content2) I[regfunc=initiate](action)} Cac2[rightAnno]{A5[|exampleAnnotation](actor)}"
+
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	// Left activation condition
+	if stmt.ActivationConditionComplex.Left.Suffix.(string) != "1" {
+		t.Fatal("Suffix should be 1, but is:", stmt.ActivationConditionComplex.Left.Suffix)
+	}
+
+	if stmt.ActivationConditionComplex.Left.Annotations.(string) != "[leftAnno]" {
+		t.Fatal("Annotation should be [leftAnno], but is:", stmt.ActivationConditionComplex.Left.Annotations)
+	}
+
+	// Right activation condition
+	if stmt.ActivationConditionComplex.Right.Suffix.(string) != "2" {
+		t.Fatal("Suffix should be 2, but is:", stmt.ActivationConditionComplex.Right.Suffix)
+	}
+
+	if stmt.ActivationConditionComplex.Right.Annotations.(string) != "[rightAnno]" {
+		t.Fatal("Annotation should be [rightAnno], but is:", stmt.ActivationConditionComplex.Right.Annotations)
+	}
+
+	// First attribute in left activation condition
+	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Left.Suffix.(string) != "1" {
+		t.Fatal("Suffix should be 1, but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Left.Suffix.(string))
+	}
+
+	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Left.Annotations.(string) != "[annotation=(left,right)]" {
+		t.Fatal("Annotation should be [annotation=(left,right)], but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Left.Annotations.(string))
+	}
+
+	// Second attribute in left activation condition
+	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Right.Suffix.(string) != "2" {
+		t.Fatal("Suffix should be 2, but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Right.Suffix.(string))
+	}
+
+	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Right.Annotations.(string) != "[annot]" {
+		t.Fatal("Annotation should be [annot], but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Right.Annotations.(string))
+	}
+
+	// Aim
+	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Aim.Suffix != nil {
+		t.Fatal("Suffix should be nil, but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Aim.Suffix)
+	}
+
+	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Aim.Annotations.(string) != "[regfunc=initiate]" {
+		t.Fatal("Annotation should be [regfunc=initiate], but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Aim.Annotations)
+	}
+
+	// Attributes in right activation condition
+	if stmt.ActivationConditionComplex.Right.Entry.(tree.Statement).Attributes.Suffix.(string) != "5" {
+		t.Fatal("Suffix should be 5, but is:", stmt.ActivationConditionComplex.Right.Entry.(tree.Statement).Attributes.Suffix.(string))
+	}
+
+	if stmt.ActivationConditionComplex.Right.Entry.(tree.Statement).Attributes.Annotations.(string) != "[|exampleAnnotation]" {
+		t.Fatal("Annotation should be [|exampleAnnotation], but is:", stmt.ActivationConditionComplex.Right.Entry.(tree.Statement).Attributes.Annotations.(string))
+	}
+
+}
