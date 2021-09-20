@@ -16,7 +16,7 @@ Parses statement tree from input string.
 func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 
 	// Remove line breaks
-	text = cleanInput(text)
+	text = CleanInput(text)
 
 	s := tree.Statement{}
 
@@ -32,7 +32,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	}
 
 	// Now retrieve component-only and nested statements
-	compAndNestedStmts, err := separateComponentsAndNestedStatements(text)
+	compAndNestedStmts, err := SeparateComponentsAndNestedStatements(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return tree.Statement{}, err
 	}
@@ -42,10 +42,12 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	// Extract potential nested statements
 	nestedStmts := compAndNestedStmts[1]
 	if len(nestedStmts) == 0 {
+		fmt.Println("No nested statements found.")
 		log.Println("No nested statements found.")
 	}
 	nestedCombos := compAndNestedStmts[2]
 	if len(nestedCombos) == 0 {
+		fmt.Println("No nested statement combination candidates found.")
 		log.Println("No nested statement combination candidates found.")
 	}
 
@@ -504,7 +506,7 @@ Returns multi-dim array, with element [0][0] containing component-only statement
 and element [1] containing nested statements (potentially multiple),
 and element [2] containing potential statement combinations.
  */
-func separateComponentsAndNestedStatements(statement string) ([][]string, tree.ParsingError) {
+func SeparateComponentsAndNestedStatements(statement string) ([][]string, tree.ParsingError) {
 
 	// Prepare return structure
 	ret := make([][]string, 3)
@@ -523,33 +525,35 @@ func separateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 
 	if len(nestedStmts) > 0 {
 
+		fmt.Println("TEMP:", nestedStmts)
+
 		// Iterate through identified nested statements (if any) and remove those from statement
 		for _, v := range nestedStmts {
-			// Prepare pattern to extract nested statements including prefix from overall statement
-			// by combining generic prefix with preprocessed specific input
-			r, err := regexp.Compile(NESTED_COMPONENT_SYNTAX + escapeSymbolsForRegex(v))
-			if err != nil {
+			// Extract statements of structure { LEFT [AND] RIGHT }
+			r2, err2 := regexp.Compile(NESTED_COMBINATIONS)
+			if err2 != nil {
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
 					ErrorMessage: "Error during pattern extraction in nested statement."}
 			}
-			// Extract nested statement including prefix embedded in overall statement
-			result := r.FindAllStringSubmatch(statement, -1)
-			if len(result) > 0 {
-				// Append extracted nested statements including component prefix
-				completeNestedStmts = append(completeNestedStmts, result[0][0])
-				fmt.Println("Added candidate for single nested statement:", result[0][0])
+			result2 := r2.FindAllString(v, -1)
+			if len(result2) > 0 {
+				// Identified combination of component-level nested statements
 
-				// Remove nested statement from overall statement
-				statement = strings.ReplaceAll(statement, result[0][0], "")
-			} else {
 				// Save for parsing as combination
 				nestedCombos = append(nestedCombos, v)
 				fmt.Println("Added candidate for statement combination:", v)
 
 				// Remove nested statement combination from overall statement
 				statement = strings.ReplaceAll(statement, v, "")
-				/*return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
-					ErrorMessage: "Unable to extract prefix of nested statement " + v}*/
+			} else {
+				// Identified single nested statement
+
+				// Append extracted nested statements including component prefix
+				completeNestedStmts = append(completeNestedStmts, v)
+				fmt.Println("Added candidate for single nested statement:", v)
+
+				// Remove nested statement from overall statement
+				statement = strings.ReplaceAll(statement, v, "")
 			}
 		}
 		// Assign nested statements if found
@@ -734,10 +738,13 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 	startPos := -1
 
 	// Search number of entries
-	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?\\" + leftPar)
+	//r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?\\" + leftPar)
 	// + escapeSymbolsForRegex(input)
+	//fmt.Println("Regex:", component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 	if err != nil {
-		log.Fatal("Error", err.Error())
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
+		//log.Fatal("Error", err.Error())
 	}
 
 	for { // infinite loop - needs to break out
@@ -839,12 +846,12 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 	// Search for annotation pattern on input (without leading component identifier)
 	result := r.FindAllStringSubmatch(strippedInput, 1)
 
-	fmt.Println("Number of annotations:", len(result))
+	// The result will find the leftPar as a minimum (e.g., "(" or "{"). The processing needs to account for this
 
-	if len(result) > 0 {
-		fmt.Println("Found annotation in component ...")
+	if len(result) > 0 && result[0][0] != leftPar {
 		// If annotations are found ...
 		res := result[0][0]
+		fmt.Println("Found annotation in component:", res)
 		// Extract semantic annotation string
 		res = res[:len(res)-1]
 		//fmt.Println("Annotations:", res)
@@ -923,7 +930,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	if len(componentStrings) > 1 {
 		fmt.Println("Component combination for component", component)
 		fmt.Println("Component content", componentStrings)
-		r, err := regexp.Compile(combinationPattern)
+		r, err := regexp.Compile(COMBINATION_PATTERN_PARENTHESES)
 		if err != nil {
 			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
 				ErrorMessage: "Error during pattern extraction in combination expression."}

@@ -91,7 +91,55 @@ func main0()  {
 
 }
 
+func main9999() {
+
+	leftPar := "("
+
+	r, err := regexp.Compile("A" + parser.COMPONENT_SUFFIX_SYNTAX +
+		parser.COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+	if err != nil {
+		log.Fatal("Error", err.Error())
+	}
+
+	text := "A1[annotation=(left,right)](con( )tent)"
+
+	fmt.Println("A" + parser.COMPONENT_SUFFIX_SYNTAX +
+		parser.COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+
+	fmt.Println(text)
+
+	res := r.FindAllString(text, -1)
+
+	fmt.Println(res)
+
+}
+
 func main() {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		// This is another nested component - should have implicit link to regular Bdir
+		"Bdir{A(farmers) that I((apply [OR] plan to apply)) for Bdir(organic farming status)}" +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		//"{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		"{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		// This is the tricky line, the multiple aims
+		//"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		// non-linked additional activation condition (should be linked by implicit AND)
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+
+	sep, _ := parser.SeparateComponentsAndNestedStatements(text)
+
+	fmt.Println(sep)
+
+
+}
+
+func main10000() {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -125,16 +173,303 @@ func main() {
 	//A1((attr1 [AND] attr2))
 	text = "A1[glksdjgl](attr) A,p(general prop), A,p1(specific prop) I(action) Bdir,p(klgjdsklg) Bdir(dsgskjg) Bdir,p1(dslkgjslkg) Bdir1(dsgjls)"
 
-	s,err := parser.ParseStatement(text)
+	text = "{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		// This is the tricky line, the multiple aims
+		"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		// non-linked additional activation condition (should be linked by implicit AND)
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	/*
+	text = "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// This is the tricky lines, specifically the second Cac{}
+		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
+	*/
+
+	text = "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		// This is another nested component - should have implicit link to regular Bdir
+		"Bdir{A(farmers) that I((apply [OR] plan to apply)) for Bdir(organic farming status)}" +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		// This is the tricky line, the multiple aims
+		"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		// non-linked additional activation condition (should be linked by implicit AND)
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	fmt.Println(text)
+
+	/*
+	text = "Bdir{A(farmers) that I((apply [OR] plan to apply)) for Bdir(organic farming status)}"
+	text = "{Cac{E(Program Manager) F(is) P(approved)} [XOR] " +
+		// This is the tricky line, the multiple aims
+		"Cac{A(NOP Official) I((recognizes [AND] accepts)) Bdir(Program Manager)}} " +
+		"A{Ce(sdkgljds) I(ldkgsl)} [AND] Bdir(dslkgjsd)"
+
+		// non-linked additional activation condition (should be linked by implicit AND)
+	//text = "Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	 */
+
+	// Remove line breaks
+	text = parser.CleanInput(text)
+
+	/*combinationPatternBraces = "\\" + LEFT_BRACE + wordsWithParentheses + "\\" + RIGHT_BRACE +
+		"\\s+" + "(\\[" + logicalOperators + "\\]\\s+" + wordsWithParentheses + ")+\\" + RIGHT_BRACE
+
+	*/
+
+	//t1 := "E(Program Manager)"
+
+	// WORDS
+
+	//const SPECIAL_SYMBOLS = "',;+\\-*/%&=$£€¤§\"#!`\\|"
+
+	WORDS_WITH_PARENTHESES := "([a-zA-Z(){}\\[\\]]+\\s*)+"
+	//WORDS_WITH_PARENTHESES := "([a-zA-Z\\[\\]]+\\s*)+"
+
+	NESTED_TERM1 := //parser.NESTED_COMPONENT_SYNTAX +
+	 "(\\{" + WORDS_WITH_PARENTHESES + "\\}|\\(" + WORDS_WITH_PARENTHESES + "\\))"
+
+	r, err := regexp.Compile(NESTED_TERM1)
+	if err != nil {
+		fmt.Println("Error: ", err.Error())
+	}
+
+	text = "(Aklsdjglksgv sklvjds) {[]jdskgl ds()}"
+
+	res := r.FindAllString(text, -1)
+
+	fmt.Println("Matching word (including parentheses/braces)")
+	fmt.Println(res)
+	fmt.Println("Count:", len(res))
+
+	// Special characters
+
+	const SPECIAL_SYMBOLS = "',;+\\-*/%&=$£€¤§\"#!`\\|"
+
+	WORDS_WITH_PARENTHESES = "([a-zA-Z" + SPECIAL_SYMBOLS + "()\\[\\]]+\\s*)+"
+	//WORDS_WITH_PARENTHESES := "([a-zA-Z\\[\\]]+\\s*)+"
+
+	NESTED_TERM2 := //parser.NESTED_COMPONENT_SYNTAX +
+		"(\\{" + WORDS_WITH_PARENTHESES + "\\}|\\(" + WORDS_WITH_PARENTHESES + "\\))"
+
+	r, err = regexp.Compile(NESTED_TERM2)
+	if err != nil {
+		fmt.Println("Error: ", err.Error())
+	}
+
+	text = "(Aklsdjgl#k{sgv sk}lvjds) {[]jdskgl ds()} "
+
+	res = r.FindAllString(text, -1)
+
+	fmt.Println("Matching word (including parentheses/braces and special characters)")
+	fmt.Println(res)
+	fmt.Println("Count:", len(res))
+
+
+	// Component structure
+
+	//const SPECIAL_SYMBOLS = "',;+\\-*/%&=$£€¤§\"#!`\\|"
+
+	WORDS_WITH_PARENTHESES = "([a-zA-Z0-9" + SPECIAL_SYMBOLS + "()\\[\\]]+\\s*)+"
+	//WORDS_WITH_PARENTHESES := "([a-zA-Z\\[\\]]+\\s*)+"
+
+	OPTIONAL_WORDS_WITH_PARENTHESES := "(" + WORDS_WITH_PARENTHESES + ")?"
+
+	COMPONENT_SUFFIX_SYNTAX := "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "]*"
+
+	COMPONENT_ANNOTATION_MAIN := "[a-zA-Z,0-9\\s" + SPECIAL_SYMBOLS + "]+"
+
+	COMPONENT_ANNOTATION_OPTIONAL := "(\\[" + COMPONENT_ANNOTATION_MAIN + "\\])*"
+
+	COMPONENT_ANNOTATION_SYNTAX := "(\\[(" + COMPONENT_ANNOTATION_MAIN + COMPONENT_ANNOTATION_OPTIONAL + ")+\\])?"
+	//COMPONENT_ANNOTATION_SYNTAX := "(\\[([0-9a-zA-Z" + SPECIAL_SYMBOLS + "{}\\[\\]\\(\\)])+\\])"
+
+	NESTED_COMPONENT_SYNTAX := "(A|D|I|Bdir|Bind|Cac|Cex|E|M|F|P)" + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX
+
+	NESTED_TERM := //parser.NESTED_COMPONENT_SYNTAX +
+		NESTED_COMPONENT_SYNTAX + "(\\{\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\}|" +
+			"\\(\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\))"
+
+	r, err = regexp.Compile(NESTED_TERM)
+	if err != nil {
+		fmt.Println("Error: ", err.Error())
+	}
+
+	text = "(Aklsdjgl#k{sgv sk}lvjds) {[]jdskgl ds()} Bdir,p1[ruler=governor](jglkdsjgsiovs) Cac[left=right[anotherLeft,anotherRight],right=[left,right], key=values]{A(actor) I(aim)}"
+
+	res = r.FindAllString(text, -1)
+
+	fmt.Println("Matching component structure (primitive and nested)")
+	fmt.Println(res)
+	fmt.Println("Count:", len(res))
+
+	// Combinations
+
+	//TODO Review for complex combinations and make reliable (multiple elements, variable presence parentheses/braces, variable use of annotations)
+	NESTED_COMBINATIONS := "\\" + parser.LEFT_BRACE + "\\s*(" + NESTED_TERM + "\\s+)+" + "\\" + parser.LEFT_BRACKET +
+		parser.LOGICAL_OPERATORS + "\\" + parser.RIGHT_BRACKET + "\\s+(" + NESTED_TERM + "\\s*)+" + "\\" + parser.RIGHT_BRACE
+
+	fmt.Println(NESTED_COMBINATIONS)
+
+	r, err = regexp.Compile(NESTED_COMBINATIONS)
+	if err != nil {
+		fmt.Println("Error: ", err.Error())
+	}
+
+	text = "(Aklsdjgl#k{sgv sk}lvjds) {[]jdskgl ds()} Bdir,p1[ruler=governor](jglkdsjgsiovs) Cac[left=right[anotherLeft,anotherRight],right=[left,right], key=values]{A(actor) I(aim)}" +
+		"{A(dlkgjsg) I[dgisg](kjsdglkds) [AND] Bdir(djglksjdgkd) Cex(sdlgjlskd)}"
+
+	res = r.FindAllString(text, -1)
+
+	fmt.Println("Matching combinations")
+	fmt.Println(res)
+	fmt.Println("Count:", len(res))
+
+	// Fixing combination refinements
+
+	//TODO Review for complex combinations and make reliable (multiple elements, variable presence parentheses/braces, variable use of annotations)
+	//NESTED_COMBINATIONS = "\\" + parser.LEFT_BRACE + "\\s*(" + NESTED_TERM + "\\s+)+" +
+	//	"(" + "\\" + parser.LEFT_BRACKET + parser.LOGICAL_OPERATORS + "\\" + parser.RIGHT_BRACKET +
+	//	"\\s+(" + NESTED_TERM + "\\s*)+" + ")+" + "\\" + parser.RIGHT_BRACE
+
+	NESTED_COMBINATION :=
+
+		// Start of alternatives
+		"(" +
+		// combination with parentheses
+		"\\" + parser.LEFT_PARENTHESIS +
+		OPTIONAL_WORDS_WITH_PARENTHESES +
+		"(" + NESTED_TERM + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+		//"\\s*(" + NESTED_TERM + "\\s*)+" +
+		"(" +
+		"\\" + parser.LEFT_BRACKET + parser.LOGICAL_OPERATORS + "\\" + parser.RIGHT_BRACKET +
+		OPTIONAL_WORDS_WITH_PARENTHESES +
+		"(" + NESTED_TERM + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+		//"\\s+(" + NESTED_TERM + "\\s*)+" +
+		")*" +
+		"\\" + parser.RIGHT_PARENTHESIS +
+		// OR
+		"|" +
+		// combinations without parentheses
+		OPTIONAL_WORDS_WITH_PARENTHESES + "(" + NESTED_TERM + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+		//"\\s*(" + NESTED_TERM + "\\s*)+" +
+		"(" +
+		"\\" + parser.LEFT_BRACKET + parser.LOGICAL_OPERATORS + "\\" + parser.RIGHT_BRACKET +
+		OPTIONAL_WORDS_WITH_PARENTHESES + "(" + NESTED_TERM + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+		//"\\s+(" + NESTED_TERM + "\\s*)+" +
+		")*" +
+		// END OF COMBINATION
+		")"
+
+	NESTED_COMBINATIONS = "\\" + parser.LEFT_BRACE +
+		"\\s*(" + NESTED_COMBINATION + "\\s+)+" +
+		"(" +
+		"\\" + parser.LEFT_BRACKET + parser.LOGICAL_OPERATORS + "\\" + parser.RIGHT_BRACKET +
+		"\\s+(" + NESTED_COMBINATION + "\\s*)+" +
+		")+" +
+		"\\" + parser.RIGHT_BRACE
+
+	fmt.Println(NESTED_COMBINATIONS)
+
+	r, err = regexp.Compile(NESTED_COMBINATIONS)
+	if err != nil {
+		fmt.Println("Error: ", err.Error())
+	}
+
+	text = "(Aklsdjgl#k{sgv sk}lvjds) {[]jdskgl ds()} Bdir,p1[ruler=governor](jglkdsjgsiovs) Cac[left=right[anotherLeft,anotherRight],right=[left,right], key=values]{A(actor) I(aim)}" +
+		"{A(dlkgjsg) I[dgisg](kjsdglkds) [AND] (Bdir{djglksjdgkd} Cex(A(sdlgjlskd)) [XOR] A(dsgjslkj) E(gklsjgls))}" +
+		"{Cac{ A(actor) I(fjhgjh) Bdir(rtyui)} [XOR] Cac{A(ertyui) I(dfghj)}}" +
+		"{Cac{ A(as(dslks)a) I(adgklsjlg)} [XOR] Cac(asas) [AND] Cac12[kgkg]{lkdjgdls} [OR] A(dslgkjds)}" +
+		"{Cac(andsdjsglk) [AND] A(sdjlgsl) Bdir(jslkgsjlkgds)}" +
+		"{Cac(andsdjsglk) [AND] ( A(sdjlgsl) [XOR] (A(sdoidjs) [OR] A(sdjglksj)))}" +
+		"((dglkdsjg [AND] jdlgksjlkgd))"
+
+
+	res = r.FindAllString(text, -1)
+
+	fmt.Println("Refined matching combinations")
+	fmt.Println(res)
+	fmt.Println("Count:", len(res))
+
+
+
+
+
+	os.Exit(0)
+
+	const LOGICAL_OPERATORS = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
+
+
+
+
+	regex := parser.LEFT_BRACE + NESTED_TERM + parser.RIGHT_BRACE +
+		"\\s+" + "\\[" + LOGICAL_OPERATORS + "\\]\\s+" //+ "\\" +
+		//parser.LEFT_BRACE + NESTED_TERM + "\\" + parser.RIGHT_BRACE
+
+
+
+	//const COMPONENT_ANNOTATION_SYNTAX = "(\\[([0-9a-zA-Z" + SPECIAL_SYMBOLS + "{}\\[\\]\\(\\)])+\\])"
+
+	//const NESTED_COMPONENT_SYNTAX = "(Bdir|Bind|Cac|Cex|E|F|P)" + parser.COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?"
+
+	//regex = NESTED_COMPONENT_SYNTAX + "\\" + parser.LEFT_BRACE + "(" + NESTED_TERM + ")+" + "\\" + parser.RIGHT_BRACE
+
+	//regex = "\\[" + parser.LOGICAL_OPERATORS + "\\]"
+
+	fmt.Println(regex)
+
+	//fmt.Println(NESTED_TERM)
+
+	r, err = regexp.Compile(regex)
+	if err != nil {
+		fmt.Println("Error: ", err.Error())
+	}
+
+	//text = "{Cac{E(Program Manager) F(is) P(approved)} [XOR] Cac{A(NOP Official) I(accepts) Bdir(Program Manager)}}"
+
+	//text = "A{gldksjgk} Bdir(dgkjslkg) Cex(sdglkdsjg)"
+
+	text = "{{A} [AND] {A}}"
+
+	//text = "(A) [AND] {A}"
+
+	res = r.FindAllString(text, -1)
+
+	fmt.Println(res)
+
+	fmt.Println(res[0][0])
+	//fmt.Println(res[0][0])
+
+	/*
+	res1, err := parser.SeparateComponentsAndNestedStatements(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		fmt.Println("Error: ", err.Error())
+	}
+
+	fmt.Println("Results")
+	fmt.Println(res1)
+	*/
+
+	// No shared elements
+	//exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
+	/*s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		fmt.Errorf("%v", "Error during parsing of statement", err.Error())
 	}
 
-	fmt.Println(s.String())
+	fmt.Println(s.String())*/
 
-	linkMap := parser.ExtractLinkBetweenProperties(s)
+	//linkMap := parser.ExtractLinkBetweenProperties(s)
 
-	fmt.Println("Identified links:", linkMap)
+	//fmt.Println("Identified links:", linkMap)
 
 /*
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
