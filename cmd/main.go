@@ -114,7 +114,7 @@ func main9999() {
 
 }
 
-func main() {
+func main00000() {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -769,7 +769,7 @@ func mainx() {
 	fmt.Println(output)
 }
 
-func main3() {
+func main() {
 	text := "(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -787,16 +787,75 @@ func main3() {
 
 	text = "I((drink [AND] drive [AND] drown [AND] pleasure [AND] hijack))"
 
+	text = "A,p(Certified) A,p1(non-suspended) A,p1(previously reviewed) A1(Operator) or A,p2(recognized) A2(Handler) D(must not) I((produce [AND] trade))"
+
+	//A,p2(non-suspended)
+	//A,p2(non-defunct)
+
 	s,_ := parser.ParseStatement(text)
 
 	fmt.Println(s.String())
 
-	//os.Exit(0)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	fmt.Println(s.Attributes.Left.PrivateNodeLinks)
+	fmt.Println(s.Attributes.Right.PrivateNodeLinks)
 
+	os.Exit(0)
+
+
+	//fmt.Println(s.Attributes.ComponentType)
+
+	// Find all leaves that have suffix
+/*	leafArrays, componentRefs := s.GenerateLeafArraysSuffixOnly()
+
+	//TODO: Check for component information carried over
+
+	//fmt.Println(leafArrays)
 	//fmt.Println(componentRefs)
 
-	//os.Exit(0)
+	// Identify links starting from top-level components
+	for _, v := range leafArrays {
+
+		// Initialize linked leaves structure
+		linkedLeaves := map[*tree.Node][]*tree.Node{}
+
+		fmt.Println("Source:", v[0])
+		fmt.Println("Source:", v[0].GetComponentName())
+
+		switch(v[0].GetComponentName()) {
+			case tree.ATTRIBUTES:
+				linkedLeaves = parser.FindNodesLinkedViaSuffix(v[0], s.AttributesPropertySimple)
+			case tree.DIRECT_OBJECT:
+				linkedLeaves = parser.FindNodesLinkedViaSuffix(v[0], s.DirectObjectPropertySimple)
+			case tree.INDIRECT_OBJECT:
+				linkedLeaves = parser.FindNodesLinkedViaSuffix(v[0], s.IndirectObjectPropertySimple)
+			case tree.CONSTITUTED_ENTITY:
+				linkedLeaves = parser.FindNodesLinkedViaSuffix(v[0], s.ConstitutedEntityPropertySimple)
+			case tree.CONSTITUTING_PROPERTIES:
+				linkedLeaves = parser.FindNodesLinkedViaSuffix(v[0], s.ConstitutingPropertiesPropertySimple)
+		default:
+			fmt.Println("Could not find match for component name.")
+		}
+		if len(linkedLeaves) > 0 {
+			fmt.Println("Found following links for", v[0].GetComponentName(), ":", linkedLeaves)
+		}
+
+	}
+
+	suffixLeafs, refs := tree.GetSingleComponentLeafArray(s.Attributes, tree.ATTRIBUTES, false, 1)
+
+	if len(suffixLeafs) > 0 {
+		fmt.Println(suffixLeafs)
+	}
+
+
+	fmt.Println(refs)
+
+	rs := parser.FindNodesLinkedViaSuffix(s.Attributes, s.AttributesPropertySimple)
+
+	fmt.Println(rs)
+
+	
+	/////////////////////////////////
 
 	res, _ := exporter.GenerateNodeArrayPermutations(leafArrays...)
 

@@ -140,6 +140,50 @@ an entry '"ATTRIBUTES": 2', etc.
 
  */
 func (s *Statement) GenerateLeafArrays() ([][]*Node, map[string]int) {
+	return s.generateLeafArrays(0)
+}
+
+/*
+Generates map of arrays containing pointers to leaf nodes in each component.
+Key is an incrementing index, and value is an array of the corresponding nodes.
+It further returns an array containing the component keys alongside the number of leaf nodes per component,
+in order to reconstruct the linkage between the index in the first return value and the components they relate to.
+
+Note: This variant only returns nodes that have a non-nil suffix.
+
+Example: The first return may include two ATTRIBUTES component trees separated by synthetic AND connections (sAND)
+based on different logical combination within the attributes component that are not genuine logical relationships (i.e.,
+not signaled using [AND], [OR], or [XOR], but inferred during parsing based on the occurrence of multiple such combinations
+within an Attributes component expression (e.g., A((Sellers [AND] Buyers) from (Northern [OR] Southern) states)).
+Internally, this would be represented as ((Sellers [AND] Buyers] [sAND] (Northern [OR] Southern))', and returned as separate
+trees with index 0 (Sellers [AND] Buyers) and 1 (Northern [OR] Southern).
+The second return indicates the fact that the first two entries in the first return type instance are of type ATTRIBUTES by holding
+an entry '"ATTRIBUTES": 2', etc.
+
+*/
+func (s *Statement) GenerateLeafArraysSuffixOnly() ([][]*Node, map[string]int) {
+	return s.generateLeafArrays(1)
+}
+
+/*
+Generates map of arrays containing pointers to leaf nodes in each component.
+Key is an incrementing index, and value is an array of the corresponding nodes.
+It further returns an array containing the component keys alongside the number of leaf nodes per component,
+in order to reconstruct the linkage between the index in the first return value and the components they relate to.
+
+Input: level indicates selection of nodes considered in aggregation (0 --> all nodes, 1 --> nodes with non-nil suffix only)
+
+Example: The first return may include two ATTRIBUTES component trees separated by synthetic AND connections (sAND)
+based on different logical combination within the attributes component that are not genuine logical relationships (i.e.,
+not signaled using [AND], [OR], or [XOR], but inferred during parsing based on the occurrence of multiple such combinations
+within an Attributes component expression (e.g., A((Sellers [AND] Buyers) from (Northern [OR] Southern) states)).
+Internally, this would be represented as ((Sellers [AND] Buyers] [sAND] (Northern [OR] Southern))', and returned as separate
+trees with index 0 (Sellers [AND] Buyers) and 1 (Northern [OR] Southern).
+The second return indicates the fact that the first two entries in the first return type instance are of type ATTRIBUTES by holding
+an entry '"ATTRIBUTES": 2', etc.
+
+*/
+func (s *Statement) generateLeafArrays(level int) ([][]*Node, map[string]int) {
 
 	// Map holding reference from component type (e.g., ATTRIBUTES) to number of entries (relevant for reconstruction)
 	referenceMap := map[string]int{}
@@ -148,59 +192,91 @@ func (s *Statement) GenerateLeafArrays() ([][]*Node, map[string]int) {
 	nodesMap := make([][]*Node, 0)
 
 	// Regulative components
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Attributes, ATTRIBUTES, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY_REFERENCE, true)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Deontic, DEONTIC, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Aim, AIM, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObject, DIRECT_OBJECT, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectComplex, DIRECT_OBJECT_REFERENCE, true)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY_REFERENCE, true)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObject, INDIRECT_OBJECT, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectComplex, INDIRECT_OBJECT_REFERENCE, true)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY_REFERENCE, true)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Attributes, ATTRIBUTES, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Deontic, DEONTIC, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Aim, AIM, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObject, DIRECT_OBJECT, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectComplex, DIRECT_OBJECT_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObject, INDIRECT_OBJECT, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectComplex, INDIRECT_OBJECT_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY_REFERENCE, true, level)
 
 	// Context
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionSimple, ACTIVATION_CONDITION, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionComplex, ACTIVATION_CONDITION_REFERENCE, true)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT_REFERENCE, true)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionComplex, ACTIVATION_CONDITION_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT_REFERENCE, true, level)
 
 	// Constitutive components
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntity, CONSTITUTED_ENTITY, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY_REFERENCE, true)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Modal, MODAL, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES_REFERENCE, true)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY_REFERENCE, true)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Modal, MODAL, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY_REFERENCE, true, level)
 
 	// Shared components
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.OrElse, OR_ELSE, true)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.OrElse, OR_ELSE, true, level)
 
 	return nodesMap, referenceMap
 }
 
 /*
 Generates a leaf array for a given component under consideration of node as being of simple or complex nature.
-Appends to existing structure if provided (i.e., not nil)
+Appends to existing structure if provided (i.e., not nil) to allow for iterative invocation.
+For a version that allows for iterative invocation, consider #getComponentLeafArray.
+For returning only leaves that contain suffix information, consider #getComponentLeafArrayWithSuffix.
+
 Input:
-- maps of nodes potentially including existing nodes for other components. Will be created internally if nil.
-- reference map that indexes the number of nodes associated with a specific component (to retain association).
-  Will be created internally if nil.
 - Reference to component node for which leaf elements are to be extracted
 - Component symbol associated with component
 - Indicator whether element embedded in node is complex (i.e., nested statement)
+- Indicator whether all leaf nodes should be returned, or only one satisfying particular conditions
+  (0 --> all nodes, 1 --> only ones with non-empty suffix).
+
+Returns:
+- Node map of nodes associated with components
+- Reference map counting number of components
+*/
+func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, complex bool, level int) ([][]*Node, map[string]int) {
+
+	// Map holding reference from component type (e.g., ATTRIBUTES) to number of entries (relevant for reconstruction)
+	referenceMap := map[string]int{}
+
+	// Counter for overall number of entries
+	nodesMap := make([][]*Node, 0)
+
+	return getComponentLeafArray(nodesMap, referenceMap, componentNode, componentSymbol, complex, level)
+}
+
+/*
+Generates a leaf array for a given component under consideration of node as being of simple or complex nature.
+Appends to existing structure if provided (i.e., not nil) to allow for iterative invocation.
+For returning only leaves that contain suffix information consider #getComponentLeafArrayWithSuffix.
+Input:
+- maps of nodes potentially including existing nodes for other components. Will be created internally if nil
+  (to allow iterative invocation).
+- reference map that indexes the number of nodes associated with a specific component (to retain association).
+  Will be created internally if nil (to allow iterative invocation).
+- Reference to component node for which leaf elements are to be extracted
+- Component symbol associated with component
+- Indicator whether element embedded in node is complex (i.e., nested statement)
+- Indicator whether all leaf nodes should be returned, or only one satisfying particular conditions
+  (0 --> all nodes, 1 --> only ones with non-empty suffix).
 
 Returns:
 - Node map of nodes associated with components
 - Reference map counting number of components
  */
-func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, componentNode *Node, componentSymbol string, complex bool) ([][]*Node, map[string]int) {
+func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, componentNode *Node, componentSymbol string, complex bool, level int) ([][]*Node, map[string]int) {
 
 	if componentNode == nil {
 		fmt.Println("No component node found - returning unmodified node and reference map ...")
@@ -239,7 +315,6 @@ func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, comp
 	return nodesMap, referenceMap
 }
 
-
 // NODE
 
 type Node struct {
@@ -249,7 +324,7 @@ type Node struct {
 	Left *Node
 	// Linkage to right child
 	Right *Node
-	// Indicates component type
+	// Indicates component type (i.e., name of component)
 	ComponentType string
 	// Substantive content of a leaf node
 	Entry interface{}
@@ -265,6 +340,8 @@ type Node struct {
 	Suffix interface{}
 	// Annotations for element - to be stored without surrounding brackets
 	Annotations interface{}
+	// Private links to given node (e.g., private properties)
+	PrivateNodeLinks []*Node
 }
 
 /*
@@ -390,6 +467,25 @@ func (n *Node) GetSharedRight() []string {
 }
 
 /*
+Returns component name stored in component type field. Recursively
+iterates through node hierarchy.
+ */
+func (n *Node) GetComponentName() string {
+	// If value is filled
+	if n.ComponentType != "" {
+		// return content
+		return n.ComponentType
+	// else test parent node
+	} else if n.Parent != nil {
+		// retrieve parent information
+		return n.Parent.GetComponentName()
+	} else {
+		// else simply return empty component name
+		return n.ComponentType
+	}
+}
+
+/*
 Indicates if node has a primitive consisting of string value, or conversely,
 a complex entry consisting of an institutional statement in its own right.
  */
@@ -500,6 +596,9 @@ func (n *Node) String() string {
 			}
 			if n.Annotations != nil {
 				retVal = retVal + " (Annotation: " + n.Annotations.(string) + ")"
+			}
+			if n.PrivateNodeLinks != nil {
+				retVal = retVal + " (Private links: " + fmt.Sprint(n.PrivateNodeLinks) + ")"
 			}
 		} else {
 			// if not a string
@@ -663,6 +762,80 @@ func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 	newNode.assignParent(n)
 	n.Right = &newNode
 	return true, NodeError{ErrorCode: TREE_NO_ERROR}
+}
+
+/*
+Removes the given node from the tree structure it is embedded in, i.e.,
+it does not have a parent and the parent is no longer aware of this child.
+
+Returns boolean indicating success and potential error (in success case TREE_NO_ERROR).
+ */
+func RemoveNodeFromTree(node *Node) (bool, NodeError) {
+
+	if node.Parent != nil {
+		// Remove parent's reference to child, and collapse tree structure of necessary
+		if node.Parent.Left == node {
+			// If the parent is a combination and the node's parent has a parent
+			if node.Parent.IsCombination() && node.Parent.Parent != nil {
+				// If the sibling node on the right is not nil
+				if node.Parent.Right != nil {
+					// Check whether the combination sits on the left side of its parent
+					if node.Parent.Parent.Left == node.Parent {
+						// and if sitting on the left, assign the former right sibling in place of the combination
+						node.Parent.Parent.Left = node.Parent.Right
+						// and adjust former right node to link to new parent
+						node.Parent.Right.assignParent(node.Parent.Parent)
+					} else if node.Parent.Parent.Right == node.Parent {
+						// and if sitting on the right, assign the former right sibling in place of the combination
+						node.Parent.Parent.Right = node.Parent.Right
+						// and adjust former right node to link to new parent
+						node.Parent.Right.assignParent(node.Parent.Parent)
+					}
+				}
+			} else if node.Parent.IsCombination() {
+				// if the node's parent is a combination (but the parent does not have a parent on its own),
+				// then simply assign former sibling as root (i.e., modify parent node of passed node)
+				fmt.Println("Assigned right as root")
+				*node.Parent = *node.Parent.Right
+			}
+		} else if node.Parent.Right == node {
+			// If the parent is a combination and the node's parent has a parent
+			if node.Parent.IsCombination() && node.Parent.Parent != nil {
+				// if the sibling on the left is not nil
+				if node.Parent.Left != nil {
+					// Check whether the combination sits on the left side of its parent
+					if node.Parent.Parent.Left == node.Parent {
+						// and if sitting on the left, assign the former left sibling in place of the combination
+						node.Parent.Parent.Left = node.Parent.Left
+						// and adjust former left node to link to new parent
+						node.Parent.Left.assignParent(node.Parent.Parent)
+					} else if node.Parent.Parent.Right == node.Parent {
+						// and if sitting on the right, assign the former left sibling in place of the combination
+						node.Parent.Parent.Right = node.Parent.Left
+						// and adjust former left node to link to new parent
+						node.Parent.Left.assignParent(node.Parent.Parent)
+					}
+				}
+			} else if node.Parent.IsCombination() {
+					// if the node's parent is a combination (but the parent does not have a parent on its own),
+					// then simply assign former sibling as root (i.e., modify parent node of passed node)
+					fmt.Println("Assigned left as root")
+					*node.Parent = *node.Parent.Left
+			}
+		} else {
+			errorMsg := "Could not find linkage of parent node in tree structure to ensure proper rebalancing following removal of node."
+			return false, NodeError{ErrorCode: TREE_INVALID_NODE_REMOVAL, ErrorMessage: errorMsg}
+		}
+
+		// Remove reference from child to parent
+		node.Parent = nil
+
+		// Now node should be disconnected and tree reorganized
+		return true, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+	// else tag the removal as invalid
+	errorMsg := "Attempted to remove already disconnected node from parent tree"
+	return false, NodeError{ErrorCode: TREE_INVALID_NODE_REMOVAL, ErrorMessage: errorMsg}
 }
 
 /*
@@ -1033,7 +1206,9 @@ func (n *Node) GetSyntheticRootNode() *Node {
 }
 
 /*
-Returns leaf nodes of a given node as arrays of arrays of nodes
+Returns leaf nodes of a given node as arrays of arrays of nodes.
+Note: currently, all leaf arrays are stored at array[0], thus not
+exploiting the multi-dimensional nature
  */
 func (n *Node) GetLeafNodes() [][]*Node {
 	if n == nil {
@@ -1133,11 +1308,18 @@ func (n *Node) IsLeafNode() bool {
 }
 
 /*
-Indicates whether node contains combination.
+Indicates whether node contains valid combination (i.e., left and right and logical operator are populated).
 */
 func (n *Node) IsCombination() bool {
 	return n.Entry == nil && !n.Left.IsNil() &&
 		!n.Right.IsNil() && n.LogicalOperator != ""
+}
+
+/*
+Indicates whether node has populated logical operator, but does not check for proper assignment of left and right children.
+ */
+func (n *Node) hasLogicalOperator() bool {
+	return n.LogicalOperator != ""
 }
 
 /*

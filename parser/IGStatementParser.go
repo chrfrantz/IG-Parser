@@ -166,6 +166,9 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	}
 	s.ConstitutingPropertiesPropertySimple = result
 
+	// Reorganize tree by shifting private nodes into PrivateNode fields of components and removing them from statement tree
+	ProcessPrivateComponentLinkages(&s)
+
 	//fmt.Println(s.String())
 
 	fmt.Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
@@ -263,6 +266,8 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 
 		// Wrap statement into node (since individual statement)
 		stmtNode := tree.Node{Entry: stmt}
+		// Assign component name to parsed node
+		stmtNode.ComponentType = component
 
 		// Attach suffix if it exists
 		if suffix != "" {
@@ -524,8 +529,6 @@ func SeparateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 	nestedCombos := []string{}
 
 	if len(nestedStmts) > 0 {
-
-		fmt.Println("TEMP:", nestedStmts)
 
 		// Iterate through identified nested statements (if any) and remove those from statement
 		for _, v := range nestedStmts {
@@ -1016,6 +1019,9 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	fmt.Println("Preprocessed string: " + componentString)
 
 	node, modifiedInput, err := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
+	if !node.IsNil() {
+		node.ComponentType = component
+	}
 
 	// Attach suffix and annotations by iterating over generated nodes
 	nodes := node.GetLeafNodes()
@@ -1028,6 +1034,10 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			if suffices[i] != "" {
 				v[0].Suffix = suffices[i]
 			}
+		}
+	}
+	if len(annotations) > 0 {
+		for i, v := range nodes {
 			if annotations[i] != "" {
 				v[0].Annotations = annotations[i]
 			}

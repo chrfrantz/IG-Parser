@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"IG-Parser/parser"
 	"IG-Parser/tree"
 	"fmt"
 	"log"
@@ -21,13 +22,13 @@ const stmtIdPrefix = "'"
 // Separator for logical operator expressions (e.g., OR[650.1,650.2]|AND[123.1,123.2])
 const logicalOperatorSeparator = ";"
 // Left bracket for logical combination expressions
-const logicalCombinationLeft = "["
+const logicalCombinationLeft = parser.LEFT_BRACKET
 // Right bracket for logical combination expressions
-const logicalCombinationRight = "]"
+const logicalCombinationRight = parser.RIGHT_BRACKET
 // Left brace surrounding identifier for component-level nested statements
-const componentNestedLeft = "{"
+const componentNestedLeft = parser.LEFT_BRACE
 // Right brace surrounding identifier for component-level nested statements
-const componentNestedRight = "}"
+const componentNestedRight = parser.RIGHT_BRACE
 // Column identifier for Statement ID
 const stmtIdColHeader = "Statement ID"
 // Column identifier for logical linkage of components
@@ -47,7 +48,7 @@ Consider the specification of INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT variable
 are to be included in output.
 Input:
 - Atomic statements with corresponding node references [statement][node references]
-- Map with with component name as key and corresponding number of columns in input stmts (i.e., same component can have
+- Map with component name as key and corresponding number of columns in input stmts (i.e., same component can have
   values across multiple columns)
 - References to entries for given nodes as indicated by logical operators, and used to produce corresponding linkages
   (e.g., AND[row1, row2, etc.])

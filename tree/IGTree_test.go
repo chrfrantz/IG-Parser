@@ -839,4 +839,115 @@ func TestExtractInheritFromNextHigherCombination(t *testing.T) {
 
 }
 
+/*
+Tests the removal of nodes from tree.
+ */
+func TestRemoveNodeFromTree(t *testing.T) {
+
+	root := Node{}
+	root.SharedLeft = []string{"Shared top left"}
+	root.SharedRight = []string{"Shared top right"}
+	root.LogicalOperator = "AND"
+
+	leftChild := Node{LogicalOperator: "AND"}
+	leftChild.SharedLeft = []string{"Shared middle left"}
+
+	leftLeftChild := Node{Entry: "left left"}
+	_, err := leftChild.InsertLeftNode(&leftLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	leftRightChild := Node{Entry: "left right"}
+	_, err = leftChild.InsertRightNode(&leftRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertLeftNode(&leftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightChild := Node{LogicalOperator: "XOR"}
+	rightChild.SharedRight = []string{"Shared middle right"}
+
+	rightLeftChild := Node{Entry: "right left"}
+	_, err = rightChild.InsertLeftNode(&rightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightChild := Node{LogicalOperator: "AND"}
+	_, err = rightChild.InsertRightNode(&rightRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightLeftChild := Node{Entry: "right right left"}
+	_, err = rightRightChild.InsertLeftNode(&rightRightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightRightChild := Node{Entry: "right right right"}
+	_, err = rightRightChild.InsertRightNode(&rightRightRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertRightNode(&rightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	fmt.Println("Before:", root)
+
+	// Remove right left child
+
+	// Attempt to remove node
+	res, err := RemoveNodeFromTree(&rightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Removal of node from tree failed (Error:", err.ErrorMessage, ")")
+	}
+	if !res {
+		t.Fatal("Removal of node from tree returned false, but did not produce error.")
+	}
+
+	if rightLeftChild.Parent != nil {
+		t.Fatal("Removed node should have empty parent.")
+	}
+
+	if rightRightChild.Parent != &root {
+		t.Fatal("Sibling node of removed node has not been properly reassigned.")
+	}
+
+	if rightRightRightChild.Parent != &rightRightChild {
+		t.Fatal("Reassignment of children to collapsed node failed.")
+	}
+
+	if rightRightLeftChild.Parent != &rightRightChild {
+		t.Fatal("Reassignment of children to collapsed node failed.")
+	}
+
+	// Remove left left child
+
+	res, err = RemoveNodeFromTree(&leftLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Removal of node from tree failed (Error:", err.ErrorMessage, ")")
+	}
+	if !res {
+		t.Fatal("Removal of node from tree returned false, but did not produce error.")
+	}
+
+	if leftLeftChild.Parent != nil {
+		t.Fatal("Removed node should have empty parent.")
+	}
+
+	if leftRightChild.Parent != &root {
+		t.Fatal("Sibling node of removed node has not been properly reassigned.")
+	}
+
+}
+
 //Collapse adjacent entries in logical operators - CollapseAdjacentOperators()
