@@ -67,7 +67,8 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 					}
 					// Test for match between source and target; if the same, store association
 					if sourceElem == targetElem {
-						fmt.Println("Found suffix match on", sourceElem, "for components (Source:", sourceTree.GetComponentName(), ", Target:", targetTree.GetComponentName(), ")")
+						fmt.Println("Found suffix match on", sourceElem, "for components (Source:", val.Entry,
+							", Name:", val.GetComponentName(), " and Target:", val2.Entry, ", Name:", val2.GetComponentName(), ")")
 						valArr := []*tree.Node{}
 						// Check if existing entry exists
 						if linkMap[val] != nil {
