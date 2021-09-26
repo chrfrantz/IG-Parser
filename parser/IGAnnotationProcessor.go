@@ -7,52 +7,37 @@ import (
 )
 
 /*
-Extracts links between nodes of given statement.
-Returns map of links between source and target nodes.
- */
-/*func ExtractLinkBetweenProperties(s tree.Statement) map[*tree.Node]*tree.Node {
-
-	// Find linked nodes from Properties to Attributes
-	linkMap := CombineMaps(FindNodesLinkedViaSuffix(s.AttributesPropertySimple, s.Attributes),
-		FindNodesLinkedViaSuffix(s.DirectObjectPropertySimple, s.DirectObject), false)
-
-	return linkMap
-}*/
-
-/*func ConvertSuffixedNodesToPrivateNodes(statement tree.Statement) {
-	gen
-}*/
-
-/*
 Identifies links via elements in suffices (if multiple, comma-separated ones, it extracts only first)
 between leaf nodes in source and target nodes.
 Returns map of linked nodes, with key being the source node, and the value being an array of matched target nodes.
  */
 func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[*tree.Node][]*tree.Node {
 
+	// Result structure with source node as key, and suffix-matched target nodes as value
 	linkMap := make(map[*tree.Node][]*tree.Node)
 
-	// Store origin of linkages between properties and components
-	sourceArrays := sourceTree.GetLeafNodes()
-
+	// Retrieve source arrays
+	sourceArrays := tree.Flatten(sourceTree.GetLeafNodes())
 	fmt.Println("Source arrays: ", sourceArrays)
 	if len(sourceArrays) == 0 {
 		fmt.Println("Could not find leaf nodes in source tree.")
 		return linkMap
 	}
 
-	targetArrays := targetTree.GetLeafNodes()
+	// Retrieve target arrays
+	targetArrays := tree.Flatten(targetTree.GetLeafNodes())
 	fmt.Println("Target arrays: ", targetArrays)
 	if len(targetArrays) == 0 {
 		fmt.Println("Could not find leaf nodes in target tree.")
 		return linkMap
 	}
 
-
+	// Iterate through source components
 	for _, v := range sourceArrays {
-		fmt.Println("Val:", v)
-		if v[0].Suffix != nil && len(v[0].Suffix.(string)) > 0 {
-			rawSuffix := v[0].Suffix.(string)
+		//fmt.Println("Val:", v)
+		val := v
+		if val.Suffix != nil && len(val.Suffix.(string)) > 0 {
+			rawSuffix := val.Suffix.(string)
 			// Assign full suffix by default
 			sourceElem := rawSuffix
 			// Extract first element from suffix
@@ -66,14 +51,13 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 				fmt.Println("Complete processing of suffix with more than one element not yet supported. Remaining elements:", rawSuffix[idx:])
 			}
 
-			fmt.Println("Element count: ", targetArrays)
-
 			// Now check target side to see if there is matching suffix
 			for _, v2 := range targetArrays {
-				fmt.Println("Target val:", v2)
-				if v2[0].Suffix != nil && len(v2[0].Suffix.(string)) > 0 {
-					rawTargetSuffix := v2[0].Suffix.(string)
-					fmt.Println("Found target suffix", rawTargetSuffix)
+				val2 := v2
+				//fmt.Println("Target val:", val2)
+				if val2.Suffix != nil && len(val2.Suffix.(string)) > 0 {
+					rawTargetSuffix := val2.Suffix.(string)
+					//fmt.Println("Found target suffix", rawTargetSuffix)
 					// Assign full suffix by default
 					targetElem := rawTargetSuffix
 					// Extract first element from candidate target suffix
@@ -86,13 +70,13 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 						fmt.Println("Found suffix match on", sourceElem, "for components (Source:", sourceTree.GetComponentName(), ", Target:", targetTree.GetComponentName(), ")")
 						valArr := []*tree.Node{}
 						// Check if existing entry exists
-						if linkMap[v[0]] != nil {
+						if linkMap[val] != nil {
 							// and extract
-							valArr = linkMap[v[0]]
+							valArr = linkMap[val]
 						}
 						// Append to existing array if entry exists
-						valArr = append(valArr, v2[0])
-						linkMap[v[0]] = valArr
+						valArr = append(valArr, val2)
+						linkMap[val] = valArr
 					}
 				}
 			}
@@ -101,6 +85,10 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 	return linkMap
 }
 
+/*
+Processes reorganization of statements to convert parsed elements as private elements based on suffix-based linkages.
+Operates directly on provided statement.
+ */
 func ProcessPrivateComponentLinkages(s *tree.Statement) {
 
 	fmt.Println("Statement before reviewing linkages: ", s)
@@ -108,14 +96,11 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 	// Find all leaves that have suffix
 	leafArrays, _ := s.GenerateLeafArraysSuffixOnly()
 
-	fmt.Println(leafArrays)
-
 	if len(leafArrays) == 0 {
 		fmt.Println("No leaf entries found, hence no suffix linkages.")
 		return
 	}
 
-	fmt.Println("Array: ", leafArrays)
 	// Identify links starting from top-level components
 	for _, v := range leafArrays {
 
@@ -123,8 +108,8 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 		linkedLeaves := map[*tree.Node][]*tree.Node{}
 
 		sourceComponentElement := v[0]
-		fmt.Println("Source:", sourceComponentElement)
-		fmt.Println("Source component:", sourceComponentElement.GetComponentName())
+		//fmt.Println("Source:", sourceComponentElement)
+		//fmt.Println("Source component:", sourceComponentElement.GetComponentName())
 
 		switch sourceComponentElement.GetComponentName() {
 		case tree.ATTRIBUTES:
@@ -138,7 +123,7 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 		case tree.CONSTITUTING_PROPERTIES:
 			linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutingPropertiesPropertySimple)
 		default:
-			fmt.Println("Could not find match for component name.")
+			fmt.Println("Could not find match for component name", sourceComponentElement.GetComponentName())
 		}
 		if len(linkedLeaves) > 0 {
 			fmt.Println("Found following links for", sourceComponentElement.GetComponentName(), ":", linkedLeaves)
@@ -162,7 +147,5 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 			}
 		}
 	}
-	fmt.Println("Statement after reviewing linkages: ", s)
-	// Return original statement
-	//return s
+	//fmt.Println("Statement after reviewing linkages: ", s)
 }
