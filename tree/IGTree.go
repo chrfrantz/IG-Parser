@@ -476,7 +476,7 @@ func (n *Node) GetComponentName() string {
 		// return content
 		return n.ComponentType
 	// else test parent node
-	} else if n.Parent != nil {
+	} else if n.Parent != nil && n.Parent != n {
 		// retrieve parent information
 		return n.Parent.GetComponentName()
 	} else {
@@ -1207,8 +1207,7 @@ func (n *Node) GetSyntheticRootNode() *Node {
 
 /*
 Returns leaf nodes of a given node as arrays of arrays of nodes.
-Note: currently, all leaf arrays are stored at array[0], thus not
-exploiting the multi-dimensional nature
+The two-dimensional array allows for separate storage of multiple arrays for a given component (e.g., multiple attributes, aims, etc.).
  */
 func (n *Node) GetLeafNodes() [][]*Node {
 	if n == nil {
