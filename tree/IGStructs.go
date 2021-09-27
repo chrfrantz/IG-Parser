@@ -9,10 +9,14 @@ import (
 
 const refSuffix = "-Ref"
 const refNameSuffix = " Reference"
-const leftBracket = "["
-const rightBracket = "]"
+const LEFT_BRACKET = "["
+const RIGHT_BRACKET = "]"
 // Syntax for properties in component identifiers
 const PROPERTY_SYNTAX_SUFFIX = ",p"
+
+// Synthetic AND and associated bracketed version as variables to allow runtime parameterization
+var SAND = "sAND"
+var SAND_BRACKETS = LEFT_BRACKET + SAND + RIGHT_BRACKET
 
 const (
 	ATTRIBUTES = "A"
@@ -86,17 +90,16 @@ const (
 	OR_ELSE = "O"
 	NAME_OR_ELSE = "Or else"
 
-	SAND = "sAND"
+	// Made sAND a variable
 	AND = "AND"
 	OR = "OR"
 	XOR = "XOR"
 	NOT = "NOT"
 
-	SAND_BRACKETS = leftBracket + SAND + rightBracket
-	AND_BRACKETS = leftBracket + AND + rightBracket
-	OR_BRACKETS = leftBracket + OR + rightBracket
-	XOR_BRACKETS = leftBracket + XOR + rightBracket
-	NOT_BRACKETS = leftBracket + NOT + rightBracket
+	AND_BRACKETS = LEFT_BRACKET + AND + RIGHT_BRACKET
+	OR_BRACKETS = LEFT_BRACKET + OR + RIGHT_BRACKET
+	XOR_BRACKETS = LEFT_BRACKET + XOR + RIGHT_BRACKET
+	NOT_BRACKETS = LEFT_BRACKET + NOT + RIGHT_BRACKET
 
 	PARSING_MODE_LEFT = "PARSING_LEFT"
 	PARSING_MODE_RIGHT = "PARSING_RIGHT"

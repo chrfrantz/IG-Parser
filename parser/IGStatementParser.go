@@ -929,7 +929,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	suffices := []string{}
 	annotations := []string{}
 
-	// [sAND]-link different components (if multiple occur in input string)
+	// Synthetically linked ([sAND]) components (if multiple occur in input string)
 	if len(componentStrings) > 1 {
 		fmt.Println("Component combination for component", component)
 		fmt.Println("Component content", componentStrings)
@@ -949,10 +949,10 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 				return nil, err
 			}
 
-			fmt.Println("Suffix:", componentSuffix)
+			fmt.Println("Suffix:", componentSuffix, "(Length:", len(suffices), ")")
 			// Store suffices
 			suffices = append(suffices, componentSuffix)
-			fmt.Println("Annotations:", componentAnnotation)
+			fmt.Println("Annotations:", componentAnnotation, "(Length:", len(annotations), ")")
 			// Store annotations
 			annotations = append(annotations, componentAnnotation)
 			fmt.Println("Content:", componentContent)
@@ -992,10 +992,10 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			return nil, err
 		}
 
-		fmt.Println("Suffix:", componentSuffix)
+		fmt.Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
 		// Store suffices
 		suffices = append(suffices, componentSuffix)
-		fmt.Println("Annotations:", componentAnnotation)
+		fmt.Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
 		// Store annotations
 		annotations = append(annotations, componentAnnotation)
 		fmt.Println("Content:", componentContent)
@@ -1019,6 +1019,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	fmt.Println("Preprocessed string: " + componentString)
 
 	node, modifiedInput, err := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
+	// Attach component name to top-level element (will be accessible to children via GetComponentName())
 	if !node.IsNil() {
 		node.ComponentType = component
 	}
@@ -1027,7 +1028,8 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	nodes := node.GetLeafNodes()
 
 	//fmt.Println("Leaves before suffix and annotation addition:", nodes)
-	fmt.Println("Attaching suffices", suffices, "and annotations", annotations, "to parsed nodes.")
+	fmt.Println("Attaching suffices", suffices, "(Length:", len(suffices),
+		") and annotations", annotations, "(Length:", len(annotations), ") to parsed nodes", nodes)
 	// Suffices and annotations must have the same number of entries as nodes
 	if len(suffices) > 0 {
 		for i, v := range nodes {

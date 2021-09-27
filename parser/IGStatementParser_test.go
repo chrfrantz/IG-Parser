@@ -1243,3 +1243,53 @@ func TestNodeParsingOfSuffixAndAnnotationsNestedStatement(t *testing.T) {
 	}
 
 }
+
+/*
+Test proper resolution of component name for primitive element, combination header and elements, and nested statement
+ */
+func TestComponentNameIdentification(t *testing.T) {
+
+	text := "A(Single Element) D( must) I((combLeft [AND] combRight)) Cac{A(Nested Element) I(perform) Bdir(something)}"
+
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing error for statement", text)
+	}
+
+	if stmt.Attributes.GetComponentName() != tree.ATTRIBUTES {
+		t.Fatal("Incorrect identification of component name for single element")
+	}
+
+	if stmt.Deontic.GetComponentName() != tree.DEONTIC {
+		t.Fatal("Incorrect identification of component name for single element")
+	}
+
+	if stmt.Aim.GetComponentName() != tree.AIM {
+		t.Fatal("Incorrect identification of component name for combination node")
+	}
+
+	if stmt.Aim.Left.GetComponentName() != tree.AIM {
+		t.Fatal("Incorrect identification of component name for combination's left element")
+	}
+
+	if stmt.Aim.Right.GetComponentName() != tree.AIM {
+		t.Fatal("Incorrect identification of component name for combination's right element")
+	}
+
+	if stmt.ActivationConditionComplex.GetComponentName() != tree.ACTIVATION_CONDITION {
+		t.Fatal("Incorrect identification of component name for nested component node")
+	}
+
+	if stmt.ActivationConditionComplex.Entry.(tree.Statement).Attributes.GetComponentName() != tree.ATTRIBUTES {
+		t.Fatal("Incorrect identification of component name for nested statement's attribute")
+	}
+
+	if stmt.ActivationConditionComplex.Entry.(tree.Statement).Aim.GetComponentName() != tree.AIM {
+		t.Fatal("Incorrect identification of component name for nested statement's aim")
+	}
+
+	if stmt.ActivationConditionComplex.Entry.(tree.Statement).DirectObject.GetComponentName() != tree.DIRECT_OBJECT {
+		t.Fatal("Incorrect identification of component name for nested statement's direct object")
+	}
+
+}

@@ -104,6 +104,23 @@ func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol st
 		// Add core content
 		if complex {
 			// Complex (i.e., nested) node output
+
+			// Append complex node-specific information to the end of nested statement
+			// Assumes that suffix and annotations are in string format for nodes that have nested statements
+			// TODO: see whether that needs to be adjusted
+			if node.Suffix != nil {
+				complexSuffix += " (Suffix: " + node.Suffix.(string) + ")"
+			}
+			if node.Annotations != nil {
+				complexSuffix += " (Annotation: " + node.Annotations.(string) + ")"
+			}
+			if node.PrivateNodeLinks != nil {
+				complexSuffix += " (Private links: " + fmt.Sprint(node.PrivateNodeLinks) + ")"
+			}
+			if node.GetComponentName() != "" {
+				complexSuffix += " (Component name: " + fmt.Sprint(node.GetComponentName()) + ")"
+			}
+
 			inputString += complexPrefix + node.String() + complexSuffix
 		} else {
 			// Simple output
@@ -324,7 +341,7 @@ type Node struct {
 	Left *Node
 	// Linkage to right child
 	Right *Node
-	// Indicates component type (i.e., name of component)
+	// Indicates component type (i.e., name of component) - Note: Access via GetComponentName(); not directly
 	ComponentType string
 	// Substantive content of a leaf node
 	Entry interface{}
@@ -589,6 +606,8 @@ func (n *Node) String() string {
 		if n.Entry == nil {
 			retVal = retVal + "nil (detected in String())"
 		} else if n.HasPrimitiveEntry() {
+			// Primitive component
+
 			retVal = retVal + n.Entry.(string)
 			// Assumes that suffix and annotations are in string form
 			if n.Suffix != nil {
@@ -600,22 +619,20 @@ func (n *Node) String() string {
 			if n.PrivateNodeLinks != nil {
 				retVal = retVal + " (Private links: " + fmt.Sprint(n.PrivateNodeLinks) + ")"
 			}
+			if n.GetComponentName() != "" {
+				retVal = retVal + " (Component name: " + fmt.Sprint(n.GetComponentName()) + ")"
+			}
 		} else {
-			// if not a string
+			// Full nested statement
+
+			// Assume entry is statement
 			val := n.Entry.(Statement)
 			retVal = retVal + val.String()
-			// Assumes that suffix and annotations are in string format for nodes that have nested statements
-			// TODO: see whether that needs to be adjusted
-			if n.Suffix != nil {
-				retVal = retVal + " (Suffix: " + n.Suffix.(string) + ")"
-			}
-			if n.Annotations != nil {
-				retVal = retVal + " (Annotation: " + n.Annotations.(string) + ")"
-			}
+
 		}
 		return retVal
-		//return /*n.ComponentType + */"Leaf entry: " + n.Entry //+ "\n"
 	} else {
+		// Nested component combinations (e.g., AND-combined components)
 		out := ""
 
 		i := 0
@@ -633,15 +650,6 @@ func (n *Node) String() string {
 			}
 		}
 
-		// Assumes that suffix and annotations are in string format for nodes that have nested statements
-		// TODO: see whether that needs to be adjusted
-		if n.Suffix != nil {
-			out = " (Suffix: " + n.Suffix.(string) + ")"
-		}
-		if n.Annotations != nil {
-			out = " (Annotation: " + n.Annotations.(string) + ")"
-		}
-
 		if n.GetSharedLeft() != nil && len(n.GetSharedLeft()) != 0 {
 			fmt.Println("Own LEFT SHARED value (raw content): " + fmt.Sprint(n.SharedLeft) + ", Count: " + strconv.Itoa(len(n.SharedLeft)))
 			out += prefix + "Shared (left): " + strings.Trim(fmt.Sprint(n.GetSharedLeft()), "[]") + "\n"
@@ -651,11 +659,28 @@ func (n *Node) String() string {
 			out += prefix + "Shared (right): " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]") + "\n"
 		}
 
-		return "(\n" + out +
+		retPrep := "(\n" + out +
 			prefix + "Left: " + n.Left.String() + "\n" +
 			prefix + "Operator: " + n.LogicalOperator + "\n" +
 			prefix + "Right: " + n.Right.String() + "\n" +
 			prefix + ")"
+
+		// Assumes that suffix and annotations are in string format for nodes that have nested statements
+		// TODO: see whether that needs to be adjusted
+		if n.Suffix != nil {
+			retPrep += " (Suffix: " + n.Suffix.(string) + ")"
+		}
+		if n.Annotations != nil {
+			retPrep += " (Annotation: " + n.Annotations.(string) + ")"
+		}
+		if n.PrivateNodeLinks != nil {
+			retPrep += " (Private links: " + fmt.Sprint(n.PrivateNodeLinks) + ")"
+		}
+		if n.GetComponentName() != "" {
+			retPrep += " (Component name: " + fmt.Sprint(n.GetComponentName()) + ")"
+		}
+
+		return retPrep
 	}
 }
 
