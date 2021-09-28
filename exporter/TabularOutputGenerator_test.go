@@ -1202,6 +1202,8 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 		/*t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}*/
 
+		t.Fatal("Test incomplete - to be refined.")
+
 }
 
 // ensure ordering of column headers
