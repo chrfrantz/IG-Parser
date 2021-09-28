@@ -78,7 +78,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 	headerSymbolsNames := []string{}
 
 	if CREATE_DYNAMIC_TABULAR_OUTPUT {
-		// Generate headers
+		// Generate headers based on parsed statement input
 		if componentFrequency != nil && len(componentFrequency) != 0 {
 
 			//output += prefix
@@ -92,7 +92,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 			//fmt.Println("Header: " + output)
 		}
 	} else {
-
+		// Generate static headers not taking frequencies of components into account
 		for k, v := range componentFrequency {
 			if v != 1 {
 				log.Println("Found component frequency > 1 for component", k)
@@ -105,6 +105,9 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		_, headerSymbols, headerSymbolsNames = generateHeaderRow("", GetStaticTabularOutputSchema(), separator)
 
 	}
+
+	fmt.Println("Generated Header Symbols: ", headerSymbols)
+	fmt.Println("Generated Header Symbol Names: ", headerSymbolsNames)
 
 	// Default error during parsing
 	errorVal := tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
@@ -457,28 +460,28 @@ Additionally returns array of statement entries, header symbols and correspondin
 If filename is provided, the result is printed to the corresponding file.
  */
 func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stmtId string, filename string) (string, []map[string]string, []string, []string, tree.ParsingError) {
-	log.Println("Step: Extracting leaf arrays")
+	log.Println(" Step: Extracting leaf arrays")
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := statement.GenerateLeafArrays()
 
-	log.Println("Generated leaf arrays: ", leafArrays, " component: ", componentRefs)
+	log.Println(" Generated leaf arrays: ", leafArrays, " component: ", componentRefs)
 
-	log.Println("Step: Generate permutations of leaf arrays (atomic statements)")
+	log.Println(" Step: Generate permutations of leaf arrays (atomic statements)")
 	// Generate all permutations of logically-linked components to produce statements
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", nil, nil, nil, err
 	}
 
-	log.Println("Generated permutations: ", res)
+	log.Println(" Generated permutations: ", res)
 
-	log.Println("Step: Generate logical operators for atomic statements")
+	log.Println(" Step: Generate logical operators for atomic statements")
 	// Extract logical operator links
 	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
-	log.Println("Links:", links)
+	log.Println(" Links:", links)
 
-	log.Println("Step: Generate tabular output")
+	log.Println(" Step: Generate tabular output")
 	// Export in Google Sheets format
 	statementMap, statementHeaders, statementHeaderNames, err := generateTabularStatementOutput(res, componentRefs, links, stmtId)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

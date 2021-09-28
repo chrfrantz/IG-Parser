@@ -130,14 +130,13 @@ func TestSimpleTabularOutput(t *testing.T) {
 }
 
 /*
-Tests basic tabular output without statement-level nesting, but component-level combinations
+Tests basic tabular output without statement-level nesting, but component-level combinations; no implicit combinations
 */
 func TestBasicTabularOutputCombinations(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
-		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) "
 
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
@@ -162,7 +161,7 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
-	if len(links) != 6 {
+	if len(links) != 5 {
 		t.Fatal("Number of statement reference links is incorrect. Value: ", len(links))
 	}
 
@@ -1128,6 +1127,7 @@ Tests combination of two nested activation conditions (single level) for static 
 func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
+		//"I((inspect and [AND] sustain (review [AND] (refresh [AND] drink)))) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
@@ -1137,12 +1137,12 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
 	// Static output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = false
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 	// Suppress synthetic ANDs
-	tree.SAND = tree.AND
-	tree.SAND_BRACKETS = tree.LEFT_BRACKET + tree.SAND + tree.RIGHT_BRACKET
+	//tree.SAND = tree.AND
+	//tree.SAND_BRACKETS = tree.LEFT_BRACKET + tree.SAND + tree.RIGHT_BRACKET
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1154,6 +1154,8 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays()
 
+	fmt.Println("Component refs:", componentRefs)
+
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
@@ -1162,6 +1164,8 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 	fmt.Println("Input arrays: ", res)
 
 	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	/*if len(links) != 8 {
