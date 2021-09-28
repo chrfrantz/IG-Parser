@@ -77,18 +77,33 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 	// Caches column header names associated with symbols for human-readable header construction
 	headerSymbolsNames := []string{}
 
-	// Generate headers
-	if componentFrequency != nil && len(componentFrequency) != 0 {
+	if CREATE_DYNAMIC_TABULAR_OUTPUT {
+		// Generate headers
+		if componentFrequency != nil && len(componentFrequency) != 0 {
 
-		//output += prefix
-		//output += stmtIdColHeader + separator
+			//output += prefix
+			//output += stmtIdColHeader + separator
+
+			// Iterate through header frequencies and create header row
+			_, headerSymbols, headerSymbolsNames = generateHeaderRow("", componentFrequency, separator)
+
+			// Complete line
+			//output += suffix
+			//fmt.Println("Header: " + output)
+		}
+	} else {
+
+		for k, v := range componentFrequency {
+			if v != 1 {
+				log.Println("Found component frequency > 1 for component", k)
+			}
+		}
+
+		fmt.Println("Providing output based on fixed structure")
 
 		// Iterate through header frequencies and create header row
-		_, headerSymbols, headerSymbolsNames = generateHeaderRow("", componentFrequency, separator)
+		_, headerSymbols, headerSymbolsNames = generateHeaderRow("", GetStaticTabularOutputSchema(), separator)
 
-		// Complete line
-		//output += suffix
-		//fmt.Println("Header: " + output)
 	}
 
 	// Default error during parsing
@@ -112,7 +127,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		// Individual entry
 		entryMap := make(map[string]string)
 
-		//fmt.Println("Statement ", stmtCt, ": ", statement)
+		fmt.Println("Statement ", stmtCt, ": ", statement) //, " --- ", statement[0].ComponentType, statement[1].ComponentType, statement[2].ComponentType)
 		// Start new row
 		//output += prefix
 		// Add statement ID for specific instance
@@ -150,10 +165,21 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						rightString = " " + rightString
 					}
 				}
-				// Save entry value into entryMap for given statement and component column
-				entryMap[headerSymbols[componentIdx]] = leftString +
+				// Prepare value for entry
+				entryVal := leftString +
 					statement[componentIdx].Entry.(string) +
 					rightString
+				if CREATE_DYNAMIC_TABULAR_OUTPUT {
+					// Dynamic variant
+					// Save entry value into entryMap for given statement and component column
+					entryMap[headerSymbols[componentIdx]] = entryVal
+				} else {
+					// Static variant
+					// Save entry for a given field matched based on node's component type
+					entryMap[statement[componentIdx].GetComponentName()] = entryVal
+				}
+				fmt.Println("Added entry ", entryVal)
+				fmt.Println("Current entrymap:", entryMap)
 				// Add to output
 				//output += statement[componentIdx].Entry.(string)
 			} else {
@@ -195,7 +221,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 							stmtIdSeparator +
 							strconv.Itoa(nestedStatementIdx)
 
-						// Added component-level nested statement
+						// Add component-level nested statement
 						componentNestedStmts = append(componentNestedStmts,
 							IdentifiedStmt{nestedStmtId, entryVal})
 						// Add newly identified nested statement to lookup index
@@ -208,13 +234,26 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						fmt.Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Val:", entryVal, ")")
 					}
 
-					// Save entry into entryMap for calling row
-					if entryMap[headerSymbols[componentIdx]] != "" {
-						// Add separator if already an entry
-						entryMap[headerSymbols[componentIdx]] += componentStmtRefSeparator
+					if CREATE_DYNAMIC_TABULAR_OUTPUT {
+						// Dynamic version
+						// Save entry into entryMap for calling row
+						if entryMap[headerSymbols[componentIdx]] != "" {
+							// Add separator if already an entry
+							entryMap[headerSymbols[componentIdx]] += componentStmtRefSeparator
+						}
+						// Append current value in any case
+						entryMap[headerSymbols[componentIdx]] += idToReferenceInCell
+					} else {
+						// Static version
+						// Save entry into entryMap for calling row
+						if entryMap[statement[componentIdx].GetComponentName()] != "" {
+							// Add separator if already an entry
+							entryMap[statement[componentIdx].GetComponentName()] += componentStmtRefSeparator
+						}
+						// Append current value in any case
+						entryMap[statement[componentIdx].GetComponentName()] += idToReferenceInCell
 					}
-					// Append current value in any case
-					entryMap[headerSymbols[componentIdx]] += idToReferenceInCell
+
 				}
 			}
 			fmt.Println("Source/calling node: ", statement[componentIdx])
@@ -236,6 +275,8 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 			}*/
 			//fmt.Println("-->", statement[componentIdx])
 		}
+
+		fmt.Println("EntryMap:", entryMap)
 
 		// Append the logical expression at the end of each row
 		if logicalValue != "" {

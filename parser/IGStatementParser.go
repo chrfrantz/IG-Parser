@@ -925,9 +925,8 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	// Initialize output string for parsing
 	componentString := ""
 
-	// Collected suffices and annotations for all identified elements
-	suffices := []string{}
-	annotations := []string{}
+	// Node to be populated as return node
+	node := &tree.Node{}
 
 	// Synthetically linked ([sAND]) components (if multiple occur in input string)
 	if len(componentStrings) > 1 {
@@ -938,8 +937,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
 				ErrorMessage: "Error during pattern extraction in combination expression."}
 		}
-		// Add leading parenthesis
-		componentString = LEFT_PARENTHESIS
+
 		for i, v := range componentStrings {
 			fmt.Println("Round: " + strconv.Itoa(i) + ": " + v)
 
@@ -949,12 +947,12 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 				return nil, err
 			}
 
-			fmt.Println("Suffix:", componentSuffix, "(Length:", len(suffices), ")")
+			fmt.Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
 			// Store suffices
-			suffices = append(suffices, componentSuffix)
-			fmt.Println("Annotations:", componentAnnotation, "(Length:", len(annotations), ")")
+			//suffices = append(suffices, componentSuffix)
+			fmt.Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
 			// Store annotations
-			annotations = append(annotations, componentAnnotation)
+			//annotations = append(annotations, componentAnnotation)
 			fmt.Println("Content:", componentContent)
 
 			// Extract and concatenate individual component values but cut leading component identifier
@@ -970,18 +968,55 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			} // else don't touch, i.e., leave parentheses in string
 			fmt.Println("Component string after:", componentWithoutIdentifier)
 
-			// Append processed element (i.e., removed identifier, checked for nested combinations)
-			componentString += componentWithoutIdentifier
-
-			if i < len(componentStrings)-1 {
-				// Add SAND primitive (synthetic linkage) in between if multiple component elements
-				componentString += " " + tree.SAND_BRACKETS + " "
+			// Parse first component into node
+			if node.IsEmptyNode() {
+				node1, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
+				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+					log.Println("Error when parsing synthetically linked element. Error:", err)
+					return nil, err
+				}
+				// Assign to main node if not populated and new node not nil
+				if !node1.IsEmptyNode() {
+					node = node1
+					// Attach component name to element (will be accessible to children via GetComponentName())
+					node.ComponentType = component
+					// Attach node-specific suffix
+					if componentSuffix != "" {
+						node.Suffix = componentSuffix
+					}
+					// Attach node-specific annotations
+					if componentAnnotation != "" {
+						node.Annotations = componentAnnotation
+					}
+				}
 			} else {
-				// Add trailing parenthesis
-				componentString += RIGHT_PARENTHESIS
+				// Parse any additional components into node and combine
+				// If cached node is already populated, create separate node and link afterwards
+				node2, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
+				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+					log.Println("Error when parsing synthetically linked element. Error:", err)
+					return nil, err
+				}
+				if !node2.IsEmptyNode() {
+					// Attach component name to element (will be accessible to children via GetComponentName())
+					node2.ComponentType = component
+					// Attach node-specific suffix
+					if componentSuffix != "" {
+						node2.Suffix = componentSuffix
+					}
+					// Attach node-specific annotations
+					if componentAnnotation != "" {
+						node2.Annotations = componentAnnotation
+					}
+					// Combine existing node with newly created one based on synthetic AND
+					nodeComb := tree.Combine(node, node2, tree.SAND)
+					// Explicitly assign component type to top-level node (for completeness)
+					nodeComb.ComponentType = component
+					// Assign to return node
+					node = nodeComb
+				}
 			}
 		}
-		//fmt.Println("Combination finished: " + componentString)
 	} else if len(componentStrings) == 1 {
 
 		fmt.Println("Component strings:", componentStrings)
@@ -994,10 +1029,8 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 
 		fmt.Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
 		// Store suffices
-		suffices = append(suffices, componentSuffix)
 		fmt.Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
 		// Store annotations
-		annotations = append(annotations, componentAnnotation)
 		fmt.Println("Content:", componentContent)
 
 		// Single entry (cut prefix)
@@ -1006,6 +1039,26 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		fmt.Println("Component content", componentString)
 		// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string if not combined
 		componentString = componentString[1:len(componentString)-1]
+
+		node1, _, err := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
+		if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+			log.Println("Error when parsing synthetically linked element. Error:", err)
+			return nil, err
+		}
+		// Attach component name to top-level element (will be accessible to children via GetComponentName())
+		if !node1.IsEmptyNode() {
+			node1.ComponentType = component
+			// Attach node-specific suffix
+			if componentSuffix != "" {
+				node1.Suffix = componentSuffix
+			}
+			// Attach node-specific annotations
+			if componentAnnotation != "" {
+				node1.Annotations = componentAnnotation
+			}
+			// Overwrite main node
+			node = node1
+		}
 	} else {
 		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
 			ErrorMessage: "Component " + component + " was not found in input string"}
@@ -1014,38 +1067,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 	fmt.Println("Component Identifier: " + component)
 	fmt.Println("Full string: " + componentString)
 
-	//tree.PrintValueOrder = true
-
-	fmt.Println("Preprocessed string: " + componentString)
-
-	node, modifiedInput, err := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
-	// Attach component name to top-level element (will be accessible to children via GetComponentName())
-	if !node.IsNil() {
-		node.ComponentType = component
-	}
-
-	// Attach suffix and annotations by iterating over generated nodes
-	nodes := node.GetLeafNodes()
-
-	//fmt.Println("Leaves before suffix and annotation addition:", nodes)
-	fmt.Println("Attaching suffices", suffices, "(Length:", len(suffices),
-		") and annotations", annotations, "(Length:", len(annotations), ") to parsed nodes", nodes)
-	// Suffices and annotations must have the same number of entries as nodes
-	if len(suffices) > 0 {
-		for i, v := range nodes {
-			if suffices[i] != "" {
-				v[0].Suffix = suffices[i]
-			}
-		}
-	}
-	if len(annotations) > 0 {
-		for i, v := range nodes {
-			if annotations[i] != "" {
-				v[0].Annotations = annotations[i]
-			}
-		}
-	}
-
+	// Some error check and override
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
 		log.Println("Error during component parsing:", err.Error())
@@ -1056,8 +1078,6 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		err.ErrorCode = tree.PARSING_NO_ERROR
 		err.ErrorMessage = ""
 	}
-
-	fmt.Println("Modified output for " + component + ": " + modifiedInput)
 
 	return node, err
 }
