@@ -108,42 +108,45 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 		// Initialize linked leaves structure
 		linkedLeaves := map[*tree.Node][]*tree.Node{}
 
-		sourceComponentElement := v[0]
-		//fmt.Println("Source:", sourceComponentElement)
-		//fmt.Println("Source component:", sourceComponentElement.GetComponentName())
+		for elem := range v {
 
-		switch sourceComponentElement.GetComponentName() {
-		case tree.ATTRIBUTES:
-			linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.AttributesPropertySimple)
-		case tree.DIRECT_OBJECT:
-			linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.DirectObjectPropertySimple)
-		case tree.INDIRECT_OBJECT:
-			linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.IndirectObjectPropertySimple)
-		case tree.CONSTITUTED_ENTITY:
-			linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutedEntityPropertySimple)
-		case tree.CONSTITUTING_PROPERTIES:
-			linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutingPropertiesPropertySimple)
-		default:
-			fmt.Println("Could not find match for component name", sourceComponentElement.GetComponentName())
-		}
-		if len(linkedLeaves) > 0 {
-			fmt.Println("Found following links for", sourceComponentElement.GetComponentName(), ":", linkedLeaves)
+			sourceComponentElement := v[elem]
+			//fmt.Println("Source:", sourceComponentElement)
+			//fmt.Println("Source component:", sourceComponentElement.GetComponentName())
 
-			// Draw direct linkage between source and target component
-			for srcComp, tgtCompArr := range linkedLeaves {
-				for _, tgtComp := range tgtCompArr {
-					linkComps := []*tree.Node{}
-					// Retrieve potentially existing node links
-					if srcComp.PrivateNodeLinks != nil {
-						linkComps = srcComp.PrivateNodeLinks
+			switch sourceComponentElement.GetComponentName() {
+			case tree.ATTRIBUTES:
+				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.AttributesPropertySimple)
+			case tree.DIRECT_OBJECT:
+				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.DirectObjectPropertySimple)
+			case tree.INDIRECT_OBJECT:
+				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.IndirectObjectPropertySimple)
+			case tree.CONSTITUTED_ENTITY:
+				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutedEntityPropertySimple)
+			case tree.CONSTITUTING_PROPERTIES:
+				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutingPropertiesPropertySimple)
+			default:
+				fmt.Println("Could not find match for component name", sourceComponentElement.GetComponentName())
+			}
+			if len(linkedLeaves) > 0 {
+				fmt.Println("Found following links for", sourceComponentElement.GetComponentName(), ":", linkedLeaves)
+
+				// Draw direct linkage between source and target component
+				for srcComp, tgtCompArr := range linkedLeaves {
+					for _, tgtComp := range tgtCompArr {
+						linkComps := []*tree.Node{}
+						// Retrieve potentially existing node links
+						if srcComp.PrivateNodeLinks != nil {
+							linkComps = srcComp.PrivateNodeLinks
+						}
+						// Add target component
+						linkComps = append(linkComps, tgtComp)
+						// Attach to node
+						srcComp.PrivateNodeLinks = linkComps
+						// Remove private node from original tree structure
+						tree.RemoveNodeFromTree(tgtComp)
+						fmt.Println("Component", srcComp.GetComponentName(), ": Added private link for node", tgtComp)
 					}
-					// Add target component
-					linkComps = append(linkComps, tgtComp)
-					// Attach to node
-					srcComp.PrivateNodeLinks = linkComps
-					// Remove private node from original tree structure
-					tree.RemoveNodeFromTree(tgtComp)
-					fmt.Println("Component", srcComp.GetComponentName(), ": Added private link for node", tgtComp)
 				}
 			}
 		}

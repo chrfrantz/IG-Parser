@@ -61,12 +61,14 @@ Output:
 func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string) ([]map[string]string, []string, []string, tree.ParsingError) {
 	//output := ""
 
-	// Quote to terminate input string for Google Sheets interpretation
-	//quote := "\""
-	// Line prefix for Google Sheets
-	//prefix := "=SPLIT(" + quote
-	// Linebreak at the end of each entry
-	//linebreak := "\n"
+	if CREATE_DYNAMIC_TABULAR_OUTPUT {
+		// Leave implicit linkages as nested leaf array
+		tree.AGGREGATE_IMPLICIT_LINKAGES = false
+	} else {
+		// Flatten output structure for implicit linkages
+		tree.AGGREGATE_IMPLICIT_LINKAGES = true
+	}
+
 	// Column separator used for Sheets output
 	separator := ";"
 	// Line suffix for Google Sheets

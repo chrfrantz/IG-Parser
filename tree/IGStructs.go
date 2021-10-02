@@ -14,10 +14,6 @@ const RIGHT_BRACKET = "]"
 // Syntax for properties in component identifiers
 const PROPERTY_SYNTAX_SUFFIX = ",p"
 
-// Synthetic AND and associated bracketed version as variables to allow runtime parameterization
-var SAND = "sAND"
-var SAND_BRACKETS = LEFT_BRACKET + SAND + RIGHT_BRACKET
-
 const (
 	ATTRIBUTES = "A"
 	NAME_ATTRIBUTES = "Attributes"
@@ -100,6 +96,15 @@ const (
 	OR_BRACKETS = LEFT_BRACKET + OR + RIGHT_BRACKET
 	XOR_BRACKETS = LEFT_BRACKET + XOR + RIGHT_BRACKET
 	NOT_BRACKETS = LEFT_BRACKET + NOT + RIGHT_BRACKET
+
+	// Synthetic AND between components of the same type (e.g., 'I(first) I(second)' linked as
+	// 'I((first [SAND_BETWEEN_COMPONENTS] second))')
+	SAND_BETWEEN_COMPONENTS = "bAND"
+	SAND_BETWEEN_COMPONENTS_BRACKETS = LEFT_BRACKET + SAND_BETWEEN_COMPONENTS + RIGHT_BRACKET
+	// Synthetic AND between components of the same type (e.g., 'I((first [AND] second) (third [AND] fourth))' linked as
+	// 'I((first [AND] second) [SAND_WITHIN_COMPONENTS] (third [AND] fourth))'
+	SAND_WITHIN_COMPONENTS = "wAND"
+	SAND_WITHIN_COMPONENTS_BRACKETS = LEFT_BRACKET + SAND_WITHIN_COMPONENTS + RIGHT_BRACKET
 
 	PARSING_MODE_LEFT = "PARSING_LEFT"
 	PARSING_MODE_RIGHT = "PARSING_RIGHT"

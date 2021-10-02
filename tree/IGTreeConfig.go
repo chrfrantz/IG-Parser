@@ -5,8 +5,10 @@ Indicates inheritance mode of shared elements from parent to children nodes (see
 */
 var SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
 
-// Indicates separator used when appending elements to components (e.g., inheriting from parent node)
-//const INHERITANCE_DELIMITER = ","
+/*
+Indicates whether implicitly linked components (e.g., multiple Cex annotations) should be disaggregated in different rows
+*/
+var AGGREGATE_IMPLICIT_LINKAGES = true
 
 /*
  Disables inheriting shared elements from parent nodes, not even combination nodes embedding the entity.

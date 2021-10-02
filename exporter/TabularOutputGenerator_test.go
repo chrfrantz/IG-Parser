@@ -7,16 +7,23 @@ import (
 	"io/ioutil"
 	"testing"
 )
+
 /*
-Tests the header generation function for tabular output.
+Tests the header generation function for tabular output, here as variant that does not assume component aggregation.
 Note that this test is implicitly contained in IGStatementParser_test.go
  */
-func TestHeaderRowGeneration(t *testing.T) {
+func TestHeaderRowGenerationWithoutComponentAggregation(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -29,6 +36,8 @@ func TestHeaderRowGeneration(t *testing.T) {
 	if nodeArray == nil || componentIdx == nil {
 		t.Fatal("Generated array or component header array should not be empty.")
 	}
+
+	fmt.Println(componentIdx)
 
 	if componentIdx[tree.ATTRIBUTES] != 1 || componentIdx[tree.DIRECT_OBJECT] != 1 ||
 		componentIdx[tree.EXECUTION_CONSTRAINT] != 2 || componentIdx[tree.DEONTIC] != 1 ||
@@ -60,14 +69,77 @@ func TestHeaderRowGeneration(t *testing.T) {
 }
 
 /*
+Tests the header generation function for tabular output, here as variant that applies component aggregation.
+Note that this test is implicitly contained in IGStatementParser_test.go
+*/
+func TestHeaderRowGenerationWithComponentAggregation(t *testing.T) {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = true
+
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during parsing: ", err.Error())
+	}
+
+	// This is tested in IGStatementParser_test.go as well
+	nodeArray, componentIdx := s.GenerateLeafArrays()
+
+	if nodeArray == nil || componentIdx == nil {
+		t.Fatal("Generated array or component header array should not be empty.")
+	}
+
+	fmt.Println(componentIdx)
+
+	if componentIdx[tree.ATTRIBUTES] != 1 || componentIdx[tree.DIRECT_OBJECT] != 1 ||
+		componentIdx[tree.EXECUTION_CONSTRAINT] != 1 || componentIdx[tree.DEONTIC] != 1 ||
+		componentIdx[tree.AIM] != 1 {
+		t.Fatal("Component element count is incorrect.")
+	}
+
+	if componentIdx[tree.CONSTITUTED_ENTITY] != 0 || componentIdx[tree.CONSTITUTED_ENTITY_PROPERTY] != 0 ||
+		componentIdx[tree.CONSTITUTIVE_FUNCTION] != 0 || componentIdx[tree.CONSTITUTING_PROPERTIES] != 0 ||
+		componentIdx[tree.CONSTITUTING_PROPERTIES_PROPERTY] != 0 {
+		t.Fatal("Component element count is not empty for some elements.")
+	}
+
+	output := "Init, "
+	output, outArr, _ := generateHeaderRow(output, componentIdx, ";")
+
+	if output == "" || len(outArr) == 0 {
+		t.Fatal("Generate header row did not return filled data structures")
+	}
+
+	if output != "Init, Attributes;Deontic;Aim;Direct Object;Execution Constraint" {
+		t.Fatal("Generated header row is wrong. Output: " + output)
+	}
+
+	if fmt.Sprint(outArr) != "[A D I Bdir Cex]" {
+		t.Fatal("Generated component array is wrong: " + fmt.Sprint(outArr))
+	}
+
+}
+
+/*
 Tests simple tabular output without any combinations or nesting.
 */
 func TestSimpleTabularOutput(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect)" +
 		"Bdir(certified production facilities) "
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -133,11 +205,14 @@ func TestSimpleTabularOutput(t *testing.T) {
 Tests basic tabular output without statement-level nesting, but component-level combinations; no implicit combinations
 */
 func TestBasicTabularOutputCombinations(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) "
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -203,11 +278,14 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 Tests basic tabular output without statement-level nesting, but implicitly sAND-linked components
 */
 func TestBasicTabularOutputImplicitAnd(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(review) I(sustain) " +
 		"Bdir(certified production facilities) "
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -273,12 +351,15 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 Tests basic tabular output without statement-level nesting, but component-level combinations and implicitly linked components
  */
 func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -345,12 +426,15 @@ Tests basic tabular output without statement-level nesting - only component-leve
 but including shared elements in output.
 */
 func TestTabularOutputWithSharedElements(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -416,6 +500,7 @@ func TestTabularOutputWithSharedElements(t *testing.T) {
 Tests multi-level nesting on statements, i.e., activation with own activation condition
  */
 func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -424,6 +509,8 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 		// This is the tricky lines, specifically the second Cac{}
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -490,6 +577,7 @@ Tests tabular output with combination of two-level statement-level nested compon
 simple activation condition (to be linked by implicit AND).
  */
 func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -500,6 +588,8 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 		// Complex activation condition, including two-level nesting (Cac{Cac{}})
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -565,6 +655,7 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 Tests combination of two nested activation conditions (single level)
  */
 func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -575,6 +666,8 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 		// Activation condition 2
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -640,6 +733,7 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 Tests combination of three nested activation conditions (single level), including embedded component-level nesting
  */
 func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -649,6 +743,8 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}" +
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -714,6 +810,7 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 Tests partial AND-linked statement-level combinations, expects the inference of implicit AND to non-linked complex component
  */
 func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -725,6 +822,8 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 		// Implicitly linked nested statement
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -790,6 +889,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 Tests partial XOR-linked statement-level combinations, expects the inference of implicit AND to non-linked complex component
  */
 func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -801,6 +901,8 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 		// should be automatically linked using AND
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -867,6 +969,7 @@ Tests statement-level combinations, alongside embedded component-level combinati
 filtering of within-statement component-level combinations are filtered prior to statement assembly.
  */
 func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -878,6 +981,8 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 		// non-linked additional activation condition (should be linked by implicit AND)
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -945,6 +1050,7 @@ filtering of within-statement component-level combinations are filtered prior to
 Includes generation of output with shared elements.
  */
 func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWithSharedElements(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -956,6 +1062,8 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 		// non-linked additional activation condition (should be linked by implicit AND)
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -1023,6 +1131,7 @@ Tests statement-level combinations on multiple components, alongside selected em
 alongside combination with non-nested components
 */
 func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDifferentComponents(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -1036,6 +1145,8 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 		// non-linked additional activation condition (should be linked by implicit AND)
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
+	// Dynamic output
+	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1103,6 +1214,7 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 Tests statement-level combinations with incompatible component symbols
 */
 func TestTabularOutputWithStatementCombinationsOfIncompatibleComponents(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
@@ -1125,6 +1237,7 @@ func TestTabularOutputWithStatementCombinationsOfIncompatibleComponents(t *testi
 Tests combination of two nested activation conditions (single level) for static output
 */
 func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
+
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		//"I((inspect and [AND] sustain (review [AND] (refresh [AND] drink)))) " +
@@ -1137,12 +1250,9 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
 	// Static output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	CREATE_DYNAMIC_TABULAR_OUTPUT = false
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Suppress synthetic ANDs
-	//tree.SAND = tree.AND
-	//tree.SAND_BRACKETS = tree.LEFT_BRACKET + tree.SAND + tree.RIGHT_BRACKET
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

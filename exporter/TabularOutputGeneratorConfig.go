@@ -6,11 +6,12 @@ import "IG-Parser/tree"
 Indicates whether shared elements are included in output
  */
 var INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
 /*
 Indicates whether tabular export produces dynamic output based on present components
 (better for individual statements), or produces fixed predefined structure (better for datasets)
- */
-var CREATE_DYNAMIC_TABULAR_OUTPUT = true
+*/
+var CREATE_DYNAMIC_TABULAR_OUTPUT = false
 
 /*
 Returns a fixed schema for tabular output

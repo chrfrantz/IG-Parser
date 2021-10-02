@@ -17,6 +17,9 @@ func TestStatementParsingIncludingSyntheticANDs(t *testing.T) {
 
 	s, err := ParseStatement(text)
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
@@ -37,7 +40,7 @@ func TestStatementParsingIncludingSyntheticANDs(t *testing.T) {
 		t.Fatal("Wrong leaf count or depth calculation")
 	}
 
-	if s.Aim.LogicalOperator != "sAND" {
+	if s.Aim.LogicalOperator != "bAND" {
 		t.Fatal("Parsed element value is incorrect")
 	}
 
@@ -63,7 +66,7 @@ func TestStatementParsingIncludingSyntheticANDs(t *testing.T) {
 	}
 
 	if s.ExecutionConstraintSimple.Left.Entry != "on behalf of the Secretary" ||
-		s.ExecutionConstraintSimple.LogicalOperator != "sAND" ||
+		s.ExecutionConstraintSimple.LogicalOperator != "bAND" ||
 		s.ExecutionConstraintSimple.Right.Left.Entry != "Act or" ||
 		s.ExecutionConstraintSimple.Right.LogicalOperator != "XOR" ||
 		s.ExecutionConstraintSimple.Right.Right.Entry != "regulations in this part" {
@@ -77,9 +80,10 @@ func TestStatementParsingIncludingSyntheticANDs(t *testing.T) {
 }
 
 /*
-Test the correct generation of leaf arrays from statements.
+Test the correct generation of leaf arrays from statements without aggregation of implicitly linked components,
+tolerating multiple components per type.
  */
-func TestLeafArrayGeneration(t *testing.T) {
+func TestLeafArrayGenerationWithoutAggregationOfImplicitlyLinkedComponents(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -88,6 +92,9 @@ func TestLeafArrayGeneration(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 	s, err := ParseStatement(text)
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
@@ -122,6 +129,10 @@ func TestLeafArrayGeneration(t *testing.T) {
 
 	if len(element) != 1 || element[0].Entry != "inspect and" {
 		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	if element[0].Parent.LogicalOperator != "bAND" {
+		t.Fatal("Wrong logical operator linking aims:", element[0].Parent.LogicalOperator)
 	}
 
 	// second aim array
@@ -177,6 +188,96 @@ func TestLeafArrayGeneration(t *testing.T) {
 	}
 }
 
+/*
+Test the correct generation of leaf arrays from statements collation of implicitly linked components, returning
+one top-level component per component.
+*/
+func TestLeafArrayGenerationWithAggregationOfImplicitlyLinkedComponents(t *testing.T) {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+
+	s, err := ParseStatement(text)
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = true
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during parsing: ", err.Error())
+	}
+
+	nodeArray, componentIdx := s.GenerateLeafArrays()
+
+	if nodeArray == nil {
+		t.Fatal("Generated array should not be empty.")
+	}
+
+	// Identify collapsed in between component linkage
+	if len(nodeArray) != 5 {
+		t.Fatal("Wrong number of array elements in generated leaf component array: ", len(nodeArray))
+	}
+
+	// Attributes
+	element := nodeArray[0]
+
+	if len(element) != 1 || element[0].Entry != "National Organic Program's Program Manager" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// Deontic
+	element = nodeArray[1]
+
+	if len(element) != 1 || element[0].Entry != "may" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
+	}
+
+	// first aim entry
+	element = nodeArray[2]
+
+	if len(element) != 4 || element[0].Entry != "inspect and" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect. Number of elements:", len(element))
+	}
+
+	if element[0].Parent.LogicalOperator != "bAND" {
+		t.Fatal("Wrong logical operator linking aims:", element[0].Parent.LogicalOperator)
+	}
+
+	// object
+	element = nodeArray[3]
+
+	if len(element) != 3 || element[0].Entry != "certified production and" ||
+		element[1].Entry != "handling operations and" || element[2].Entry != "accredited certifying agents" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect. Number of elements:", len(element))
+	}
+
+	// execution constraint
+	element = nodeArray[4]
+
+	if len(element) != 3 || element[0].Entry != "on behalf of the Secretary" ||
+		element[1].Entry != "Act or" || element[2].Entry != "regulations in this part" {
+		t.Fatal("Number of elements or element values in generated array is/are incorrect. Number of elements:", len(element))
+	}
+
+	if element[0].Parent.LogicalOperator != "bAND" {
+		t.Fatal("Wrong logical operator linking aims:", element[0].Parent.LogicalOperator)
+	}
+
+	if componentIdx[tree.ATTRIBUTES] != 1 || componentIdx[tree.DIRECT_OBJECT] != 1 ||
+		componentIdx[tree.EXECUTION_CONSTRAINT] != 1 || componentIdx[tree.DEONTIC] != 1 ||
+		componentIdx[tree.AIM] != 1 {
+		t.Fatal("Component element count is incorrect.")
+	}
+
+	if componentIdx[tree.CONSTITUTED_ENTITY] != 0 || componentIdx[tree.CONSTITUTED_ENTITY_PROPERTY] != 0 ||
+		componentIdx[tree.CONSTITUTIVE_FUNCTION] != 0 || componentIdx[tree.CONSTITUTING_PROPERTIES] != 0 ||
+		componentIdx[tree.CONSTITUTING_PROPERTIES_PROPERTY] != 0 {
+		t.Fatal("Component element count is not empty for some elements.")
+	}
+}
+
 func TestSyntheticRootRetrieval(t *testing.T) {
 
 	text := "I(inspect and), I(sustain (review [AND] (refresh [AND] drink)))"
@@ -186,6 +287,9 @@ func TestSyntheticRootRetrieval(t *testing.T) {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	nodeArray, componentIdx := s.GenerateLeafArrays()
 
@@ -224,7 +328,8 @@ func TestSyntheticRootRetrieval(t *testing.T) {
 		t.Fatal("Root node in new node combination was wrongly detected.")
 	}
 
-	newRoot.LogicalOperator = tree.SAND
+	// TODO: Check for the need to consider SAND_WITHIN_COMPONENTS
+	newRoot.LogicalOperator = tree.SAND_BETWEEN_COMPONENTS
 
 	if nodeArray[1][0].GetSyntheticRootNode().LogicalOperator != "AND" ||
 		nodeArray[1][0].GetSyntheticRootNode().Left.Entry != "review" ||
@@ -248,6 +353,9 @@ func TestExcessiveParentheses(t *testing.T) {
 	if err.ErrorCode != tree.PARSING_ERROR_IMBALANCED_PARENTHESES {
 		t.Fatal("Test did not pick up on unbalanced parentheses")
 	}
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	// Test excessive left parentheses
 	text = "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -279,6 +387,9 @@ func TestComponentTwoLevelNestedStatement(t *testing.T) {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	nodeArray, componentIdx := s.GenerateLeafArrays()
 
@@ -406,8 +517,6 @@ func TestComponentTwoLevelNestedStatement(t *testing.T) {
 		t.Fatal("Number of elements or element values in generated array is/are incorrect.")
 	}
 
-	fmt.Println(componentIdx)
-
 	// All fields and activation condition reference should be filled
 	if componentIdx[tree.ATTRIBUTES] != 1 || componentIdx[tree.DIRECT_OBJECT] != 1 ||
 		componentIdx[tree.EXECUTION_CONSTRAINT] != 2 || componentIdx[tree.DEONTIC] != 1 ||
@@ -443,6 +552,9 @@ func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	nodeArray, componentIdx := s.GenerateLeafArrays()
 
@@ -639,6 +751,9 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 	nodeArray, componentIdx := s.GenerateLeafArrays()
 
 	if nodeArray == nil {
@@ -794,6 +909,9 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 		"{Cac{E(Program Participant2) F(is2) P(employed2)} [XOR] " +
 		"Cac{E(Program Participant) F(is) P(employed)}}}"
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 	combo, _, errStmt := ParseIntoNodeTree(input, false, LEFT_BRACE, RIGHT_BRACE)
 	if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Error("Error when parsing nested statements: " + errStmt.ErrorCode)
@@ -873,6 +991,9 @@ func TestSpecialCharacters(t *testing.T) {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 
 	if s.Attributes.Entry != "A&dsisgj=" {
 		t.Fatal("Failed to detect Attributes")
@@ -927,6 +1048,9 @@ func TestUnambiguousExtractionOfComponentAndRelatedProperties(t *testing.T) {
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 	if s.Attributes.CountLeaves() != 1 {
 		t.Fatal("Attributes count should be 1, but is:", s.Attributes.CountLeaves())
 	}
@@ -959,6 +1083,9 @@ func TestExtractSuffixAndAnnotationsSingleComponentValue(t *testing.T) {
 	// Single component entry
 	text := "A1[annotation=(left,right)](content)"
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
@@ -987,6 +1114,9 @@ func TestExtractSuffixOnlySingleComponentValue(t *testing.T) {
 
 	// Single component entry
 	text := "A1(content)"
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1017,6 +1147,9 @@ func TestExtractAnnotationOnlySingleComponentValue(t *testing.T) {
 	// Single component entry
 	text := "A[abc=(left;right)](content)"
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
@@ -1045,6 +1178,9 @@ func TestExtractAnnotationOnlyWithSpecialCharacters(t *testing.T) {
 
 	// Single component entry
 	text := "A[abc=(left|right)](content)"
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1075,6 +1211,9 @@ func TestExtractSuffixOnlyWithSpecialCharacters(t *testing.T) {
 	// Single component entry
 	text := "A2#|(cont$ent)"
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
@@ -1103,6 +1242,9 @@ func TestExtractSuffixAndAnnotationWithSpecialCharacters(t *testing.T) {
 
 	// Single component entry
 	text := "A2#|[abc=(le#ft|righ$t)](cont$ent)"
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1136,6 +1278,9 @@ func TestNodeParsingOfSuffixAndAnnotationsAtomicStatement(t *testing.T) {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	// Check Attributes
 
@@ -1187,6 +1332,9 @@ func TestNodeParsingOfSuffixAndAnnotationsNestedStatement(t *testing.T) {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	// Left activation condition
 	if stmt.ActivationConditionComplex.Left.Suffix.(string) != "1" {
@@ -1250,6 +1398,9 @@ Test proper resolution of component name for primitive element, combination head
 func TestComponentNameIdentification(t *testing.T) {
 
 	text := "A(Single Element) D( must) I((combLeft [AND] combRight)) Cac{A(Nested Element) I(perform) Bdir(something)}"
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	stmt, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

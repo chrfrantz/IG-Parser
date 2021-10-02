@@ -1009,7 +1009,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 						node2.Annotations = componentAnnotation
 					}
 					// Combine existing node with newly created one based on synthetic AND
-					nodeComb := tree.Combine(node, node2, tree.SAND)
+					nodeComb := tree.Combine(node, node2, tree.SAND_BETWEEN_COMPONENTS)
 					// Explicitly assign component type to top-level node (for completeness)
 					nodeComb.ComponentType = component
 					// Assign to return node

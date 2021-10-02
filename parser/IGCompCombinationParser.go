@@ -412,7 +412,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 		for ct < len(input) {
 			if _, ok := orderMap[ct]; ok {
 				// ... then synthetically link elements
-				nodeTree = tree.Combine(nodeTree, orderMap[ct], tree.SAND)
+				nodeTree = tree.Combine(nodeTree, orderMap[ct], tree.SAND_WITHIN_COMPONENTS)
 				fmt.Println("Added to tree: " + fmt.Sprint(orderMap[ct]))
 			}
 			ct++
@@ -629,14 +629,19 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 				foundOperator = tree.XOR
 			}
 			// Separately test for OR due to differing length
-			if foundOperator == "" && expression[i:i+4] == tree.OR_BRACKETS {
+			if foundOperator == "" && expression[i:i+len(tree.OR_BRACKETS)] == tree.OR_BRACKETS {
 				fmt.Println("Detected " + tree.OR_BRACKETS)
 				foundOperator = tree.OR
 			}
-			// Separately test for sAND due to differing length
-			if foundOperator == "" && expression[i:i+6] == tree.SAND_BRACKETS {
-				fmt.Println("Detected " + tree.SAND_BRACKETS)
-				foundOperator = tree.SAND
+			// Separately test for sAND WITHIN components due to differing length
+			if foundOperator == "" && expression[i:i+len(tree.SAND_WITHIN_COMPONENTS_BRACKETS)] == tree.SAND_WITHIN_COMPONENTS_BRACKETS {
+				fmt.Println("Detected " + tree.SAND_WITHIN_COMPONENTS_BRACKETS)
+				foundOperator = tree.SAND_WITHIN_COMPONENTS
+			}
+			// Separately test for sAND BETWEEN components due to differing length
+			if foundOperator == "" && expression[i:i+len(tree.SAND_BETWEEN_COMPONENTS_BRACKETS)] == tree.SAND_BETWEEN_COMPONENTS_BRACKETS {
+				fmt.Println("Detected " + tree.SAND_BETWEEN_COMPONENTS_BRACKETS)
+				foundOperator = tree.SAND_BETWEEN_COMPONENTS
 			}
 			// If parsing for statement combinations, suppress operators if within component-level nesting scope
 			if foundOperator != "" && leftPar == LEFT_BRACE && rightPar == RIGHT_BRACE && generalParCount != 0 {

@@ -188,11 +188,11 @@ in order to reconstruct the linkage between the index in the first return value 
 
 Input: level indicates selection of nodes considered in aggregation (0 --> all nodes, 1 --> nodes with non-nil suffix only)
 
-Example: The first return may include two ATTRIBUTES component trees separated by synthetic AND connections (sAND)
+Example: The first return may include two ATTRIBUTES component trees separated by synthetic AND connections (bAND)
 based on different logical combination within the attributes component that are not genuine logical relationships (i.e.,
 not signaled using [AND], [OR], or [XOR], but inferred during parsing based on the occurrence of multiple such combinations
 within an Attributes component expression (e.g., A((Sellers [AND] Buyers) from (Northern [OR] Southern) states)).
-Internally, this would be represented as ((Sellers [AND] Buyers] [sAND] (Northern [OR] Southern))', and returned as separate
+Internally, this would be represented as ((Sellers [AND] Buyers] [bAND] (Northern [OR] Southern))', and returned as separate
 trees with index 0 (Sellers [AND] Buyers) and 1 (Northern [OR] Southern).
 The second return indicates the fact that the first two entries in the first return type instance are of type ATTRIBUTES by holding
 an entry '"ATTRIBUTES": 2', etc.

@@ -6,12 +6,47 @@ import (
 	"testing"
 )
 
-func TestExtractComponentLinkage(t *testing.T) {
+func TestExtractComponentLinkageNonAggregateLinkages(t *testing.T) {
 
 	text := "A,p(Certified) A,p1(non-suspended) A,p1(previously reviewed) A1(Operator) or A,p2(recognized) A2(Handler) D(must not) I((produce [AND] trade))"
 
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
 	// Parse statement, which should consider private suffices
-	s,_ := ParseStatement(text)
+	s, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing error for statement", text)
+	}
+
+	fmt.Println(s.String())
+
+	if s.Attributes.Left.PrivateNodeLinks[0].Entry.(string) != "non-suspended" {
+		t.Fatal("Did not correct identify private node value. Should have been 'non-suspended', but is", s.Attributes.Left.PrivateNodeLinks[0].Entry.(string))
+	}
+
+	if s.Attributes.Left.PrivateNodeLinks[1].Entry.(string) != "previously reviewed" {
+		t.Fatal("Did not correct identify private node value. Should have been 'previously reviewed', but is", s.Attributes.Left.PrivateNodeLinks[1].Entry.(string))
+	}
+
+	if s.Attributes.Right.PrivateNodeLinks[0].Entry.(string) != "recognized" {
+		t.Fatal("Did not correct identify private node value. Should have been 'recognized', but is", s.Attributes.Right.PrivateNodeLinks[0].Entry.(string))
+	}
+
+}
+
+func TestExtractComponentLinkageAggregateLinkages(t *testing.T) {
+
+	text := "A,p(Certified) A,p1(non-suspended) A,p1(previously reviewed) A1(Operator) or A,p2(recognized) A2(Handler) D(must not) I((produce [AND] trade))"
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = true
+
+	// Parse statement, which should consider private suffices
+	s, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing error for statement", text)
+	}
 
 	fmt.Println(s.String())
 

@@ -892,8 +892,9 @@ func (n *Node) CountLeaves() int {
 Returns root node of given tree the node is embedded in
 up to the level at which nodes are linked by synthetic AND (sAND).
  */
+// TODO: Check for the need to consider SAND_WITHIN_COMPONENTS
 func (n *Node) GetSyntheticRootNode() *Node {
-	if n.Parent == nil || n.Parent.LogicalOperator == SAND {
+	if n.Parent == nil || n.Parent.LogicalOperator == SAND_BETWEEN_COMPONENTS {
 		// Assume to be parent if no parent on its own,
 		// or root in synthetic hierarchy if paired with sAND
 		return n
@@ -930,19 +931,24 @@ func (n *Node) GetLeafNodes() [][]*Node {
 	if n.Left != nil && n.Right != nil {
 		leftNodes = n.Left.GetLeafNodes()
 		rightNodes = n.Right.GetLeafNodes()
-		if n.LogicalOperator == SAND {
-			// Return as collection of node collection
-			// Append individual nodes arrays
-			for _, v := range leftNodes {
-				returnNode = append(returnNode, v)
+		// TODO: Check for the need to consider SAND_WITHIN_COMPONENTS
+		// if combined with synthetic linkages,
+		if n.LogicalOperator == SAND_WITHIN_COMPONENTS {
+			// Nested arrays
+			return aggregateNodes(1, leftNodes, rightNodes, returnNode)
+		} else if n.LogicalOperator == SAND_BETWEEN_COMPONENTS {
+			if AGGREGATE_IMPLICIT_LINKAGES {
+				// Flatten arrays (keep components separate)
+				return aggregateNodes(0, leftNodes, rightNodes, returnNode)
+			} else {
+				// Nested arrays (carry over relationships)
+				return aggregateNodes(1, leftNodes, rightNodes, returnNode)
 			}
-			// Append individual nodes arrays
-			for _, v := range rightNodes {
-				returnNode = append(returnNode, v)
-			}
-			return returnNode
 		} else {
-			nodeArray := make([]*Node, 0)
+			// if linked via genuine logical operators (e.g., AND, OR, XOR),
+			// return as flat structure (i.e., individual nodes are returned in isolation)
+			// (e.g., [ ..., one, two, ... ])
+			/*nodeArray := make([]*Node, 0)
 			// return as individual nodes
 			for _, v := range leftNodes {
 				nodeArray = append(nodeArray, v...)
@@ -952,7 +958,9 @@ func (n *Node) GetLeafNodes() [][]*Node {
 			}
 			// Appends as first array (second remains empty)
 			returnNode = append(returnNode, nodeArray)
-			return returnNode
+			return returnNode*/
+			// Flat array
+			return aggregateNodes(0, leftNodes, rightNodes, returnNode)
 		}
 	}
 	// Process left nodes
@@ -968,6 +976,42 @@ func (n *Node) GetLeafNodes() [][]*Node {
 		for _, v := range rightNodes {
 			returnNode[0] = append(returnNode[0], v...)
 		}
+	}
+	return returnNode
+}
+
+/*
+Enables different forms of node aggregation, where aggregationType 0 indicates flat combination of nodes in array ([ ..., one, two, ...]),
+and aggregationType 1 indicates returning node arrays within node array ([ ..., [one, two], ...])
+Takes populated leaf arrays as input and prepared return structure for output.
+ */
+func aggregateNodes(aggregationType int, leftNodes [][]*Node, rightNodes [][]*Node, returnNode [][]*Node) [][]*Node {
+	switch(aggregationType) {
+	case 0:
+		// return as flat structure (i.e., individual nodes are returned in isolation)
+		// (e.g., [ ..., one, two, ... ])
+		nodeArray := make([]*Node, 0)
+		// return as individual nodes
+		for _, v := range leftNodes {
+			nodeArray = append(nodeArray, v...)
+		}
+		for _, v := range rightNodes {
+			nodeArray = append(nodeArray, v...)
+		}
+		// Appends as first array (second remains empty)
+		returnNode = append(returnNode, nodeArray)
+		return returnNode
+	case 1:
+		// Append individual nested node arrays
+		// (e.g., [ ... [one, two] ... ])
+		for _, v := range leftNodes {
+			returnNode = append(returnNode, v)
+		}
+		// Append individual node arrays
+		for _, v := range rightNodes {
+			returnNode = append(returnNode, v)
+		}
+		return returnNode
 	}
 	return returnNode
 }
