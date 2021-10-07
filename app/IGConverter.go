@@ -18,7 +18,7 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 
 	log.Println(" Step: Parse input statement")
 	// Explicitly activate printing of shared elements
-	exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	//exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Parse IGScript statement into tree
 	s, err := parser.ParseStatement(statement)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -26,7 +26,7 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 	}
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, stmtId, "")
+	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, stmtId, "", tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	fmt.Println(statementHeader)
 	fmt.Println(statementHeaderNames)

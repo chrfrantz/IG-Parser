@@ -181,7 +181,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				} else {
 					// Static variant
 					// Save entry for a given field matched based on node's component type
-					entryMap[statement[componentIdx].GetComponentName()] = entryVal
+					entryMap[headerSymbols[componentIdx]] = entryVal
 				}
 				fmt.Println("Added entry ", entryVal)
 				fmt.Println("Current entrymap:", entryMap)
@@ -199,7 +199,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				if entryVals[0].IsCombination() {
 					fmt.Println("Detected statement combination")
 					// If combination of statements, retrieve all elements
-					stmts := entryVals[0].GetLeafNodes()
+					stmts := entryVals[0].GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
 					// Flatten array and override entry values for iteration
 					entryVals = tree.Flatten(stmts)
 				} else {
@@ -306,7 +306,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		fmt.Println("Nested Statement to parse, ID:", val.ID, ", Stmt:", val.NestedStmt)
 
 		// Parse individual nested statements on component level
-		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.ID, "")
+		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, nil, nil, errorVal
 		}
@@ -461,10 +461,10 @@ Generates all substatements and logical combination linkages in Google Sheets ou
 Additionally returns array of statement entries, header symbols and corresponding header symbol names.
 If filename is provided, the result is printed to the corresponding file.
  */
-func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stmtId string, filename string) (string, []map[string]string, []string, []string, tree.ParsingError) {
+func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stmtId string, filename string, aggregateImplicitLinkages bool) (string, []map[string]string, []string, []string, tree.ParsingError) {
 	log.Println(" Step: Extracting leaf arrays")
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
-	leafArrays, componentRefs := statement.GenerateLeafArrays()
+	leafArrays, componentRefs := statement.GenerateLeafArrays(aggregateImplicitLinkages)
 
 	log.Println(" Generated leaf arrays: ", leafArrays, " component: ", componentRefs)
 
@@ -581,7 +581,17 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 		}
 		// Sort by retrieving leaves for the given tree
 		if firstKey != nil {
-			leaves := firstKey.GetSyntheticRootNode().GetLeafNodes()
+			leaves := [][]*tree.Node{}
+			if tree.AGGREGATE_IMPLICIT_LINKAGES {
+				// Retrieve actual root node, not just the one that sits below synthetic linkage
+				leaves = firstKey.GetRootNode().GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
+				fmt.Println("Root:", firstKey.GetRootNode())
+			} else {
+				// Retrieve all nodes up to synthetic linkage
+				leaves = firstKey.GetSyntheticRootNode().GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
+				fmt.Println("Synthetic Root:", firstKey.GetSyntheticRootNode())
+			}
+
 			if len(leaves) > 0 {
 				nodesKeys = leaves[0]
 			} else {
@@ -629,7 +639,13 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						// ... and append to logical expression column string
 						logicalExpressionString += fmt.Sprint(ops)
 						// Statement component identifier
-						logicalExpressionString += "." + headerSymbols[componentIdx] + "."
+						if CREATE_DYNAMIC_TABULAR_OUTPUT {
+							// Based on index or parsed input nodes
+							logicalExpressionString += "." + headerSymbols[componentIdx] + "."
+						} else {
+							// Based on name of current element
+							logicalExpressionString += "." + statement[componentIdx].GetComponentName() + "."
+						}
 						// Leading bracket
 						logicalExpressionString += logicalCombinationLeft
 						// Prepare intermediate structure to store statement references

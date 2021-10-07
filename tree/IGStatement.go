@@ -148,14 +148,17 @@ Example: The first return may include two ATTRIBUTES component trees separated b
 based on different logical combination within the attributes component that are not genuine logical relationships (i.e.,
 not signaled using [AND], [OR], or [XOR], but inferred during parsing based on the occurrence of multiple such combinations
 within an Attributes component expression (e.g., A((Sellers [AND] Buyers) from (Northern [OR] Southern) states)).
-Internally, this would be represented as ((Sellers [AND] Buyers] [sAND] (Northern [OR] Southern))', and returned as separate
+Internally, this would be represented as ((Sellers [AND] Buyers] [bAND] (Northern [OR] Southern))', and returned as separate
 trees with index 0 (Sellers [AND] Buyers) and 1 (Northern [OR] Southern).
 The second return indicates the fact that the first two entries in the first return type instance are of type ATTRIBUTES by holding
 an entry '"ATTRIBUTES": 2', etc.
 
+The parameter aggregateImplicitLinkages specifies whether implicit linkages (based on bAND) are actually aggregated, or
+returned as separate node trees.
+
 */
-func (s *Statement) GenerateLeafArrays() ([][]*Node, map[string]int) {
-	return s.generateLeafArrays(0)
+func (s *Statement) GenerateLeafArrays(aggregateImplicitLinkages bool) ([][]*Node, map[string]int) {
+	return s.generateLeafArrays(aggregateImplicitLinkages, 0)
 }
 
 /*
@@ -175,9 +178,13 @@ trees with index 0 (Sellers [AND] Buyers) and 1 (Northern [OR] Southern).
 The second return indicates the fact that the first two entries in the first return type instance are of type ATTRIBUTES by holding
 an entry '"ATTRIBUTES": 2', etc.
 
+The parameter aggregateImplicitLinkages indicates whether implicitly linked trees of nodes should be returned as a single
+tree, or as separate trees.
+The parameter level indicates whether all nodes should be returned, or only ones that contain suffix information.
+
 */
-func (s *Statement) GenerateLeafArraysSuffixOnly() ([][]*Node, map[string]int) {
-	return s.generateLeafArrays(1)
+func (s *Statement) GenerateLeafArraysSuffixOnly(aggregateImplicitLinkages bool) ([][]*Node, map[string]int) {
+	return s.generateLeafArrays(aggregateImplicitLinkages, 1)
 }
 
 /*
@@ -197,8 +204,12 @@ trees with index 0 (Sellers [AND] Buyers) and 1 (Northern [OR] Southern).
 The second return indicates the fact that the first two entries in the first return type instance are of type ATTRIBUTES by holding
 an entry '"ATTRIBUTES": 2', etc.
 
+The parameter aggregateImplicitLinkages indicates whether implicitly linked trees of nodes should be returned as a single
+tree, or as separate trees.
+The parameter level indicates whether all nodes should be returned, or only ones that contain suffix information.
+
 */
-func (s *Statement) generateLeafArrays(level int) ([][]*Node, map[string]int) {
+func (s *Statement) generateLeafArrays(aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
 
 	// Map holding reference from component type (e.g., ATTRIBUTES) to number of entries (relevant for reconstruction)
 	referenceMap := map[string]int{}
@@ -207,39 +218,39 @@ func (s *Statement) generateLeafArrays(level int) ([][]*Node, map[string]int) {
 	nodesMap := make([][]*Node, 0)
 
 	// Regulative components
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Attributes, ATTRIBUTES, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY_REFERENCE, true, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Deontic, DEONTIC, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Aim, AIM, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObject, DIRECT_OBJECT, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectComplex, DIRECT_OBJECT_REFERENCE, true, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY_REFERENCE, true, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObject, INDIRECT_OBJECT, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectComplex, INDIRECT_OBJECT_REFERENCE, true, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Attributes, ATTRIBUTES, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY_REFERENCE, true, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Deontic, DEONTIC, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Aim, AIM, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObject, DIRECT_OBJECT, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectComplex, DIRECT_OBJECT_REFERENCE, true, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY_REFERENCE, true, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObject, INDIRECT_OBJECT, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectComplex, INDIRECT_OBJECT_REFERENCE, true, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY_REFERENCE, true, aggregateImplicitLinkages, level)
 
 	// Context
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionComplex, ACTIVATION_CONDITION_REFERENCE, true, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ActivationConditionComplex, ACTIVATION_CONDITION_REFERENCE, true, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT_REFERENCE, true, aggregateImplicitLinkages, level)
 
 	// Constitutive components
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY_REFERENCE, true, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Modal, MODAL, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES_REFERENCE, true, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, level)
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY_REFERENCE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY_REFERENCE, true, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.Modal, MODAL, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES_REFERENCE, true, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, aggregateImplicitLinkages, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY_REFERENCE, true, aggregateImplicitLinkages, level)
 
 	// Shared components
-	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.OrElse, OR_ELSE, true, level)
+	nodesMap, referenceMap = getComponentLeafArray(nodesMap, referenceMap, s.OrElse, OR_ELSE, true, aggregateImplicitLinkages, level)
 
 	return nodesMap, referenceMap
 }
@@ -254,6 +265,9 @@ Input:
 - Reference to component node for which leaf elements are to be extracted
 - Component symbol associated with component
 - Indicator whether element embedded in node is complex (i.e., nested statement)
+- The parameter aggregateImplicitLinkages indicates whether implicitly linked trees of nodes should be returned as a single tree, or as separate trees.
+- The parameter level indicates whether all nodes should be returned, or only ones that contain suffix information.
+
 - Indicator whether all leaf nodes should be returned, or only one satisfying particular conditions
   (0 --> all nodes, 1 --> only ones with non-empty suffix).
 
@@ -261,7 +275,7 @@ Returns:
 - Node map of nodes associated with components
 - Reference map counting number of components
 */
-func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, complex bool, level int) ([][]*Node, map[string]int) {
+func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, complex bool, aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
 
 	// Map holding reference from component type (e.g., ATTRIBUTES) to number of entries (relevant for reconstruction)
 	referenceMap := map[string]int{}
@@ -269,7 +283,7 @@ func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, co
 	// Counter for overall number of entries
 	nodesMap := make([][]*Node, 0)
 
-	return getComponentLeafArray(nodesMap, referenceMap, componentNode, componentSymbol, complex, level)
+	return getComponentLeafArray(nodesMap, referenceMap, componentNode, componentSymbol, complex, aggregateImplicitLinkages, level)
 }
 
 /*
@@ -291,7 +305,7 @@ Returns:
 - Node map of nodes associated with components
 - Reference map counting number of components
 */
-func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, componentNode *Node, componentSymbol string, complex bool, level int) ([][]*Node, map[string]int) {
+func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, componentNode *Node, componentSymbol string, complex bool, aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
 
 	if componentNode == nil {
 		fmt.Println("No component node found - returning unmodified node and reference map ...")
@@ -318,7 +332,7 @@ func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, comp
 		// Counter for number of elements in given component
 		i := 0
 		// Add array of leaf nodes attached to general array
-		for _, v := range componentNode.GetLeafNodes() {
+		for _, v := range componentNode.GetLeafNodes(aggregateImplicitLinkages) {
 			nodesMap = append(nodesMap, v)
 			i++
 		}

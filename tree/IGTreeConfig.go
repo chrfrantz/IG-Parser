@@ -6,7 +6,8 @@ Indicates inheritance mode of shared elements from parent to children nodes (see
 var SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
 
 /*
-Indicates whether implicitly linked components (e.g., multiple Cex annotations) should be disaggregated in different rows
+Indicates whether implicitly linked components (e.g., multiple Cex annotations) should be aggregated
+into single tree, or be returned as separate trees (based on the implicit AND operator)
 */
 var AGGREGATE_IMPLICIT_LINKAGES = true
 

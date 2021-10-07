@@ -347,7 +347,7 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 		}
 
 		// Check whether all leaves have the same prefix
-		flatCombo := tree.Flatten(combo.GetLeafNodes())
+		flatCombo := tree.Flatten(combo.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES))
 		sharedPrefix := ""
 		for _, node := range flatCombo {
 			if node.Entry == nil {

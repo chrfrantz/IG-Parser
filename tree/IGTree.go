@@ -890,7 +890,7 @@ func (n *Node) CountLeaves() int {
 
 /*
 Returns root node of given tree the node is embedded in
-up to the level at which nodes are linked by synthetic AND (sAND).
+up to the level at which nodes are linked by synthetic AND (bAND).
  */
 // TODO: Check for the need to consider SAND_WITHIN_COMPONENTS
 func (n *Node) GetSyntheticRootNode() *Node {
@@ -905,10 +905,26 @@ func (n *Node) GetSyntheticRootNode() *Node {
 }
 
 /*
+Returns root node of given tree the node independent of linking logical operators.
+*/
+func (n *Node) GetRootNode() *Node {
+	if n.Parent == nil {
+		// Assume to be parent if no parent on its own,
+		// or root in synthetic hierarchy if paired with sAND
+		return n
+	} else {
+		// else delegate to parent
+		return n.Parent.GetRootNode()
+	}
+}
+
+/*
 Returns leaf nodes of a given node as arrays of arrays of nodes.
 The two-dimensional array allows for separate storage of multiple arrays for a given component (e.g., multiple attributes, aims, etc.).
+The parameter aggregateImplicitLinkages indicates whether the nodes for a given tree with implicitly linked branches
+should be returned as a single tree, or multiple trees.
  */
-func (n *Node) GetLeafNodes() [][]*Node {
+func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
 	if n == nil {
 		// Uninitialized node
 		return nil
@@ -929,15 +945,15 @@ func (n *Node) GetLeafNodes() [][]*Node {
 
 	// If both left and right children nodes exist, return those combined
 	if n.Left != nil && n.Right != nil {
-		leftNodes = n.Left.GetLeafNodes()
-		rightNodes = n.Right.GetLeafNodes()
+		leftNodes = n.Left.GetLeafNodes(aggregateImplicitLinkages)
+		rightNodes = n.Right.GetLeafNodes(aggregateImplicitLinkages)
 		// TODO: Check for the need to consider SAND_WITHIN_COMPONENTS
 		// if combined with synthetic linkages,
 		if n.LogicalOperator == SAND_WITHIN_COMPONENTS {
 			// Nested arrays
 			return aggregateNodes(1, leftNodes, rightNodes, returnNode)
 		} else if n.LogicalOperator == SAND_BETWEEN_COMPONENTS {
-			if AGGREGATE_IMPLICIT_LINKAGES {
+			if aggregateImplicitLinkages {
 				// Flatten arrays (keep components separate)
 				return aggregateNodes(0, leftNodes, rightNodes, returnNode)
 			} else {
@@ -965,14 +981,14 @@ func (n *Node) GetLeafNodes() [][]*Node {
 	}
 	// Process left nodes
 	if n.Left != nil {
-		leftNodes = n.Left.GetLeafNodes()
+		leftNodes = n.Left.GetLeafNodes(aggregateImplicitLinkages)
 		for _, v := range leftNodes {
 			returnNode[0] = append(returnNode[0], v...)
 		}
 	}
 	// Process right nodes
 	if n.Right != nil {
-		rightNodes = n.Right.GetLeafNodes()
+		rightNodes = n.Right.GetLeafNodes(aggregateImplicitLinkages)
 		for _, v := range rightNodes {
 			returnNode[0] = append(returnNode[0], v...)
 		}

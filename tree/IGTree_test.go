@@ -107,7 +107,7 @@ func TestTreeCreation(t *testing.T) {
 	}
 
 	// Should have a single branch with four leaves, i.e., leaves[1][4]
-	leaves := root.GetLeafNodes()
+	leaves := root.GetLeafNodes(true)
 
 	if len(leaves) != 1 || len(leaves[0]) != 4 {
 		t.Fatal("Wrong number of leaves returned")
@@ -948,6 +948,65 @@ func TestRemoveNodeFromTree(t *testing.T) {
 		t.Fatal("Sibling node of removed node has not been properly reassigned.")
 	}
 
+}
+
+/*
+Tests root node retrieval functions in variants for synthetic root nodes and actual root nodes.
+ */
+func TestNode_GetSyntheticRootNode(t *testing.T) {
+	root := Node{}
+	root.SharedLeft = []string{"Shared top left"}
+	root.SharedRight = []string{"Shared top right"}
+	root.LogicalOperator = "bAND"
+
+	leftChild := Node{LogicalOperator: "AND"}
+	leftChild.SharedLeft = []string{"Shared middle left"}
+
+	leftLeftChild := Node{Entry: "left left"}
+	_, err := leftChild.InsertLeftNode(&leftLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	leftRightChild := Node{Entry: "left right"}
+	_, err = leftChild.InsertRightNode(&leftRightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertLeftNode(&leftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightChild := Node{LogicalOperator: "XOR"}
+	rightChild.SharedRight = []string{"Shared middle right"}
+
+	rightLeftChild := Node{Entry: "right left"}
+	_, err = rightChild.InsertLeftNode(&rightLeftChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	rightRightChild := Node{Entry: "right right"}
+	_, err = rightChild.InsertRightNode(&rightRightChild)
+	rightRightChild.SharedRight = []string{"lower right"}
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	_, err = root.InsertRightNode(&rightChild)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree.")
+	}
+
+	if rightRightChild.GetSyntheticRootNode() != &rightChild {
+		t.Fatal("Wrong identification of synthetic root node:", rightRightChild.GetSyntheticRootNode())
+	}
+
+	if rightRightChild.GetRootNode() != &root {
+		t.Fatal("Wrong identification of root node:", rightRightChild.GetRootNode())
+	}
 }
 
 //Collapse adjacent entries in logical operators - CollapseAdjacentOperators()

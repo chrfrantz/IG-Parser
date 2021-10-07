@@ -100,7 +100,7 @@ func TestLeafArrayGenerationWithoutAggregationOfImplicitlyLinkedComponents(t *te
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
 
-	nodeArray, componentIdx := s.GenerateLeafArrays()
+	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil {
 		t.Fatal("Generated array should not be empty.")
@@ -209,7 +209,7 @@ func TestLeafArrayGenerationWithAggregationOfImplicitlyLinkedComponents(t *testi
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
 
-	nodeArray, componentIdx := s.GenerateLeafArrays()
+	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil {
 		t.Fatal("Generated array should not be empty.")
@@ -291,7 +291,7 @@ func TestSyntheticRootRetrieval(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	nodeArray, componentIdx := s.GenerateLeafArrays()
+	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	fmt.Println(nodeArray)
 	fmt.Println(componentIdx)
@@ -391,7 +391,7 @@ func TestComponentTwoLevelNestedStatement(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	nodeArray, componentIdx := s.GenerateLeafArrays()
+	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil {
 		t.Fatal("Generated array should not be empty.")
@@ -471,7 +471,7 @@ func TestComponentTwoLevelNestedStatement(t *testing.T) {
 
 	// Test for nested elements
 	nestedStmt := element[0].Entry.(tree.Statement)
-	leaves, _ := nestedStmt.GenerateLeafArrays()
+	leaves, _ := nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 4 {
 		t.Fatal("Did not leaf elements of first-order nested statement correctly")
 	}
@@ -498,7 +498,7 @@ func TestComponentTwoLevelNestedStatement(t *testing.T) {
 	}
 
 	nestedStmt = element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
-	leaves, _ = nestedStmt.GenerateLeafArrays()
+	leaves, _ = nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 3 {
 		t.Fatal("Did not leaf elements of second-order nested statement correctly")
 	}
@@ -556,7 +556,7 @@ func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	nodeArray, componentIdx := s.GenerateLeafArrays()
+	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil {
 		t.Fatal("Generated array should not be empty.")
@@ -666,7 +666,7 @@ func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 
 	// Test for nested elements
 	nestedStmt := element[0].Entry.(tree.Statement)
-	leaves, _ := nestedStmt.GenerateLeafArrays()
+	leaves, _ := nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 4 {
 		t.Fatal("Did not leaf elements of first-order nested statement correctly")
 	}
@@ -693,7 +693,7 @@ func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 	}
 
 	nestedStmt = element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
-	leaves, _ = nestedStmt.GenerateLeafArrays()
+	leaves, _ = nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 3 {
 		t.Fatal("Did not leaf elements of second-order nested statement correctly")
 	}
@@ -754,7 +754,7 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	nodeArray, componentIdx := s.GenerateLeafArrays()
+	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil {
 		t.Fatal("Generated array should not be empty.")
@@ -836,7 +836,7 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 
 	// Test for nested elements
 	nestedStmt := element[0].Left.Entry.(tree.Statement)
-	leaves, _ := nestedStmt.GenerateLeafArrays()
+	leaves, _ := nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 4 {
 		t.Fatal("Did not leaf elements of first-order nested statement correctly")
 	}
@@ -863,7 +863,7 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 	}
 
 	nestedStmt = element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
-	leaves, _ = nestedStmt.GenerateLeafArrays()
+	leaves, _ = nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 3 {
 		t.Fatal("Did not leaf elements of second-order nested statement correctly")
 	}
@@ -918,7 +918,7 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 	}
 
 	// Check whether all leaves have the same prefix
-	flatCombo := tree.Flatten(combo.GetLeafNodes())
+	flatCombo := tree.Flatten(combo.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES))
 	sharedPrefix := ""
 	for _, node := range flatCombo {
 		entry := node.Entry.(string)
@@ -936,7 +936,7 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 		}
 	}
 
-	if len(tree.Flatten(combo.GetLeafNodes())) != 3 {
+	if len(tree.Flatten(combo.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES))) != 3 {
 		t.Fatal("Wrong number of parsed string nodes.")
 	}
 
@@ -952,7 +952,7 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 		t.Fatal("Conversion of string entries to parsed statements failed:", err.Error())
 	}
 
-	if len(tree.Flatten(combo.GetLeafNodes())) != 3 {
+	if len(tree.Flatten(combo.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES))) != 3 {
 		t.Fatal("Wrong number of parsed string nodes.")
 	}
 
@@ -1284,38 +1284,38 @@ func TestNodeParsingOfSuffixAndAnnotationsAtomicStatement(t *testing.T) {
 
 	// Check Attributes
 
-	if stmt.Attributes.GetLeafNodes()[0][0].Suffix != "1" {
-		t.Fatal("Suffix should be 1, but is:", stmt.Attributes.GetLeafNodes()[0][0].Suffix)
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Suffix != "1" {
+		t.Fatal("Suffix should be 1, but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Suffix)
 	}
 
-	if stmt.Attributes.GetLeafNodes()[1][0].Suffix != "2" {
-		t.Fatal("Suffix should be 2, but is:", stmt.Attributes.GetLeafNodes()[1][0].Suffix)
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[1][0].Suffix != "2" {
+		t.Fatal("Suffix should be 2, but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[1][0].Suffix)
 	}
 
-	if stmt.Attributes.GetLeafNodes()[2][0].Suffix != "3" {
-		t.Fatal("Suffix should be 3, but is:", stmt.Attributes.GetLeafNodes()[2][0].Suffix)
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[2][0].Suffix != "3" {
+		t.Fatal("Suffix should be 3, but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[2][0].Suffix)
 	}
 
-	if stmt.Attributes.GetLeafNodes()[0][0].Annotations != "[annotation1]" {
-		t.Fatal("Suffix should be [annotation1], but is:", stmt.Attributes.GetLeafNodes()[0][0].Annotations)
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Annotations != "[annotation1]" {
+		t.Fatal("Suffix should be [annotation1], but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Annotations)
 	}
 
-	if stmt.Attributes.GetLeafNodes()[1][0].Annotations != "[annotation2]" {
-		t.Fatal("Suffix should be [annotation2], but is:", stmt.Attributes.GetLeafNodes()[1][0].Annotations)
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[1][0].Annotations != "[annotation2]" {
+		t.Fatal("Suffix should be [annotation2], but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[1][0].Annotations)
 	}
 
-	if stmt.Attributes.GetLeafNodes()[2][0].Annotations != nil {
-		t.Fatal("Suffix should be nil, but is:", stmt.Attributes.GetLeafNodes()[2][0].Annotations)
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[2][0].Annotations != nil {
+		t.Fatal("Suffix should be nil, but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[2][0].Annotations)
 	}
 
 	// Check Aim
 
-	if stmt.Aim.GetLeafNodes()[0][0].Suffix != "4" {
-		t.Fatal("Suffix should be 4, but is:", stmt.Aim.GetLeafNodes()[0][0].Suffix)
+	if stmt.Aim.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Suffix != "4" {
+		t.Fatal("Suffix should be 4, but is:", stmt.Aim.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Suffix)
 	}
 
-	if stmt.Aim.GetLeafNodes()[0][0].Annotations != "[annotation=(left,right)]" {
-		t.Fatal("Suffix should be [annotation=(left,right)], but is:", stmt.Aim.GetLeafNodes()[0][0].Annotations)
+	if stmt.Aim.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Annotations != "[annotation=(left,right)]" {
+		t.Fatal("Suffix should be [annotation=(left,right)], but is:", stmt.Aim.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Annotations)
 	}
 
 }

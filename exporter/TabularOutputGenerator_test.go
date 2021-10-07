@@ -31,7 +31,7 @@ func TestHeaderRowGenerationWithoutComponentAggregation(t *testing.T) {
 	}
 
 	// This is tested in IGStatementParser_test.go as well
-	nodeArray, componentIdx := s.GenerateLeafArrays()
+	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil || componentIdx == nil {
 		t.Fatal("Generated array or component header array should not be empty.")
@@ -91,7 +91,7 @@ func TestHeaderRowGenerationWithComponentAggregation(t *testing.T) {
 	}
 
 	// This is tested in IGStatementParser_test.go as well
-	nodeArray, componentIdx := s.GenerateLeafArrays()
+	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil || componentIdx == nil {
 		t.Fatal("Generated array or component header array should not be empty.")
@@ -142,6 +142,8 @@ func TestSimpleTabularOutput(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -151,7 +153,7 @@ func TestSimpleTabularOutput(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -215,6 +217,8 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit linkages are resolved
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -224,7 +228,7 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -288,6 +292,8 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -297,7 +303,7 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -362,6 +368,8 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -371,7 +379,7 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -437,6 +445,8 @@ func TestTabularOutputWithSharedElements(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -446,7 +456,7 @@ func TestTabularOutputWithSharedElements(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -513,6 +523,8 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -522,7 +534,7 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -592,6 +604,8 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -601,7 +615,7 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -670,6 +684,8 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -679,7 +695,7 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -747,6 +763,8 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -756,7 +774,7 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -826,6 +844,8 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -835,7 +855,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -905,6 +925,8 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -914,7 +936,7 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -985,6 +1007,8 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -994,7 +1018,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1066,6 +1090,8 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1075,7 +1101,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	res, err := GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1149,6 +1175,8 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 	CREATE_DYNAMIC_TABULAR_OUTPUT = true
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1158,7 +1186,7 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	fmt.Println("Generated Component References: ", componentRefs)
 
@@ -1236,13 +1264,12 @@ func TestTabularOutputWithStatementCombinationsOfIncompatibleComponents(t *testi
 /*
 Tests combination of two nested activation conditions (single level) for static output
 */
-func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
+func TestStaticTabularOutputBasicStatement(t *testing.T) {
 
-	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
-		//"I((inspect and [AND] sustain (review [AND] (refresh [AND] drink)))) " +
-		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"I(inspect), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) "+//Bdir,p1(accredited) Bdir1(certifying agents) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
@@ -1252,7 +1279,9 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 	// Static output
 	CREATE_DYNAMIC_TABULAR_OUTPUT = false
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Indicates whether implicit component linkages are aggregated or kept separately
+	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1262,7 +1291,7 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 	fmt.Println(s.String())
 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
-	leafArrays, componentRefs := s.GenerateLeafArrays()
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	fmt.Println("Component refs:", componentRefs)
 
@@ -1278,18 +1307,18 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 	fmt.Println("Links: ", links)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
-	/*if len(links) != 8 {
+	if len(links) != 8 {
 		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
-	}*/
+	}
 
 	// Read reference file
-	/*content, err2 := ioutil.ReadFile("TestOutputTwoNestedComplexComponents.test")
+	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaBasicStatement.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
 
 	// Extract expected output
-	expectedOutput := string(content)*/
+	expectedOutput := string(content)
 
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1304,21 +1333,20 @@ func TestTabularOutputWithStaticOutputLayout(t *testing.T) {
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	/*if output != expectedOutput {
+	if output != expectedOutput {
 		fmt.Println("Statement headers:\n", statementHeaders)
 		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
-		fmt.Println("Expected output:\n", expectedOutput)*/
+		fmt.Println("Expected output:\n", expectedOutput)
 		err2 := WriteToFile("errorOutput.error", output)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
-		/*t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
-	}*/
-
-		t.Fatal("Test incomplete - to be refined.")
-
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
 }
+
+// Test annotation mapping based on private nodes
 
 // ensure ordering of column headers
 

@@ -17,7 +17,7 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 	linkMap := make(map[*tree.Node][]*tree.Node)
 
 	// Retrieve source arrays
-	sourceArrays := tree.Flatten(sourceTree.GetLeafNodes())
+	sourceArrays := tree.Flatten(sourceTree.GetLeafNodes(true))
 	fmt.Println("Source arrays: ", sourceArrays)
 	if len(sourceArrays) == 0 {
 		fmt.Println("Could not find leaf nodes in source tree.")
@@ -25,7 +25,7 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 	}
 
 	// Retrieve target arrays
-	targetArrays := tree.Flatten(targetTree.GetLeafNodes())
+	targetArrays := tree.Flatten(targetTree.GetLeafNodes(true))
 	fmt.Println("Target arrays: ", targetArrays)
 	if len(targetArrays) == 0 {
 		fmt.Println("Could not find leaf nodes in target tree.")
@@ -95,7 +95,7 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 	fmt.Println("Statement before reviewing linkages: ", s)
 
 	// Find all leaves that have suffix
-	leafArrays, _ := s.GenerateLeafArraysSuffixOnly()
+	leafArrays, _ := s.GenerateLeafArraysSuffixOnly(true)
 
 	if len(leafArrays) == 0 {
 		fmt.Println("No leaf entries found, hence no suffix linkages.")
