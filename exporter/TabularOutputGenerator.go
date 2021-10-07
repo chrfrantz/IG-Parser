@@ -63,21 +63,12 @@ Output:
  */
 func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string) ([]map[string]string, []string, []string, tree.ParsingError) {
 
-	// TODO: Check whether there is a more elegant solution to adjust the AGGREGATE_IMPLICIT_LINKAGES parameters
-	if CREATE_DYNAMIC_TABULAR_OUTPUT {
-		// Leave implicit linkages as nested leaf array
-		tree.AGGREGATE_IMPLICIT_LINKAGES = false
-	} else {
-		// Flatten output structure for implicit linkages
-		tree.AGGREGATE_IMPLICIT_LINKAGES = true
-	}
-
 	// Caches column header symbols by component index for reuse in logical operator construction
 	headerSymbols := []string{}
 	// Caches column header names associated with symbols for human-readable header construction
 	headerSymbolsNames := []string{}
 
-	if CREATE_DYNAMIC_TABULAR_OUTPUT {
+	if ProduceDynamicOutput() {
 		// Generate headers based on parsed statement input
 		if componentFrequency != nil && len(componentFrequency) != 0 {
 			// Iterate through header frequencies and create header row
@@ -162,7 +153,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				entryVal := leftString +
 					statement[componentIdx].Entry.(string) +
 					rightString
-				if CREATE_DYNAMIC_TABULAR_OUTPUT {
+				if ProduceDynamicOutput() {
 					// Dynamic variant
 					// Save entry value into entryMap for given statement and component column
 					entryMap[headerSymbols[componentIdx]] = entryVal
@@ -223,7 +214,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						fmt.Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Val:", entryVal, ")")
 					}
 
-					if CREATE_DYNAMIC_TABULAR_OUTPUT {
+					if ProduceDynamicOutput() {
 						// Dynamic version
 						// Save entry into entryMap for calling row
 						if entryMap[headerSymbols[componentIdx]] != "" {
@@ -595,7 +586,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						// ... and append to logical expression column string
 						logicalExpressionString += fmt.Sprint(ops)
 						// Statement component identifier
-						if CREATE_DYNAMIC_TABULAR_OUTPUT {
+						if ProduceDynamicOutput() {
 							// Based on index or parsed input nodes
 							logicalExpressionString += "." + headerSymbols[componentIdx] + "."
 						} else {

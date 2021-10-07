@@ -1,6 +1,9 @@
 package exporter
 
-import "IG-Parser/tree"
+import (
+	"IG-Parser/tree"
+	"log"
+)
 
 /*
 Indicates whether shared elements are included in output
@@ -10,8 +13,30 @@ var INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 /*
 Indicates whether tabular export produces dynamic output based on present components
 (better for individual statements), or produces fixed predefined structure (better for datasets)
+Should not be directly modified, but rather using SetDynamicOutput().
 */
-var CREATE_DYNAMIC_TABULAR_OUTPUT = false
+var create_DYNAMIC_TABULAR_OUTPUT = false
+
+/*
+Sets whether produced output should be dynamic or static.
+ */
+func SetDynamicOutput(dynamic bool) {
+	create_DYNAMIC_TABULAR_OUTPUT = dynamic
+	if create_DYNAMIC_TABULAR_OUTPUT {
+		log.Println("Activated dynamic output.")
+		tree.AGGREGATE_IMPLICIT_LINKAGES = false
+	} else {
+		log.Println("Activated static output.")
+		tree.AGGREGATE_IMPLICIT_LINKAGES = true
+	}
+}
+
+/*
+Queries whether dynamic (vs. static) output is activated.
+ */
+func ProduceDynamicOutput() bool {
+	return create_DYNAMIC_TABULAR_OUTPUT
+}
 
 /*
 Returns a fixed schema for tabular output

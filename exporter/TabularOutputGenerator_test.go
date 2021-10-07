@@ -21,9 +21,12 @@ func TestHeaderRowGenerationWithoutComponentAggregation(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+	SetDynamicOutput(true)
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -54,6 +57,7 @@ func TestHeaderRowGenerationWithoutComponentAggregation(t *testing.T) {
 	output := "Init, "
 	output, outArr, _ := generateHeaderRow(output, componentIdx, ";")
 
+	// Unnecessary check is intentional to allow for flexible row specification change
 	if output == "" || len(outArr) == 0 {
 		t.Fatal("Generate header row did not return filled data structures")
 	}
@@ -81,8 +85,8 @@ func TestHeaderRowGenerationWithComponentAggregation(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
-	// Indicates whether implicit component linkages are aggregated or kept separately
+	SetDynamicOutput(true)
+	// OVERRIDE dynamic output setting
 	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
 	s, err := parser.ParseStatement(text)
@@ -114,6 +118,7 @@ func TestHeaderRowGenerationWithComponentAggregation(t *testing.T) {
 	output := "Init, "
 	output, outArr, _ := generateHeaderRow(output, componentIdx, ";")
 
+	// Unnecessary check is intentional to allow for flexible row specification change
 	if output == "" || len(outArr) == 0 {
 		t.Fatal("Generate header row did not return filled data structures")
 	}
@@ -139,10 +144,10 @@ func TestSimpleTabularOutput(t *testing.T) {
 		"Bdir(certified production facilities) "
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
+	// OVERRIDE dynamic output setting
 	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
 	s,err := parser.ParseStatement(text)
@@ -217,11 +222,14 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) "
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit linkages are resolved
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -295,11 +303,14 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 		"Bdir(certified production facilities) "
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -374,11 +385,14 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -454,11 +468,14 @@ func TestTabularOutputWithSharedElements(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -535,11 +552,14 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -619,11 +639,14 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed)) Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -702,11 +725,14 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -784,11 +810,14 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -868,11 +897,14 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -952,11 +984,14 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1037,11 +1072,14 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1123,11 +1161,14 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1211,11 +1252,14 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
 
 	// Dynamic output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = true
+	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1319,11 +1363,13 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
 	// Static output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = false
+	SetDynamicOutput(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = true
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1409,11 +1455,13 @@ func TestStaticTabularOutputBasicStatementPrivateProperties(t *testing.T) {
 		//"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
 	// Static output
-	CREATE_DYNAMIC_TABULAR_OUTPUT = false
+	SetDynamicOutput(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
-	// Indicates whether implicit component linkages are aggregated or kept separately
-	tree.AGGREGATE_IMPLICIT_LINKAGES = true
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {

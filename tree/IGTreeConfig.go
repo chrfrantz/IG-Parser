@@ -8,6 +8,8 @@ var SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
 /*
 Indicates whether implicitly linked components (e.g., multiple Cex annotations) should be aggregated
 into single tree, or be returned as separate trees (based on the implicit AND operator)
+NOTE: Interacts closely with create_DYNAMIC_TABULAR_OUTPUT variable
+(accessible via SetDynamicOutput() and ProduceDynamicOutput()) in TabularOutputGeneratorConfig.go
 */
 var AGGREGATE_IMPLICIT_LINKAGES = true
 
