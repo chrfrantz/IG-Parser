@@ -1443,16 +1443,16 @@ Tests combination of two nested activation conditions (single level) for static 
 func TestStaticTabularOutputBasicStatementPrivateProperties(t *testing.T) {
 
 	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
-		//"D(may) " +
-		"I(review) " +
-		//"I(inspect), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"D(may) " +
+		"I(inspect), " +
+		"I(sustain (review [AND] (refresh [AND] drink))) " +
 		//"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) "+
-		"Bdir,p(recognized) Bdir,p1(accredited) Bdir1(certifying agents) " //+
-		//"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		"Bdir,p(recognized) Bdir,p1(accredited) Bdir1(certifying agents) Bdir(other agents)" +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
-		//"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
+		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
 		// Activation condition 2
-		//"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
+		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
 	// Static output
 	SetDynamicOutput(false)
@@ -1487,12 +1487,12 @@ func TestStaticTabularOutputBasicStatementPrivateProperties(t *testing.T) {
 	fmt.Println("Links: ", links)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
-	//if len(links) != 8 {
-		//t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
-	//}
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaBasicStatement.test")
+	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaBasicStatementPrivateProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}

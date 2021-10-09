@@ -50,6 +50,14 @@ func TestExtractComponentLinkageAggregateLinkages(t *testing.T) {
 
 	fmt.Println(s.String())
 
+	if s.AttributesPropertySimple.Entry.(string) != "Certified" {
+		t.Fatal("Did not correctly parse shared property.")
+	}
+
+	if s.AttributesPropertySimple.Parent != nil {
+		t.Fatal("Did not correctly clean parent reference of shared property.")
+	}
+
 	if s.Attributes.Left.PrivateNodeLinks[0].Entry.(string) != "non-suspended" {
 		t.Fatal("Did not correct identify private node value. Should have been 'non-suspended', but is", s.Attributes.Left.PrivateNodeLinks[0].Entry.(string))
 	}

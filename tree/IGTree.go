@@ -34,16 +34,20 @@ type Node struct {
 	PrivateNodeLinks []*Node
 }
 
+
 /*
 Returns parents' left shared elements in order of hierarchical (top first).
  */
 func (n *Node) getParentsLeftSharedElements() []string {
-	if n.Parent != nil && n.Parent.SharedLeft != nil && len(n.Parent.SharedLeft) != 0 {
-		// Recursively return parents' shared elements, followed by respective children ones
-		return append(n.Parent.getParentsLeftSharedElements(), n.Parent.SharedLeft...)
-	} else if n.Parent != nil {
-		// Return only parents' shared elements
-		return n.Parent.getParentsLeftSharedElements()
+
+	if n.Parent != nil {
+		if n.Parent.SharedLeft != nil && len(n.Parent.SharedLeft) != 0 {
+			// Recursively return parents' shared elements, followed by respective children ones
+			return append(n.Parent.getParentsLeftSharedElements(), n.Parent.SharedLeft...)
+		} else {
+			// Return only parents' shared elements
+			return n.Parent.getParentsLeftSharedElements()
+		}
 	}
 	// Return empty structure
 	return []string{}
@@ -53,12 +57,15 @@ func (n *Node) getParentsLeftSharedElements() []string {
 Returns parents' right shared elements in order of hierarchical (top first).
 */
 func (n *Node) getParentsRightSharedElements() []string {
-	if n.Parent != nil && n.Parent.SharedRight != nil && len(n.Parent.SharedRight) != 0 {
-		// Recursively return parents' shared elements, followed by respective children ones
-		return append(n.Parent.getParentsRightSharedElements(), n.Parent.SharedRight...)
-	} else if n.Parent != nil {
-		// Return only parents' shared elements
-		return n.Parent.getParentsRightSharedElements()
+
+	if n.Parent != nil {
+		if n.Parent.SharedRight != nil && len(n.Parent.SharedRight) != 0 {
+			// Recursively return parents' shared elements, followed by respective children ones
+			return append(n.Parent.getParentsRightSharedElements(), n.Parent.SharedRight...)
+		} else {
+			// Return only parents' shared elements
+			return n.Parent.getParentsRightSharedElements()
+		}
 	}
 	// Return empty structure
 	return []string{}
@@ -87,7 +94,7 @@ func (n *Node) GetSharedLeft() []string {
 			} else if len(n.SharedLeft) != 0 {
 				// Return own node information
 				return n.SharedLeft
-			} else {
+			} else if n.Parent != nil {
 				// Return parent node information
 				return n.getParentsLeftSharedElements()
 			}
@@ -133,7 +140,7 @@ func (n *Node) GetSharedRight() []string {
 		} else if len(n.SharedRight) != 0 {
 			// Return own node information
 			return n.SharedRight
-		} else {
+		} else if n.Parent != nil {
 			// Return parent node information
 			return n.getParentsRightSharedElements()
 		}
@@ -471,7 +478,7 @@ Returns boolean indicating success and potential error (in success case TREE_NO_
 func RemoveNodeFromTree(node *Node) (bool, NodeError) {
 
 	if node.Parent != nil {
-		// Remove parent's reference to child, and collapse tree structure of necessary
+		// Remove parent's reference to child, and collapse tree structure if necessary
 		if node.Parent.Left == node {
 			// If the parent is a combination and the node's parent has a parent
 			if node.Parent.IsCombination() && node.Parent.Parent != nil {
@@ -494,6 +501,9 @@ func RemoveNodeFromTree(node *Node) (bool, NodeError) {
 				// if the node's parent is a combination (but the parent does not have a parent on its own),
 				// then simply assign former sibling as root (i.e., modify parent node of passed node)
 				fmt.Println("Assigned right as root")
+				// Remove pointer to parent
+				node.Parent.Right.Parent = nil
+				// Reassign
 				*node.Parent = *node.Parent.Right
 			}
 		} else if node.Parent.Right == node {
@@ -518,6 +528,9 @@ func RemoveNodeFromTree(node *Node) (bool, NodeError) {
 					// if the node's parent is a combination (but the parent does not have a parent on its own),
 					// then simply assign former sibling as root (i.e., modify parent node of passed node)
 					fmt.Println("Assigned left as root")
+					// Remove pointer to parent
+					node.Parent.Left.Parent = nil
+					// Reassign
 					*node.Parent = *node.Parent.Left
 			}
 		} else {
