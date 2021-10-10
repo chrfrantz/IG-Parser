@@ -37,6 +37,8 @@ const logLinkColHeaderComps = "Logical Linkage (Components)"
 const logLinkColHeaderStmts = "Logical Linkage (Statements)"
 // Default separator used for header row generation
 const headerRowSeparator = ";"
+// Default separator for multiple items within cell
+const cellValueSeparator = ","
 
 // Structure referencing ID (based on input ID), along with (nested) statement to be decomposed
 type IdentifiedStmt struct {
@@ -153,16 +155,46 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				entryVal := leftString +
 					statement[componentIdx].Entry.(string) +
 					rightString
+
 				if ProduceDynamicOutput() {
 					// Dynamic variant
 					// Save entry value into entryMap for given statement and component column
-					entryMap[headerSymbols[componentIdx]] = entryVal
+					if len(entryMap[headerSymbols[componentIdx]]) > 0 {
+						// Add separator for cell values
+						entryMap[headerSymbols[componentIdx]] = entryMap[headerSymbols[componentIdx]] +
+							cellValueSeparator + entryVal
+					} else {
+						// First value, hence no separator needed
+						entryMap[headerSymbols[componentIdx]] = entryVal
+					}
 				} else {
 					// Static variant
 					// Save entry for a given field matched based on node's component type
-					entryMap[headerSymbols[componentIdx]] = entryVal
+					if len(entryMap[statement[componentIdx].GetComponentName()]) > 0 {
+						// Add separator for cell values
+						entryMap[statement[componentIdx].GetComponentName()] = entryMap[statement[componentIdx].GetComponentName()] +
+							cellValueSeparator + entryVal
+					} else {
+						// First value, hence no separator needed
+						entryMap[statement[componentIdx].GetComponentName()] = entryVal
+					}
+
 				}
 				fmt.Println("Added entry ", entryVal)
+
+				// For static output, consider private nodes
+				if !ProduceDynamicOutput() && statement[componentIdx].HasPrivateNodes() {
+					for _, privateNodeValue := range statement[componentIdx].PrivateNodeLinks {
+						existing := entryMap[privateNodeValue.GetComponentName()]
+						if len(existing) > 0 {
+							existing += cellValueSeparator
+						}
+						existing += privateNodeValue.Entry.(string)
+						entryMap[privateNodeValue.GetComponentName()] = existing
+					}
+					fmt.Println("Added private nodes to given output node")
+				}
+
 				fmt.Println("Current entrymap:", entryMap)
 			} else {
 				// Nested statements are stored for later processing, but assigned IDs and references added to calling row

@@ -1009,4 +1009,23 @@ func TestNode_GetSyntheticRootNode(t *testing.T) {
 	}
 }
 
+/*
+Tests whether HasPrivateNodes function works correctly.
+ */
+func TestNode_HasPrivateNodes(t *testing.T) {
+	n := Node{Entry: "random content"}
+
+	if n.HasPrivateNodes() {
+		t.Fatal("Node should not have private nodes.")
+	}
+
+	n2 := Node{Entry: "content of linked node"}
+	n.PrivateNodeLinks = append(n.PrivateNodeLinks, &n2)
+
+	if !n.HasPrivateNodes() {
+		t.Fatal("Private node was not detected.")
+	}
+
+}
+
 //Collapse adjacent entries in logical operators - CollapseAdjacentOperators()

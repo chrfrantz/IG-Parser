@@ -1131,3 +1131,14 @@ func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) 
 	}
 	return ParsingError{ErrorCode: PARSING_NO_ERROR}
 }
+
+/*
+Indicates whether node has own private nodes (referenced via PrivateNodes field)
+ */
+func (n *Node) HasPrivateNodes() bool {
+	if n.PrivateNodeLinks != nil && len(n.PrivateNodeLinks) > 0 {
+		return true
+	} else {
+		return false
+	}
+}
