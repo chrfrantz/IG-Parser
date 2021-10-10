@@ -144,12 +144,33 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 						// Attach to node
 						srcComp.PrivateNodeLinks = linkComps
 						// Remove private node from original tree structure
-						tree.RemoveNodeFromTree(tgtComp)
+						rt, err := tree.RemoveNodeFromTree(tgtComp)
+						if err.ErrorCode != tree.TREE_NO_ERROR {
+							// Do not deal with error, since false will always refer to need for node removal from statement
+						}
+						// If return value is false, this implies that the remaining node is the last element - and to be removed from statement
+						if !rt {
+							// Identify corresponding element from statement and remove from statement tree
+							fmt.Println("Element", srcComp, "will be removed from parent tree (last element)")
+							switch sourceComponentElement.GetComponentName() {
+							case tree.ATTRIBUTES:
+								s.AttributesPropertySimple = nil
+							case tree.DIRECT_OBJECT:
+								s.DirectObjectPropertySimple = nil
+							case tree.INDIRECT_OBJECT:
+								s.IndirectObjectPropertySimple = nil
+							case tree.CONSTITUTED_ENTITY:
+								s.ConstitutedEntityPropertySimple = nil
+							case tree.CONSTITUTING_PROPERTIES:
+								s.ConstitutingPropertiesPropertySimple = nil
+							default:
+								fmt.Println("Node deletion from tree: Could not find match for component name", sourceComponentElement.GetComponentName())
+							}
+						}
 						fmt.Println("Component", srcComp.GetComponentName(), ": Added private link for node", tgtComp)
 					}
 				}
 			}
 		}
 	}
-	//fmt.Println("Statement after reviewing linkages: ", s)
 }

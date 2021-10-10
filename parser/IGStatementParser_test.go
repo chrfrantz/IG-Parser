@@ -1444,3 +1444,53 @@ func TestComponentNameIdentification(t *testing.T) {
 	}
 
 }
+
+/*
+Tests whether annotated statements (with suffix) are properly decomposed. Case mixes private and shared properties.
+ */
+func TestCorrectNodeRemovalWithSharedAndPrivateProperties(t *testing.T) {
+	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir,p(proper) Bdir,p1(organic farming) Bdir1(provisions) and Bdir,p2(improper) Bdir2(rules)"
+
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	if stmt.DirectObjectPropertySimple.Entry != "proper" {
+		t.Fatal("Shared property was not correctly detected.")
+	}
+
+	if stmt.DirectObject.Left.PrivateNodeLinks[0].Entry != "organic farming" {
+		t.Fatal("Private node was incorrectly identified")
+	}
+
+	if stmt.DirectObject.Right.PrivateNodeLinks[0].Entry != "improper" {
+		t.Fatal("Private node was incorrectly identified")
+	}
+
+}
+
+/*
+Tests whether annotated statements (with suffix) are properly decomposed. Case contains only private properties.
+*/
+func TestCorrectNodeRemovalWithPrivatePropertiesOnly(t *testing.T) {
+	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir,p1(organic farming) Bdir1(provisions) and Bdir,p2(improper) Bdir2(rules)"
+
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	if stmt.DirectObjectPropertySimple != nil {
+		t.Fatal("Shared property present, but should be absent. Value:", stmt.DirectObjectPropertySimple)
+	}
+
+	if stmt.DirectObject.Left.PrivateNodeLinks[0].Entry != "organic farming" {
+		t.Fatal("Private node was incorrectly identified")
+	}
+
+	if stmt.DirectObject.Right.PrivateNodeLinks[0].Entry != "improper" {
+		t.Fatal("Private node was incorrectly identified")
+	}
+
+}
