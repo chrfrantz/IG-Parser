@@ -1028,4 +1028,57 @@ func TestNode_HasPrivateNodes(t *testing.T) {
 
 }
 
+/*
+Test retrieval of annotations across tree with and without inheritance.
+ */
+func TestNode_GetAnnotations(t *testing.T) {
+	//oneNode := Node{Entry: "entry1", Annotations: "top annotation"}
+	twoNode := Node{LogicalOperator: SAND_BETWEEN_COMPONENTS, Annotations: "upper annotation"}
+	//topRightNode := Node{Entry: "right unused entry"}
+	threeNode := Node{Entry: "three entry"}
+	fourNode := Node{LogicalOperator: AND, Annotations: "lower annotation"}
+	fiveNode := Node{Entry: "entry1-1"}
+	sixNode := Node{Entry: "entry1-2"}
+
+	res, err := fourNode.InsertLeftNode(&fiveNode)
+	if !res {
+		t.Fatal("Error when inserting node. Error:", err.Error())
+	}
+
+	res, err = fourNode.InsertRightNode(&sixNode)
+	if !res {
+		t.Fatal("Error when inserting node. Error:", err.Error())
+	}
+
+	res, err = twoNode.InsertLeftNode(&threeNode)
+	if !res {
+		t.Fatal("Error when inserting node. Error:", err.Error())
+	}
+
+	res, err = twoNode.InsertRightNode(&fourNode)
+	if !res {
+		t.Fatal("Error when inserting node. Error:", err.Error())
+	}
+
+	if twoNode.GetAnnotations() != "upper annotation" {
+		t.Fatal("Error during annotation retrieval. Found:", twoNode.GetAnnotations())
+	}
+
+	if fourNode.GetAnnotations() != "lower annotation" {
+		t.Fatal("Error during annotation retrieval. Found:", fourNode.GetAnnotations())
+	}
+
+	if fiveNode.GetAnnotations() == "" || fiveNode.GetAnnotations() != "lower annotation" {
+		t.Fatal("Error during annotation retrieval via inheritance. Found:", fiveNode.GetAnnotations())
+	}
+
+	if sixNode.GetAnnotations() == "" || sixNode.GetAnnotations() != "lower annotation" {
+		t.Fatal("Error during annotation retrieval via inheritance. Found:", sixNode.GetAnnotations())
+	}
+
+	if threeNode.GetAnnotations() != nil {
+		t.Fatal("Error during annotation retrieval. Found:", threeNode.GetAnnotations())
+	}
+}
+
 //Collapse adjacent entries in logical operators - CollapseAdjacentOperators()

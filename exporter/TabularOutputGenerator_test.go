@@ -1536,8 +1536,8 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 
 	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
-		"I(inspect), " +
-		"I(sustain (review [AND] (refresh [AND] drink))) " +
+		"I[type=act](inspect), " +
+		"I[type=act2](sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir,p(recognized) Bdir,p1(accredited) Bdir1(certifying agents) Bdir(other agents)" +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1

@@ -185,14 +185,33 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				// For static output, consider private nodes
 				if !ProduceDynamicOutput() && statement[componentIdx].HasPrivateNodes() {
 					for _, privateNodeValue := range statement[componentIdx].PrivateNodeLinks {
+
+						// Check for existing private nodes ...
 						existing := entryMap[privateNodeValue.GetComponentName()]
 						if len(existing) > 0 {
+							// ... and append if necessary
 							existing += cellValueSeparator
 						}
+						// Add actual value
 						existing += privateNodeValue.Entry.(string)
+						// (Re)Assign to entry to be output
 						entryMap[privateNodeValue.GetComponentName()] = existing
 					}
 					fmt.Println("Added private nodes to given output node")
+				}
+				// For static output, consider annotations
+				if !ProduceDynamicOutput() && statement[componentIdx].HasAnnotations() {
+
+					// Check for existing annotations ...
+					existing := entryMap[statement[componentIdx].GetComponentName() + tree.ANNOTATION]
+					if len(existing) > 0 {
+						// ... and append if necessary
+						existing += cellValueSeparator
+					}
+					// Add actual value
+					existing += statement[componentIdx].GetAnnotations().(string)
+					// (Re)Assign to entry to be output
+					entryMap[statement[componentIdx].GetComponentName() + tree.ANNOTATION] = existing
 				}
 
 				fmt.Println("Current entrymap:", entryMap)

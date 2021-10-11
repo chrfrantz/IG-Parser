@@ -49,34 +49,63 @@ func GetStaticTabularOutputSchema() map[string]int {
 	// Regulative side
 	staticComponentFrequency[tree.ATTRIBUTES_PROPERTY] = 1
 	staticComponentFrequency[tree.ATTRIBUTES_PROPERTY_REFERENCE] = 1
+	staticComponentFrequency[tree.ATTRIBUTES_PROPERTY_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.ATTRIBUTES] = 1
+	staticComponentFrequency[tree.ATTRIBUTES_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.DEONTIC] = 1
+	staticComponentFrequency[tree.DEONTIC_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.AIM] = 1
+	staticComponentFrequency[tree.AIM_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.DIRECT_OBJECT_PROPERTY] = 1
 	staticComponentFrequency[tree.DIRECT_OBJECT_PROPERTY_REFERENCE] = 1
+	staticComponentFrequency[tree.DIRECT_OBJECT_PROPERTY_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.DIRECT_OBJECT] = 1
 	staticComponentFrequency[tree.DIRECT_OBJECT_REFERENCE] = 1
+	staticComponentFrequency[tree.DIRECT_OBJECT_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.INDIRECT_OBJECT_PROPERTY] = 1
 	staticComponentFrequency[tree.INDIRECT_OBJECT_PROPERTY_REFERENCE] = 1
+	staticComponentFrequency[tree.INDIRECT_OBJECT_PROPERTY_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.INDIRECT_OBJECT] = 1
 	staticComponentFrequency[tree.INDIRECT_OBJECT_REFERENCE] = 1
+	staticComponentFrequency[tree.INDIRECT_OBJECT_ANNOTATION] = 1
 
 	// Shared elements
 	staticComponentFrequency[tree.ACTIVATION_CONDITION] = 1
 	staticComponentFrequency[tree.ACTIVATION_CONDITION_REFERENCE] = 1
+	staticComponentFrequency[tree.ACTIVATION_CONDITION_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.EXECUTION_CONSTRAINT] = 1
 	staticComponentFrequency[tree.EXECUTION_CONSTRAINT_REFERENCE] = 1
+	staticComponentFrequency[tree.EXECUTION_CONSTRAINT_ANNOTATION] = 1
 
 	// Constitutive side
 	staticComponentFrequency[tree.CONSTITUTED_ENTITY_PROPERTY] = 1
 	staticComponentFrequency[tree.CONSTITUTED_ENTITY_PROPERTY_REFERENCE] = 1
+	staticComponentFrequency[tree.CONSTITUTED_ENTITY_PROPERTY_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.CONSTITUTED_ENTITY] = 1
+	staticComponentFrequency[tree.CONSTITUTED_ENTITY_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.MODAL] = 1
+	staticComponentFrequency[tree.MODAL_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.CONSTITUTIVE_FUNCTION] = 1
+	staticComponentFrequency[tree.CONSTITUTIVE_FUNCTION_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.CONSTITUTING_PROPERTIES_PROPERTY] = 1
 	staticComponentFrequency[tree.CONSTITUTING_PROPERTIES_PROPERTY_REFERENCE] = 1
+	staticComponentFrequency[tree.CONSTITUTING_PROPERTIES_PROPERTY_ANNOTATION] = 1
+
 	staticComponentFrequency[tree.CONSTITUTING_PROPERTIES] = 1
 	staticComponentFrequency[tree.CONSTITUTING_PROPERTIES_REFERENCE] = 1
+	staticComponentFrequency[tree.CONSTITUTING_PROPERTIES_ANNOTATION] = 1
 
 	return staticComponentFrequency
 }
