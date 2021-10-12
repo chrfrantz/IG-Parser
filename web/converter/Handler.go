@@ -58,6 +58,7 @@ func Init() {
 		// Sensible to terminate in this case
 		log.Fatal(err)
 	}
+
 	fmt.Println("Working directory: " + dir)
 	// If in docker container
 	if dir == "/" {
@@ -159,6 +160,8 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		retStruct.Success = false
 		retStruct.Error = true
 		retStruct.Message = app.ERROR_INPUT_NO_STATEMENT
+		retStruct.DynamicOutput = dynChk
+		retStruct.IncludeAnnotations = inclAnnotations
 		err := tmpl.Execute(w, retStruct)
 		if err != nil {
 			log.Println("Error generating error response for empty input:", err.Error())
@@ -187,6 +190,8 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 			retStruct.Success = false
 			retStruct.Error = true
 			retStruct.CodedStmt = codedStmt
+			retStruct.DynamicOutput = dynChk
+			retStruct.IncludeAnnotations = inclAnnotations
 			switch err2.ErrorCode {
 			case tree.PARSING_ERROR_EMPTY_LEAF:
 				retStruct.Message = app.ERROR_INPUT_NO_STATEMENT
@@ -213,6 +218,8 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		retStruct.Success = true
 		retStruct.CodedStmt = codedStmt
 		retStruct.TabularOutput = output
+		retStruct.DynamicOutput = dynChk
+		retStruct.IncludeAnnotations = inclAnnotations
 		err := tmpl.Execute(w, retStruct)
 		if err != nil {
 			log.Println("Error processing default template:", err.Error())
