@@ -2,6 +2,7 @@ package converter
 
 import (
 	"IG-Parser/app"
+	"IG-Parser/exporter"
 	"IG-Parser/tree"
 	"IG-Parser/web/helper"
 	"fmt"
@@ -77,6 +78,27 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 	rawStmt := r.FormValue("rawStatement")
 	codedStmt := r.FormValue("annotatedStatement")
 	stmtId := r.FormValue("stmtId")
+	dynChk := r.FormValue("dynamicOutput")
+	inclAnnotations := r.FormValue("annotations")
+
+	// Dynamic output
+	dynamicOutput := false
+	fmt.Println("Dynamic: ", dynChk)
+	if dynChk == "on" {
+		dynamicOutput = true
+	} else {
+		dynamicOutput = false
+	}
+
+	// Annotations in output
+	includeAnnotations := false
+	fmt.Println("Annotations: ", inclAnnotations)
+	if inclAnnotations == "on" {
+		includeAnnotations = true
+	} else {
+		includeAnnotations = false
+	}
+
 	retStruct := ReturnStruct{
 		Success: false,
 		Error: false,
@@ -84,6 +106,8 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		RawStmt: rawStmt,
 		CodedStmt: codedStmt,
 		StmtId: stmtId,
+		DynamicOutput: dynChk,
+		IncludeAnnotations: inclAnnotations,
 		TransactionId: transactionID,
 		RawStmtHelp: HELP_RAW_STMT,
 		CodedStmtHelp: HELP_CODED_STMT,
@@ -151,6 +175,12 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	} else {
+		// Define whether output is dynamic
+		fmt.Println("Setting dynamic output: ", dynamicOutput)
+		exporter.SetDynamicOutput(dynamicOutput)
+		// Define whether annotations are included
+		fmt.Println("Setting annotations: ", includeAnnotations)
+		exporter.SetIncludeAnnotations(includeAnnotations)
 		// Convert input
 		output, err2 := app.ConvertIGScriptToGoogleSheets(codedStmt, stmtId, "")
 		if err2.ErrorCode != tree.PARSING_NO_ERROR {

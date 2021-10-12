@@ -16,6 +16,10 @@ type ReturnStruct struct{
 	CodedStmt string;
 	// Statement ID
 	StmtId string;
+	// Dynamic output indicator
+	DynamicOutput string
+	// Annotation inclusion indicator
+	IncludeAnnotations string
 	// Generated tabular output
 	TabularOutput string
 	// Transaction ID
