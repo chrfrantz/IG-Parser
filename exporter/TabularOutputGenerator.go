@@ -199,8 +199,8 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					}
 					fmt.Println("Added private nodes to given output node")
 				}
-				// For static output, consider annotations
-				if !ProduceDynamicOutput() && statement[componentIdx].HasAnnotations() {
+				// For static output, consider annotations (if activated)
+				if !ProduceDynamicOutput() && IncludeAnnotations() && statement[componentIdx].HasAnnotations() {
 
 					// Check for existing annotations ...
 					existing := entryMap[statement[componentIdx].GetComponentName() + tree.ANNOTATION]

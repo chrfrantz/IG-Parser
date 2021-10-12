@@ -1147,7 +1147,7 @@ func (n *Node) HasPrivateNodes() bool {
 Indicates whether node has annotations (referenced via Annotations field)
 */
 func (n *Node) HasAnnotations() bool {
-	if n.Annotations != nil && len(n.Annotations.(string)) > 0 {
+	if n.GetAnnotations() != nil && n.GetAnnotations() != nil && len(n.GetAnnotations().(string)) > 0 {
 		return true
 	} else {
 		return false
@@ -1159,8 +1159,9 @@ Returns annotations for specific node. If non-synthetic parent nodes hold annota
 those are inherited.
  */
 func (n *Node) GetAnnotations() interface{} {
+
 	// If annotations of nodes are empty
-	if n.Annotations == nil || len(n.Annotations.(string)) == 0 {
+	if n.Parent != nil && (n.Annotations == nil || len(n.Annotations.(string)) == 0) {
 		// Check for parent entries
 		if n.Parent != nil && n.Parent.LogicalOperator != SAND_BETWEEN_COMPONENTS {
 			// Delegate to parent component

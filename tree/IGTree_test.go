@@ -1030,8 +1030,9 @@ func TestNode_HasPrivateNodes(t *testing.T) {
 
 /*
 Test retrieval of annotations across tree with and without inheritance.
+Tests both GetAnnotations() and HasAnnotations().
  */
-func TestNode_GetAnnotations(t *testing.T) {
+func TestNode_GetAnnotationsHasAnnotations(t *testing.T) {
 	//oneNode := Node{Entry: "entry1", Annotations: "top annotation"}
 	twoNode := Node{LogicalOperator: SAND_BETWEEN_COMPONENTS, Annotations: "upper annotation"}
 	//topRightNode := Node{Entry: "right unused entry"}
@@ -1060,20 +1061,40 @@ func TestNode_GetAnnotations(t *testing.T) {
 		t.Fatal("Error when inserting node. Error:", err.Error())
 	}
 
+	if !twoNode.HasAnnotations() {
+		t.Fatal("Error No annotations found, but should have been.")
+	}
+
 	if twoNode.GetAnnotations() != "upper annotation" {
 		t.Fatal("Error during annotation retrieval. Found:", twoNode.GetAnnotations())
+	}
+
+	if !fourNode.HasAnnotations() {
+		t.Fatal("Error No annotations found, but should have been.")
 	}
 
 	if fourNode.GetAnnotations() != "lower annotation" {
 		t.Fatal("Error during annotation retrieval. Found:", fourNode.GetAnnotations())
 	}
 
+	if !fiveNode.HasAnnotations() {
+		t.Fatal("Error No annotations found, but should have been.")
+	}
+
 	if fiveNode.GetAnnotations() == "" || fiveNode.GetAnnotations() != "lower annotation" {
 		t.Fatal("Error during annotation retrieval via inheritance. Found:", fiveNode.GetAnnotations())
 	}
 
+	if !sixNode.HasAnnotations() {
+		t.Fatal("Error No annotations found, but should have been.")
+	}
+
 	if sixNode.GetAnnotations() == "" || sixNode.GetAnnotations() != "lower annotation" {
 		t.Fatal("Error during annotation retrieval via inheritance. Found:", sixNode.GetAnnotations())
+	}
+
+	if threeNode.HasAnnotations() {
+		t.Fatal("Error annotations found but should not have any.")
 	}
 
 	if threeNode.GetAnnotations() != nil {
