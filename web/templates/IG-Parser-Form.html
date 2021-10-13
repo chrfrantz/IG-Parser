@@ -50,9 +50,9 @@
             <span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
             <input name="stmtId" type="number" value="{{.StmtId}}"><br />
 
-            <span data-text="{{.StmtIdHelp}}" class="tooltip">Parameters:</span>
+            <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
             </br></br>
-            Dynamic output (default: static)<input name="dynamicOutput" type="checkbox" {{.DynamicOutput}}>
+            Human-readable output (dynamic output schema; not suitable for computational processing) (default: off)<input name="dynamicOutput" type="checkbox" {{.DynamicOutput}}>
             Include annotations in output (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}}><br />
 
 

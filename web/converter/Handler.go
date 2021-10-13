@@ -117,6 +117,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		RawStmtHelp: HELP_RAW_STMT,
 		CodedStmtHelp: HELP_CODED_STMT,
 		StmtIdHelp: HELP_STMT_ID,
+		ParametersHelp: HELP_PARAMETERS,
 		ReportHelp: HELP_REPORT}
 
 	if r.Method != http.MethodPost {

@@ -30,6 +30,8 @@ type ReturnStruct struct{
 	CodedStmtHelp string;
 	// Help message for statement ID
 	StmtIdHelp string;
+	// Help message for parameters
+	ParametersHelp string;
 	// Help message for report tooltip
 	ReportHelp string;
 }
