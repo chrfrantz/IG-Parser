@@ -20,14 +20,17 @@ var STATEMENT_ID = "650"
 var HELP_RAW_STMT = "This entry field is for optional use. You can paste the original statement here to maintain a reference, while reconstructing it in the 'Annotated Statement' field."
 // Help for coded statement field
 const HTML_LINEBREAK = "\n"
-var HELP_CODED_STMT = "This entry field should be used to annotate your institutional statement using the IG-Script notation." + HTML_LINEBREAK +
+var HELP_CODED_STMT = "This entry field should be used to encode your institutional statement using the IG-Script notation." + HTML_LINEBREAK +
 						"The basic structure of a statement is the component symbol (e.g., 'A'), immediately followed by the coded text in parentheses, e.g., 'A(certifying agent)'." + HTML_LINEBREAK +
 						"Within the coded component, logical combinations of type [AND], [OR], and [XOR] are supported, e.g., 'A(Both (certifying agent [AND] inspector)) ...'. " + HTML_LINEBREAK +
 						"Note the parentheses indicating the combination scope within the component; these need to be explicitly specified for every logical operator (i.e., 'A((first [AND] second))'; 'A(first [AND] second)' will lead to an error)." + HTML_LINEBREAK + HTML_LINEBREAK +
 						"In addition, the notion of statement-level nesting is supported (i.e., the substitution of component content with entire statements), " +
 						"e.g., 'Cac{A(certifier) I(observes) Bdir(violation)}', including the combination of nested statements, e.g., '{Cac{A(certifier) I(observes) Bdir(violation)} [AND] Cac{A(certifier) I(sanctions) Bdir(violation)}}' (note the outer braces)." + HTML_LINEBREAK +
 	                    "Nesting is supported on all property types (as detailed below), Activation conditions (" + tree.ACTIVATION_CONDITION + "{}), Execution constraints (" + tree.EXECUTION_CONSTRAINT + "{}), " + //HTML_LINEBREAK +
-	                    " and the Or else component (" + tree.OR_ELSE + "{})." + HTML_LINEBREAK + HTML_LINEBREAK +
+	                    " and the Or else component (" + tree.OR_ELSE + "{})." + HTML_LINEBREAK +
+	                    "Additional features include the use of suffices to indicate private linkages between properties and associated components (e.g., 'Bdir,p1(violating) Bdir1(citizens) as well as Bdir,p2(compliant) Bdir2(customers)')." + HTML_LINEBREAK +
+						"The parser further supports the encoding of IG Logico annotations to capture semantic information associated with component values (e.g., 'A[type=animate](Officer)'). " +
+						"Such annotations can be combined with suffices indicating private component relationships (e.g., 'A,p1[prop=qualitative](personal) A1[type=animate](agent)')." + HTML_LINEBREAK + HTML_LINEBREAK +
 						"Supported component symbols include (with indication of optional component-level nesting):" + HTML_LINEBREAK +
 						tree.ATTRIBUTES + "() --> " + tree.IGComponentSymbolNameMap[tree.ATTRIBUTES] + HTML_LINEBREAK +
 						tree.ATTRIBUTES_PROPERTY + "() --> " + tree.IGComponentSymbolNameMap[tree.ATTRIBUTES_PROPERTY] + "*" + HTML_LINEBREAK +

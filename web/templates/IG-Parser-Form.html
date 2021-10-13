@@ -44,7 +44,7 @@
             <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
             <textarea name="rawStatement" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
 
-            <span data-text="{{.CodedStmtHelp}}" class="tooltip">Annotated Statement:</span>
+            <span data-text="{{.CodedStmtHelp}}" class="tooltip">Encoded Statement:</span>
             <textarea name="annotatedStatement" onfocusin="check(this)" onkeyup="check(this)">{{.CodedStmt}}</textarea><br />
 
             <span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
@@ -56,7 +56,7 @@
             Include IG Logico annotations in output (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}}><br />
 
 
-            <input value="Generate statements" type="submit">
+            <input value="Generate tabular output" type="submit">
             {{if .Error}}
                 <div class="error">
                     <label>Error: {{.Message}}</label>
