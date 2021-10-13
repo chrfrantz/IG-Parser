@@ -21,7 +21,8 @@ IG Script centers around a set of fundamental primitives that can be combined to
 * Component combinations
 * Nested statements
 * Nested statement combinations
-* Semantic Annotations (not yet supported in output)
+* Object-Property relationships
+* Semantic Annotations
 
 #### Component Annotations
 
@@ -166,15 +167,15 @@ Note that non-nested and nested components can be used in the same statement
 
 Entities such as Attributes, Direct Object, Indirect Object, Constituted Entity and Constitutive Properties often carry private properties specific to a particular instance of that component (e.g., where multiple components of the same type exist).
 
-An example is `Bdir,p(shared) Bdir,p1(private) Bdir1(object1) Bdir(object2)`, where both Direct Objects (Bdir) have a shared property ("Bdir,p(shared)"), but only one has an additional private property ("Bdir,p1(private)") that is exclusively linked to `object1` ("Bdir1(object1)").
+An example is `Bdir,p(shared) Bdir,p1(private) Bdir1(object1) Bdir(object2)`, where both Direct Objects (Bdir) have a shared property (`Bdir,p(shared)`), but only one has an additional private property (`Bdir,p1(private)`) that is exclusively linked to `object1` (`Bdir1(object1)`).
 
-In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix ("1" to signal direct linkage between "Bdir,p1" and Bdir1").
+In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix ("1" to signal direct linkage between `Bdir,p1` and `Bdir1`).
 
-The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`suffix`) signals the private linkage (i.e, the "1" in "Bdir,p1" and "Bdir1").
+The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`suffix`) signals the private linkage between particular instances (i.e, the `1` in `Bdir,p1` and `Bdir1`).
 
-This coding ensures that the specific intra-statement relationships can be captured and considered in further analysis.
+This coding ensures that the specific intra-statement relationships can be captured and accessible to downstream analysis.
 
-Note that the basic syntax introduced here is further augmented with the ability to capture IG Logico's Semantic Annotations.
+Note that the syntax introduced here is further augmented with the ability to capture IG Logico's Semantic Annotations as discussed in the following.
 
 #### Semantic Annotations
 
@@ -184,7 +185,7 @@ The syntax (including support for suffices introduced above) is `componentSymbol
 
 ### Examples
 
-In the following, you will find selected examples that highlight the practical use of the features introduced above.
+In the following, you will find selected examples that highlight the practical use of the features introduced above. These can be tested and explored using the parser.
 
 * Simple regulative statement: 
   * `A(Operator) D(must) I(comply) Bdir(with regulations)`
