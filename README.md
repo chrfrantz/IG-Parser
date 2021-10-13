@@ -95,6 +95,7 @@ Supported logical operators:
 * `[AND]` - conjunction (i.e., "and")
 * `[OR]` - inclusive disjunction (i.e., "and/or")
 * `[XOR]` - exclusive disjunction (i.e., "either or")
+* `[NOT]` - negation (i.e., "not")
 
 Invalid operators (e.g., `[AN]`) will be ignored in the parsing process.
 
@@ -161,13 +162,25 @@ Unlike the first example, the following one will result in an error due to missi
 Note that non-nested and nested components can be used in the same statement 
 (e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ), and are implicitly AND-combined.
 
+#### Object-Property Relationships
+
+Entities such as Attributes, Direct Object, Indirect Object, Constituted Entity and Constitutive Properties often carry private properties specific to a particular instance of that component (e.g., where multiple components of the same type exist).
+
+An example is `Bdir,p(shared) Bdir,p1(private) Bdir1(object1) Bdir(object2)`, where both Direct Objects (Bdir) have a shared property ("Bdir,p(shared)"), but only one has an additional private property ("Bdir,p1(private)") that is exclusively linked to `object1` ("Bdir1(object1)").
+
+In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix ("1" to signal direct linkage between "Bdir,p1" and Bdir1").
+
+The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`suffix`) signals the private linkage (i.e, the "1" in "Bdir,p1" and "Bdir1").
+
+This coding ensures that the specific intra-statement relationships can be captured and considered in further analysis.
+
+Note that the basic syntax introduced here is further augmented with the ability to capture IG Logico's Semantic Annotations.
+
 #### Semantic Annotations
 
 In addition to the parsing of component annotations and combinations of various kinds, the parser further supports semantic annotations of components according to the taxonomies outlined in the [Institutional Grammar 2.0 Codebook](https://arxiv.org/abs/2008.08937).
 
-The syntax is `compononentSymbol[semanticAnnotation](component content)`, i.e., any component can be augmented with `[semantic annotation content]`, e.g., `Cac[context=state](Upon certification)`.
-
-Note that semantic annotations are not yet supported by the parser.
+The syntax (including support for suffices introduced above) is `componentSymbolSuffix[semanticAnnotation](component content)`, i.e., any component can be augmented with `[semantic annotation content]`, e.g., `Cac[context=state](Upon certification)`.
 
 ### Examples
 
@@ -183,9 +196,12 @@ In the following, you will find selected examples that highlight the practical u
   * `A(Farmer) D(must) I(comply) with Bdir(Organic Farming provisions) Cac{A(Farmer) I(has lodged) for Bdir(application) Bdir,p(certification) Cex(successfully) with the Bind(Organic Farming Program) Cac{E(Organic Program) F(covers) P,p(relevant) P(region)}}`
 * Component-level nesting on various components (e.g., Bdir and Cac) and combinations of nested statements (Cac): 
   * `A(Program Manager) D(may) I(administer) Bdir(sanctions) {Cac{A(Program Manager) I(suspects) Bdir{A(farmer) I((violates [OR] does not comply)) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}`
-* Complex statement showcasing combined use of various features (e.g., component-level combinations, nested statement combinations (activation conditions, Or else)): 
+* Complex statement; showcasing combined use of various features (e.g., component-level combinations, nested statement combinations (activation conditions, Or else)): 
   * `A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), D(must) I(inspect), I((review [AND] (revise [AND] resubmit))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) if {Cac{A(Programme Manager) I((suspects [OR] establishes)) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}, or else {O{A,p(Manager's) A(supervisor) D(may) I((suspend [XOR] revoke)) Bdir,p(Program Manager's) Bdir(authority)} [XOR] O{A(regional board) D(may) I((warn [OR] fine)) Bdir,p(violating) Bdir(Program Manager)}}`
-<!--* Semantic annotations: `A,p(Certified) A(organic farmers) D(must) I(submit) Bdir(report) to Bind(Organic Program Representative) Cac[context=tim](at the end of each year).`-->
+* Object-Property Relationships; showcasing linkage of private nodes with specific component instances (especially where implicit component-level combinations occur), alongside a shared property that apply to both objects.
+  * `A,p(Certified) A(agent) D(must) I(request) Bdir,p(independently) Bdir,p1(authorized) Bdir1(report) [AND] Bdir,p2(audited) Bdir2(financial documents).`
+* Semantic annotations; showcasing the basic use of annotations on arbitrary components 
+  * `A,p[property=qualitative](Certified) A[role=responsible](organic farmers) D[stringency=obligation](must) I[type=act](submit) Bdir[type=inanimate](report) to Bind[role=authority](Organic Program Representative) Cac[context=tim](at the end of each year).`
 
 * Common issues:
   * Parentheses/braces need to match. The parser calls out if a mismatch exists. 
