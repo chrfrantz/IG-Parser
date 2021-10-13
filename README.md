@@ -11,7 +11,7 @@ The conceptual background of the Institutional Grammar 2.0 is provided [here](ht
 
 ## IG Script
 
-IG Script is a notation introduced in the context of the [Institutional Grammar 2.0](https://doi.org/10.1111/padm.12719) (IG 2.0) that aims at a deep structural representation of legal statements alongside selected levels of expressiveness. While IG 2.0 highlights the conceptual background, the objective of IG Script is to provide an accessible, but formal approach to provide a format-independent representation of institutional statements. While the parser currently only supports export in tabular format, future refinements will include other formats (e.g.,  XML, JSON, YAML). While this introduction focuses on the operational use, syntactic and semantic foundations are provided [elsewhere](https://github.com/InstitutionalGrammar/IG-2.0-Resources).
+IG Script is a notation introduced in the context of the [Institutional Grammar 2.0](https://doi.org/10.1111/padm.12719) (IG 2.0) that aims at a deep structural representation of legal statements alongside selected levels of expressiveness. While IG 2.0 highlights the conceptual background, the objective of IG Script is to provide an accessible, but formal approach to provide a format-independent representation of institutional statements of any type (e.g., regulative, constitutive, hybrid). While the parser currently only supports export in tabular format, future refinements will include other formats (e.g.,  XML, JSON, YAML). While this introduction focuses on the operational use, syntactic and semantic foundations are provided [elsewhere](https://github.com/InstitutionalGrammar/IG-2.0-Resources).
 
 ### Principles of IG Script Syntax
 
@@ -169,7 +169,7 @@ Entities such as Attributes, Direct Object, Indirect Object, Constituted Entity 
 
 An example is `Bdir,p(shared) Bdir,p1(private) Bdir1(object1) Bdir(object2)`, where both Direct Objects (Bdir) have a shared property (`Bdir,p(shared)`), but only one has an additional private property (`Bdir,p1(private)`) that is exclusively linked to `object1` (`Bdir1(object1)`).
 
-In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix ("1" to signal direct linkage between `Bdir,p1` and `Bdir1`).
+In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix (`1` to signal direct linkage between `Bdir,p1` and `Bdir1`).
 
 The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`suffix`) signals the private linkage between particular instances (i.e, the `1` in `Bdir,p1` and `Bdir1`).
 
@@ -199,12 +199,12 @@ In the following, you will find selected examples that highlight the practical u
   * `A(Program Manager) D(may) I(administer) Bdir(sanctions) {Cac{A(Program Manager) I(suspects) Bdir{A(farmer) I((violates [OR] does not comply)) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}`
 * Complex statement; showcasing combined use of various features (e.g., component-level combinations, nested statement combinations (activation conditions, Or else)): 
   * `A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), D(must) I(inspect), I((review [AND] (revise [AND] resubmit))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) if {Cac{A(Programme Manager) I((suspects [OR] establishes)) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}, or else {O{A,p(Manager's) A(supervisor) D(may) I((suspend [XOR] revoke)) Bdir,p(Program Manager's) Bdir(authority)} [XOR] O{A(regional board) D(may) I((warn [OR] fine)) Bdir,p(violating) Bdir(Program Manager)}}`
-* Object-Property Relationships; showcasing linkage of private nodes with specific component instances (especially where implicit component-level combinations occur), alongside a shared property that apply to both objects.
+* Object-Property Relationships; showcasing linkage of private nodes with specific component instances (especially where implicit component-level combinations occur), alongside a shared property that apply to both objects:
   * `A,p(Certified) A(agent) D(must) I(request) Bdir,p(independently) Bdir,p1(authorized) Bdir1(report) [AND] Bdir,p2(audited) Bdir2(financial documents).`
-* Semantic annotations; showcasing the basic use of annotations on arbitrary components 
+* Semantic annotations; showcasing the basic use of annotations on arbitrary components:
   * `A,p[property=qualitative](Certified) A[role=responsible](organic farmers) D[stringency=obligation](must) I[type=act](submit) Bdir[type=inanimate](report) to Bind[role=authority](Organic Program Representative) Cac[context=tim](at the end of each year).`
 
-* Common issues:
+ ### Common issues
   * Parentheses/braces need to match. The parser calls out if a mismatch exists. 
   * Explicit specification of combinations using parentheses/braces is necessary. 
     * This example works: `A(( actor1 [XOR] actor2 ))` 
@@ -214,6 +214,8 @@ In the following, you will find selected examples that highlight the practical u
   * In nested statements, only components of the same kind can be logically linked (e.g., `{Cac{ ... } [AND] Cac{ ... }}` will parse; `{Cac{ ... } [AND] Bdir{ ... }}` will not parse).
 
 ## Deployment
+
+This section is particularly focused on the setup of IG Parser, not the practical use discussed above.
 
 * Prerequisites:
   * [Docker](https://docs.docker.com/engine/install/)
