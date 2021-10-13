@@ -1,6 +1,7 @@
 FROM golang:1.16 as builder
 
 LABEL maintainer "cf@christopherfrantz.org"
+LABEL stage=builder
 
 WORKDIR /go/src/IG-Parser/web
 

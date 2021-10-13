@@ -45,5 +45,11 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Remove remaining build containers
+docker image prune --filter label=stage=builder
+if [ $? -ne 0 ]; then
+  echo "Error when deleting build containers."
+  exit 1
+fi
 
 echo "Latest version should be deployed (check output for errors)"
