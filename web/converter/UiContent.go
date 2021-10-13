@@ -17,7 +17,7 @@ var ANNOTATED_STATEMENT = "A,p(Regional) A(Managers), Cex(on behalf of the Secre
 // Default example ID
 var STATEMENT_ID = "650"
 // Help for raw statement field
-var HELP_RAW_STMT = "This entry field is for optional use. You can paste the original statement here to maintain a reference, while reconstructing it in the 'Annotated Statement' field."
+var HELP_RAW_STMT = "This entry field is for optional use. You can paste the original statement here to maintain a reference, while reconstructing it in the 'Encoded Statement' field."
 // Help for coded statement field
 const HTML_LINEBREAK = "\n"
 var HELP_CODED_STMT = "This entry field should be used to encode your institutional statement using the IG-Script notation." + HTML_LINEBREAK +
