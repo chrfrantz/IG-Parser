@@ -86,8 +86,10 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 	dynamicOutput := false
 	fmt.Println("Dynamic: ", dynChk)
 	if dynChk == "on" {
+		dynChk = "checked"
 		dynamicOutput = true
 	} else {
+		dynChk = "unchecked"
 		dynamicOutput = false
 	}
 
@@ -95,8 +97,10 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 	includeAnnotations := false
 	fmt.Println("Annotations: ", inclAnnotations)
 	if inclAnnotations == "on" {
+		inclAnnotations = "checked"
 		includeAnnotations = true
 	} else {
+		inclAnnotations = "unchecked"
 		includeAnnotations = false
 	}
 
