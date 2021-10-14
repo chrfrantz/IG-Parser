@@ -44,7 +44,7 @@ The parser further tolerates multiple component annotations of the same kind. Mu
 for example (e.g., `A(Farmer) D(must) I(comply) A(Certifier)`, are effectively interpreted as a combination (i.e., 
 `A((Farmer [AND] Certifier)) D(must) I(comply)`) in the parsing process.  
 
-Any symbols outside the annotations and combinations are ignored by the parser.
+Any symbols outside the encoded components and combinations of components are ignored by the parser.
 
 The parser supports a fixed set of component type symbols that uniquely identify a given component type.
 
@@ -169,13 +169,21 @@ Entities such as Attributes, Direct Object, Indirect Object, Constituted Entity 
 
 An example is `Bdir,p(shared) Bdir,p1(private) Bdir1(object1) Bdir(object2)`, where both Direct Objects (Bdir) have a shared property (`Bdir,p(shared)`), but only one has an additional private property (`Bdir,p1(private)`) that is exclusively linked to `object1` (`Bdir1(object1)`).
 
-In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix (`1` to signal direct linkage between `Bdir,p1` and `Bdir1`).
+In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix (i.e., `1` to signal direct linkage between `Bdir,p1` and `Bdir1` in the above example).
 
-The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`suffix`) signals the private linkage between particular instances (i.e, the `1` in `Bdir,p1` and `Bdir1`).
+The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`suffix`) is the identifier of the private linkage between particular instances of the related components (i.e, the suffix `1` identifies the relationship between `Bdir,p1` and `Bdir1`).
 
-This coding ensures that the specific intra-statement relationships can be captured and accessible to downstream analysis.
+This coding ensures that the specific intra-statement relationships are correctly captured and accessible to downstream analysis.
 
-Note that the syntax introduced here is further augmented with the ability to capture IG Logico's Semantic Annotations as discussed in the following.
+Suffices can be attached to any component type, but private property linkages (i.e., linkages between particular types of components/properties) are currently supported for the following component-property pairs:
+
+* `A` and `A,p`
+* `Bdir` and `Bdir,p`
+* `Bind` and `Bind,p`
+* `E` and `E,p`
+* `P` and `P,p`
+
+Note that the extended syntax that supports Object-Property Relationships is further augmented with the ability to capture IG Logico's Semantic Annotations as discussed in the following.
 
 #### Semantic Annotations
 
