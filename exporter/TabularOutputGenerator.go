@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Separator for main statement ID (e.g., 123) and suffix for introduced substatement (e.g., .1, i.e., 123.1)
@@ -155,6 +156,16 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				entryVal := leftString +
 					statement[componentIdx].Entry.(string) +
 					rightString
+
+				// HANDLE SYMBOLS THAT REQUIRE SUBSTITUTION
+				// Substitute symbols before producing output (e.g., " with ')
+				// TODO: Review for further symbols
+				entryVal = strings.ReplaceAll(entryVal, "\"", "'")
+				// Duplicate leading ' for proper Google Sheets parsing
+				// TODO: Google Sheets specific
+				if len(entryVal) > 0 && entryVal[0:1] == "'" {
+					entryVal = "'" + entryVal
+				}
 
 				if ProduceDynamicOutput() {
 					// Dynamic variant
