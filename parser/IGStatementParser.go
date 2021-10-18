@@ -247,7 +247,7 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		}
 
 		// Extracting suffices and annotations
-		suffix, annotation, content, err := extractSuffixAndAnnotations(component, v, LEFT_BRACE, RIGHT_BRACE)
+		suffix, annotation, _, err := extractSuffixAndAnnotations(component, v, LEFT_BRACE, RIGHT_BRACE)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			fmt.Print("Error during extraction of suffices and annotations: " + err.ErrorCode)
 			return err
