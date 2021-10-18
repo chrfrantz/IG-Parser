@@ -595,7 +595,7 @@ func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []
 		return false, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 
-	fmt.Println("Searching downward from ", lastNode.Parent)
+	//fmt.Println("Searching downward from ", lastNode.Parent)
 	// Search unexplored neighbouring path, starting with the input's node's parent - prevent repeated exploration of the input node path lastNode
 	response, ops, err := searchDownward(originNode, lastNode, lastNode.Parent, targetNode, opsPath)
 	if err.ErrorCode != TREE_NO_ERROR {
@@ -606,7 +606,7 @@ func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []
 	if !response {
 		// Explicit include logical operator if moving upward
 		opsPath = append(opsPath, lastNode.Parent.LogicalOperator)
-		fmt.Println("Search one level higher above ", lastNode.Parent)
+		//fmt.Println("Search one level higher above ", lastNode.Parent)
 		response, ops, err = searchUpward(originNode, lastNode.Parent, targetNode, opsPath)
 	}
 
@@ -625,33 +625,33 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 
 	// Check if input node is already target
 	if startNode == targetNode {
-		fmt.Println("Search node ", startNode, " is target node")
+		//fmt.Println("Search node ", startNode, " is target node")
 		return true, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 
 	// if leaf and does not match, return false
 	if startNode.IsLeafNode() {
-		fmt.Println("Search node ", startNode, " is leaf, but does not corresponding to the target node. Node: ", targetNode)
+		//fmt.Println("Search node ", startNode, " is leaf, but does not corresponding to the target node. Node: ", targetNode)
 		return false, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 
 	// Carry over input operator
 	ops := []string{}
 	if opsPath != nil {
-		fmt.Println("Inherits operators ", opsPath)
+		//fmt.Println("Inherits operators ", opsPath)
 		ops = append(ops, opsPath...)
 	}
 
 	// Append start node operator
 	ops = append(ops, startNode.LogicalOperator)
-	fmt.Println("Added logical operator ", startNode.LogicalOperator)
+	//fmt.Println("Added logical operator ", startNode.LogicalOperator)
 
 	// Predefine response values
 	err := NodeError{ErrorCode: TREE_NO_ERROR}
 
 	// Test left first - it must not be nil, and not be the last explored node (i.e., a left child of the currently explored one)
 	if startNode.Left != nil && startNode.Left != lastNode {
-		fmt.Println("Test left branch ...")
+		//fmt.Println("Test left branch ...")
 		response, ops2, err := searchDownward(originNode, startNode.Left, startNode.Left, targetNode, ops)
 		// return lacking success if appearing
 		if err.ErrorCode != TREE_NO_ERROR {
@@ -659,11 +659,11 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		}
 		// If positive outcome
 		if response {
-			fmt.Println("Found target on left side")
+			//fmt.Println("Found target on left side")
 			return true, ops2, err
 		}
 		// Delegate downwards
-		fmt.Println("- Test left left")
+		//fmt.Println("- Test left left")
 		response, ops3, err := searchDownward(originNode, startNode.Left.Left, startNode.Left.Left, targetNode, ops2)
 		// return lacking success if appearing
 		if err.ErrorCode != TREE_NO_ERROR {
@@ -671,10 +671,10 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		}
 		// If positive outcome
 		if response {
-			fmt.Println("Found target on left left side")
+			//fmt.Println("Found target on left left side")
 			return true, ops3, err
 		}
-		fmt.Println("- Test left right")
+		//fmt.Println("- Test left right")
 		response, ops3, err = searchDownward(originNode, startNode.Left.Right, startNode.Left.Right, targetNode, ops2)
 		// return lacking success if appearing
 		if err.ErrorCode != TREE_NO_ERROR {
@@ -682,14 +682,14 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		}
 		// If positive outcome
 		if response {
-			fmt.Println("Found target on left right side")
+			//fmt.Println("Found target on left right side")
 			return true, ops3, err
 		}
 	}
 	// Test right (will only be done if left was not successful)
 	// Right node must not be nil, and not be the last explored node (i.e., a right child of the currently explored one)
 	if startNode.Right != nil && startNode.Right != lastNode {
-		fmt.Println("Testing right branch ...")
+		//fmt.Println("Testing right branch ...")
 		response, ops2, err := searchDownward(originNode, startNode.Right, startNode.Right, targetNode, ops)
 		// return lacking success if appearing
 		if err.ErrorCode != TREE_NO_ERROR {
@@ -697,11 +697,11 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		}
 		// If positive outcome
 		if response {
-			fmt.Println("Found target on right side")
+			//fmt.Println("Found target on right side")
 			return true, ops2, err
 		}
 		// Delegate downwards
-		fmt.Println("- Test right left")
+		//fmt.Println("- Test right left")
 		response, ops3, err := searchDownward(originNode, startNode.Right.Left, startNode.Right.Left, targetNode, ops2)
 		// return lacking success if appearing
 		if err.ErrorCode != TREE_NO_ERROR {
@@ -709,10 +709,10 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		}
 		// If positive outcome
 		if response {
-			fmt.Println("Found target on right left side")
+			//fmt.Println("Found target on right left side")
 			return true, ops3, err
 		}
-		fmt.Println("- Test right right")
+		//fmt.Println("- Test right right")
 		response, ops3, err = searchDownward(originNode, startNode.Right.Right, startNode.Right.Right, targetNode, ops2)
 		// return lacking success if appearing
 		if err.ErrorCode != TREE_NO_ERROR {
@@ -724,7 +724,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 			return true, ops3, err
 		}
 	}
-	fmt.Println("Final result: false")
+	//fmt.Println("Final result: false")
 	return false, ops, err
 }
 

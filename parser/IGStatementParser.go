@@ -256,7 +256,7 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		fmt.Println("Nested Stmt Component Identifier:", component)
 		fmt.Println("Nested Stmt Suffix:", suffix)
 		fmt.Println("Nested Stmt Annotation:", annotation)
-		fmt.Println("Nested Stmt Content:", content)
+		//fmt.Println("Nested Stmt Content:", content)
 
 		stmt, errStmt := ParseStatement(v[strings.Index(v, LEFT_BRACE)+1:strings.LastIndex(v, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
@@ -762,7 +762,7 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 		}*/
 
 		//// NEW REGEX-BASED PARSING (TO CONSIDER ANNOTATIONS AND SUFFICES)
-		fmt.Println("String to be searched for component:", processedString)
+		//fmt.Println("String to be searched for component:", processedString)
 		// Return index of found element
 		result := r.FindAllStringIndex(processedString, 1)
 		resultContent := r.FindString(processedString)
