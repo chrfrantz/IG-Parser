@@ -85,15 +85,15 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 			}
 		}
 
-		fmt.Println("Providing output based on fixed structure")
+		Println("Providing output based on fixed structure")
 
 		// Iterate through header frequencies and create header row
 		_, headerSymbols, headerSymbolsNames = generateHeaderRow("", GetStaticTabularOutputSchema(), headerSeparator)
 
 	}
 
-	fmt.Println("Generated Header Symbols: ", headerSymbols)
-	fmt.Println("Generated Header Symbol Names: ", headerSymbolsNames)
+	Println("Generated Header Symbols: ", headerSymbols)
+	Println("Generated Header Symbol Names: ", headerSymbolsNames)
 
 	// Default error during parsing
 	errorVal := tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
@@ -116,7 +116,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		// Individual entry
 		entryMap := make(map[string]string)
 
-		fmt.Println("Statement ", stmtCt, ": ", statement)
+		Println("Statement ", stmtCt, ": ", statement)
 
 		// Create new entry with individual ID
 
@@ -131,7 +131,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 			// Append element value as output for given cell
 			if statement[componentIdx].IsEmptyNode() {
 				// Empty entry - don't add anything
-				fmt.Println("Found empty node")
+				Println("Found empty node")
 			} else if statement[componentIdx].HasPrimitiveEntry() {
 				// Regular leaf entry (i.e., component)
 
@@ -191,7 +191,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					}
 
 				}
-				fmt.Println("Added entry ", entryVal)
+				Println("Added entry ", entryVal)
 
 				// For static output, consider private nodes
 				if !ProduceDynamicOutput() && statement[componentIdx].HasPrivateNodes() {
@@ -208,7 +208,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						// (Re)Assign to entry to be output
 						entryMap[privateNodeValue.GetComponentName()] = existing
 					}
-					fmt.Println("Added private nodes to given output node")
+					Println("Added private nodes to given output node")
 				}
 				// For static output, consider annotations (if activated)
 				if !ProduceDynamicOutput() && IncludeAnnotations() && statement[componentIdx].HasAnnotations() {
@@ -225,10 +225,10 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					entryMap[statement[componentIdx].GetComponentName() + tree.ANNOTATION] = existing
 				}
 
-				fmt.Println("Current entrymap:", entryMap)
+				Println("Current entrymap:", entryMap)
 			} else {
 				// Nested statements are stored for later processing, but assigned IDs and references added to calling row
-				fmt.Println("Found complex entry (nested statement): " + fmt.Sprint(statement[componentIdx]))
+				Println("Found complex entry (nested statement): " + fmt.Sprint(statement[componentIdx]))
 				// Check for statement combination (i.e., node combination)
 
 				// Add entry to array (assuming single nested statement)
@@ -236,13 +236,13 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 
 				// Check if combination contained; if so, flatten, and override
 				if entryVals[0].IsCombination() {
-					fmt.Println("Detected statement combination")
+					Println("Detected statement combination")
 					// If combination of statements, retrieve all elements
 					stmts := entryVals[0].GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
 					// Flatten array and override entry values for iteration
 					entryVals = tree.Flatten(stmts)
 				} else {
-					fmt.Println("Detected individual nested statement")
+					Println("Detected individual nested statement")
 				}
 
 				// Iterate over all nested statements
@@ -273,7 +273,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						// Prepare reference to to-be component-level nested statements to output
 						idToReferenceInCell = nestedStmtId
 						//output += nestedStmtId
-						fmt.Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Val:", entryVal, ")")
+						Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Val:", entryVal, ")")
 					}
 
 					if ProduceDynamicOutput() {
@@ -297,7 +297,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					}
 				}
 			}
-			fmt.Println("Source/calling node: ", statement[componentIdx])
+			Println("Source/calling node: ", statement[componentIdx])
 
 			// Process component-level logical linkage
 
@@ -309,7 +309,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 			}
 		}
 
-		fmt.Println("EntryMap:", entryMap)
+		Println("EntryMap:", entryMap)
 
 		// Append the logical expression at the end of each row
 		if logicalValue != "" {
@@ -322,11 +322,12 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		entriesMap = append(entriesMap, entryMap)
 	}
 
-	fmt.Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
+	Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
 	for _, val := range componentNestedStmts {
 
-		fmt.Println("Nested Statement to parse, ID:", val.ID, ", Stmt:", val.NestedStmt)
+		Println("Nested Statement to parse, ID:", val.ID, ", Stmt:", val.NestedStmt)
 
+		log.Println("Parsing nested statement ...")
 		// Parse individual nested statements on component level
 		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -396,11 +397,11 @@ func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNeste
 				return "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION}
 			}
 			if res {
-				fmt.Println("Collapsing adjacent AND operators ...")
+				Println("Collapsing adjacent AND operators ...")
 				// Collapse adjacent AND operators
 				ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
 
-				fmt.Println("Node has linkage ", ops)
+				Println("Node has linkage ", ops)
 
 				if logicalExpressionString != "" {
 					logicalExpressionString += logicalOperatorStmtRefSeparator
@@ -410,7 +411,7 @@ func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNeste
 				// Leading bracket
 				logicalExpressionString += logicalCombinationLeft
 
-				fmt.Println("Target node IDs: ", targetID)
+				Println("Target node IDs: ", targetID)
 				// Add trailing bracket and column ref (to be reviewed)
 				logicalExpressionString += targetID + logicalCombinationRight
 			}
@@ -486,7 +487,7 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stm
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := statement.GenerateLeafArrays(aggregateImplicitLinkages)
 
-	log.Println(" Generated leaf arrays: ", leafArrays, " component: ", componentRefs)
+	Println(" Generated leaf arrays: ", leafArrays, " component: ", componentRefs)
 
 	log.Println(" Step: Generate permutations of leaf arrays (atomic statements)")
 	// Generate all permutations of logically-linked components to produce statements
@@ -495,13 +496,13 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stm
 		return "", nil, nil, nil, err
 	}
 
-	log.Println(" Generated permutations: ", res)
+	Println(" Generated permutations: ", res)
 
 	log.Println(" Step: Generate logical operators for atomic statements")
 	// Extract logical operator links
 	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
-	log.Println(" Links:", links)
+	Println(" Links:", links)
 
 	log.Println(" Step: Generate tabular output")
 
@@ -575,7 +576,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 	componentIdx int, headerSymbols []string, logicalLinks []map[*tree.Node][]string, stmtId string) (string, tree.ParsingError) {
 	// Check for logical operator linkage based on index
 	linksForElement := logicalLinks[componentIdx]
-	fmt.Println("Links for element: ", linksForElement)
+	Println("Links for element: ", linksForElement)
 
 	// Node key array (maintaining order of iteration)
 	nodesKeys := []*tree.Node{}
@@ -597,26 +598,26 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 			if tree.AGGREGATE_IMPLICIT_LINKAGES {
 				// Retrieve actual root node, not just the one that sits below synthetic linkage
 				leaves = firstKey.GetRootNode().GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
-				fmt.Println("Root:", firstKey.GetRootNode())
+				Println("Root:", firstKey.GetRootNode())
 			} else {
 				// Retrieve all nodes up to synthetic linkage
 				leaves = firstKey.GetSyntheticRootNode().GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
-				fmt.Println("Synthetic Root:", firstKey.GetSyntheticRootNode())
+				Println("Synthetic Root:", firstKey.GetSyntheticRootNode())
 			}
 
 			if len(leaves) > 0 {
 				nodesKeys = leaves[0]
 			} else {
-				fmt.Println("No component keys to iterate over for logical relationships")
+				Println("No component keys to iterate over for logical relationships")
 			}
 		} else {
-			fmt.Println("No component keys to iterate over for logical relationships")
+			Println("No component keys to iterate over for logical relationships")
 		}
 
 		// ALTERNATIVE: Sorting based on alphabet by interface
 		//sort.Sort(tree.ByEntry(nodesKeys))
 
-		fmt.Println("Sorted keys: ", nodesKeys)
+		Println("Sorted keys: ", nodesKeys)
 	}
 
 	// Check that entries for own component value exist
@@ -631,7 +632,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 			// if target node is different ...
 			if otherNode != statement[componentIdx] {
 				if len(linkedElement) > 0 {
-					fmt.Println("Testing other node: ", otherNode, " with elements ", linkedElement)
+					Println("Testing other node: ", otherNode, " with elements ", linkedElement)
 					// find operator
 					res, ops, err := tree.FindLogicalLinkage(statement[componentIdx], otherNode)
 					if err.ErrorCode != tree.TREE_NO_ERROR {
@@ -640,11 +641,11 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						return "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION}
 					}
 					if res {
-						fmt.Println("Collapsing adjacent AND operators ...")
+						Println("Collapsing adjacent AND operators ...")
 						// Collapse adjacent AND operators
 						ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
 
-						fmt.Println("Node has linkage ", ops)
+						Println("Node has linkage ", ops)
 						// ... and append to logical expression column string
 						logicalExpressionString += fmt.Sprint(ops)
 						// Statement component identifier
@@ -660,9 +661,9 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						// Prepare intermediate structure to store statement references
 						stmtsRefs := ""
 
-						fmt.Println("Target node IDs: ", linkedElement)
+						Println("Target node IDs: ", linkedElement)
 						for lks := range linkedElement {
-							//fmt.Println("Found pointer from ", statement[componentIdx] ," to ", otherNode , " as ", generateStatementID(stmtId, lks + 1))
+							//Println("Found pointer from ", statement[componentIdx] ," to ", otherNode , " as ", generateStatementID(stmtId, lks + 1))
 							// Append actual statement id
 							stmtsRefs += generateStatementIDString(stmtId, linkedElement[lks])
 							if lks < len(linkedElement)-1 {
@@ -673,9 +674,9 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						// Add trailing bracket and column ref (to be reviewed)
 						logicalExpressionString += stmtsRefs + logicalCombinationRight + logicalOperatorSeparator
 					}
-					fmt.Println("Added logical relationships for value", otherNode, ", elements:", logicalExpressionString)
+					Println("Added logical relationships for value", otherNode, ", elements:", logicalExpressionString)
 				} else {
-					fmt.Println("Did not find target links for", otherNode, "- did not add logical operator links for component")
+					Println("Did not find target links for", otherNode, "- did not add logical operator links for component")
 				}
 			}
 		}

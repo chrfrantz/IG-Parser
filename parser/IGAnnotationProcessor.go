@@ -2,7 +2,6 @@ package parser
 
 import (
 	"IG-Parser/tree"
-	"fmt"
 	"strings"
 )
 
@@ -18,23 +17,23 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 
 	// Retrieve source arrays
 	sourceArrays := tree.Flatten(sourceTree.GetLeafNodes(true))
-	fmt.Println("Source arrays: ", sourceArrays)
+	Println("Source arrays: ", sourceArrays)
 	if len(sourceArrays) == 0 {
-		fmt.Println("Could not find leaf nodes in source tree.")
+		Println("Could not find leaf nodes in source tree.")
 		return linkMap
 	}
 
 	// Retrieve target arrays
 	targetArrays := tree.Flatten(targetTree.GetLeafNodes(true))
-	fmt.Println("Target arrays: ", targetArrays)
+	Println("Target arrays: ", targetArrays)
 	if len(targetArrays) == 0 {
-		fmt.Println("Could not find leaf nodes in target tree.")
+		Println("Could not find leaf nodes in target tree.")
 		return linkMap
 	}
 
 	// Iterate through source components
 	for _, v := range sourceArrays {
-		//fmt.Println("Val:", v)
+		//Println("Val:", v)
 		val := v
 		if val.Suffix != nil && len(val.Suffix.(string)) > 0 {
 			rawSuffix := val.Suffix.(string)
@@ -48,16 +47,16 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 			}
 
 			if len(rawSuffix) != len(sourceElem) {
-				fmt.Println("Complete processing of suffix with more than one element not yet supported. Remaining elements:", rawSuffix[idx:])
+				Println("Complete processing of suffix with more than one element not yet supported. Remaining elements:", rawSuffix[idx:])
 			}
 
 			// Now check target side to see if there is matching suffix
 			for _, v2 := range targetArrays {
 				val2 := v2
-				//fmt.Println("Target val:", val2)
+				//Println("Target val:", val2)
 				if val2.Suffix != nil && len(val2.Suffix.(string)) > 0 {
 					rawTargetSuffix := val2.Suffix.(string)
-					//fmt.Println("Found target suffix", rawTargetSuffix)
+					//Println("Found target suffix", rawTargetSuffix)
 					// Assign full suffix by default
 					targetElem := rawTargetSuffix
 					// Extract first element from candidate target suffix
@@ -67,7 +66,7 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 					}
 					// Test for match between source and target; if the same, store association
 					if sourceElem == targetElem {
-						fmt.Println("Found suffix match on", sourceElem, "for components (Source:", val.Entry,
+						Println("Found suffix match on", sourceElem, "for components (Source:", val.Entry,
 							", Name:", val.GetComponentName(), " and Target:", val2.Entry, ", Name:", val2.GetComponentName(), ")")
 						valArr := []*tree.Node{}
 						// Check if existing entry exists
@@ -92,13 +91,13 @@ Operates directly on provided statement.
  */
 func ProcessPrivateComponentLinkages(s *tree.Statement) {
 
-	fmt.Println("Statement before reviewing linkages: ", s)
+	Println("Statement before reviewing linkages: ", s)
 
 	// Find all leaves that have suffix
 	leafArrays, _ := s.GenerateLeafArraysSuffixOnly(true)
 
 	if len(leafArrays) == 0 {
-		fmt.Println("No leaf entries found, hence no suffix linkages.")
+		Println("No leaf entries found, hence no suffix linkages.")
 		return
 	}
 
@@ -111,8 +110,8 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 		for elem := range v {
 
 			sourceComponentElement := v[elem]
-			//fmt.Println("Source:", sourceComponentElement)
-			//fmt.Println("Source component:", sourceComponentElement.GetComponentName())
+			//Println("Source:", sourceComponentElement)
+			//Println("Source component:", sourceComponentElement.GetComponentName())
 
 			switch sourceComponentElement.GetComponentName() {
 			case tree.ATTRIBUTES:
@@ -126,10 +125,10 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 			case tree.CONSTITUTING_PROPERTIES:
 				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutingPropertiesPropertySimple)
 			default:
-				fmt.Println("Could not find match for component name", sourceComponentElement.GetComponentName())
+				Println("Could not find match for component name", sourceComponentElement.GetComponentName())
 			}
 			if len(linkedLeaves) > 0 {
-				fmt.Println("Found following links for", sourceComponentElement.GetComponentName(), ":", linkedLeaves)
+				Println("Found following links for", sourceComponentElement.GetComponentName(), ":", linkedLeaves)
 
 				// Draw direct linkage between source and target component
 				for srcComp, tgtCompArr := range linkedLeaves {
@@ -151,7 +150,7 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 						// If return value is false, this implies that the remaining node is the last element - and to be removed from statement
 						if !rt {
 							// Identify corresponding element from statement and remove from statement tree
-							fmt.Println("Element", srcComp, "will be removed from parent tree (last element)")
+							Println("Element", srcComp, "will be removed from parent tree (last element)")
 							switch sourceComponentElement.GetComponentName() {
 							case tree.ATTRIBUTES:
 								s.AttributesPropertySimple = nil
@@ -164,10 +163,10 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 							case tree.CONSTITUTING_PROPERTIES:
 								s.ConstitutingPropertiesPropertySimple = nil
 							default:
-								fmt.Println("Node deletion from tree: Could not find match for component name", sourceComponentElement.GetComponentName())
+								Println("Node deletion from tree: Could not find match for component name", sourceComponentElement.GetComponentName())
 							}
 						}
-						fmt.Println("Component", srcComp.GetComponentName(), ": Added private link for node", tgtComp)
+						Println("Component", srcComp.GetComponentName(), ": Added private link for node", tgtComp)
 					}
 				}
 			}

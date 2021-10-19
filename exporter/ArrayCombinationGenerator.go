@@ -2,7 +2,6 @@ package exporter
 
 import (
 	"IG-Parser/tree"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -23,13 +22,13 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 	// Determine output parameters
 	// Iterate over number of input arrays (i.e., components)
 	for _, array := range nodeArrays {
-		fmt.Println("Entries in array: " + strconv.Itoa(len(array)))
+		Println("Entries in array: " + strconv.Itoa(len(array)))
 		// Tolerate empty nodeArrays
 		if len(array) != 0 {
 			n *= len(array)
 		}
 	}
-	fmt.Println("Number of anticipated atomic statements: " + strconv.Itoa(n))
+	Println("Number of anticipated atomic statements: " + strconv.Itoa(n))
 
 	// Generate arrays of node arrays representing the different atomic statements
 	stmts = make([][]*tree.Node, n)
@@ -58,11 +57,11 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 		for i, ar := range nodeArrays {
 			var p = pos[i]
 			if p >= 0 && p < len(ar) {
-				//fmt.Println("Append " + ar[p].String())
+				//Println("Append " + ar[p].String())
 				out = append(out, ar[p])
 			}
 		}
-		//fmt.Println("Wrote atomic statement ", ct)
+		//Println("Wrote atomic statement ", ct)
 
 		// Assign generated statement to return data structure
 		stmts[ct] = out
@@ -151,20 +150,20 @@ func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incr
 	if incrementReferences {
 		addedId += 1
 	}
-	fmt.Println("Testing value ", addedId)
+	Println("Testing value ", addedId)
 	// If generation of ranges is indicated and previous entries exist ...
 	if generateRanges && len(nodeRefs) > 0 {
 		// Retrieve previously added element
 		val := nodeRefs[len(nodeRefs) - 1]
 		if strings.Contains(val, rangeSeparator) {
-			fmt.Println("Detected existing range ", val)
+			Println("Detected existing range ", val)
 			// If range separator symbol is contained, extract prefix
 			firstEndIndex := strings.Index(val, rangeSeparator)
 			// Extract last value in range expression
 			lastValue := val[firstEndIndex+1:len(val)]
 			// Convert to int
 			intVal, err := strconv.Atoi(lastValue)
-			fmt.Println("Last value in range: ", intVal)
+			Println("Last value in range: ", intVal)
 			// Prepare for error
 			stopRangeCheck := false
 			if err != nil {
@@ -176,11 +175,11 @@ func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incr
 				valueToAdd := val[:firstEndIndex] + rangeSeparator + strconv.Itoa(addedId)
 				// Overwrite previous entry
 				nodeRefs[len(nodeRefs)-1] = valueToAdd
-				fmt.Println("Replaced previous entry with new value ", valueToAdd)
+				Println("Replaced previous entry with new value ", valueToAdd)
 			} else {
 				// Create new entry
 				nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
-				fmt.Println("Created new entry ", addedId)
+				Println("Created new entry ", addedId)
 			}
 		} else {
 			// else simply check if previous value is decrement of to-be-added value
@@ -190,18 +189,18 @@ func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incr
 				log.Println("Extraction of integer from ", val , " did not work.")
 				stopRangeCheck = true
 			}
-			fmt.Println("Checking for previous non-range value ", val)
+			Println("Checking for previous non-range value ", val)
 			if !stopRangeCheck && intVal == (addedId - 1) {
 				// Overwrite previous entry
 				nodeRefs[len(nodeRefs)-1] = val + rangeSeparator + strconv.Itoa(addedId)
-				fmt.Println("Overwrite existing entry with ", (val + rangeSeparator + strconv.Itoa(addedId)))
+				Println("Overwrite existing entry with ", (val + rangeSeparator + strconv.Itoa(addedId)))
 			} else if intVal != addedId {
 				// Create new entry
 				nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
-				fmt.Println("Created new entry ", addedId)
+				Println("Created new entry ", addedId)
  			} else {
  				// if old value and current are the same, simply omit if creating ranges, i.e., aggregating
- 				fmt.Println("Values has not been added, since identical to last value ", intVal)
+ 				Println("Values has not been added, since identical to last value ", intVal)
 			}
 		}
 	} else {

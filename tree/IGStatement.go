@@ -308,7 +308,7 @@ Returns:
 func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, componentNode *Node, componentSymbol string, complex bool, aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
 
 	if componentNode == nil {
-		fmt.Println("No component node found - returning unmodified node and reference map ...")
+		Println("No component node found - returning unmodified node and reference map ...")
 		return nodesMap, referenceMap
 	}
 

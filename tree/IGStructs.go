@@ -2,7 +2,6 @@ package tree
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -550,8 +549,8 @@ Input:
  */
 func MergeSlices(array1 []string, array2 []string, subItemSeparator string) []string {
 
-	fmt.Println("Slice 1 before merge: ", array1)
-	fmt.Println("Slice 2 before merge: ", array2)
+	Println("Slice 1 before merge: ", array1)
+	Println("Slice 2 before merge: ", array2)
 
 	result := array1
 	arrayToIterate := array2
@@ -571,7 +570,7 @@ func MergeSlices(array1 []string, array2 []string, subItemSeparator string) []st
 		lastSimilarElement := FindLastSimilarElement(result, v, subItemSeparator)
 
 		if lastSimilarElement != -1 {
-			fmt.Println("Found last similar element for item ", v, " on position: ", lastSimilarElement)
+			Println("Found last similar element for item ", v, " on position: ", lastSimilarElement)
 
 			// Add element at position following last shared index
 
@@ -582,7 +581,7 @@ func MergeSlices(array1 []string, array2 []string, subItemSeparator string) []st
 			// Insert new element at given position
 			result[lastSimilarElement+1] = v
 		} else {
-			fmt.Println("No similar element found for item ", v, ", appending at the end.")
+			Println("No similar element found for item ", v, ", appending at the end.")
 			// Append at the end of the array
 			result = append(result, v)
 		}
@@ -612,9 +611,9 @@ func FindLastSimilarElement(arrayToIterate []string, itemToTest string, subItemS
 		// Remove trailing substring if match exists
 		substringedSearchItem = itemToTest[:substringedSearchItemIdx]
 	}
-	fmt.Println("Input:", itemToTest)
-	fmt.Println("Separator:", subItemSep)
-	fmt.Println("Preprocessed:", substringedSearchItem)
+	Println("Input:", itemToTest)
+	Println("Separator:", subItemSep)
+	Println("Preprocessed:", substringedSearchItem)
 
 	// Index of last similar item
 	similarIndex := -1
@@ -628,16 +627,16 @@ func FindLastSimilarElement(arrayToIterate []string, itemToTest string, subItemS
 		if targetItemIdx != -1 {
 			// Remove trailing substring if match exists
 			targetItem = v[:targetItemIdx]
-			//fmt.Println("Preprocessed target item:", targetItem)
+			//Println("Preprocessed target item:", targetItem)
 		}
 
 		// If the current value matches search item ...
 		if targetItem == substringedSearchItem {
 			// ... then save the index
 			similarIndex = i
-			//fmt.Println("Items match")
+			//Println("Items match")
 		} else {
-			//fmt.Println("Items do not match")
+			//Println("Items do not match")
 		}
 	}
 
@@ -669,7 +668,7 @@ func MoveElementToNewPosition(indexToTakeFrom int, indexToMoveTo int, arrayToOpe
 	newSlice[indexToMoveTo] = val
 	// Fill up remaining elements
 	sourceArray = append(newSlice, sourceArray[indexToMoveTo:]...)
-	fmt.Println("Revised sourceArray:", sourceArray)
+	Println("Revised sourceArray:", sourceArray)
 
 	return sourceArray
 }
@@ -702,3 +701,4 @@ func Flatten(input [][]*Node) []*Node {
 	}
 	return output
 }
+

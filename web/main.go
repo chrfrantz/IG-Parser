@@ -54,6 +54,10 @@ func main() {
 	// Manual override for local testing
 	converter.LoggingPath = "./logs"
 
+	// Redirect stdout
+	//temp := os.Stdout
+	//os.Stdout = nil
+
 	addr := ":" + port
 	log.Printf("Listening on %s ...\n", addr)
 	log.Println("Logging: " + fmt.Sprint(converter.Logging))

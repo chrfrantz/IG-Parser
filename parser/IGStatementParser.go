@@ -36,22 +36,22 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return tree.Statement{}, err
 	}
-	fmt.Println("Returned separated components and nested statements: " + fmt.Sprint(compAndNestedStmts))
+	Println("Returned separated components and nested statements: " + fmt.Sprint(compAndNestedStmts))
 	// Extract component-only statement and override input
 	text = compAndNestedStmts[0][0]
 	// Extract potential nested statements
 	nestedStmts := compAndNestedStmts[1]
 	if len(nestedStmts) == 0 {
-		fmt.Println("No nested statements found.")
+		Println("No nested statements found.")
 		log.Println("No nested statements found.")
 	}
 	nestedCombos := compAndNestedStmts[2]
 	if len(nestedCombos) == 0 {
-		fmt.Println("No nested statement combination candidates found.")
+		Println("No nested statement combination candidates found.")
 		log.Println("No nested statement combination candidates found.")
 	}
 
-	fmt.Println("Text to be parsed: " + text)
+	Println("Text to be parsed: " + text)
 	// Now parsing on component level
 
 	result, err := parseAttributes(text)
@@ -169,9 +169,9 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	// Reorganize tree by shifting private nodes into PrivateNode fields of components and removing them from statement tree
 	ProcessPrivateComponentLinkages(&s)
 
-	//fmt.Println(s.String())
+	//Println(s.String())
 
-	fmt.Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
+	Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
 
 	// Process nested statements
 	if len(nestedStmts) > 0 {
@@ -182,7 +182,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 		}
 	}
 
-	fmt.Println("Testing for nested statement combinations in " + fmt.Sprint(nestedCombos))
+	Println("Testing for nested statement combinations in " + fmt.Sprint(nestedCombos))
 
 	// Process nested statement combinations
 	if len(nestedCombos) > 0 {
@@ -253,10 +253,10 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 			return err
 		}
 
-		fmt.Println("Nested Stmt Component Identifier:", component)
-		fmt.Println("Nested Stmt Suffix:", suffix)
-		fmt.Println("Nested Stmt Annotation:", annotation)
-		//fmt.Println("Nested Stmt Content:", content)
+		Println("Nested Stmt Component Identifier:", component)
+		Println("Nested Stmt Suffix:", suffix)
+		Println("Nested Stmt Annotation:", annotation)
+		//Println("Nested Stmt Content:", content)
 
 		stmt, errStmt := ParseStatement(v[strings.Index(v, LEFT_BRACE)+1:strings.LastIndex(v, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
@@ -354,7 +354,7 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 				return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Nested combination returned nil element."}
 			}
 			entry := node.Entry.(string)
-			fmt.Println("Entry to parse of component type: " + entry)
+			Println("Entry to parse of component type: " + entry)
 			// Extract prefix for node
 			prefix := entry[:strings.Index(entry, LEFT_BRACE)]
 			if sharedPrefix == "" {
@@ -380,9 +380,9 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 				return tree.Statement{}, tree.ParsingError{}
 			}
 
-			fmt.Println("Nested Combo Stmt Suffix:", suffix)
-			fmt.Println("Nested Combo Stmt Annotation:", annotation)
-			fmt.Println("Nested Combo Stmt Content:", content)
+			Println("Nested Combo Stmt Suffix:", suffix)
+			Println("Nested Combo Stmt Annotation:", annotation)
+			Println("Nested Combo Stmt Content:", content)
 
 			stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1:strings.LastIndex(oldValue, RIGHT_BRACE)])
 			if errStmt.ErrorCode != tree.PARSING_NO_ERROR{
@@ -544,7 +544,7 @@ func SeparateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 
 				// Save for parsing as combination
 				nestedCombos = append(nestedCombos, v)
-				fmt.Println("Added candidate for statement combination:", v)
+				Println("Added candidate for statement combination:", v)
 
 				// Remove nested statement combination from overall statement
 				statement = strings.ReplaceAll(statement, v, "")
@@ -553,7 +553,7 @@ func SeparateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 
 				// Append extracted nested statements including component prefix
 				completeNestedStmts = append(completeNestedStmts, v)
-				fmt.Println("Added candidate for single nested statement:", v)
+				Println("Added candidate for single nested statement:", v)
 
 				// Remove nested statement from overall statement
 				statement = strings.ReplaceAll(statement, v, "")
@@ -562,15 +562,15 @@ func SeparateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 		// Assign nested statements if found
 		ret[1] = completeNestedStmts
 		ret[2] = nestedCombos
-		fmt.Println("Remaining non-nested input statement (without nested elements): " + statement)
+		Println("Remaining non-nested input statement (without nested elements): " + statement)
 	} else {
-		fmt.Println("No nested statement found in input: " + statement)
+		Println("No nested statement found in input: " + statement)
 	}
 
 	// Assign component-only string
 	ret[0] = []string{statement}
 
-	fmt.Println("Array to be returned: " + fmt.Sprint(ret))
+	Println("Array to be returned: " + fmt.Sprint(ret))
 
 	// Return combined structure
 	return ret, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
@@ -588,7 +588,7 @@ func identifyNestedStatements(statement string) ([]string, tree.ParsingError) {
 		return nil, err
 	}
 
-	fmt.Println("Nested statements: " + fmt.Sprint(nestedStatements))
+	Println("Nested statements: " + fmt.Sprint(nestedStatements))
 
 	return nestedStatements, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
@@ -728,7 +728,7 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 	// Copy string for truncating
 	processedString := input
 
-	fmt.Println("Looking for component: " + component)
+	Println("Looking for component: " + component)
 
 	// Assume that parentheses/braces are checked beforehand
 
@@ -743,7 +743,7 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 	// Search number of entries
 	//r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?\\" + leftPar)
 	// + escapeSymbolsForRegex(input)
-	//fmt.Println("Regex:", component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+	//Println("Regex:", component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 	if err != nil {
 		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
@@ -762,18 +762,18 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 		}*/
 
 		//// NEW REGEX-BASED PARSING (TO CONSIDER ANNOTATIONS AND SUFFICES)
-		//fmt.Println("String to be searched for component:", processedString)
+		//Println("String to be searched for component:", processedString)
 		// Return index of found element
 		result := r.FindAllStringIndex(processedString, 1)
 		resultContent := r.FindString(processedString)
 
-		//fmt.Println("Index:", result)
-		//fmt.Println("Content:", resultContent)
+		//Println("Index:", result)
+		//Println("Content:", resultContent)
 
 		if len(result) > 0 {
 			// Start search after potential suffix and annotation elements
 			startPos = result[0][0] + len(resultContent) - len(leftPar)
-			fmt.Println("Start position: ", startPos)
+			Println("Start position: ", startPos)
 		} else {
 			// Returns component strings once opening parenthesis symbol is no longer found
 			return componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
@@ -797,11 +797,11 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 					candidateString := resultContent[:len(resultContent)-len(leftPar)] + processedString[startPos:startPos+i+1]
 					if !strings.HasSuffix(component, tree.PROPERTY_SYNTAX_SUFFIX) && strings.HasPrefix(candidateString, component + tree.PROPERTY_SYNTAX_SUFFIX) {
 						// Don't consider if properties component is found (e.g., A,p(...)), but main component is sought (e.g., A(...)).
-						fmt.Println("Ignoring found element due to ambiguous matching with property of component (Match: " +
+						Println("Ignoring found element due to ambiguous matching with property of component (Match: " +
 							component + tree.PROPERTY_SYNTAX_SUFFIX + ", Component: " + component + ")")
 					} else {
 						componentStrings = append(componentStrings, candidateString)
-						fmt.Println("Added string " + candidateString)
+						Println("Added string " + candidateString)
 					}
 					// String to be processed in next round is beyond identified component
 					// This includes starting position of parentheses, but moves back to include component identifier,
@@ -836,8 +836,8 @@ TODO: Make this more efficient
  */
 func extractSuffixAndAnnotations(component string, input string, leftPar string, rightPar string) (string, string, string, tree.ParsingError) {
 
-	fmt.Println("Component:", component)
-	fmt.Println("Input:", input)
+	Println("Component:", component)
+	Println("Input:", input)
 	strippedInput := input // leave input unchanged
 	
 	// Component annotation pattern
@@ -854,10 +854,10 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 	if len(result) > 0 && result[0][0] != leftPar {
 		// If annotations are found ...
 		res := result[0][0]
-		fmt.Println("Found annotation in component:", res)
+		Println("Found annotation in component:", res)
 		// Extract semantic annotation string
 		res = res[:len(res)-1]
-		//fmt.Println("Annotations:", res)
+		//Println("Annotations:", res)
 		pos := strings.Index(strippedInput, res)
 		suffix := ""
 		// Only attempt to extract suffix if there is actually one
@@ -870,11 +870,11 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return "", "", "", err
 		}
-		fmt.Println("Reconstructed statement:", reconstructedComponent)
+		Println("Reconstructed statement:", reconstructedComponent)
 		// Return suffix and annotations
 		return suffix, res, reconstructedComponent[0], tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 	} else {
-		fmt.Println("No annotations found ...")
+		Println("No annotations found ...")
 		// ... if no annotations are found ...
 		// Identifier start position for content
 		contentStartPos := strings.Index(strippedInput, leftPar)
@@ -884,7 +884,7 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 		suffix = strippedInput[len(component):contentStartPos]
 		// Does not guard against mistaken choice of property variants of components (e.g., A,p instead of A) - is handled in #ExtractComponentContent.
 		reconstructedComponent := strings.Replace(strippedInput, suffix, "", 1)
-		fmt.Println("Reconstructed statement:", reconstructedComponent)
+		Println("Reconstructed statement:", reconstructedComponent)
 		// Return only suffix
 		return suffix, "", reconstructedComponent, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 	}
@@ -912,7 +912,7 @@ Returns the parsed node.
  */
 func parseComponent(component string, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
 
-	fmt.Println("Parsing:", component)
+	Println("Parsing:", component)
 
 	// Extract component (one or multiple occurrences) from input string based on provided component identifier
 	componentStrings, err := ExtractComponentContent(component, text, leftPar, rightPar)
@@ -920,7 +920,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		return nil, err
 	}
 
-	fmt.Println("Components (Count:", len(componentStrings), "):", fmt.Sprint(componentStrings))
+	Println("Components (Count:", len(componentStrings), "):", fmt.Sprint(componentStrings))
 
 	// Initialize output string for parsing
 	componentString := ""
@@ -930,8 +930,8 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 
 	// Synthetically linked ([sAND]) components (if multiple occur in input string)
 	if len(componentStrings) > 1 {
-		fmt.Println("Component combination for component", component)
-		fmt.Println("Component content", componentStrings)
+		Println("Component combination for component", component)
+		Println("Component content", componentStrings)
 		r, err := regexp.Compile(COMBINATION_PATTERN_PARENTHESES)
 		if err != nil {
 			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
@@ -939,7 +939,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		}
 
 		for i, v := range componentStrings {
-			fmt.Println("Round: " + strconv.Itoa(i) + ": " + v)
+			Println("Round: " + strconv.Itoa(i) + ": " + v)
 
 			// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
 			componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, v, leftPar, rightPar)
@@ -947,26 +947,26 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 				return nil, err
 			}
 
-			fmt.Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
+			Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
 			// Store suffices
 			//suffices = append(suffices, componentSuffix)
-			fmt.Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
+			Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
 			// Store annotations
 			//annotations = append(annotations, componentAnnotation)
-			fmt.Println("Content:", componentContent)
+			Println("Content:", componentContent)
 
 			// Extract and concatenate individual component values but cut leading component identifier
 			componentWithoutIdentifier := componentContent[len(component):]
 			// Identify whether combination embedded in input string element
 			result := r.FindAllStringSubmatch(componentWithoutIdentifier, -1)
-			fmt.Println(result)
-			fmt.Println("Length:", len(result))
-			fmt.Println("Component string before:", componentWithoutIdentifier)
+			Println("Result of component match:", result)
+			Println("Length:", len(result))
+			Println("Component string before:", componentWithoutIdentifier)
 			if len(result) == 0 {
 				// If no combination embedded in combination component, strip leading and trailing parentheses prior to combining
 				componentWithoutIdentifier = componentWithoutIdentifier[1:len(componentWithoutIdentifier)-1]
 			} // else don't touch, i.e., leave parentheses in string
-			fmt.Println("Component string after:", componentWithoutIdentifier)
+			Println("Component string after:", componentWithoutIdentifier)
 
 			// Parse first component into node
 			if node.IsEmptyNode() {
@@ -1019,7 +1019,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		}
 	} else if len(componentStrings) == 1 {
 
-		fmt.Println("Component strings:", componentStrings)
+		Println("Component strings:", componentStrings)
 
 		// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
 		componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, componentStrings[0], leftPar, rightPar)
@@ -1027,16 +1027,16 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			return nil, err
 		}
 
-		fmt.Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
+		Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
 		// Store suffices
-		fmt.Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
+		Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
 		// Store annotations
-		fmt.Println("Content:", componentContent)
+		Println("Content:", componentContent)
 
 		// Single entry (cut prefix)
 		componentString = componentContent[len(component):]
-		fmt.Println("Single component for component", component)
-		fmt.Println("Component content", componentString)
+		Println("Single component for component", component)
+		Println("Component content", componentString)
 		// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string if not combined
 		componentString = componentString[1:len(componentString)-1]
 
@@ -1064,8 +1064,8 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			ErrorMessage: "Component " + component + " was not found in input string"}
 	}
 
-	fmt.Println("Component Identifier: " + component)
-	fmt.Println("Full string: " + componentString)
+	Println("Component Identifier: " + component)
+	Println("Full string: " + componentString)
 
 	// Some error check and override
 	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
