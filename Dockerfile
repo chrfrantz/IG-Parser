@@ -7,6 +7,7 @@ WORKDIR /go/src/IG-Parser/web
 
 # Copy all relevant folders from repository
 COPY ./app /go/src/IG-Parser/app
+COPY ./config /go/src/IG-Parser/config
 COPY ./exporter /go/src/IG-Parser/exporter
 COPY ./parser /go/src/IG-Parser/parser
 COPY ./tree /go/src/IG-Parser/tree
