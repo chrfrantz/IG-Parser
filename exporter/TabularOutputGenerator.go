@@ -397,9 +397,11 @@ func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNeste
 				return "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION}
 			}
 			if res {
-				Println("Collapsing adjacent AND operators ...")
-				// Collapse adjacent AND operators
-				ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
+				if CollapseOperators() {
+					Println("Collapsing adjacent AND, bAND and wAND operators ...")
+					// Collapse adjacent AND operators
+					ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND, tree.SAND_BETWEEN_COMPONENTS, tree.SAND_WITHIN_COMPONENTS})
+				}
 
 				Println("Node has linkage ", ops)
 
@@ -641,9 +643,11 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						return "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION}
 					}
 					if res {
-						Println("Collapsing adjacent AND operators ...")
-						// Collapse adjacent AND operators
-						ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND})
+						if CollapseOperators() {
+							Println("Collapsing adjacent AND, bAND and wAND operators ...")
+							// Collapse adjacent AND operators
+							ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND, tree.SAND_BETWEEN_COMPONENTS, tree.SAND_WITHIN_COMPONENTS})
+						}
 
 						Println("Node has linkage ", ops)
 						// ... and append to logical expression column string

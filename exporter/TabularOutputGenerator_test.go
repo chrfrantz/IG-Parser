@@ -1448,7 +1448,7 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 		"D(may) " +
 		"I(inspect), " +
 		"I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir,p(recognized) Bdir,p1(accredited) Bdir1(certifying agents) Bdir(other agents)" +
+		"Bdir,p(recognized) Bdir1,p1(accredited) Bdir1(certifying agents) Bdir(other agents)" +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
@@ -1542,12 +1542,12 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 		"D(may) " +
 		"I(inspect), " +
 		"I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir,p(recognized) Bdir,p1(accredited) Bdir1(certifying agents) Bdir(other agents)" +
+		"Bdir,p(recognized) Bdir1,p1(accredited) Bdir1(certifying agents) Bdir(other agents)" +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
-		// Activation condition 2
-		"Cac{A(NOP Official) I(recognizes) Bdir,p1(responsible) Bdir1(Program Manager) and Bdir,p2(associated) Bdir2(inspectors)}"
+		// Activation condition 2 -- note that associated is wrongly annotated, leading to linkage to both Bdirs
+		"Cac{A(NOP Official) I(recognizes) Bdir1,p1(responsible) Bdir1(Program Manager) and Bdir,p2(associated) Bdir2(inspectors)}"
 
 	// Static output
 	SetDynamicOutput(false)
@@ -1627,6 +1627,194 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 }
 
 /*
+Tests presence of shared and private properties on indexed components (e.g., A1(content)), as opposed
+to indexed properties only (e.g., A,p1(content)).
+*/
+func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *testing.T) {
+
+	text := "A1,p(National Organic Program's) A1(Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect), " +
+		"I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir,p(recognized) Bdir1,p(accredited) Bdir1(certifying agents) Bdir(other agents)" +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Activation condition 1
+		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
+		// Activation condition 2 - shared properties implied in this activation condition
+		"Cac{A(NOP Official) I(recognizes) Bdir,p1(responsible) Bdir1(Program Manager) and Bdir,p2(associated) Bdir2(inspectors)}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 7 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementComponentLevelIndexedProperties.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Take separator for Google Sheets output
+	separator := headerRowSeparator
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+}
+
+/*
+Tests presence of shared and private properties on indexed components (e.g., A1(content)), as opposed
+to indexed properties only (e.g., A,p1(content)).
+*/
+func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotations(t *testing.T) {
+
+	text := "A1,p[prop=qualitative](National Organic Program's) A1[type=animate](Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect), " +
+		"I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir,p(recognized) Bdir1,p(accredited) Bdir1(certifying agents) Bdir(other agents)" +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Activation condition 1
+		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
+		// Activation condition 2 - shared properties implied in this activation condition
+		"Cac{A(NOP Official) I(recognizes) Bdir,p1(responsible) Bdir1(Program Manager) and Bdir,p2(associated) Bdir2(inspectors)}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 7 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementComponentLevelIndexedProperties.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Take separator for Google Sheets output
+	separator := headerRowSeparator
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+}
+
+/*
 Tests combination of two nested activation conditions (single level) , tests for a mix
 of shared and private properties (on top level) and private properties only on nested level,
 and includes *deactivated* annotations on various components.
@@ -1637,12 +1825,12 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 		"D(may) " +
 		"I[act=main](inspect), " +
 		"I[act=variable](sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir,p[shared](recognized) Bdir,p1[private](accredited) Bdir1[type=main object](certifying agents) Bdir[type=third party](other agents)" +
+		"Bdir,p[shared](recognized) Bdir1,p1[private](accredited) Bdir1[type=main object](certifying agents) Bdir[type=third party](other agents)" +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"Cac{E(Program Manager) F[cfunc=state](is) P((approved [AND] committed))} " +
-		// Activation condition 2
-		"Cac{A(NOP Official) I[act=main](recognizes) Bdir,p1(responsible) Bdir1(Program Manager) and Bdir,p2(associated) Bdir2(inspectors)}"
+		// Activation condition 2 - misspelt second property is intentional (to make it shared property)
+		"Cac{A(NOP Official) I[act=main](recognizes) Bdir1,p1(responsible) Bdir1(Program Manager) and Bdir,p1(associated) Bdir2(inspectors)}"
 
 	// Static output
 	SetDynamicOutput(false)
@@ -1732,12 +1920,12 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 		"D(may) " +
 		"I[act=main](inspect), " +
 		"I[act=variable](sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir,p[shared](recognized) Bdir,p1[private](accredited) Bdir1[type=main object](certifying agents) Bdir[type=third party](other agents)" +
+		"Bdir,p[shared](recognized) Bdir1,p[private](accredited) Bdir1[type=main object](certifying agents) Bdir[type=third party](other agents)" +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"Cac{E(Program Manager) F[cfunc=state](is) P((approved [AND] committed))} " +
 		// Activation condition 2
-		"Cac{A[type=enforcer](NOP Official) I[act=main](recognizes) Bdir,p1(responsible) Bdir1[type=main object](Program Manager) and Bdir,p2[type=third party](associated) Bdir2(inspectors)}"
+		"Cac{A[type=enforcer](NOP Official) I[act=main](recognizes) Bdir1,p1(responsible) Bdir1[type=main object](Program Manager) and Bdir2,p2[type=third party](associated) Bdir2(inspectors)}"
 
 	// Static output
 	SetDynamicOutput(false)
@@ -1826,12 +2014,12 @@ func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
 		"D(may) " +
 		"I(inspect), " +
 		"I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir,p(recognized) Bdir,p1(accredited) Bdir1(\"certifying agents) Bdir(\"other agents\")" +
+		"Bdir,p(recognized) Bdir1,p(accredited) Bdir1(\"certifying agents) Bdir(\"other agents\")" +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
 		// Activation condition 2
-		"Cac{A('NOP Official') I(recognizes) Bdir,p1(responsible) Bdir1(Program Manager) and Bdir,p2(associated) Bdir2(inspectors)}"
+		"Cac{A('NOP Official') I(recognizes) Bdir1,p(responsible) Bdir1(Program Manager) and Bdir2,p(associated) Bdir2(inspectors)}"
 
 	// Static output
 	SetDynamicOutput(false)

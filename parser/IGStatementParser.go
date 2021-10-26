@@ -209,45 +209,64 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		// Extract nested statement content and parse
 
 		component := ""
+		prefix := ""
+		isProperty := false
+
+		//TODO: Test prefix for nested statements
+		leadIdx := strings.Index(v, LEFT_BRACE)
+		if leadIdx != -1 {
+			prefix = v[:leadIdx]
+		}
 
 		// Identify embedded component identifier - parse properties before main components to avoid wrongful mapping
-		if strings.HasPrefix(v, tree.ATTRIBUTES_PROPERTY) {
+		if strings.HasPrefix(prefix, tree.ATTRIBUTES_PROPERTY) ||
+			(strings.HasPrefix(prefix, tree.ATTRIBUTES) && strings.Contains(prefix, tree.PROPERTY_SYNTAX_SUFFIX)) {
 			log.Println("Identified nested attributes property")
 			component = tree.ATTRIBUTES_PROPERTY
-		} else if strings.HasPrefix(v, tree.DIRECT_OBJECT_PROPERTY) {
+			isProperty = true
+		} else if strings.HasPrefix(prefix, tree.DIRECT_OBJECT_PROPERTY) ||
+			(strings.HasPrefix(prefix, tree.DIRECT_OBJECT) && strings.Contains(prefix, tree.PROPERTY_SYNTAX_SUFFIX)) {
 			log.Println("Identified nested direct object property")
 			component = tree.DIRECT_OBJECT_PROPERTY
-		} else if strings.HasPrefix(v, tree.DIRECT_OBJECT) {
+			isProperty = true
+		} else if strings.HasPrefix(prefix, tree.DIRECT_OBJECT) && !strings.Contains(prefix, tree.PROPERTY_SYNTAX_SUFFIX) {
 			log.Println("Identified nested direct object")
 			component = tree.DIRECT_OBJECT
-		} else if strings.HasPrefix(v, tree.INDIRECT_OBJECT_PROPERTY) {
+		} else if strings.HasPrefix(prefix, tree.INDIRECT_OBJECT_PROPERTY) ||
+			(strings.HasPrefix(prefix, tree.INDIRECT_OBJECT) && strings.Contains(prefix, tree.PROPERTY_SYNTAX_SUFFIX)) {
 			log.Println("Identified nested indirect object property")
 			component = tree.INDIRECT_OBJECT_PROPERTY
-		} else if strings.HasPrefix(v, tree.INDIRECT_OBJECT) {
+			isProperty = true
+		} else if strings.HasPrefix(prefix, tree.INDIRECT_OBJECT) && !strings.Contains(prefix, tree.PROPERTY_SYNTAX_SUFFIX) {
 			log.Println("Identified nested indirect object")
 			component = tree.INDIRECT_OBJECT
-		} else if strings.HasPrefix(v, tree.ACTIVATION_CONDITION) {
+		} else if strings.HasPrefix(prefix, tree.ACTIVATION_CONDITION) {
 			log.Println("Identified nested activation condition")
 			component = tree.ACTIVATION_CONDITION
-		} else if strings.HasPrefix(v, tree.EXECUTION_CONSTRAINT) {
+		} else if strings.HasPrefix(prefix, tree.EXECUTION_CONSTRAINT) {
 			log.Println("Identified nested execution constraint")
 			component = tree.EXECUTION_CONSTRAINT
-		} else if strings.HasPrefix(v, tree.CONSTITUTED_ENTITY_PROPERTY) {
+		} else if strings.HasPrefix(prefix, tree.CONSTITUTED_ENTITY_PROPERTY) ||
+			(strings.HasPrefix(prefix, tree.CONSTITUTED_ENTITY) && strings.Contains(prefix, tree.PROPERTY_SYNTAX_SUFFIX)) {
 			log.Println("Identified nested constituted entity property")
 			component = tree.CONSTITUTED_ENTITY_PROPERTY
-		} else if strings.HasPrefix(v, tree.CONSTITUTING_PROPERTIES_PROPERTY) {
+			isProperty = true
+		} else if strings.HasPrefix(prefix, tree.CONSTITUTING_PROPERTIES_PROPERTY) ||
+			(strings.HasPrefix(prefix, tree.CONSTITUTING_PROPERTIES) && strings.Contains(prefix, tree.PROPERTY_SYNTAX_SUFFIX)) {
 			log.Println("Identified nested constituting properties property")
 			component = tree.CONSTITUTING_PROPERTIES_PROPERTY
-		} else if strings.HasPrefix(v, tree.CONSTITUTING_PROPERTIES) {
+			isProperty = true
+		} else if strings.HasPrefix(prefix, tree.CONSTITUTING_PROPERTIES) && !strings.Contains(prefix, tree.PROPERTY_SYNTAX_SUFFIX) {
 			log.Println("Identified nested constituting properties")
 			component = tree.CONSTITUTING_PROPERTIES
-		} else if strings.HasPrefix(v, tree.OR_ELSE) {
+		} else if strings.HasPrefix(prefix, tree.OR_ELSE) {
 			log.Println("Identified nested or else")
 			component = tree.OR_ELSE
 		}
+		// TODO: Check whether nesting on unsupported components is a challenge
 
 		// Extracting suffices and annotations
-		suffix, annotation, _, err := extractSuffixAndAnnotations(component, v, LEFT_BRACE, RIGHT_BRACE)
+		suffix, annotation, _, err := extractSuffixAndAnnotations(component, isProperty, v, LEFT_BRACE, RIGHT_BRACE)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			fmt.Print("Error during extraction of suffices and annotations: " + err.ErrorCode)
 			return err
@@ -374,7 +393,7 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 		err := combo.ParseAllEntries(func(oldValue string) (tree.Statement, tree.ParsingError) {
 
 			// Extracting suffices and annotations
-			suffix, annotation, content, err := extractSuffixAndAnnotations("", oldValue, LEFT_BRACE, RIGHT_BRACE)
+			suffix, annotation, content, err := extractSuffixAndAnnotations("", false, oldValue, LEFT_BRACE, RIGHT_BRACE)
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
 				fmt.Print("Error during extraction of suffices and annotations: " + err.ErrorCode)
 				return tree.Statement{}, tree.ParsingError{}
@@ -583,7 +602,7 @@ func identifyNestedStatements(statement string) ([]string, tree.ParsingError) {
 
 	// TODO: Review
 	// Extract nested statements from input string
-	nestedStatements, err := ExtractComponentContent("", statement, LEFT_BRACE, RIGHT_BRACE) //, "", "")
+	nestedStatements, err := ExtractComponentContent("", false, statement, LEFT_BRACE, RIGHT_BRACE) //, "", "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return nil, err
 	}
@@ -594,67 +613,67 @@ func identifyNestedStatements(statement string) ([]string, tree.ParsingError) {
 }
 
 func parseAttributes(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.ATTRIBUTES, text)
+	return parseComponentWithParentheses(tree.ATTRIBUTES, false, text)
 }
 
 func parseAttributesProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.ATTRIBUTES_PROPERTY, text)
+	return parseComponentWithParentheses(tree.ATTRIBUTES_PROPERTY, true, text)
 }
 
 func parseDeontic(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.DEONTIC, text)
+	return parseComponentWithParentheses(tree.DEONTIC, false, text)
 }
 
 func parseAim(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.AIM, text)
+	return parseComponentWithParentheses(tree.AIM, false, text)
 }
 
 func parseDirectObject(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.DIRECT_OBJECT, text)
+	return parseComponentWithParentheses(tree.DIRECT_OBJECT, false, text)
 }
 
 func parseDirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.DIRECT_OBJECT_PROPERTY, text)
+	return parseComponentWithParentheses(tree.DIRECT_OBJECT_PROPERTY, true, text)
 }
 
 func parseIndirectObject(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.INDIRECT_OBJECT, text)
+	return parseComponentWithParentheses(tree.INDIRECT_OBJECT, false, text)
 }
 
 func parseIndirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.INDIRECT_OBJECT_PROPERTY, text)
+	return parseComponentWithParentheses(tree.INDIRECT_OBJECT_PROPERTY, true, text)
 }
 
 func parseConstitutedEntity(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY, text)
+	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY, false, text)
 }
 
 func parseConstitutedEntityProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY_PROPERTY, text)
+	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY_PROPERTY, true, text)
 }
 
 func parseModal(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.MODAL, text)
+	return parseComponentWithParentheses(tree.MODAL, false, text)
 }
 
 func parseConstitutingFunction(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTIVE_FUNCTION, text)
+	return parseComponentWithParentheses(tree.CONSTITUTIVE_FUNCTION, false, text)
 }
 
 func parseConstitutingProperties(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES, text)
+	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES, false, text)
 }
 
 func parseConstitutingPropertiesProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES_PROPERTY, text)
+	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES_PROPERTY, true, text)
 }
 
 func parseActivationCondition(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.ACTIVATION_CONDITION, text)
+	return parseComponentWithParentheses(tree.ACTIVATION_CONDITION, false, text)
 }
 
 func parseExecutionConstraint(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.EXECUTION_CONSTRAINT, text)
+	return parseComponentWithParentheses(tree.EXECUTION_CONSTRAINT, false, text)
 }
 
 /*
@@ -716,11 +735,13 @@ func validateInput(text string, leftPar string, rightPar string) (tree.ParsingEr
 
 /*
 Extracts a component content from string based on component signature (e.g., A, I, etc.)
-and balanced parentheses/braces. Tolerates presence of suffices and annotations
+and balanced parentheses/braces. Tolerates presence of suffices and annotations and includes those
+in output (e.g., A1[type=animate](content)).
+Allows for indication whether parsed component is actually a property.
 If no component content is found, an empty string is returned.
 Tests against mistaken parsing of property variant of a component (e.g., A,p() instead of A()).
 */
-func ExtractComponentContent(component string, input string, leftPar string, rightPar string) ([]string, tree.ParsingError) {
+func ExtractComponentContent(component string, propertyComponent bool, input string, leftPar string, rightPar string) ([]string, tree.ParsingError) {
 
 	// Strings for given component
 	componentStrings := []string{}
@@ -728,14 +749,13 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 	// Copy string for truncating
 	processedString := input
 
-	Println("Looking for component: " + component)
+	Println("Looking for component: ", component, "in", input, "(Property:", propertyComponent, ")")
 
 	// Assume that parentheses/braces are checked beforehand
 
-	// Validate component identifier presence (if component is specified as part of parameter)
-	if component != "" && strings.Index(processedString, component) == -1 {
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND}
-	}
+
+	// Switch indicating nested statement structure
+	nestedStatement := false
 
 	// Start position
 	startPos := -1
@@ -744,10 +764,35 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 	//r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?\\" + leftPar)
 	// + escapeSymbolsForRegex(input)
 	//Println("Regex:", component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+
+	// General component syntax (inclusive of ,p)
 	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 	if err != nil {
 		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
 		//log.Fatal("Error", err.Error())
+	}
+	// Component syntax to test for suffix-embedded property syntax (e.g., A1,p)
+	rProp, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + tree.PROPERTY_SYNTAX_SUFFIX + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+	if err != nil {
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
+		//log.Fatal("Error", err.Error())
+	}
+
+	if propertyComponent {
+		Println("Identified as component", component, "as property:", propertyComponent)
+		// If component is a property, extract root symbol to allow for intermediate index/suffix (e.g., A1,p)
+		leadIdx := strings.Index(component, tree.PROPERTY_SYNTAX_SUFFIX)
+		if leadIdx != -1 {
+			// If property element is indeed found, strip it for regex generation
+			componentRoot := component[:leadIdx]
+			
+			r, err = regexp.Compile(componentRoot + COMPONENT_SUFFIX_SYNTAX + tree.PROPERTY_SYNTAX_SUFFIX + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
+			if err != nil {
+				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
+				//log.Fatal("Error", err.Error())
+			}
+			
+		}
 	}
 
 	for { // infinite loop - needs to break out
@@ -765,10 +810,15 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 		//Println("String to be searched for component:", processedString)
 		// Return index of found element
 		result := r.FindAllStringIndex(processedString, 1)
+		// Return content of found element
 		resultContent := r.FindString(processedString)
 
 		//Println("Index:", result)
-		//Println("Content:", resultContent)
+		//Println("Component prefix:", resultContent)
+		if nestedStatement && len(resultContent) > 0 {
+			component = resultContent[:len(resultContent)-1]
+			Println("Identified nested component", component)
+		}
 
 		if len(result) > 0 {
 			// Start search after potential suffix and annotation elements
@@ -793,10 +843,17 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 			case rightPar:
 				parCount--
 				if parCount == 0 {
+					// Lead string including component identifier, suffices and annotations
+					leadString := resultContent[:len(resultContent)-len(leftPar)]
+					// String containing content only (including parentheses)
+					contentString := processedString[startPos:startPos+i+1]
+					Println(contentString)
 					// Store candidate string before cutting off potential leading component identifier (if nested statement)
-					candidateString := resultContent[:len(resultContent)-len(leftPar)] + processedString[startPos:startPos+i+1]
-					if !strings.HasSuffix(component, tree.PROPERTY_SYNTAX_SUFFIX) && strings.HasPrefix(candidateString, component + tree.PROPERTY_SYNTAX_SUFFIX) {
-						// Don't consider if properties component is found (e.g., A,p(...)), but main component is sought (e.g., A(...)).
+					candidateString := leadString + contentString
+					if !strings.HasSuffix(component, tree.PROPERTY_SYNTAX_SUFFIX) && !propertyComponent &&
+						// Test whether property is accidently embedded but it is actually non-property component search
+						rProp.MatchString(candidateString) {
+						// Don't consider if properties component is found (e.g., A,p(...) or A1,p(...)), but main component is sought (e.g., A(...)).
 						Println("Ignoring found element due to ambiguous matching with property of component (Match: " +
 							component + tree.PROPERTY_SYNTAX_SUFFIX + ", Component: " + component + ")")
 					} else {
@@ -828,16 +885,17 @@ func ExtractComponentContent(component string, input string, leftPar string, rig
 /*
 Extracts suffix (e.g., ,p1) and annotations (e.g., [ctx=time]), and content from IG-Script-coded input.
 It takes component identifier and raw coded information as input, as well as left and right parenthesis symbols (e.g., (,) or {,}).
-Returns suffix as first element, annotations string as second, and component content (including identifier) as third element.
+Returns suffix as first element, annotations string as second, and component content (including identifier, but without suffix and annotations) as third element.
 IMPORTANT:
 - This function will only extract the suffix and annotation for the first element of a given component type found in the input string.
 - This function will not prevent wrongful extraction of property components instead of first-order components. This is handled in #ExtractComponentContent.
 TODO: Make this more efficient
  */
-func extractSuffixAndAnnotations(component string, input string, leftPar string, rightPar string) (string, string, string, tree.ParsingError) {
+func extractSuffixAndAnnotations(component string, propertyComponent bool, input string, leftPar string, rightPar string) (string, string, string, tree.ParsingError) {
 
 	Println("Component:", component)
 	Println("Input:", input)
+	Println("Property:", propertyComponent)
 	strippedInput := input // leave input unchanged
 	
 	// Component annotation pattern
@@ -860,28 +918,67 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 		//Println("Annotations:", res)
 		pos := strings.Index(strippedInput, res)
 		suffix := ""
-		// Only attempt to extract suffix if there is actually one
-		if pos > len(component) {
-			// Extract component name suffix (e.g., 1), but remove component identifier
+
+		if propertyComponent {
+			// If component is property, find first position of property indicator
+			propIdx := strings.Index(strippedInput[:pos], tree.PROPERTY_SYNTAX_SUFFIX)
+			if propIdx == -1 {
+				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
+					tree.PROPERTY_SYNTAX_SUFFIX + " spread over string (e.g., A1,p) could not be found in input " + strippedInput}
+			}
+			// Find original component identifier
+			leadIdx := strings.Index(component, tree.PROPERTY_SYNTAX_SUFFIX)
+			if leadIdx == -1 {
+				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
+					tree.PROPERTY_SYNTAX_SUFFIX + " as concise prefix (e.g., A,p) could not be found in input " + strippedInput}
+			}
+			if propIdx > leadIdx {
+				// Extract difference between index in original component and new identifier
+				suffix = strippedInput[leadIdx:leadIdx+(propIdx-leadIdx)]
+			}
+		} else {
+			// Component identifier is suppressed if suffix is found
+			// Extract suffix (e.g., 1), but remove component identifier
 			suffix = strippedInput[len(component):pos]
-			// Does not guard against mistaken choice of property variants of components (e.g., A,p instead of A) - is handled in #ExtractComponentContent.
 		}
-		reconstructedComponent, err := ExtractComponentContent(component, strings.ReplaceAll(strippedInput, suffix + res, ""), leftPar, rightPar)
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return "", "", "", err
-		}
-		Println("Reconstructed statement:", reconstructedComponent)
+
+
+		// Replace annotations
+		extractedContent := strings.ReplaceAll(strippedInput, res, "")
+		// Replace suffices
+		extractedContent = strings.ReplaceAll(extractedContent, suffix, "")
+		Println("Extracted content:", extractedContent)
 		// Return suffix and annotations
-		return suffix, res, reconstructedComponent[0], tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+		return suffix, res, extractedContent, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 	} else {
 		Println("No annotations found ...")
 		// ... if no annotations are found ...
 		// Identifier start position for content
 		contentStartPos := strings.Index(strippedInput, leftPar)
 		suffix := ""
-		// Component identifier is suppressed if suffix is found
-		// Extract suffix (e.g., 1), but remove component identifier
-		suffix = strippedInput[len(component):contentStartPos]
+
+		if propertyComponent {
+			// If component is property, find first position of property indicator
+			propIdx := strings.Index(strippedInput[:contentStartPos], tree.PROPERTY_SYNTAX_SUFFIX)
+			if propIdx == -1 {
+				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
+					tree.PROPERTY_SYNTAX_SUFFIX + " spread over string (e.g., A1,p) could not be found in input " + strippedInput}
+			}
+			// Find original component identifier
+			leadIdx := strings.Index(component, tree.PROPERTY_SYNTAX_SUFFIX)
+			if leadIdx == -1 {
+				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
+					tree.PROPERTY_SYNTAX_SUFFIX + " as concise prefix (e.g., A,p) could not be found in input " + strippedInput}
+			}
+			if propIdx > leadIdx {
+				// Extract difference between index in original component and new identifier
+				suffix = strippedInput[leadIdx:leadIdx+(propIdx-leadIdx)]
+			}
+		} else {
+			// Component identifier is suppressed if suffix is found
+			// Extract suffix (e.g., 1), but remove component identifier
+			suffix = strippedInput[len(component):contentStartPos]
+		}
 		// Does not guard against mistaken choice of property variants of components (e.g., A,p instead of A) - is handled in #ExtractComponentContent.
 		reconstructedComponent := strings.Replace(strippedInput, suffix, "", 1)
 		Println("Reconstructed statement:", reconstructedComponent)
@@ -893,29 +990,32 @@ func extractSuffixAndAnnotations(component string, input string, leftPar string,
 /*
 Parses component based on surrounding parentheses.
 */
-func parseComponentWithParentheses(component string, input string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(component, input, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
+func parseComponentWithParentheses(component string, propertyComponent bool, input string) (*tree.Node, tree.ParsingError) {
+	return parseComponent(component, propertyComponent, input, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
 }
 
 /*
 Parses component based on surrounding braces
 */
-func parseComponentWithBraces(component string, input string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(component, input, LEFT_BRACE, RIGHT_BRACE)
+func parseComponentWithBraces(component string, propertyComponent bool, input string) (*tree.Node, tree.ParsingError) {
+	return parseComponent(component, propertyComponent, input, LEFT_BRACE, RIGHT_BRACE)
 }
 
 /*
 Generic entry point to parse individual components of a given statement.
 Input is component symbol of interest, full statements, as well as delimiting parentheses signaling parsing for atomic
-or nested components.
+or nested components. Additionally, the parameter propertyComponent indicates whether the parsed component is a property
 Returns the parsed node.
  */
-func parseComponent(component string, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
+func parseComponent(component string, propertyComponent bool, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
 
 	Println("Parsing:", component)
 
+	// TODO: For property variants, identify root property and search as to whether embedded midfix exists
+
+
 	// Extract component (one or multiple occurrences) from input string based on provided component identifier
-	componentStrings, err := ExtractComponentContent(component, text, leftPar, rightPar)
+	componentStrings, err := ExtractComponentContent(component, propertyComponent, text, leftPar, rightPar)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return nil, err
 	}
@@ -942,7 +1042,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			Println("Round: " + strconv.Itoa(i) + ": " + v)
 
 			// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
-			componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, v, leftPar, rightPar)
+			componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, propertyComponent, v, leftPar, rightPar)
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
 				return nil, err
 			}
@@ -963,8 +1063,11 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 			Println("Length:", len(result))
 			Println("Component string before:", componentWithoutIdentifier)
 			if len(result) == 0 {
-				// If no combination embedded in combination component, strip leading and trailing parentheses prior to combining
-				componentWithoutIdentifier = componentWithoutIdentifier[1:len(componentWithoutIdentifier)-1]
+				leadStripIdx := strings.Index(componentWithoutIdentifier, leftPar)
+				if leadStripIdx != -1 {
+					// If no combination embedded in combination component, strip leading and trailing parentheses prior to combining
+					componentWithoutIdentifier = componentWithoutIdentifier[leadStripIdx+1 : len(componentWithoutIdentifier)-1]
+				}
 			} // else don't touch, i.e., leave parentheses in string
 			Println("Component string after:", componentWithoutIdentifier)
 
@@ -1022,7 +1125,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		Println("Component strings:", componentStrings)
 
 		// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
-		componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, componentStrings[0], leftPar, rightPar)
+		componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, propertyComponent, componentStrings[0], leftPar, rightPar)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, err
 		}
@@ -1034,7 +1137,7 @@ func parseComponent(component string, text string, leftPar string, rightPar stri
 		Println("Content:", componentContent)
 
 		// Single entry (cut prefix)
-		componentString = componentContent[len(component):]
+		componentString = componentContent[strings.Index(componentContent, leftPar):]
 		Println("Single component for component", component)
 		Println("Component content", componentString)
 		// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string if not combined

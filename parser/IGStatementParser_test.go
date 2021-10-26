@@ -1086,7 +1086,7 @@ func TestExtractSuffixAndAnnotationsSingleComponentValue(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", false, text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
@@ -1118,7 +1118,7 @@ func TestExtractSuffixOnlySingleComponentValue(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", false, text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
@@ -1150,7 +1150,7 @@ func TestExtractAnnotationOnlySingleComponentValue(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", false, text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
@@ -1182,7 +1182,7 @@ func TestExtractAnnotationOnlyWithSpecialCharacters(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", false, text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
@@ -1214,7 +1214,7 @@ func TestExtractSuffixOnlyWithSpecialCharacters(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", false, text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
@@ -1246,7 +1246,7 @@ func TestExtractSuffixAndAnnotationWithSpecialCharacters(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	suffix, annotation, content, err := extractSuffixAndAnnotations("A", text, "(", ")")
+	suffix, annotation, content, err := extractSuffixAndAnnotations("A", false, text, "(", ")")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
@@ -1305,6 +1305,53 @@ func TestNodeParsingOfSuffixAndAnnotationsAtomicStatement(t *testing.T) {
 	}
 
 	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[2][0].Annotations != nil {
+		t.Fatal("Suffix should be nil, but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[2][0].Annotations)
+	}
+
+	// Check Aim
+
+	if stmt.Aim.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Suffix != "4" {
+		t.Fatal("Suffix should be 4, but is:", stmt.Aim.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Suffix)
+	}
+
+	if stmt.Aim.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Annotations != "[annotation=(left,right)]" {
+		t.Fatal("Suffix should be [annotation=(left,right)], but is:", stmt.Aim.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Annotations)
+	}
+
+}
+
+/*
+Tests whether complete statements are parsed and whether indexed suffices (e.g., A1,p(content)) and annotations are stored accordingly in the underlying node structure.
+*/
+func TestNodeParsingOfIndexedSuffixAndAnnotationsAtomicStatement(t *testing.T) {
+
+	text := "A1[annotation1](content1) A1,p[annotation2](content2) A1,p2(content3) I4[annotation=(left,right)](aim1)"
+
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Extraction should not have failed.")
+	}
+
+	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
+	tree.AGGREGATE_IMPLICIT_LINKAGES = false
+
+	fmt.Println(stmt.String())
+
+	// Check Attributes
+
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Suffix != "1" {
+		t.Fatal("Suffix should be 1, but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Suffix)
+	}
+
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Annotations != "[annotation1]" {
+		t.Fatal("Suffix should be [annotation1], but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].Annotations)
+	}
+
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].PrivateNodeLinks[0].Annotations != "[annotation2]" {
+		t.Fatal("Suffix of private node should be [annotation2], but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[1][0].Annotations)
+	}
+
+	if stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[0][0].PrivateNodeLinks[1].Annotations != nil {
 		t.Fatal("Suffix should be nil, but is:", stmt.Attributes.GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)[2][0].Annotations)
 	}
 
@@ -1449,7 +1496,7 @@ func TestComponentNameIdentification(t *testing.T) {
 Tests whether annotated statements (with suffix) are properly decomposed. Case mixes private and shared properties.
  */
 func TestCorrectNodeRemovalWithSharedAndPrivateProperties(t *testing.T) {
-	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir,p(proper) Bdir,p1(organic farming) Bdir1(provisions) and Bdir,p2(improper) Bdir2(rules)"
+	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir,p(proper) Bdir1,p1(organic farming) Bdir1(provisions) and Bdir2,p2(improper) Bdir2(rulesS)"
 
 	stmt, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1474,7 +1521,7 @@ func TestCorrectNodeRemovalWithSharedAndPrivateProperties(t *testing.T) {
 Tests whether annotated statements (with suffix) are properly decomposed. Case contains only private properties.
 */
 func TestCorrectNodeRemovalWithPrivatePropertiesOnly(t *testing.T) {
-	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir,p1(organic farming) Bdir1(provisions) and Bdir,p2(improper) Bdir2(rules)"
+	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir1,p(organic farming) Bdir1(provisions) and Bdir2,p(improper) Bdir2(rules)"
 
 	stmt, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1494,3 +1541,19 @@ func TestCorrectNodeRemovalWithPrivatePropertiesOnly(t *testing.T) {
 	}
 
 }
+
+/*
+Tests ExtractComponentContent() function.
+ */
+/*func TestExtractComponentContent(t *testing.T) {
+
+	text := "A(content1)"
+
+	content, err := ExtractComponentContent(tree.ATTRIBUTES, false, text, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of content.")
+	}
+
+	fmt.Println(content)
+
+}*/

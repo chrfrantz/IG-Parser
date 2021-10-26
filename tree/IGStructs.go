@@ -146,7 +146,7 @@ const (
 /*
 Indicates whether a given symbol is a valid IG Component symbol
  */
-func validIGComponentSymbol(symbol string) bool {
+func ValidIGComponentSymbol(symbol string) bool {
 	res, _ := StringInSlice(symbol, IGComponentSymbols)
 	return res
 }
@@ -440,6 +440,8 @@ const PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION = "INVALID_TYP
 const PARSING_ERROR_NIL_ELEMENT = "INVALID_PARSING_OF_NIL_ELEMENT"
 // Indicates an unexpected parsing error - can be diverse
 const PARSING_ERROR_UNEXPECTED_ERROR = "UNEXPECTED_ERROR"
+// Indicates nesting on invalid component (no component-level nesting)
+const PARSING_ERROR_NESTING_ON_UNSUPPORTED_COMPONENT = "NESTING_ON_NON-NESTED_COMPONENT"
 
 /*
 Error type signaling errors during statement parsing
@@ -494,17 +496,11 @@ func CollapseAdjacentOperators(inputArray []string, valuesToCollapse []string) [
 			continue
 		}
 		// If last value is the same as this one
-		if outSlice[len(outSlice) - 1] == v {
-			// and in the registered value
-			res, _ := StringInSlice(v, valuesToCollapse)
-			if res {
-				// do nothing
-			} else {
-				// else append
-				outSlice = append(outSlice, v)
-			}
+		res, _ := StringInSlice(v, valuesToCollapse)
+		if res {
+			// do nothing
 		} else {
-			// otherwise simply append
+			// else append
 			outSlice = append(outSlice, v)
 		}
 	}

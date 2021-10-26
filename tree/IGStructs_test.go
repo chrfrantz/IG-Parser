@@ -16,7 +16,7 @@ func TestValidIGComponentName(t *testing.T) {
 
 func TestValidIGSymbol(t *testing.T) {
 
-	res := validIGComponentSymbol("A")
+	res := ValidIGComponentSymbol("A")
 	if !res {
 		t.Fatal("Could not resolve valid component name")
 	}
@@ -125,6 +125,21 @@ func TestMergeSlicesSubItemMatch(t *testing.T) {
 	if fmt.Sprint(res) != fmt.Sprint(expected) {
 		t.Error("Generated array does not reflect expected output (Expected: " +
 			fmt.Sprint(expected) + ", actual: " + fmt.Sprint(res))
+	}
+
+}
+
+/*
+Tests collapsing adjacent operators.
+ */
+func TestCollapseAdjacentOperators(t *testing.T) {
+
+	input := []string{"AND", "AND", "AND", "sAND", "XOR"}
+	collapseValues := []string{AND, SAND_WITHIN_COMPONENTS, SAND_BETWEEN_COMPONENTS}
+
+	result := CollapseAdjacentOperators(input, collapseValues)
+	if len(result) != 3 {
+		t.Fatal("Did not identify correct number of operators. Found ", len(result), "in", result)
 	}
 
 }

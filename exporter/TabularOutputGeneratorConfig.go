@@ -17,7 +17,17 @@ Should not be directly modified, but rather using SetDynamicOutput().
 */
 var create_DYNAMIC_TABULAR_OUTPUT = false
 
+/*
+Indicates whether annotations should be included in output.
+Should not be directly modified, but rather using SetIncludeAnnotations().
+ */
 var include_ANNOTATIONS = false
+
+/*
+Indicates whether adjacent operators should be collapsed (right now AND, sAND and bAND).
+Should not be directly modified, but rather using SetCollapseOperators().
+ */
+var collapse_OPERATORS = true
 
 /*
 Sets whether produced output should be dynamic or static.
@@ -52,6 +62,20 @@ Queries whether dynamic (vs. static) output is activated.
  */
 func ProduceDynamicOutput() bool {
 	return create_DYNAMIC_TABULAR_OUTPUT
+}
+
+/*
+Sets whether operators should be collapsed.
+ */
+func SetCollapseOperators(collapse bool) {
+	collapse_OPERATORS = collapse
+}
+
+/*
+Indicates whether operators should be collapsed.
+ */
+func CollapseOperators() bool {
+	return collapse_OPERATORS
 }
 
 /*
