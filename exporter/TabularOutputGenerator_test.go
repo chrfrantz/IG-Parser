@@ -55,7 +55,10 @@ func TestHeaderRowGenerationWithoutComponentAggregation(t *testing.T) {
 	}
 
 	output := "Init, "
-	output, outArr, _ := generateHeaderRow(output, componentIdx, ";")
+	output, outArr, _, err := generateHeaderRow(output, componentIdx, ";")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during header generation:", err)
+	}
 
 	// Unnecessary check is intentional to allow for flexible row specification change
 	if output == "" || len(outArr) == 0 {
@@ -116,7 +119,10 @@ func TestHeaderRowGenerationWithComponentAggregation(t *testing.T) {
 	}
 
 	output := "Init, "
-	output, outArr, _ := generateHeaderRow(output, componentIdx, ";")
+	output, outArr, _, err := generateHeaderRow(output, componentIdx, ";")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during header generation:", err)
+	}
 
 	// Unnecessary check is intentional to allow for flexible row specification change
 	if output == "" || len(outArr) == 0 {
@@ -149,6 +155,9 @@ func TestSimpleTabularOutput(t *testing.T) {
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 	// OVERRIDE dynamic output setting
 	tree.AGGREGATE_IMPLICIT_LINKAGES = true
+
+	// Override cell separator symbol
+	CellSeparator = ";"
 
 	s,err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -184,14 +193,14 @@ func TestSimpleTabularOutput(t *testing.T) {
 	expectedOutput := string(content)
 
 	// Take separator for Google Sheets output
-	separator := headerRowSeparator
+	separator := ";"
 
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator,"")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -225,6 +234,9 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
+	// Take separator for Google Sheets output
+	separator := ";"
 
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
@@ -264,15 +276,12 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -306,6 +315,9 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
+	// Take separator for Google Sheets output
+	separator := ";"
 
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
@@ -345,15 +357,12 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -388,6 +397,9 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
+	// Take separator for Google Sheets output
+	separator := ";"
 
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
@@ -427,15 +439,12 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -471,6 +480,9 @@ func TestTabularOutputWithSharedElements(t *testing.T) {
 	SetDynamicOutput(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
 
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
@@ -510,15 +522,12 @@ func TestTabularOutputWithSharedElements(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -555,6 +564,9 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
+	// Take separator for Google Sheets output
+	separator := ";"
 
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
@@ -594,15 +606,12 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -643,6 +652,9 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -681,15 +693,12 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -729,6 +738,9 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -767,15 +779,12 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -813,6 +822,9 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	SetDynamicOutput(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
+	// Take separator for Google Sheets output
+	separator := ";"
 
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
@@ -852,15 +864,12 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -901,6 +910,9 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -939,15 +951,12 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -988,6 +997,9 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -1026,15 +1038,12 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1076,6 +1085,9 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -1114,15 +1126,12 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1165,6 +1174,9 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -1203,15 +1215,12 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1256,6 +1265,9 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -1296,15 +1308,12 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1368,6 +1377,10 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -1410,15 +1423,12 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1461,6 +1471,10 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -1503,15 +1517,12 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1555,6 +1566,10 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -1597,15 +1612,12 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1647,6 +1659,10 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 	SetDynamicOutput(false)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
@@ -1691,15 +1707,12 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1743,6 +1756,10 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -1785,15 +1802,12 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1836,6 +1850,10 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 	SetDynamicOutput(false)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
@@ -1880,15 +1898,12 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1931,6 +1946,10 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 	SetDynamicOutput(false)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
@@ -1975,15 +1994,12 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2027,6 +2043,10 @@ func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
 	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -2069,15 +2089,12 @@ func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	// Take separator for Google Sheets output
-	separator := headerRowSeparator
-
 	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, componentRefs, links, "650", separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, "")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}

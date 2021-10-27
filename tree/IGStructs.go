@@ -442,6 +442,8 @@ const PARSING_ERROR_NIL_ELEMENT = "INVALID_PARSING_OF_NIL_ELEMENT"
 const PARSING_ERROR_UNEXPECTED_ERROR = "UNEXPECTED_ERROR"
 // Indicates nesting on invalid component (no component-level nesting)
 const PARSING_ERROR_NESTING_ON_UNSUPPORTED_COMPONENT = "NESTING_ON_NON-NESTED_COMPONENT"
+// Indicates missing separator value (for output generation)
+const PARSING_ERROR_MISSING_SEPARATOR_VALUE = "MISSING_SEPARATOR"
 
 /*
 Error type signaling errors during statement parsing
