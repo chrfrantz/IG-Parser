@@ -116,6 +116,8 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 			switch sourceComponentElement.GetComponentName() {
 			case tree.ATTRIBUTES:
 				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.AttributesPropertySimple)
+			case tree.AIM:
+				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ExecutionConstraintSimple)
 			case tree.DIRECT_OBJECT:
 				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.DirectObjectPropertySimple)
 			case tree.INDIRECT_OBJECT:
@@ -154,6 +156,8 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 							switch sourceComponentElement.GetComponentName() {
 							case tree.ATTRIBUTES:
 								s.AttributesPropertySimple = nil
+							case tree.AIM:
+								s.ExecutionConstraintSimple = nil
 							case tree.DIRECT_OBJECT:
 								s.DirectObjectPropertySimple = nil
 							case tree.INDIRECT_OBJECT:
