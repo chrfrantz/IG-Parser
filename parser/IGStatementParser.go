@@ -417,6 +417,9 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 
 		log.Println("Assigning nested tree structure", combo)
 
+		// Assign component type name to combination (for proper retrieval and identification as correct type)
+		combo.ComponentType = sharedPrefix
+
 		// Checks are ordered with property variants (e.g., Bdir,p) before component variants (e.g., Bdir) to avoid wrong match
 
 		if strings.HasPrefix(sharedPrefix, tree.ATTRIBUTES_PROPERTY) {

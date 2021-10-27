@@ -274,7 +274,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 							componentNestedRight +
 							stmtIdSeparator +
 							strconv.Itoa(nestedStatementIdx)
-
+						Println("Generated ID for nested statement:", nestedStmtId)
 						// Add component-level nested statement
 						componentNestedStmts = append(componentNestedStmts,
 							IdentifiedStmt{nestedStmtId, entryVal})
@@ -284,7 +284,6 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						nestedStatementIdx++
 						// Prepare reference to to-be component-level nested statements to output
 						idToReferenceInCell = nestedStmtId
-						//output += nestedStmtId
 						Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Val:", entryVal, ")")
 					}
 
@@ -299,6 +298,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						entryMap[headerSymbols[componentIdx]] += idToReferenceInCell
 					} else {
 						// Static version
+						Println("Linking substatement ID to component", statement[componentIdx])
 						// Save entry into entryMap for calling row
 						if entryMap[statement[componentIdx].GetComponentName()] != "" {
 							// Add separator if already an entry
