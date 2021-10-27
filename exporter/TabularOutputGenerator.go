@@ -300,12 +300,12 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						// Static version
 						Println("Linking substatement ID to component", statement[componentIdx])
 						// Save entry into entryMap for calling row
-						if entryMap[statement[componentIdx].GetComponentName()] != "" {
+						if entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] != "" {
 							// Add separator if already an entry
-							entryMap[statement[componentIdx].GetComponentName()] += componentStmtRefSeparator
+							entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] += componentStmtRefSeparator
 						}
 						// Append current value in any case
-						entryMap[statement[componentIdx].GetComponentName()] += idToReferenceInCell
+						entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] += idToReferenceInCell
 					}
 				}
 			}
