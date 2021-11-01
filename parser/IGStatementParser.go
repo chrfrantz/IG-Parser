@@ -171,6 +171,21 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 
 	//Println(s.String())
 
+	Println("Testing for nested statement combinations in " + fmt.Sprint(nestedCombos))
+
+	// Process nested statement combinations
+	if len(nestedCombos) > 0 {
+		log.Println("Found nested statement combinations ...")
+		err = parseNestedStatementCombinations(&s, nestedCombos)
+		if err.ErrorCode == tree.PARSING_ERROR_NIL_ELEMENT {
+			// Shift to regular nested statement if parsing as combo failed (Regex is too coarse-grained)
+			nestedStmts = append(nestedStmts, nestedCombos...)
+			Println("Reclassifying statement as nested statement (as opposed to nested combination) ...")
+		} else if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return s, err
+		}
+	}
+
 	Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
 
 	// Process nested statements
@@ -182,16 +197,7 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 		}
 	}
 
-	Println("Testing for nested statement combinations in " + fmt.Sprint(nestedCombos))
 
-	// Process nested statement combinations
-	if len(nestedCombos) > 0 {
-		log.Println("Found nested statement combinations ...")
-		err = parseNestedStatementCombinations(&s, nestedCombos)
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return s, err
-		}
-	}
 
 	log.Println("Statement (after assigning sub elements):\n" + s.String())
 

@@ -629,26 +629,32 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 		case "[":
 			//Println("Checking for logical operator ... " + expression[i:i+5])
 			foundOperator := ""
-			switch expression[i:i+5] {
-			case tree.AND_BRACKETS:
-				Println("Detected " + tree.AND_BRACKETS)
-				foundOperator = tree.AND
-			case tree.XOR_BRACKETS:
-				Println("Detected " + tree.XOR_BRACKETS)
-				foundOperator = tree.XOR
+			// Check for length of expression before testing logical operators
+			if len(expression) >= i+len(tree.AND_BRACKETS) {
+				switch expression[i : i+len(tree.AND_BRACKETS)] {
+				case tree.AND_BRACKETS:
+					Println("Detected " + tree.AND_BRACKETS)
+					foundOperator = tree.AND
+				case tree.XOR_BRACKETS:
+					Println("Detected " + tree.XOR_BRACKETS)
+					foundOperator = tree.XOR
+				}
 			}
-			// Separately test for OR due to differing length
-			if foundOperator == "" && expression[i:i+len(tree.OR_BRACKETS)] == tree.OR_BRACKETS {
+			// Separately test for OR due to differing length (but remember to test for length of expression first)
+			if foundOperator == "" && len(expression) >= i+len(tree.OR_BRACKETS) &&
+					expression[i:i+len(tree.OR_BRACKETS)] == tree.OR_BRACKETS {
 				Println("Detected " + tree.OR_BRACKETS)
 				foundOperator = tree.OR
 			}
-			// Separately test for sAND WITHIN components due to differing length
-			if foundOperator == "" && expression[i:i+len(tree.SAND_WITHIN_COMPONENTS_BRACKETS)] == tree.SAND_WITHIN_COMPONENTS_BRACKETS {
+			// Separately test for sAND WITHIN components due to differing length (but remember to test for length of expression first)
+			if foundOperator == "" && len(expression) >= i+len(tree.SAND_WITHIN_COMPONENTS_BRACKETS) &&
+					expression[i:i+len(tree.SAND_WITHIN_COMPONENTS_BRACKETS)] == tree.SAND_WITHIN_COMPONENTS_BRACKETS {
 				Println("Detected " + tree.SAND_WITHIN_COMPONENTS_BRACKETS)
 				foundOperator = tree.SAND_WITHIN_COMPONENTS
 			}
-			// Separately test for sAND BETWEEN components due to differing length
-			if foundOperator == "" && expression[i:i+len(tree.SAND_BETWEEN_COMPONENTS_BRACKETS)] == tree.SAND_BETWEEN_COMPONENTS_BRACKETS {
+			// Separately test for sAND BETWEEN components due to differing length (but remember to test for length of expression first)
+			if foundOperator == "" && len(expression) >= i+len(tree.SAND_BETWEEN_COMPONENTS_BRACKETS) &&
+					expression[i:i+len(tree.SAND_BETWEEN_COMPONENTS_BRACKETS)] == tree.SAND_BETWEEN_COMPONENTS_BRACKETS {
 				Println("Detected " + tree.SAND_BETWEEN_COMPONENTS_BRACKETS)
 				foundOperator = tree.SAND_BETWEEN_COMPONENTS
 			}

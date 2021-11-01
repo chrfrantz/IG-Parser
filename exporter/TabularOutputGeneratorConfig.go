@@ -184,5 +184,8 @@ func GetStaticTabularOutputSchema() map[string]int {
 		staticComponentFrequency[tree.CONSTITUTING_PROPERTIES_ANNOTATION] = 1
 	}
 
+	// Or else only exists as reference
+	staticComponentFrequency[tree.OR_ELSE_REFERENCE] = 1
+
 	return staticComponentFrequency
 }
