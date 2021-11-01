@@ -729,20 +729,21 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 }
 
 /*
-Combines existing nodes into new node and returns newly generated node
+Combines existing nodes into new node and returns newly generated node.
+Returns an error if component types of input nodes differ (should not be combined).
  */
-func Combine(leftNode *Node, rightNode *Node, logicalOperator string) *Node {
+func Combine(leftNode *Node, rightNode *Node, logicalOperator string) (*Node, NodeError) {
 
 	if leftNode == nil && rightNode == nil {
 		log.Fatal("Illegal call to Combine() with nil nodes")
 	}
 	if leftNode == nil || leftNode.IsEmptyNode() {
 		Println("Combining nodes returns right node (other node is nil or empty)")
-		return rightNode
+		return rightNode, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 	if rightNode == nil || rightNode.IsEmptyNode() {
 		Println("Combining nodes returns left node (other node is nil or empty)")
-		return leftNode
+		return leftNode, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 	// In all other cases, create new combination using provided logical operator
 	newNode := Node{}
@@ -751,7 +752,20 @@ func Combine(leftNode *Node, rightNode *Node, logicalOperator string) *Node {
 	newNode.Right = rightNode
 	newNode.Right.Parent = &newNode
 	newNode.LogicalOperator = logicalOperator
-	return &newNode
+	// Move left nodes component name to newly created parent node
+	if leftNode.GetComponentName() != "" {
+		newNode.ComponentType = leftNode.GetComponentName()
+	}
+	// Attach right node's type to parent if none is provided
+	if leftNode.GetComponentName() == "" && rightNode.GetComponentName() != ""{
+		newNode.ComponentType = rightNode.GetComponentName()
+	}
+	// Check whether both nodes have divergent component names - should not be allowed.
+	if leftNode.GetComponentName() != "" && rightNode.GetComponentName() != "" && leftNode.GetComponentName() != rightNode.GetComponentName() {
+		return nil, NodeError{TREE_INVALID_COMPONENT_COMBINATIONS, "Invalid component types for nodes to be combined (Left: " +
+			leftNode.GetComponentName() + ", Right: " + rightNode.GetComponentName() + ")", nil}
+	}
+	return &newNode, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 

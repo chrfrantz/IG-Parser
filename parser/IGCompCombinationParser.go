@@ -407,12 +407,21 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 	// Reconstructing node based on order of node input
 	//Println("Node order: ")
 	ct := 0
+
+	// Default error to test for invalid combinations
+	nodeCombinationError := tree.NodeError{ErrorCode: tree.PARSING_NO_ERROR}
+
 	// If more than one node ...
 	if len(orderMap) > 1 {
 		for ct < len(input) {
 			if _, ok := orderMap[ct]; ok {
 				// ... then synthetically link elements
-				nodeTree = tree.Combine(nodeTree, orderMap[ct], tree.SAND_WITHIN_COMPONENTS)
+				nodeTree, nodeCombinationError = tree.Combine(nodeTree, orderMap[ct], tree.SAND_WITHIN_COMPONENTS)
+				// Check if combination error has been picked up - here and in the beginning of loop
+				if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
+					return nil, input, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
+						ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
+				}
 				Println("Added to tree: " + fmt.Sprint(orderMap[ct]))
 			}
 			ct++

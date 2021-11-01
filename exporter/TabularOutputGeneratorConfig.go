@@ -86,6 +86,11 @@ func GetStaticTabularOutputSchema() map[string]int {
 	// Generate static headers
 	staticComponentFrequency := make(map[string]int)
 
+	if include_ANNOTATIONS {
+		// Statement annotation
+		staticComponentFrequency[tree.STATEMENT_ANNOTATION] = 1
+	}
+
 	// Regulative side
 	staticComponentFrequency[tree.ATTRIBUTES_PROPERTY] = 1
 	staticComponentFrequency[tree.ATTRIBUTES_PROPERTY_REFERENCE] = 1

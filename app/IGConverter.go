@@ -27,8 +27,10 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 		return "", err
 	}
 
+	Println("Parsed statement:", s.String())
+
 	// Run composite generation and return output and error. Will write file if filename != ""
-	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, stmtId, "", tree.AGGREGATE_IMPLICIT_LINKAGES, separator)
+	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, "", stmtId, "", tree.AGGREGATE_IMPLICIT_LINKAGES, separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", err
 	}

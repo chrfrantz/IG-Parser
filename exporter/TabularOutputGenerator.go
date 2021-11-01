@@ -53,6 +53,7 @@ Consider the specification of INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT variable
 are to be included in output.
 Input:
 - Atomic statements with corresponding node references [statement][node references]
+- Input statement annotations (i.e., of statement, not components)
 - Map with component name as key and corresponding number of columns in input stmts (i.e., same component can have
   values across multiple columns)
 - References to entries for given nodes as indicated by logical operators, and used to produce corresponding linkages
@@ -64,7 +65,7 @@ Output:
 - Array of header symbols (used for component linkage references)
 - Array of header symbols names (for human-readable header construction)
  */
-func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string) ([]map[string]string, []string, []string, tree.ParsingError) {
+func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{}, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string) ([]map[string]string, []string, []string, tree.ParsingError) {
 
 	if headerSeparator == "" {
 		return nil, nil, nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_MISSING_SEPARATOR_VALUE,
@@ -138,7 +139,12 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 		entryMap[stmtIdColHeader] = subStmtId
 		// String linking all logical operators for a given row
 		logicalValue := ""
-		// Iterate over component index (i.e., column)
+
+		// Include statement-level annotations if activated and existing in input
+		if include_ANNOTATIONS && annotations != nil {
+			entryMap[tree.STATEMENT_ANNOTATION] = annotations.(string)
+		}
+		// Iterate over component index (i.e., column) covering conventional components
 		for componentIdx := range statement {
 			// Append element value as output for given cell
 			if statement[componentIdx].IsEmptyNode() {
@@ -192,6 +198,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 					}
 				} else {
 					// Static variant
+					Println("Looking for component entry for", statement[componentIdx].GetComponentName())
 					// Save entry for a given field matched based on node's component type
 					if len(entryMap[statement[componentIdx].GetComponentName()]) > 0 {
 						// Add separator for cell values
@@ -201,7 +208,6 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						// First value, hence no separator needed
 						entryMap[statement[componentIdx].GetComponentName()] = entryVal
 					}
-
 				}
 				Println("Added entry ", entryVal)
 
@@ -240,7 +246,9 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 				Println("Current entrymap:", entryMap)
 			} else {
 				// Nested statements are stored for later processing, but assigned IDs and references added to calling row
-				Println("Found complex entry (nested statement): " + fmt.Sprint(statement[componentIdx]))
+				Println("Found complex entry (nested statement) in component: " + fmt.Sprint(statement[componentIdx].GetComponentName()))
+				Println("Complex entry (nested statement):" + fmt.Sprint(statement[componentIdx]))
+				Println("Complex entry's annotations:" + fmt.Sprint(statement[componentIdx].Annotations))
 				// Check for statement combination (i.e., node combination)
 
 				// Add entry to array (assuming single nested statement)
@@ -284,7 +292,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						nestedStatementIdx++
 						// Prepare reference to to-be component-level nested statements to output
 						idToReferenceInCell = nestedStmtId
-						Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Val:", entryVal, ")")
+						Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Annotations:", entryVal.Annotations, ", Val:", entryVal, ")")
 					}
 
 					if ProduceDynamicOutput() {
@@ -298,7 +306,8 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 						entryMap[headerSymbols[componentIdx]] += idToReferenceInCell
 					} else {
 						// Static version
-						Println("Linking substatement ID to component", statement[componentIdx])
+						Println("Linking substatement ID to component", statement[componentIdx],
+							"Name: ", statement[componentIdx].GetComponentName())
 						// Save entry into entryMap for calling row
 						if entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] != "" {
 							// Add separator if already an entry
@@ -337,11 +346,11 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, componentFrequency map
 	Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
 	for _, val := range componentNestedStmts {
 
-		Println("Nested Statement to parse, ID:", val.ID, ", Stmt:", val.NestedStmt)
+		Println("Nested Statement to parse, ID:", val.ID, ", Annotations:", val.NestedStmt.Annotations, ", Stmt:", val.NestedStmt)
 
 		log.Println("Parsing nested statement ...")
 		// Parse individual nested statements on component level
-		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator)
+		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.NestedStmt.Annotations, val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, nil, nil, errorVal
 		}
@@ -496,7 +505,7 @@ Additionally returns array of statement entries, header symbols and correspondin
 Uses separator to delimited Google Sheet output.
 If filename is provided, the result is printed to the corresponding file.
  */
-func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stmtId string, filename string, aggregateImplicitLinkages bool, separator string) (string, []map[string]string, []string, []string, tree.ParsingError) {
+func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, annotations interface{}, stmtId string, filename string, aggregateImplicitLinkages bool, separator string) (string, []map[string]string, []string, []string, tree.ParsingError) {
 	log.Println(" Step: Extracting leaf arrays")
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := statement.GenerateLeafArrays(aggregateImplicitLinkages)
@@ -521,9 +530,7 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, stm
 	log.Println(" Step: Generate tabular output")
 
 	// Prepare export to Google Sheets format
-	// Header row separator for generated Google Sheets output
-	//separator := CellSeparator
-	statementMap, statementHeaders, statementHeaderNames, err := generateTabularStatementOutput(res, componentRefs, links, stmtId, separator)
+	statementMap, statementHeaders, statementHeaderNames, err := generateTabularStatementOutput(res, annotations, componentRefs, links, stmtId, separator)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", nil, nil, nil, err
 	}

@@ -1543,6 +1543,208 @@ func TestCorrectNodeRemovalWithPrivatePropertiesOnly(t *testing.T) {
 }
 
 /*
+Tests automated extraction of component type.
+ */
+func TestExtractComponentType(t *testing.T) {
+
+	// Primitive type
+
+	input := "Cac("
+
+	compType, prop, err := extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac" {
+		t.Fatal("Wrong component type detected.")
+	}
+	if prop != false {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+	// complex type
+
+	input = "Cac{"
+
+	compType, prop, err = extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac" {
+		t.Fatal("Wrong component type detected.")
+	}
+	if prop != false {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+	// Primitive type with property
+
+	input = "Cac,p("
+
+	compType, prop, err = extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac,p" {
+		t.Fatal("Wrong component type detected. Type:", compType)
+	}
+	if prop != true {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+	// simple type with suffix
+
+	input = "Cac1("
+
+	compType, prop, err = extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac" {
+		t.Fatal("Wrong component type detected.")
+	}
+	if prop != false {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+	// simple type with suffix and property
+
+	input = "Cac1,p("
+
+	compType, prop, err = extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac,p" {
+		t.Fatal("Wrong component type detected.")
+	}
+	if prop != true {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+	// simple type with annotation
+
+	input = "Cac[annotation]("
+
+	compType, prop, err = extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac" {
+		t.Fatal("Wrong component type detected.")
+	}
+	if prop != false {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+	// simple type with suffix and annotation
+
+	input = "Cac1[annot=test]("
+
+	compType, prop, err = extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac" {
+		t.Fatal("Wrong component type detected.")
+	}
+	if prop != false {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+	// simple type with suffix and annotation and property
+
+	input = "Cac1,p[annot=test]("
+
+	compType, prop, err = extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac,p" {
+		t.Fatal("Wrong component type detected.")
+	}
+	if prop != true {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+	// complex type with suffix and annotation
+
+	input = "Cac1[testAnnotation]{"
+
+	compType, prop, err = extractComponentType(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during component type extraction:", err)
+	}
+	if compType != "Cac" {
+		t.Fatal("Wrong component type detected. Component type:", compType)
+	}
+	if prop != false {
+		t.Fatal("Wrong property characteristics detected.")
+	}
+
+}
+
+func TestSuffixAndAnnotationParsingOnSimpleNestedStatement(t *testing.T) {
+
+	input := "A(Actor) D(must) I(review) Bdir(subjects) CacA[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)}"
+
+	s, err := ParseStatement(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing:", err)
+	}
+
+	if s.ActivationConditionComplex == nil {
+		t.Fatal("Complex nested activation condition was not correctly parsed.")
+	}
+
+	if s.ActivationConditionComplex.Suffix != "A" {
+		t.Fatal("Suffix on complex nested statement is incorrect:", s.ActivationConditionComplex.Suffix)
+	}
+
+	if s.ActivationConditionComplex.Annotations.(string) != "[ctx=state]" {
+		t.Fatal("Annotations on complex nested statement are incorrect:", s.ActivationConditionComplex.Annotations.(string))
+	}
+
+}
+
+func TestSuffixAndAnnotationParsingOnNestedStatementCombination(t *testing.T) {
+
+	input := "A(Actor) D(must) I(review) Bdir(subjects) " +
+		"{CacA[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)} [XOR] " +
+		"Cac1[annotA]{A(other actor) I(does) Bdir(something)}}"
+
+	s, err := ParseStatement(input)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing:", err)
+	}
+
+	if s.ActivationConditionComplex == nil {
+		t.Fatal("Complex nested activation condition was not correctly parsed.")
+	}
+
+	if s.ActivationConditionComplex.LogicalOperator != "XOR" {
+		t.Fatal("Logical operator incorrectly identified as", s.ActivationConditionComplex.LogicalOperator)
+	}
+
+	if s.ActivationConditionComplex.Left.Suffix != "A" {
+		t.Fatal("Suffix on complex nested statement is incorrect:", s.ActivationConditionComplex.Left.Suffix)
+	}
+
+	if s.ActivationConditionComplex.Right.Suffix != "1" {
+		t.Fatal("Suffix on complex nested statement is incorrect:", s.ActivationConditionComplex.Right.Suffix)
+	}
+
+	if s.ActivationConditionComplex.Left.Annotations.(string) != "[ctx=state]" {
+		t.Fatal("Annotations on complex nested statement are incorrect:", s.ActivationConditionComplex.Left.Annotations.(string))
+	}
+
+	if s.ActivationConditionComplex.Right.Annotations.(string) != "[annotA]" {
+		t.Fatal("Annotations on complex nested statement are incorrect:", s.ActivationConditionComplex.Right.Annotations.(string))
+	}
+
+}
+
+/*
 Tests ExtractComponentContent() function.
  */
 /*func TestExtractComponentContent(t *testing.T) {

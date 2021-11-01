@@ -391,8 +391,11 @@ Tests the combination of nodes into new node
 func TestNodeCombination(t *testing.T) {
 
 	node1 := Node{}
+	node1.ComponentType = "Type2"
 	leftSubnode1 := Node{Entry: "left subvalue1"}
+	leftSubnode1.ComponentType = "Type1"
 	rightSubnode1 := Node{Entry: "right subvalue1"}
+	rightSubnode1.ComponentType =  "Type1"
 
 	res, err := node1.InsertLeftNode(&leftSubnode1)
 	if !res || err.ErrorCode != TREE_NO_ERROR {
@@ -405,6 +408,7 @@ func TestNodeCombination(t *testing.T) {
 	}
 
 	node2 := Node{}
+	node2.ComponentType = "Type2"
 	leftSubnode2 := Node{Entry: "left subvalue2"}
 	rightSubnode2 := Node{Entry: "right subvalue2"}
 
@@ -418,10 +422,17 @@ func TestNodeCombination(t *testing.T) {
 		t.Fatal("Error when adding new node should not happen")
 	}
 
-	combinedNode := Combine(&node1, &node2, "AND")
+	combinedNode, err := Combine(&node1, &node2, "AND")
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error during combination of nodes.")
+	}
 
 	if combinedNode.LogicalOperator != "AND" {
 		t.Fatal("Logical operator was not correctly assigned in combined node.")
+	}
+
+	if combinedNode.GetComponentName() != "Type2" {
+		t.Fatal("Wrong component name introduced in combination.")
 	}
 
 	if combinedNode.Left != &node1 {
@@ -450,6 +461,49 @@ func TestNodeCombination(t *testing.T) {
 
 }
 
+/*
+Tests the combination of nodes into new node under consideration of conflicting types.
+*/
+func TestNodeCombinationConflictingTypes(t *testing.T) {
+
+	node1 := Node{}
+	node1.ComponentType = "Type2"
+	leftSubnode1 := Node{Entry: "left subvalue1"}
+	leftSubnode1.ComponentType = "Type1"
+	rightSubnode1 := Node{Entry: "right subvalue1"}
+	rightSubnode1.ComponentType =  "Type1"
+
+	res, err := node1.InsertLeftNode(&leftSubnode1)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	res, err = node1.InsertRightNode(&rightSubnode1)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	node2 := Node{}
+	node2.ComponentType = "Type1"
+	leftSubnode2 := Node{Entry: "left subvalue2"}
+	rightSubnode2 := Node{Entry: "right subvalue2"}
+
+	res, err = node2.InsertLeftNode(&leftSubnode2)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	res, err = node2.InsertRightNode(&rightSubnode2)
+	if !res || err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when adding new node should not happen")
+	}
+
+	_, err = Combine(&node1, &node2, "AND")
+	if err.ErrorCode == TREE_NO_ERROR {
+		t.Fatal("Did not pick up on combination of incompatible components")
+	}
+
+}
 
 /*
 Test for inheriting shared elements using the append inheritance mode.
