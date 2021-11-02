@@ -396,7 +396,10 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 			}
 			entry := node.Entry.(string)
 			Println("Entry to parse for component type: " + entry)
-			// Extract prefix (i.e., component type) for node
+			// Extract prefix (i.e., component type) for node, but check whether it contains nested statement
+			if strings.Index(entry, LEFT_BRACE) == -1 {
+				return tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION, ErrorMessage: "Element in combination of nested statement does not contain nested statement. Element of concern: " + entry}
+			}
 			prefix, prop, err := extractComponentType(entry[:strings.Index(entry, LEFT_BRACE)])
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
 				return tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: "Error when extracting component type from nested statement."}

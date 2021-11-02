@@ -448,7 +448,7 @@ const PARSING_INVALID_COMBINATION = "INVALID_COMBINATION_IN_INPUT"
 // Signals empty leaf value during parsing
 const PARSING_ERROR_EMPTY_LEAF = "EMPTY_LEAF_VALUE"
 // Indicates that parentheses are umbalanced during parsing
-const PARSING_ERROR_IMBALANCED_PARENTHESES = "UNBALANCED_PARENTHESES"
+const PARSING_ERROR_IMBALANCED_PARENTHESES = "IMBALANCED_PARENTHESES"
 // Indicates that component was not found during preprocessing
 const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 // Indicates ignored elements during parsing

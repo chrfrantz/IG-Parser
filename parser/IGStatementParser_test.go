@@ -1745,6 +1745,20 @@ func TestSuffixAndAnnotationParsingOnNestedStatementCombination(t *testing.T) {
 }
 
 /*
+Tests correct handling of invalid combination of nested statements.
+ */
+func TestInvalidNestedCombination(t *testing.T) {
+
+	text := "{Cac{A(actor) I(action)} [XOR] Cac(simple content)}"
+
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_INVALID_COMBINATION {
+		t.Fatal("Parsing did not pick up on erroneous combination.")
+	}
+
+}
+
+/*
 Tests ExtractComponentContent() function.
  */
 /*func TestExtractComponentContent(t *testing.T) {
