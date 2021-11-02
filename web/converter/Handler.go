@@ -122,6 +122,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
 		// Just show empty form with prepopulated elements
+		retStruct.RawStmt = RAW_STATEMENT
 		retStruct.CodedStmt = ANNOTATED_STATEMENT
 		retStruct.StmtId = STATEMENT_ID
 
