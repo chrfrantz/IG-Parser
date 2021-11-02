@@ -6,15 +6,19 @@ import (
 	"strings"
 )
 
+// Internal column header for components with nested statement references
 const REF_SUFFIX = "-Ref"
+// Column header in output for reference column
 const NAME_REF_SUFFIX = " Reference"
+// Brackets used for logical operators (and annotations)
 const LEFT_BRACKET = "["
 const RIGHT_BRACKET = "]"
-// Syntax for properties in component identifiers
+// Syntax for properties in component identifiers (e.g., A,p)
 const PROPERTY_SYNTAX_SUFFIX = ",p"
+// Suffix for component-specific annotation column header
 const ANNOTATION = " (Annotation)"
 
-// Annotation of statement
+// Column header for statement annotations
 const STATEMENT_ANNOTATION = "Statement Annotation"
 
 const (
@@ -419,8 +423,6 @@ type Boundaries struct {
 	Complete bool
 	// Indicates whether element is shared (i.e., belongs to some combination)
 	Shared bool
-	// Signals whether a boundary value has already been added to the final output
-	//AlreadyAdded bool
 }
 
 func (b *Boundaries) String() string {
@@ -502,15 +504,16 @@ func (e *NodeError) Error() error {
 		" (Ignored elements: " + strconv.Itoa(len(e.ErrorIgnoredElements)) + ")")
 }
 
+// Standard error type if no error was found
 const TREE_NO_ERROR = "NO_ERROR"
 const TREE_INVALID_NODE_ADDITION = "INVALID_NODE_ADDITION"
+// Indicates that node is linked to itself as parent
 const TREE_INVALID_NODE_SELF_LINKAGE = "INVALID_NODE_LINKAGE_TO_SELF"
 const TREE_INVALID_NODE_REMOVAL = "INVALID_NODE_REMOVAL"
 const TREE_INVALID_TREE = "TREE_STRUCTURE_INVALID"
 // Indicates combination of different component types under shared component node.
 const TREE_INVALID_COMPONENT_COMBINATIONS = "TREE_INVALID_COMPONENT_COMBINATIONS"
 const TREE_INPUT_VALIDATION = "INPUT_VALIDATION"
-//const TREE_ALREADY_VISITED = "NODE_ALREADY_VISITED"
 
 /*
 Collapses repeated occurrences of values in a given array (e.g., [AND] [AND] becomes [AND]).
@@ -730,4 +733,3 @@ func Flatten(input [][]*Node) []*Node {
 	}
 	return output
 }
-
