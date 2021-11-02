@@ -1756,6 +1756,13 @@ func TestInvalidNestedCombination(t *testing.T) {
 		t.Fatal("Parsing did not pick up on erroneous combination.")
 	}
 
+	text = "{Cac(simple content) [OR] Cac{A(actor) I(action)} [OR] Cac{A(actor2) I(action2)}}"
+
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_INVALID_COMBINATION {
+		t.Fatal("Parsing did not pick up on erroneous combination.")
+	}
+
 }
 
 /*
