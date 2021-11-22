@@ -1794,7 +1794,7 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect), I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) "+//Bdir,p1(accredited) Bdir1(certifying agents) " +
+		"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"{Cac{E(Program Manager) F(is) P((approved [AND] committed))} [XOR] " +
@@ -1887,7 +1887,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect), I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) "+//Bdir,p1(accredited) Bdir1(certifying agents) " +
+		"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"{Cac{E(Program Manager) F(is) P((approved [AND] committed))} [XOR] " +
@@ -1941,6 +1941,95 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedCombinationsImplicitAnd.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, nil, componentRefs, links, "650", separator)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+}
+
+/*
+Correct parsing of shared elements left and right (on Aim and Cex).
+*/
+func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.T) {
+
+	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect), " +
+		"I(sustain (review [AND] (refresh [AND] drink)) rightShared) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part) and beyond) "
+
+	// Static output
+	SetDynamicOutput(false)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 5 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaBasicStatementLeftAndRightElements.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
