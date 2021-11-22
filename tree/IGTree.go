@@ -41,7 +41,8 @@ Returns parents' left shared elements in order of hierarchical (top first).
 func (n *Node) getParentsLeftSharedElements() []string {
 
 	if n.Parent != nil {
-		if n.Parent.SharedLeft != nil && len(n.Parent.SharedLeft) != 0 {
+		// Only allows for shared elements that are truly not-empty (including preventing "" as first element)
+		if n.Parent.SharedLeft != nil && len(n.Parent.SharedLeft) != 0 && n.Parent.SharedLeft[0] != "" {
 			// Recursively return parents' shared elements, followed by respective children ones
 			return append(n.Parent.getParentsLeftSharedElements(), n.Parent.SharedLeft...)
 		} else {
@@ -59,7 +60,8 @@ Returns parents' right shared elements in order of hierarchical (top first).
 func (n *Node) getParentsRightSharedElements() []string {
 
 	if n.Parent != nil {
-		if n.Parent.SharedRight != nil && len(n.Parent.SharedRight) != 0 {
+		// Only allows for shared elements that are truly not-empty (including preventing "" as first element)
+		if n.Parent.SharedRight != nil && len(n.Parent.SharedRight) != 0  && n.Parent.SharedRight[0] != ""  {
 			// Recursively return parents' shared elements, followed by respective children ones
 			return append(n.Parent.getParentsRightSharedElements(), n.Parent.SharedRight...)
 		} else {
@@ -245,8 +247,8 @@ func (n *Node) Stringify() string {
 	}
 	// Walk the tree
 	out := ""
-	// Potential left shared elements
-	if n.GetSharedLeft() != nil && len(n.GetSharedLeft()) != 0 {
+	// Potential left shared elements; note: explicitly checks for empty elements (e.g., "")
+	if n.GetSharedLeft() != nil && len(n.GetSharedLeft()) != 0 && n.GetSharedLeft()[0] != "" {
 		out += "(" + strings.Trim(fmt.Sprint(n.GetSharedLeft()), "[]") + " "
 	}
 	// Inner combination
@@ -262,8 +264,8 @@ func (n *Node) Stringify() string {
 	}
 	// Close inner combinations
 	out += ")"
-	// Potential right shared elements
-	if n.GetSharedRight() != nil && len(n.GetSharedRight()) != 0 {
+	// Potential right shared elements; note: explicitly checks for empty elements (e.g., "")
+	if n.GetSharedRight() != nil && len(n.GetSharedRight()) != 0 && n.GetSharedRight()[0] != "" {
 		out += " " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]") + ")"
 	}
 	return out

@@ -860,15 +860,30 @@ Return: string arrays for left and right side shared components
  */
 func extractSharedComponents(input string, boundaries map[int]map[int]tree.Boundaries, level int, index int) ([]string, []string) {
 
-	// shared components can only be on first level onwards, i.e., if combination is on second level
-	if len(boundaries) < 2 {
-		return nil, nil
-	}
+	Println("Identifying left and right shared entries for " + input[boundaries[level][index].Left:boundaries[level][index].Right])
 
-	Println("IDENTIFYING left and right shared entries for " + input[boundaries[level][index].Left:boundaries[level][index].Right])
-
+	// Output arrays
 	sharedLeft := []string{}
 	sharedRight := []string{}
+
+	// shared components can only be on first level onwards, i.e., if combination is on second level
+	if len(boundaries) < 2 {
+		// Trim spaces, then assign
+		leftInput := strings.TrimSpace(input[:boundaries[level][index].Left-1])
+		// Only append if there is meaningful content, else the resulting string will have the length one, but be empty ("") (because of the strings function)
+		if leftInput != "" {
+			sharedLeft = append(sharedLeft, leftInput)
+		}
+		// Trim spaces, then assign
+		rightInput := strings.TrimSpace(input[boundaries[level][index].Right+1:])
+		// Only append if there is meaningful content, else the resulting string will have the length one, but be empty ("") (because of the strings function)
+		if rightInput != "" {
+			sharedRight = append(sharedRight, rightInput)
+		}
+		return sharedLeft, sharedRight
+	}
+
+	// multiple component occurrences in input
 	combination := boundaries[level][index]
 
 	idx := 0
