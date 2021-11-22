@@ -24,6 +24,7 @@ func main() {
 	converter.Init()
 
 	http.HandleFunc("/", converter.ConverterHandler)
+	http.HandleFunc("/favicon.ico", converter.FaviconHandler)
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(converter.RelativePathPrefix + "css"))))
 
 	// Check for custom port

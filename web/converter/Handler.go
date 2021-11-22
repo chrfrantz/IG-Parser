@@ -126,6 +126,55 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		retStruct.CodedStmt = ANNOTATED_STATEMENT
 		retStruct.StmtId = STATEMENT_ID
 
+
+		// Check for parameters that customize input
+		// Set switch to indicate potential need to align raw and coded statement field entries
+		resetValues := false
+		// Parameter: Raw Statement
+		keys, ok := r.URL.Query()[PARAM_RAW_STATEMENT]
+		if ok && len(keys[0]) > 0 {
+
+			// Assume single item
+			key := keys[0]
+
+			//log.Println("Url Param 'rawStmt' is: " + string(key))
+			// Assign value instead
+			retStruct.RawStmt = string(key)
+			// Set switch to indicate reset of raw statement if not specified as parameter
+			resetValues = true
+		}
+
+		// Parameter: IG Script-coded statement - consider interaction with raw statement
+		keys, ok = r.URL.Query()[PARAM_CODED_STATEMENT]
+		if ok && len(keys[0]) > 0 {
+
+			// Assume single item
+			key := keys[0]
+
+			//log.Println("Url Param 'codedStmt' is: " + string(key))
+			// Assign value instead
+			retStruct.CodedStmt = string(key)
+			// Check for raw statement if it is still default; then reset
+			if retStruct.RawStmt == RAW_STATEMENT {
+				retStruct.RawStmt = ""
+			}
+		} else if resetValues {
+			// Reset value, since the default coded statement will likely not correspond.
+			retStruct.CodedStmt = ""
+		}
+
+		// Parameter: Statement ID
+		keys, ok = r.URL.Query()[PARAM_STATEMENT_ID]
+		if ok && len(keys[0]) > 0 {
+
+			// Assume single item
+			key := keys[0]
+
+			//log.Println("Url Param 'stmtId' is: " + string(key))
+			// Assign value instead
+			retStruct.StmtId = string(key)
+		}
+
 		err := tmpl.Execute(w, retStruct)
 		if err != nil {
 			log.Println("Error processing default template:", err.Error())
@@ -184,6 +233,9 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	} else {
+		// Run default configuration
+		SetDefaultConfig()
+		// Now, adjust to user settings based on UI output
 		// Define whether output is dynamic
 		fmt.Println("Setting dynamic output: ", dynamicOutput)
 		exporter.SetDynamicOutput(dynamicOutput)
@@ -242,4 +294,14 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+}
+
+/*
+Serves favicon.
+ */
+func FaviconHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Received favicon request")
+	dir, _ := os.Getwd()
+	fmt.Println("Current location:", dir)
+	http.ServeFile(w, r, "web/css/favicon.ico")
 }
