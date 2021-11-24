@@ -151,7 +151,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 				// Empty entry - don't add anything
 				Println("Found empty node")
 			} else if statement[componentIdx].HasPrimitiveEntry() {
-				// Regular leaf entry (i.e., component)
+				// Regular leaf entry (i.e., component) - unless IG Core coding is intended (which implies collapsed nested components)
 
 				// Provide default values for left and right elements (potentially used hereafter)
 				leftString := ""
@@ -268,53 +268,99 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 				// Iterate over all nested statements
 				for _, entryVal := range entryVals {
 
+					// Keep track whether entry is last in iteration -
+					// which is relevant for inclusion of logical operators in combined statements
+					last := false
+					if entryVal == entryVals[len(entryVals)-1] {
+						last = true
+					}
+
 					idToReferenceInCell := ""
 
-					// Retrieve ID of already identified statements ...
-					if nestedStmtID, ok := componentNestedStmtsMap[entryVal]; ok {
-						// Prepare reference to be saved
-						idToReferenceInCell = nestedStmtID
-					} else {
-						// ... else create new one
-						// Generate ID for component-level nested statement
-						nestedStmtId := componentNestedLeft +
-							stmtId +
-							componentNestedRight +
-							stmtIdSeparator +
-							strconv.Itoa(nestedStatementIdx)
-						Println("Generated ID for nested statement:", nestedStmtId)
-						// Add component-level nested statement
-						componentNestedStmts = append(componentNestedStmts,
-							IdentifiedStmt{nestedStmtId, entryVal})
-						// Add newly identified nested statement to lookup index
-						componentNestedStmtsMap[entryVal] = nestedStmtId
-						// Increase index for component-level nested statements (for next round)
-						nestedStatementIdx++
-						// Prepare reference to to-be component-level nested statements to output
-						idToReferenceInCell = nestedStmtId
-						Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Annotations:", entryVal.Annotations, ", Val:", entryVal, ")")
+					if ProduceIGExtendedOutput() {
+
+						// Retrieve ID of already identified statements ...
+						if nestedStmtID, ok := componentNestedStmtsMap[entryVal]; ok {
+							// Prepare reference to be saved
+							idToReferenceInCell = nestedStmtID
+						} else {
+							// ... else create new one
+							// Generate ID for component-level nested statement
+							nestedStmtId := componentNestedLeft +
+								stmtId +
+								componentNestedRight +
+								stmtIdSeparator +
+								strconv.Itoa(nestedStatementIdx)
+							Println("Generated ID for nested statement:", nestedStmtId)
+							// Add component-level nested statement
+							componentNestedStmts = append(componentNestedStmts,
+								IdentifiedStmt{nestedStmtId, entryVal})
+							// Add newly identified nested statement to lookup index
+							componentNestedStmtsMap[entryVal] = nestedStmtId
+							// Increase index for component-level nested statements (for next round)
+							nestedStatementIdx++
+							// Prepare reference to to-be component-level nested statements to output
+							idToReferenceInCell = nestedStmtId
+							Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Annotations:", entryVal.Annotations, ", Val:", entryVal, ")")
+						}
 					}
 
 					if ProduceDynamicOutput() {
 						// Dynamic version
 						// Save entry into entryMap for calling row
-						if entryMap[headerSymbols[componentIdx]] != "" {
+						if entryMap[headerSymbols[componentIdx]] != "" &&
+							// Suppress separator if preceding element is a statement
+							!strings.HasSuffix(entryMap[headerSymbols[componentIdx]], logicalCombinationRight + " ") {
+
 							// Add separator if already an entry
 							entryMap[headerSymbols[componentIdx]] += componentStmtRefSeparator
 						}
-						// Append current value in any case
-						entryMap[headerSymbols[componentIdx]] += idToReferenceInCell
+
+						if ProduceIGExtendedOutput() {
+							// Add nested statement reference (IG Extended)
+							entryMap[headerSymbols[componentIdx]] += idToReferenceInCell
+						} else {
+							// IG Core output without nesting
+
+							// Append flat string representation of nested statements
+							entryMap[headerSymbols[componentIdx]] += entryVal.StringFlat()
+
+							// Add logical operator if not last entry (and parent not empty otherwise)
+							if !last && entryVal.Parent != nil {
+								entryMap[headerSymbols[componentIdx]] +=
+									" " + logicalCombinationLeft + entryVal.Parent.LogicalOperator + logicalCombinationRight + " "
+							}
+						}
 					} else {
 						// Static version
 						Println("Linking substatement ID to component", statement[componentIdx],
 							"Name: ", statement[componentIdx].GetComponentName())
 						// Save entry into entryMap for calling row
-						if entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] != "" {
+						if entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] != "" &&
+							// Suppress separator if preceding element is a statement
+							!strings.HasSuffix(entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX], logicalCombinationRight + " ") {
+
 							// Add separator if already an entry
 							entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] += componentStmtRefSeparator
 						}
-						// Append current value in any case
-						entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] += idToReferenceInCell
+
+						if ProduceIGExtendedOutput() {
+							// Add nested statement reference (IG Extended)
+
+							// Append current value in any case
+							entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] += idToReferenceInCell
+						} else {
+							// IG Core output without nesting
+
+							// Append flat string representation of nested statements
+							entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] += entryVal.StringFlat()
+
+							// Add logical operator if not last entry (and parent not empty otherwise)
+							if !last && entryVal.Parent != nil {
+								entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] +=
+									" " + logicalCombinationLeft + entryVal.Parent.LogicalOperator + logicalCombinationRight + " "
+							}
+						}
 					}
 				}
 			}

@@ -271,6 +271,39 @@ func (n *Node) Stringify() string {
 	return out
 }
 
+/*
+Provide the flattest possible representation of contents without structure or linebreaks.
+ */
+func (n *Node) StringFlat() string {
+	if n.HasPrimitiveEntry() {
+		// Simple entry
+		return n.Entry.(string)
+	} else if n.IsCombination() {
+		out := ""
+		// Prepend left shared elements
+		if n.SharedLeft != nil && len(n.SharedLeft) != 0 {
+			for _, v := range n.SharedLeft {
+				out += v + " "
+			}
+		}
+		out += n.Left.StringFlat() + " " + n.LogicalOperator + " " + n.Right.StringFlat()
+		// Append right shared elements
+		if n.SharedRight != nil && len(n.SharedRight) != 0 {
+			out += " "
+			for _, v := range n.SharedRight {
+				out += v + " "
+			}
+		}
+		return out
+	} else if n.Entry == nil {
+		// else simply return empty string
+		return ""
+	} else {
+		// Complex entry
+		stmt := n.Entry.(Statement)
+		return stmt.StringFlat()
+	}
+}
 
 var PrintValueOrder = false
 

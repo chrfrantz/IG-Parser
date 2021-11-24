@@ -1143,11 +1143,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 			}
 
 			Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
-			// Store suffices
-			//suffices = append(suffices, componentSuffix)
 			Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
-			// Store annotations
-			//annotations = append(annotations, componentAnnotation)
 			Println("Content:", componentContent)
 
 			// Extract and concatenate individual component values but cut leading component identifier

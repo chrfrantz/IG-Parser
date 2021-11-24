@@ -11,6 +11,11 @@ Indicates whether shared elements are included in output
 var INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 /*
+Indicates whether the coding follows the IG Core decomposition level (or IG Extended)
+ */
+var create_IG_EXTENDED_OUTPUT = true
+
+/*
 Indicates whether tabular export produces dynamic output based on present components
 (better for individual statements), or produces fixed predefined structure (better for datasets)
 Should not be directly modified, but rather using SetDynamicOutput().
@@ -44,24 +49,24 @@ func SetDynamicOutput(dynamic bool) {
 }
 
 /*
-Defines whether annotations should be included in output.
+Queries whether dynamic (vs. static) output is activated.
  */
+func ProduceDynamicOutput() bool {
+	return create_DYNAMIC_TABULAR_OUTPUT
+}
+
+/*
+Defines whether annotations should be included in output.
+*/
 func SetIncludeAnnotations(include bool) {
 	include_ANNOTATIONS = include
 }
 
 /*
 Indicates whether annotations should be included in output.
- */
+*/
 func IncludeAnnotations() bool {
 	return include_ANNOTATIONS
-}
-
-/*
-Queries whether dynamic (vs. static) output is activated.
- */
-func ProduceDynamicOutput() bool {
-	return create_DYNAMIC_TABULAR_OUTPUT
 }
 
 /*
@@ -76,6 +81,20 @@ Indicates whether operators should be collapsed.
  */
 func CollapseOperators() bool {
 	return collapse_OPERATORS
+}
+
+/*
+Sets whether output should be IG Extended (component-level nesting) or IG Core.
+ */
+func SetProduceIGExtendedOutput(extendedOutput bool) {
+	create_IG_EXTENDED_OUTPUT = extendedOutput
+}
+
+/*
+Indicates whether output included IG Extended features (specifically component-level nesting).
+ */
+func ProduceIGExtendedOutput() bool {
+	return create_IG_EXTENDED_OUTPUT
 }
 
 /*

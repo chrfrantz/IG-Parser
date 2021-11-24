@@ -22,6 +22,10 @@ func TestHeaderRowGenerationWithoutComponentAggregation(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
@@ -89,6 +93,10 @@ func TestHeaderRowGenerationWithComponentAggregation(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// OVERRIDE dynamic output setting
 	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
@@ -151,6 +159,10 @@ func TestSimpleTabularOutput(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 	// OVERRIDE dynamic output setting
@@ -232,6 +244,10 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -313,6 +329,10 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -395,6 +415,10 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -478,6 +502,10 @@ func TestTabularOutputWithSharedLeftElements(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -561,6 +589,10 @@ func TestTabularOutputWithSharedRightElements(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -644,6 +676,10 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -728,6 +764,10 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -815,6 +855,10 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -901,6 +945,10 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -986,6 +1034,10 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1073,6 +1125,10 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1143,6 +1199,97 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 }
 
 /*
+Tests flattened representation (IG Core) of partial AND-linked statement-level combinations, expects the inference of implicit AND to non-linked complex component
+*/
+func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testing.T) {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Proper combination
+		"{Cac{E(Program Manager) F(is) P(approved)} [OR] " +
+		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}} " +
+		// Implicitly linked nested statement
+		"Cac{A(Another Official) I(complains) Bdir(Program Manager) Cex(daily)}"
+
+	// Dynamic output
+	SetDynamicOutput(true)
+	// IG Core output
+	SetProduceIGExtendedOutput(false)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputNestedComplexCombinationsImplicitAndIGCore.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, nil, componentRefs, links, "650", separator)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
 Tests partial XOR-linked statement-level combinations, expects the inference of implicit AND to non-linked complex component
  */
 func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
@@ -1160,6 +1307,10 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1248,6 +1399,10 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1337,6 +1492,10 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -1428,6 +1587,10 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 
 	// Dynamic output
 	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1516,6 +1679,10 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 
 	// Dynamic output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1597,6 +1764,8 @@ func TestStaticTabularOutputOrElseAnnotations(t *testing.T) {
 
 	// Dynamic output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Activate annotations
 	SetIncludeAnnotations(true)
 	// No shared elements
@@ -1710,9 +1879,11 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
-	// No shared elements
+	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 	// Take separator for Google Sheets output
@@ -1803,9 +1974,11 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
-	// No shared elements
+	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 	// Take separator for Google Sheets output
@@ -1898,9 +2071,11 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
-	// No shared elements
+	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 	// Take separator for Google Sheets output
@@ -1975,6 +2150,103 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 }
 
 /*
+Tests flat printing (IG Core) of nested combinations and implicit AND-linked statement with focus on proper resolution of references.
+*/
+func TestStaticTabularOutputNestedCombinationsImplicitAndIGCore(t *testing.T) {
+
+	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Activation condition 1
+		"{Cac{E(Program Manager) F(is) P((approved [AND] committed))} [XOR] " +
+		// Activation condition 2
+		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}} " +
+		// Activation condition 3 (to be linked implicitly)
+		"Cac{A(Another official) I(does) Bdir(something else)}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Core output (no component-level nesting)
+	SetProduceIGExtendedOutput(false)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// With shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s,err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedCombinationsImplicitAndIGCore.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, nil, componentRefs, links, "650", separator)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+}
+
+/*
 Correct parsing of shared elements left and right (on Aim and Cex).
 */
 func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.T) {
@@ -1987,9 +2259,11 @@ func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
-	// No shared elements
+	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 	// Take separator for Google Sheets output
@@ -2081,9 +2355,11 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
-	// No shared elements
+	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 	// Take separator for Google Sheets output
@@ -2176,9 +2452,11 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
-	// No shared elements
+	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 	// Take separator for Google Sheets output
@@ -2271,6 +2549,8 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
 
@@ -2366,6 +2646,8 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
 	// No shared elements
@@ -2462,6 +2744,8 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
 
@@ -2558,6 +2842,8 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
 
@@ -2653,6 +2939,8 @@ func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
 	// No shared elements
@@ -2747,6 +3035,8 @@ func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
 
@@ -2842,6 +3132,8 @@ func TestStaticTabularOutputNestedStatementCombinationAnnotations(t *testing.T) 
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
 
@@ -2941,6 +3233,8 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotations(t *test
 
 	// Static output
 	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
 
