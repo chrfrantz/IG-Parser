@@ -1,8 +1,8 @@
 package converter
 
 import (
-	"IG-Parser/app"
 	"IG-Parser/exporter"
+	"IG-Parser/parser"
 	"IG-Parser/tree"
 	"IG-Parser/web/helper"
 	"fmt"
@@ -214,7 +214,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 	if codedStmt == "" {
 		retStruct.Success = false
 		retStruct.Error = true
-		retStruct.Message = app.ERROR_INPUT_NO_STATEMENT
+		retStruct.Message = ERROR_INPUT_NO_STATEMENT
 		retStruct.DynamicOutput = dynChk
 		retStruct.IncludeAnnotations = inclAnnotations
 		err := tmpl.Execute(w, retStruct)
@@ -252,7 +252,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 			retStruct.IncludeAnnotations = inclAnnotations
 			switch err2.ErrorCode {
 			case tree.PARSING_ERROR_EMPTY_LEAF:
-				retStruct.Message = app.ERROR_INPUT_NO_STATEMENT
+				retStruct.Message = ERROR_INPUT_NO_STATEMENT
 			default:
 				retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
 			}
