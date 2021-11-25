@@ -18,6 +18,8 @@ type ReturnStruct struct{
 	StmtId string;
 	// Dynamic output indicator
 	DynamicOutput string
+	// IG Extended output indicator
+	IGExtendedOutput string
 	// Annotation inclusion indicator
 	IncludeAnnotations string
 	// Generated tabular output

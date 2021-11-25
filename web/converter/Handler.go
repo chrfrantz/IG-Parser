@@ -1,8 +1,8 @@
 package converter
 
 import (
+	"IG-Parser/app"
 	"IG-Parser/exporter"
-	"IG-Parser/parser"
 	"IG-Parser/tree"
 	"IG-Parser/web/helper"
 	"fmt"
@@ -81,6 +81,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 	stmtId := r.FormValue("stmtId")
 	dynChk := r.FormValue("dynamicOutput")
 	inclAnnotations := r.FormValue("annotations")
+	igExtended := r.FormValue("compLevelNesting")
 
 	// Dynamic output
 	dynamicOutput := false
@@ -104,6 +105,17 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		includeAnnotations = false
 	}
 
+	// Component-level nesting in output
+	produceIGExtendedOutput := false
+	fmt.Println("IG Extended output: ", igExtended)
+	if igExtended == "on" {
+		igExtended = "checked"
+		produceIGExtendedOutput = true
+	} else {
+		igExtended = "unchecked"
+		produceIGExtendedOutput = false
+	}
+
 	retStruct := ReturnStruct{
 		Success: false,
 		Error: false,
@@ -112,6 +124,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		CodedStmt: codedStmt,
 		StmtId: stmtId,
 		DynamicOutput: dynChk,
+		IGExtendedOutput: igExtended,
 		IncludeAnnotations: inclAnnotations,
 		TransactionId: transactionID,
 		RawStmtHelp: HELP_RAW_STMT,
@@ -239,6 +252,9 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		// Define whether output is dynamic
 		fmt.Println("Setting dynamic output: ", dynamicOutput)
 		exporter.SetDynamicOutput(dynamicOutput)
+		// Define whether output is IG Extended (component-level nesting)
+		fmt.Println("Setting IG Extended output: ", produceIGExtendedOutput)
+		exporter.SetProduceIGExtendedOutput(produceIGExtendedOutput)
 		// Define whether annotations are included
 		fmt.Println("Setting annotations: ", includeAnnotations)
 		exporter.SetIncludeAnnotations(includeAnnotations)
@@ -249,6 +265,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 			retStruct.Error = true
 			retStruct.CodedStmt = codedStmt
 			retStruct.DynamicOutput = dynChk
+			retStruct.IGExtendedOutput = igExtended
 			retStruct.IncludeAnnotations = inclAnnotations
 			switch err2.ErrorCode {
 			case tree.PARSING_ERROR_EMPTY_LEAF:
@@ -277,6 +294,7 @@ func ConverterHandler(w http.ResponseWriter, r *http.Request) {
 		retStruct.CodedStmt = codedStmt
 		retStruct.TabularOutput = output
 		retStruct.DynamicOutput = dynChk
+		retStruct.IGExtendedOutput = igExtended
 		retStruct.IncludeAnnotations = inclAnnotations
 		err := tmpl.Execute(w, retStruct)
 		if err != nil {

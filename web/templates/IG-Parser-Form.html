@@ -53,8 +53,9 @@
 
             <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
             </br></br>
-            Human-readable output (dynamic output schema; not suitable for computational processing) (default: off)<input name="dynamicOutput" type="checkbox" {{.DynamicOutput}}>
-            Include IG Logico annotations in output (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}}><br />
+            Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)<input name="dynamicOutput" type="checkbox" {{.DynamicOutput}}>
+            Produce IG Extended (component-level nesting) output (default: off)<input name="compLevelNesting" type="checkbox" {{.IGExtendedOutput}}>
+            Include IG Logico annotations in output (only for static output) (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}}><br />
 
 
             <input value="Generate tabular output" type="submit">
