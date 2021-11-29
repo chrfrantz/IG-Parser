@@ -782,3 +782,23 @@ func TestUnbalancedParentheses(t *testing.T) {
 
 }
 
+/*
+Tests for statements that contain parentheses, but no combinations.
+ */
+func TestSimpleStatementWithEmbeddedParentheses(t *testing.T) {
+
+	input := "Left side informat(ion middle information ) sd glkjdslk ) dksljfs("
+
+	// Parse provided expression
+	_, text, err := ParseIntoNodeTree(input, false, "(", ")")
+
+	if err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+		t.Fatal("Did not pick up on simple entry")
+	}
+
+	if text != input {
+		t.Fatal("Returned output does not correspond to input (Output: '" + text + "')")
+	}
+
+}
+

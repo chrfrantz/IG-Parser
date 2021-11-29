@@ -9,49 +9,6 @@ import (
 	"strings"
 )
 
-func main() {
-
-	// Dummy input for convenient selection
-	input := ""
-	// Very simple input
-	input = "(inspect and [OR] party)"
-	// Simple input
-	//input = "((inspect and [OR] party) [AND] sing)"
-	// Proper complex input
-	//input = "((inspect and [OR] party) [AND] ((review [XOR] muse) [AND] pray))"
-	// Imbalanced parentheses will fail (whatever the direction)
-	//input = "((inspect and [OR] party) [AND] ((review [XOR] muse) [AND] pray)"
-	//input = "(inspect and [OR] party) [AND] ((review [XOR] muse) [AND] pray))"
-	// Missing outer parentheses will lead to processing of right side only
-	//input = "(inspect and [OR] party) [AND] ((review [XOR] muse) [AND] pray)"
-	// Invalid operators lead to ignoring element in processing
-	//input = "((inspect and [OR] party) [AND] ((review [XOR] muse) AND pray))"
-	// Invalid operators even apply to parenthesized combinations --> FIX and make leaf node
-	//input = "((inspect and OR party) [AND] ((review [XOR] muse) [AND] pray))"
-	// Invalid operators without parentheses around operands will be treated as leaf node
-	//input = "(inspect and OR party [AND] ((review [XOR] muse) [AND] pray))"
-	// Excessive parentheses are acceptable (will be flattened in parsing process)
-	input = "((((inspect and [OR] party) [AND] ((review [XOR] muse) [AND] pray))))"
-	// Non-combinations are ignored (i.e., parentheses within components)
-	input = "(French (and) [AND] (accredited certifying agents))"
-	// Repeated AND combinations (e.g., "expr1 AND expr2 AND expr3") are collapsed into nested structures (e.g., "(expr1 AND expr2) AND expr3")
-	input = "(French (and) [AND] (certified production and [XOR] handling operations) and [AND] (accredited certifying agents))"
-	// Repeated logical operators will break (empty leaf value in the AND case)
-	//input = "(French (and) [AND] [AND] (certified production and [XOR] handling operations) and [AND] (accredited certifying agents))"
-	// Repeated logical operators will break (multiple non-AND operators (or mix thereof))
-	//input = "(French (and) [AND] [OR] (certified production and [XOR] handling operations) and [AND] (accredited certifying agents))"
-
-	// Create root node
-	//node := tree.Node{}
-	// Parse provided expression
-	node, modifiedInput, _ := ParseIntoNodeTree(input, false, "(", ")")
-	// Print resulting tree
-	Println("Final tree: \n" + node.String())
-	Println("Corresponding (potentially modified) input string: " + modifiedInput)
-
-	Println(node.Stringify())
-}
-
 /*
 Parses combinations in string. The syntactic form of input is:
 "( leftSide [OPERATOR] rightSide )", where [OPERATOR] is one
@@ -103,49 +60,32 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 			ErrorMessage: "Invalid parentheses specification when parsing into tree (Left: " + leftPar + ", Right: " + rightPar + ")"}
 	}
 
-	// Return detected combinations, alongside potentially modified input string
-	//if combinations == nil {
-		combinations, _, input, err := detectCombinations(input, leftPar, rightPar)
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return nil, input, err
-		}
-		//combinations = combos
-	//}
+	// Test content for absence of logical operators for non-component-level nested input
+	if leftPar != LEFT_BRACE && rightPar != RIGHT_BRACE &&
+		!strings.Contains(input, tree.AND_BRACKETS) &&
+		!strings.Contains(input, tree.XOR_BRACKETS) &&
+		!strings.Contains(input, tree.OR_BRACKETS) &&
+		!strings.Contains(input, tree.SAND_BETWEEN_COMPONENTS_BRACKETS) {
 
-	/*if len(combinations) == 0 {
-		Println("No combinations detected.")
-	} else {
-		//TODO to be reviewed if issues arise with unwanted elements; else remove
-		/*ct := 0
-		toBeDeleted := []int{}
-		for k, level := range combinations {
-			if level.Complete {
-				ct++
-			} else {
-				toBeDeleted = append(toBeDeleted, k)
-			}
-		}
-		errorMsg := ""
-		if len(toBeDeleted) > 0 {
-			errorMsg = ", with one partial " + strconv.Itoa(len(toBeDeleted)) + " to be removed"
-		}
-		Println(strconv.Itoa(ct) + " valid combination detected" + errorMsg + "!")*/
-
-
-		// Clean up invalid entries
-		/*i := 0
-		for i < len(toBeDeleted) {
-			delete(combinations, toBeDeleted[i])
-			i++
-		}
-	}*/
-
-	// if no valid combinations are left, the parsing is finished
-	if len(combinations) == 0 {
-		node := tree.Node{Entry: input}
-		return &node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_COMBINATIONS,
+		node := &tree.Node{Entry: strings.Trim(input, " ")}
+		return node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_COMBINATIONS,
 			ErrorMessage: "The input does not contain combinations"}
 	}
+
+
+	// Return detected combinations, alongside potentially modified input string
+	combinations, _, input, err := detectCombinations(input, leftPar, rightPar)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return nil, input, err
+	}
+
+	// If no valid combinations are left, the parsing is finished
+	if len(combinations) == 0 {
+		node := &tree.Node{Entry: strings.Trim(input, " ")}
+		return node, strings.Trim(input, " "), tree.ParsingError{ErrorCode: tree.PARSING_NO_COMBINATIONS,
+			ErrorMessage: "The input does not contain combinations"}
+	}
+
 
 	// Now the parsing of nested combinations starts
 	Print("STARTING TREE CONSTRUCTION: Detected combinations: ")
@@ -265,7 +205,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 
 					Println("Go deep on left side: " + left)
 					leftNode, left, err := ParseIntoNodeTree(left, true, leftPar, rightPar)
-					if err.ErrorCode != tree.PARSING_NO_ERROR {
+					if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 						return nil, left, err
 					}
 
@@ -337,7 +277,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 
 					Println("Go deep on right side: " + right)
 					rightNode, right, err := ParseIntoNodeTree(right, true, leftPar, rightPar)
-					if err.ErrorCode != tree.PARSING_NO_ERROR {
+					if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 						return nil, right, err
 					}
 
@@ -376,10 +316,6 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					Println("Saving tree to ordermap (Level " + strconv.Itoa(level) + ", Index: " + strconv.Itoa(idx) + "): " + node.String())
 					orderMap[combinations[level][idx].Left] = &node
 				} else {
-					// Indicate that the combination has already been considered in tree construction
-					/*b := combinations[level][idx]
-					b.AlreadyAdded = true
-					combinations[level][idx] = b*/
 					Println("Node is nested; return without further linking")
 					// return node outright if nested
 					return &node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
