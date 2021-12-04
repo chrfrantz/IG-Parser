@@ -3,7 +3,6 @@ package parser
 import (
 	"IG-Parser/tree"
 	"fmt"
-	"github.com/sergi/go-diff/diffmatchpatch"
 	"log"
 	"strconv"
 	"strings"
@@ -121,7 +120,10 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 
 			//Println("TREE BEFORE NEXT COMBINATION: " + node.String())
 
-			// Parse complete combinations, and combinations can extract their respective shared elements
+			// Create node for assigning elements
+			node := tree.Node{}
+
+			// Parse complete combinations
 			if combinations[level][idx].Complete {
 
 				//Toggling break after this level
@@ -130,18 +132,9 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					Println("Signalling to break out after level " + strconv.Itoa(level))
 				}
 
+
 				Println("Found combination to parse on level " + strconv.Itoa(level) +
 					", Index: " + strconv.Itoa(idx) + ": " + fmt.Sprint(combinations[level][idx]))
-
-				node := tree.Node{}
-
-				Println("Input to parse over: " + input)
-				// full parsing
-				left := input[combinations[level][idx].Left:combinations[level][idx].Operator]
-				right := input[combinations[level][idx].Operator+len(combinations[level][idx].OperatorVal)+2 : combinations[level][idx].Right]
-				Println("==Raw Left value: " + left)
-				Println("==Raw Operator: " + combinations[level][idx].OperatorVal)
-				Println("==Raw Right value: " + right)
 
 				// Check for shared elements by sending ID to parse function and search boundaries for next lower level and embracing
 				sharedLeft, sharedRight := extractSharedComponents(input, combinations, level, idx)
@@ -160,6 +153,14 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					// Reset shared
 					sharedRight = []string{}
 				}
+
+				Println("Input to parse over: " + input)
+				// full parsing
+				left := input[combinations[level][idx].Left:combinations[level][idx].Operator]
+				right := input[combinations[level][idx].Operator+len(combinations[level][idx].OperatorVal)+2 : combinations[level][idx].Right]
+				Println("==Raw Left value: " + left)
+				Println("==Raw Operator: " + combinations[level][idx].OperatorVal)
+				Println("==Raw Right value: " + right)
 
 				// Assign logical operator
 				node.LogicalOperator = combinations[level][idx].OperatorVal
@@ -224,7 +225,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 						}
 					} else {
 						// Create nested node and link with parent
-						Println("Deep parsing: Returned left node is combination; assign as nested node")
+						Println("Deep parsing: Returned left node is combination; assign as nested node. Node:", leftNode)
 
 						// Link newly identified node with main node
 						res, err := node.InsertLeftNode(leftNode)
@@ -311,17 +312,18 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					Println("Tree after processing right deep: " + node.String())
 				}
 
+				// Store node for further preparation of return
 				if !nestedNode {
 					//Adds non-nested, i.e. top-level, node to map with starting character index as key - for later reconstruction of tree prior to return
-					Println("Saving tree to ordermap (Level " + strconv.Itoa(level) + ", Index: " + strconv.Itoa(idx) + "): " + node.String())
+					Println("Saving tree to ordermap (Level " + strconv.Itoa(level) + ", Index: " + strconv.Itoa(idx) + "): ", node)
 					orderMap[combinations[level][idx].Left] = &node
 				} else {
 					Println("Node is nested; return without further linking")
 					// return node outright if nested
 					return &node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 				}
-
 			}
+
 			Println("==Finished parsing index " + strconv.Itoa(idx) + " on level " + strconv.Itoa(level))
 			// Increase to explore other entries
 			idx++
@@ -351,6 +353,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 	if len(orderMap) > 1 {
 		for ct < len(input) {
 			if _, ok := orderMap[ct]; ok {
+				Println("Final tree before adding element:", ct, ":", nodeTree.String())
 				// ... then synthetically link elements
 				nodeTree, nodeCombinationError = tree.Combine(nodeTree, orderMap[ct], tree.SAND_WITHIN_COMPONENTS)
 				// Check if combination error has been picked up - here and in the beginning of loop
@@ -359,6 +362,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 						ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 				}
 				Println("Added to tree: " + fmt.Sprint(orderMap[ct]))
+				Println("Final tree after adding element:", ct, ":", nodeTree.String())
 			}
 			ct++
 		}
@@ -511,8 +515,9 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 				b.Right = i
 				levelMap[level][levelIdx] = b
 				Println("Level map for level " + strconv.Itoa(level) + " (after adding right value but before assessing completeness): " + b.String())
+				Println("--> Content:", expression[b.Left:b.Right])
 				// Test whether indices are identical or immediately following - suggesting gaps in values
-				if ((b.Operator + len(b.OperatorVal) + 2) == b.Right) {
+				if (b.Operator + len(b.OperatorVal) + 2) == b.Right {
 					msg := "Input contains invalid combination expression in the range '" + expression[b.Left:b.Right] + "'."
 					return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
 						ErrorMessage: msg}
@@ -553,7 +558,7 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 
 			// Reset operator count for given level
 			for op := range foundOperators {
-				Println("Deleting operator " + op + " for level " + strconv.Itoa(level))
+				Println("Resetting operator " + op + " for level " + strconv.Itoa(level))
 				delete(foundOperators[op], level)
 			}
 
@@ -802,185 +807,88 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 	sharedLeft := []string{}
 	sharedRight := []string{}
 
-	// shared components can only be on first level onwards, i.e., if combination is on second level
-	if len(boundaries) < 2 {
-		// Trim spaces, then assign
-		leftInput := strings.TrimSpace(input[:boundaries[level][index].Left-1])
-		// Only append if there is meaningful content, else the resulting string will have the length one, but be empty ("") (because of the strings function)
-		if leftInput != "" {
-			sharedLeft = append(sharedLeft, leftInput)
-		}
-		// Trim spaces, then assign
-		rightInput := strings.TrimSpace(input[boundaries[level][index].Right+1:])
-		// Only append if there is meaningful content, else the resulting string will have the length one, but be empty ("") (because of the strings function)
-		if rightInput != "" {
-			sharedRight = append(sharedRight, rightInput)
-		}
-		return sharedLeft, sharedRight
-	}
+	Println("=Boundaries:", boundaries)
+	Println("=Input:", input)
+	Println("=Level:", level)
+	Println("=Index:", index)
 
-	// multiple component occurrences in input
-	combination := boundaries[level][index]
+	if boundaries[level][index].OperatorVal != "" {
 
-	idx := 0
-	for idx < len(boundaries[level-1]) {
-
-		// shared entry candidate
-		entry := boundaries[level-1][idx]
-
-
-		// Tested entry must not be combination itself and must frame combination sent as input
-		if !entry.Complete &&
-			(entry.Left < combination.Left &&
-			 entry.Right > combination.Right) {
-
-			Println("Testing for shared elements on left side")
-
-			if entry.Left < combination.Left {
-
-				// parse from left until combination boundary and check for other combinations in between
-				idx1 := 0
-				
-				matcher := diffmatchpatch.New()
-
-				// Collection of elements to be prevented from being classified as shared
-				elementsToExclude := []tree.Boundaries{}
-
-				// Collect excluded components on same level
-				for idx1 < len(boundaries[level])+1 {
-
-					// Don't check for own index
-					if index != idx1 {
-						elementToTest := boundaries[level][idx1]
-						// check whether another element is in between and a combination
-						if elementToTest.Left > entry.Left &&
-							elementToTest.Right < combination.Left &&
-							elementToTest.Complete {
-
-							// Collect elements that have overlaps
-							elementsToExclude = append(elementsToExclude, elementToTest)
-							Print("Planning to exclude element: ")
-							Println(elementToTest)
-						}
-					}
-					idx1++
-				}
-
-				if len(elementsToExclude) > 0 {
-					// Perform actual filtering
-					diff := matcher.DiffMain(input[entry.Left:combination.Left-1],
-						input[elementsToExclude[0].Left-1:elementsToExclude[len(elementsToExclude)-1].Right+1], false)
-					Print("Found overlaps: ")
-					Println(diff)
-
-					// Evaluate and assign shared elements
-					fidx := 0
-					for fidx < len(diff) {
-						if diff[fidx].Type.String() == "Delete" {
-							sharedLeft = append(sharedLeft, diff[fidx].Text)
-						}
-						fidx++
+		// LEFT SIDE
+		if index == 0 {
+			// Take everything on the left side as shared left element, unless ...
+			val := input[:boundaries[level][index].Left]
+			// ... lower-level boundary exists, in which case that one is used
+			outerBoundary := -1
+			if level > 0 && boundaries[level-1] != nil {
+				for i, v := range boundaries[level-1] {
+					// If lower-level boundary encompasses current one, then consider for extended boundaries
+					if v.Left < boundaries[level][index].Left && v.Right > boundaries[level][index].Right && v.OperatorVal == "" {
+						outerBoundary = i
+						break
 					}
 				}
-
-				//Left shared content here
-				if len(sharedLeft) != 0 {
-					ct := 0
-					for ct < len(sharedLeft) {
-						sharedLeft[ct] = strings.Trim(sharedLeft[ct], " ")
-						ct++
-					}
-				} else {
-					entryCandidate := strings.Trim(input[entry.Left:combination.Left-1], " ")
-					if len(entryCandidate) > 0 {
-						sharedLeft = append(sharedLeft, entryCandidate)
-					}
-				}
-
-				if len(sharedLeft) > 0 {
-					Println("Found left shared content: " + fmt.Sprint(sharedLeft))
-				}
-				// Set flag to signal that this entry is shared for later processing of non-shared content
-				entry.Shared = true
-				boundaries[level-1][idx] = entry
+			}
+			if outerBoundary != -1 {
+				// If multiple levels, though, only consume up to left boundary on next lower level (and if that level does not
+				// contain a valid combination)
+				val = input[boundaries[level-1][outerBoundary].Left:boundaries[level][index].Left]
 			}
 
-			Println("Testing for shared elements on right side")
-
-			if entry.Right > combination.Right+1 {
-
-				// parse from left until combination boundary and check for other combinations in between
-				idx1 := 0
-				
-				matcher := diffmatchpatch.New()
-
-				// Collection of elements to be prevented from being classified as shared
-				elementsToExclude := []tree.Boundaries{}
-
-				// Collect excluded components on same level
-				for idx1 < len(boundaries[level])+1 {
-					Println("Index: " + strconv.Itoa(idx1))
-					// Don't check for own index
-					if index != idx1 {
-						Print("Testing element ")
-						Println(boundaries[level][idx1])
-						elementToTest := boundaries[level][idx1]
-						// check whether another element is in between and a combination
-						if elementToTest.Right < entry.Right &&
-							elementToTest.Left > combination.Right &&
-							elementToTest.Complete {
-
-							// Collect elements that have overlaps
-							elementsToExclude = append(elementsToExclude, elementToTest)
-							Print("Planning to exclude element: ")
-							Println(elementToTest)
-						}
-					}
-					idx1++
-				}
-
-				if len(elementsToExclude) > 0 {
-					// Perform actual filtering
-					diff := matcher.DiffMain(input[combination.Right+1:entry.Right],
-						input[elementsToExclude[0].Left-1:elementsToExclude[len(elementsToExclude)-1].Right+1], false)
-					Print("Found overlaps: ")
-					Println(diff)
-
-					// Evaluate and assign shared elements
-					fidx := 0
-					for fidx < len(diff) {
-						if diff[fidx].Type.String() == "Delete" {
-							sharedRight = append(sharedRight, diff[fidx].Text)
-						}
-						fidx++
-					}
-				}
-
-				//Right shared content here
-				if len(sharedRight) != 0 {
-					ct := 0
-					for ct < len(sharedRight) {
-						sharedRight[ct] = strings.Trim(sharedRight[ct], " ")
-						ct++
-					}
-				} else {
-					entryCandidate := strings.Trim(input[combination.Right+1:entry.Right], " ")
-					if len(entryCandidate) > 0 {
-						sharedRight = append(sharedRight, strings.Trim(input[combination.Right+1:entry.Right], " "))
-					}
-				}
-
-				if len(sharedRight) > 0 {
-					Println("Found right shared content: " + fmt.Sprint(sharedRight))
-				}
-				// Set flag to signal that this entry is shared for later processing of non-shared content
-				entry.Shared = true
-				boundaries[level-1][idx] = entry
-			}
-			return sharedLeft, sharedRight
+			// Get rid of parentheses first
+			val = strings.Trim(val, "()")
+			// Then get rid of spaces
+			val = strings.TrimSpace(val)
+			Println("Identified left shared value:", val)
+			sharedLeft = append(sharedLeft, val)
+		} else {
+			// If element is left (e.g., wAND combined on same level), only consider string to boundary as shared
+			val := input[boundaries[level][index-1].Right:boundaries[level][index].Left]
+			// Get rid of parentheses first
+			val = strings.Trim(val, "()")
+			// Then get rid of spaces
+			val = strings.TrimSpace(val)
+			Println("Identified left shared value in multi-value component:", val)
+			sharedLeft = append(sharedLeft, val)
 		}
-		idx++
+
+		// RIGHT SIDE
+		// Check if other combination (i.e., higher index) exists, and only consider elements to that boundary as shared right
+		if val, ok := boundaries[level][index+1]; ok {
+			val := input[boundaries[level][index].Right:val.Left]
+			// Get rid of parentheses first
+			val = strings.Trim(val, "()")
+			// Then get rid of spaces
+			val = strings.TrimSpace(val)
+			Println("Identified right shared value in multi-value component:", val)
+			sharedRight = append(sharedRight, val)
+		} else {
+			// Else take the entire remaining string on the right, unless ...
+			val := input[boundaries[level][index].Right:]
+			outerBoundary := -1
+			// ... lower-level boundary exists, but also which index (in case of multiple combinations)
+			// wraps the currently analyzed entry
+			if level > 0 && boundaries[level-1] != nil {
+				for i, v := range boundaries[level-1] {
+					// If lower-level boundary encompasses current one, then consider for extended boundaries
+					if v.Left < boundaries[level][index].Left && v.Right > boundaries[level][index].Right && v.OperatorVal == "" {
+						outerBoundary = i
+						break
+					}
+				}
+			}
+			if outerBoundary != -1 {
+				// If multiple levels, though, only consume up to right boundary on next lower level (and if that level does not
+				// contain a valid combination)
+				val = input[boundaries[level][index].Right:boundaries[level-1][outerBoundary].Right]
+			}
+			// Get rid of parentheses first
+			val = strings.Trim(val, "()")
+			// Then get rid of spaces
+			val = strings.TrimSpace(val)
+			Println("Identified right shared value:", val)
+			sharedRight = append(sharedRight, val)
+		}
 	}
-	// no shared content found
-	return nil, nil
+	return sharedLeft, sharedRight
 }

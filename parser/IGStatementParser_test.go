@@ -301,9 +301,9 @@ func TestSyntheticRootRetrieval(t *testing.T) {
 	}
 
 	// Test basic root detection function
-	if nodeArray[1][0].GetSyntheticRootNode().LogicalOperator != "AND" ||
-		nodeArray[1][0].GetSyntheticRootNode().Left.Entry != "review" ||
-		nodeArray[1][0].GetSyntheticRootNode().Right.LogicalOperator != "AND" {
+	if nodeArray[1][0].GetNodeBelowSyntheticRootNode().LogicalOperator != "AND" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Left.Entry != "review" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Right.LogicalOperator != "AND" {
 		t.Fatal("Root node was wrongly detected.")
 	}
 
@@ -314,26 +314,26 @@ func TestSyntheticRootRetrieval(t *testing.T) {
 	if !res || errAdd.ErrorCode != tree.TREE_NO_ERROR {
 		t.Fatal("Addition of left node failed. Error: ", errAdd)
 	}
-	res, errAdd = newRoot.InsertRightNode(nodeArray[1][0].GetSyntheticRootNode())
+	res, errAdd = newRoot.InsertRightNode(nodeArray[1][0].GetNodeBelowSyntheticRootNode())
 	if !res || errAdd.ErrorCode != tree.TREE_NO_ERROR {
 		t.Fatal("Addition of right node failed. Error: ", errAdd)
 	}
 
-	if nodeArray[1][0].GetSyntheticRootNode().LogicalOperator != "XOR" ||
-		nodeArray[1][0].GetSyntheticRootNode().Left.Entry != "inspect and" ||
-		nodeArray[1][0].GetSyntheticRootNode().Right.LogicalOperator != "AND" ||
-		nodeArray[1][0].GetSyntheticRootNode().Right.Left.Entry != "review" ||
-		nodeArray[1][0].GetSyntheticRootNode().Right.Right.Left.Entry != "refresh" ||
-		nodeArray[1][0].GetSyntheticRootNode().Right.Right.Right.Entry != "drink" {
+	if nodeArray[1][0].GetNodeBelowSyntheticRootNode().LogicalOperator != "XOR" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Left.Entry != "inspect and" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Right.LogicalOperator != "AND" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Right.Left.Entry != "review" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Right.Right.Left.Entry != "refresh" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Right.Right.Right.Entry != "drink" {
 		t.Fatal("Root node in new node combination was wrongly detected.")
 	}
 
 	// TODO: Check for the need to consider SAND_WITHIN_COMPONENTS
 	newRoot.LogicalOperator = tree.SAND_BETWEEN_COMPONENTS
 
-	if nodeArray[1][0].GetSyntheticRootNode().LogicalOperator != "AND" ||
-		nodeArray[1][0].GetSyntheticRootNode().Left.Entry != "review" ||
-		nodeArray[1][0].GetSyntheticRootNode().Right.LogicalOperator != "AND" {
+	if nodeArray[1][0].GetNodeBelowSyntheticRootNode().LogicalOperator != "AND" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Left.Entry != "review" ||
+		nodeArray[1][0].GetNodeBelowSyntheticRootNode().Right.LogicalOperator != "AND" {
 		t.Fatal("Root node in new node combination was wrongly detected.")
 	}
 
@@ -1761,6 +1761,86 @@ func TestInvalidNestedCombination(t *testing.T) {
 	_, err = ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_INVALID_COMBINATION {
 		t.Fatal("Parsing did not pick up on erroneous combination.")
+	}
+
+}
+
+/*
+Tests whether presence of within-linkage (wAND) is correctly detected.
+ */
+func TestHasWithinLinkage(t *testing.T) {
+
+	text := "Cex(for compliance with (left [AND] right) as well as (left1 [XOR] right1) shared) Cex(outlier)"
+
+	res, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing:", err)
+	}
+
+	nodes := res.ExecutionConstraintSimple.GetLeafNodes(true)
+
+	fmt.Println("Nodes:", nodes)
+
+	if !nodes[0][0].HasWithinComponentLinkage() {
+		t.Fatal("Node", nodes[0][0], "should have within-component linkage.")
+	}
+
+	if !nodes[0][1].HasWithinComponentLinkage() {
+		t.Fatal("Node", nodes[0][1], "should have within-component linkage.")
+	}
+
+	if !nodes[0][2].HasWithinComponentLinkage() {
+		t.Fatal("Node", nodes[0][2], "should have within-component linkage.")
+	}
+
+	if !nodes[0][3].HasWithinComponentLinkage() {
+		t.Fatal("Node", nodes[0][3], "should have within-component linkage.")
+	}
+
+	if nodes[0][4].HasWithinComponentLinkage() {
+		t.Fatal("Node", nodes[0][4], "should NOT have within-component linkage.")
+	}
+
+}
+
+/*
+Tests for the correct resolution of between- (bAND) and within-linked (wAND) nodes.
+ */
+func TestGetSyntheticRootNode(t *testing.T) {
+
+	text := "Cex(for compliance with (left [AND] right) as well as (left1 [XOR] right1) shared) Cex(outlier)"
+
+	res, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing:", err)
+	}
+
+	nodes := res.ExecutionConstraintSimple.GetLeafNodes(true)
+
+	fmt.Println("Nodes:", nodes)
+
+	if nodes[0][0].GetRootNode() != res.ExecutionConstraintSimple {
+		t.Fatal("Node", nodes[0][0], "should have have top-level root node.")
+	}
+
+	if nodes[0][0].GetNodeBelowSyntheticRootNode() != nodes[0][0].Parent {
+		t.Fatal("Node", nodes[0][0], "has an incorrect implicit within-linked synthetic root node.")
+	}
+
+	if nodes[0][1].GetNodeBelowSyntheticRootNode() != nodes[0][1].Parent {
+		t.Fatal("Node", nodes[0][1], "has an incorrect implicit within-linked synthetic root node.")
+	}
+
+	if nodes[0][2].GetNodeBelowSyntheticRootNode() != nodes[0][2].Parent {
+		t.Fatal("Node", nodes[0][2], "has an incorrect implicit within-linked synthetic root node.")
+	}
+
+	if nodes[0][3].GetNodeBelowSyntheticRootNode() != nodes[0][3].Parent {
+		t.Fatal("Node", nodes[0][3], "has an incorrect implicit within-linked synthetic root node.")
+	}
+
+	if nodes[0][4].GetNodeBelowSyntheticRootNode() != res.ExecutionConstraintSimple.Right {
+		t.Fatal("Node", nodes[0][4], "should have have implicit between-linked synthetic root node.")
 	}
 
 }

@@ -358,6 +358,20 @@ func TestSharedElements(t *testing.T) {
 	}
 }
 
+func TestInferenceOfLowerLevelSharedElements(t *testing.T) {
+
+
+	text := "Cex(shared left1 (left1 [XOR] left2) mid (shared left2 (lefter [XOR] (left [AND] right)) shared right2) shared right1)"
+
+	res1, res2 := ParseStatement(text)
+
+	//res1, res2, res3 := ParseIntoNodeTree(text, false, "(", ")")
+
+	fmt.Println(res1)
+	fmt.Println(res2)
+	//fmt.Println(res3)
+}
+
 /*
 Tests for correct parsing of shared elements as well as decomposition of multiple AND combinations
  */
@@ -425,20 +439,22 @@ func TestSharedElementsAndAndCombinationWithInheritanceAppendMode(t *testing.T) 
 	}
 
 	if fmt.Sprint(node.GetSharedLeft()) != "[innermost left]" {
-		t.Fatal("Parsed left shared value is not correct. Node value: " + fmt.Sprint(node.GetSharedLeft()) + ". Expected output: innermost left")
+		t.Fatal("Parsed left shared value is not correct. Node value: " + fmt.Sprint(node.GetSharedLeft()) + ". Expected output: [innermost left]")
 	}
 
 	if fmt.Sprint(node.GetSharedRight()) != "[shared right]" {
-		t.Fatal("Parsed right shared value is not correct. Node value: " + fmt.Sprint(node.GetSharedRight()) + ". Expected output: shared right")
+		t.Fatal("Parsed right shared value is not correct. Node value: " + fmt.Sprint(node.GetSharedRight()) + ". Expected output: [shared right]")
 	}
 
 	if fmt.Sprint(node.Left.GetSharedLeft()) != "[innermost left]" {
-		t.Fatal("Left-nested left node did not inherit shared value. Node value: " + fmt.Sprint(node.Left.GetSharedLeft()) + ". Expected output: shared left inner left")
+		t.Fatal("Left-nested left node did not inherit shared value. Node value: " + fmt.Sprint(node.Left.GetSharedLeft()) + ". Expected output: [innermost left]")
 	}
 
 	if fmt.Sprint(node.Left.GetSharedRight()) != "[shared right]" {
 		t.Fatal("Left-nested right node did not inherit shared value. Node value: " + fmt.Sprint(node.Left.GetSharedRight()) + ". Expected output: shared right")
 	}
+
+	fmt.Println(node)
 
 	// Test reconstruction from tree
 	if node.Stringify() != "(innermost left ((innermost left ((innermost left (left-most information [AND] Left side information) shared right) [AND] middle information) shared right) [AND] right information) shared right)" {
@@ -562,11 +578,11 @@ func TestSharedElementsAndAndCombinationWithoutInheritance(t *testing.T) {
 		t.Fatal("Parsed right shared value is not correct. Output: " + fmt.Sprint(node.GetSharedRight()))
 	}
 
-	if len(node.Left.GetSharedLeft()) > 0 {
+	if len(node.Left.GetSharedLeft()) > 1 || node.Left.GetSharedLeft()[0] != "" {
 		t.Fatal("Left-nested left node should not inherit shared value. Node value: " + fmt.Sprint(node.Left.GetSharedLeft()) + ". Expected output: ")
 	}
 
-	if len(node.Left.GetSharedRight()) > 0 {
+	if len(node.Left.GetSharedRight()) > 1 || node.Left.GetSharedRight()[0] != "" {
 		t.Fatal("Left-nested right node should not inherit shared value. Node value: " + fmt.Sprint(node.Left.GetSharedRight()) + ". Expected output: ")
 	}
 

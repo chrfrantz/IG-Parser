@@ -336,7 +336,7 @@ Returns:
 - Node map of nodes associated with components
 - Reference map counting number of components
 */
-func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, complex bool, aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
+/*func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, complex bool, aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
 
 	// Map holding reference from component type (e.g., ATTRIBUTES) to number of entries (relevant for reconstruction)
 	referenceMap := map[string]int{}
@@ -345,7 +345,7 @@ func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, co
 	nodesMap := make([][]*Node, 0)
 
 	return getComponentLeafArray(nodesMap, referenceMap, componentNode, componentSymbol, complex, aggregateImplicitLinkages, level)
-}
+}*/
 
 /*
 Generates a leaf array for a given component under consideration of node as being of simple or complex nature.

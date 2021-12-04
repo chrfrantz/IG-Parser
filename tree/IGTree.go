@@ -90,10 +90,10 @@ func (n *Node) GetSharedLeft() []string {
 			return n.getParentsLeftSharedElements()
 		case SHARED_ELEMENT_INHERIT_APPEND:
 			parentsSharedLeft := n.getParentsLeftSharedElements()
-			if len(n.SharedLeft) != 0 && len(parentsSharedLeft) != 0 {
+			if len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
 				// Append child's to parents' elements
 				return append(parentsSharedLeft, n.SharedLeft...)
-			} else if len(n.SharedLeft) != 0 {
+			} else if len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" {
 				// Return own node information
 				return n.SharedLeft
 			} else if n.Parent != nil {
@@ -136,10 +136,10 @@ func (n *Node) GetSharedRight() []string {
 		return n.getParentsRightSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedRight := n.getParentsRightSharedElements()
-		if len(n.SharedRight) != 0 && len(parentsSharedRight) != 0 {
+		if len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedRight, n.SharedRight...)
-		} else if len(n.SharedRight) != 0 {
+		} else if len(n.SharedRight) != 0 && n.SharedRight[0] != "" {
 			// Return own node information
 			return n.SharedRight
 		} else if n.Parent != nil {
@@ -281,14 +281,14 @@ func (n *Node) StringFlat() string {
 	} else if n.IsCombination() {
 		out := ""
 		// Prepend left shared elements
-		if n.SharedLeft != nil && len(n.SharedLeft) != 0 {
+		if n.SharedLeft != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" {
 			for _, v := range n.SharedLeft {
 				out += v + " "
 			}
 		}
 		out += n.Left.StringFlat() + " " + n.LogicalOperator + " " + n.Right.StringFlat()
 		// Append right shared elements
-		if n.SharedRight != nil && len(n.SharedRight) != 0 {
+		if n.SharedRight != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" {
 			out += " "
 			for _, v := range n.SharedRight {
 				out += v + " "
@@ -952,18 +952,50 @@ func (n *Node) CountLeaves() int {
 
 /*
 Returns root node of given tree the node is embedded in
-up to the level at which nodes are linked by synthetic AND (bAND).
+up to the level at which nodes are linked by synthetic AND (bAND and wAND).
+I.e., it returns the last node level below an sAND or bAND linkage.
  */
-// TODO: Check for the need to consider SAND_WITHIN_COMPONENTS
-func (n *Node) GetSyntheticRootNode() *Node {
-	if n.Parent == nil || n.Parent.LogicalOperator == SAND_BETWEEN_COMPONENTS {
+// TODO: Check for the need to refine considerations of SAND_WITHIN_COMPONENTS
+func (n *Node) GetNodeBelowSyntheticRootNode() *Node {
+	if n.Parent == nil || n.Parent.LogicalOperator == SAND_BETWEEN_COMPONENTS || n.Parent.LogicalOperator == SAND_WITHIN_COMPONENTS {
 		// Assume to be parent if no parent on its own,
 		// or root in synthetic hierarchy if paired with sAND
 		return n
 	} else {
 		// else delegate to parent
-		return n.Parent.GetSyntheticRootNode()
+		return n.Parent.GetNodeBelowSyntheticRootNode()
 	}
+}
+
+/*
+Indicates whether a given node has a linkage (wAND) within the same component
+(e.g., Cex(shared (left [AND] right) middle (left2 [XOR] right2) shared)).
+ */
+func (n *Node) HasWithinComponentLinkage() bool {
+	if n.Parent != nil && n.Parent.LogicalOperator == SAND_WITHIN_COMPONENTS {
+		// Has linkage in parent
+		return true
+	} else if n.Parent != nil {
+		// Delegate to parent
+		return n.Parent.HasWithinComponentLinkage()
+	} else {
+		// if no parent, then no within-linkage
+		return false
+	}
+}
+
+/*
+Returns all nodes that are in the same branch under a within-component linkage (i.e., wAND operators).
+ */
+func (n *Node) getAllNodesInWithinComponentLinkageBranch() []*Node {
+	if n.Parent != nil && n.Parent.LogicalOperator == SAND_WITHIN_COMPONENTS {
+		// Return own node if immediate parent is wAND linkage
+		return []*Node{n}
+	} else if n.Parent != nil {
+		return n.Parent.getAllNodesInWithinComponentLinkageBranch()
+	}
+	// Return empty node
+	return []*Node{}
 }
 
 /*
@@ -987,6 +1019,8 @@ The parameter aggregateImplicitLinkages indicates whether the nodes for a given 
 should be returned as a single tree, or multiple trees.
  */
 func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
+
+	// Error checking first
 	if n == nil {
 		// Uninitialized node
 		return nil
@@ -1002,45 +1036,36 @@ func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
 		returnNode = append(returnNode, inner)
 		return returnNode
 	}
+
+	// Output 2-dim arrays
 	leftNodes := [][]*Node{}
 	rightNodes := [][]*Node{}
 
 	// If both left and right children nodes exist, return those combined
 	if n.Left != nil && n.Right != nil {
-		leftNodes = n.Left.GetLeafNodes(aggregateImplicitLinkages)
-		rightNodes = n.Right.GetLeafNodes(aggregateImplicitLinkages)
-		// TODO: Check for the need to consider SAND_WITHIN_COMPONENTS
-		// if combined with synthetic linkages,
-		if n.LogicalOperator == SAND_WITHIN_COMPONENTS {
-			// Nested arrays
-			return aggregateNodes(1, leftNodes, rightNodes, returnNode)
-		} else if n.LogicalOperator == SAND_BETWEEN_COMPONENTS {
+		aggregate := 1
+		if n.LogicalOperator == SAND_BETWEEN_COMPONENTS {
+			Println("Found " + SAND_BETWEEN_COMPONENTS)
 			if aggregateImplicitLinkages {
-				// Flatten arrays (keep components separate)
-				return aggregateNodes(0, leftNodes, rightNodes, returnNode)
-			} else {
-				// Nested arrays (carry over relationships)
-				return aggregateNodes(1, leftNodes, rightNodes, returnNode)
+				aggregate = 0
 			}
+		} else if n.LogicalOperator == SAND_WITHIN_COMPONENTS {
+			Println("Found " + SAND_WITHIN_COMPONENTS)
+			// Generate combinations of internally linked component elements (wAND)
+			aggregate = 1
 		} else {
-			// if linked via genuine logical operators (e.g., AND, OR, XOR),
-			// return as flat structure (i.e., individual nodes are returned in isolation)
-			// (e.g., [ ..., one, two, ... ])
-			/*nodeArray := make([]*Node, 0)
-			// return as individual nodes
-			for _, v := range leftNodes {
-				nodeArray = append(nodeArray, v...)
-			}
-			for _, v := range rightNodes {
-				nodeArray = append(nodeArray, v...)
-			}
-			// Appends as first array (second remains empty)
-			returnNode = append(returnNode, nodeArray)
-			return returnNode*/
-			// Flat array
-			return aggregateNodes(0, leftNodes, rightNodes, returnNode)
+			Println("Found operator:", n.LogicalOperator)
+			// Regular operators (i.e., AND, OR, XOR)
+			aggregate = 0
 		}
+
+		res := aggregateNodes(aggregate, n.Left.GetLeafNodes(aggregateImplicitLinkages), n.Right.GetLeafNodes(aggregateImplicitLinkages), returnNode)
+		Println("Returning following aggregated nodes for operator", n.LogicalOperator, ": ", res)
+		return res
 	}
+
+	// Alternatively, process nodes individually
+
 	// Process left nodes
 	if n.Left != nil {
 		leftNodes = n.Left.GetLeafNodes(aggregateImplicitLinkages)

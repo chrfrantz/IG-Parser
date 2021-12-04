@@ -181,14 +181,14 @@ func TestSimpleTabularOutput(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 5 {
@@ -269,14 +269,14 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 5 {
@@ -354,14 +354,14 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 6 {
@@ -440,14 +440,14 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 7 {
@@ -527,14 +527,14 @@ func TestTabularOutputWithSharedLeftElements(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 7 {
@@ -614,14 +614,14 @@ func TestTabularOutputWithSharedRightElements(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 7 {
@@ -701,14 +701,14 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 7 {
@@ -789,14 +789,14 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -880,14 +880,14 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 9 {
@@ -970,14 +970,14 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -1059,14 +1059,14 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -1150,14 +1150,14 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -1241,14 +1241,14 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testin
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -1332,14 +1332,14 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -1424,14 +1424,14 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -1517,14 +1517,14 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
 	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -1614,14 +1614,14 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 
 	fmt.Println("Generated Component References: ", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 9 {
@@ -1706,14 +1706,14 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 
 	fmt.Println("Generated Component References: ", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 8 {
@@ -1791,14 +1791,14 @@ func TestStaticTabularOutputOrElseAnnotations(t *testing.T) {
 
 	fmt.Println("Generated Component References: ", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	// Content of statement links is tested in ArrayCombinationGenerator_test.go
 	if len(links) != 7 {
@@ -1906,14 +1906,14 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2001,14 +2001,14 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2098,14 +2098,14 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2195,14 +2195,14 @@ func TestStaticTabularOutputNestedCombinationsImplicitAndIGCore(t *testing.T) {
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2286,14 +2286,14 @@ func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2382,14 +2382,14 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2479,14 +2479,14 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2576,14 +2576,14 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2673,14 +2673,14 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2771,14 +2771,14 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2869,14 +2869,14 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -2966,14 +2966,14 @@ func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -3062,14 +3062,14 @@ func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -3159,14 +3159,14 @@ func TestStaticTabularOutputNestedStatementCombinationAnnotations(t *testing.T) 
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 
@@ -3260,14 +3260,14 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotations(t *test
 
 	fmt.Println("Component refs:", componentRefs)
 
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Unexpected error during array generation.")
 	}
 
 	fmt.Println("Input arrays: ", res)
 
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	fmt.Println("Links: ", links)
 

@@ -1,7 +1,6 @@
-package exporter
+package tree
 
 import (
-	"IG-Parser/tree"
 	"log"
 	"strconv"
 	"strings"
@@ -12,11 +11,13 @@ Generates all permutations of a given set of input arrays, representing an
 institutional statement alongside its components per entry.
 Output array structure is [statement][component instances of statement]
  */
-func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.Node, parsingError tree.ParsingError) {
+func GenerateNodeArrayPermutations(nodeArrays ...[]*Node) (stmts [][]*Node, parsingError ParsingError) {
 
 	if len(nodeArrays) == 0 {
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_LEAF, ErrorMessage: "No parseable node found."}
+		return nil, ParsingError{ErrorCode: PARSING_ERROR_EMPTY_LEAF, ErrorMessage: "No parseable node found."}
 	}
+
+	Println("Number of top-level arrays:", len(nodeArrays))
 
 	n := 1
 	// Determine output parameters
@@ -31,14 +32,14 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 	Println("Number of anticipated atomic statements: " + strconv.Itoa(n))
 
 	// Generate arrays of node arrays representing the different atomic statements
-	stmts = make([][]*tree.Node, n)
+	stmts = make([][]*Node, n)
 
 	// Array of position references
 	pos := make([]int, len(nodeArrays))
 	// Statement counter
 	ct := 0
 	// Basic atomic statement structure
-	out := []*tree.Node{}
+	out := []*Node{}
 
 	// Named loop
 	loop:
@@ -57,23 +58,23 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*tree.Node) (stmts [][]*tree.
 		for i, ar := range nodeArrays {
 			var p = pos[i]
 			if p >= 0 && p < len(ar) {
-				//Println("Append " + ar[p].String())
+				Println("Appending " + ar[p].String())
 				out = append(out, ar[p])
 			}
 		}
-		//Println("Wrote atomic statement ", ct)
+		Println("Wrote atomic statement ", ct)
 
 		// Assign generated statement to return data structure
 		stmts[ct] = out
 		ct++
 
 		// Reset temporary node array (capturing one atomic statement each time)
-		out = []*tree.Node{}
+		out = []*Node{}
 
 		// Adjust position references
 		pos[len(nodeArrays)-1]++
 	}
-	return stmts, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	return stmts, ParsingError{ErrorCode: PARSING_NO_ERROR}
 }
 
 /*
@@ -88,7 +89,7 @@ ranges of statement references, alongside potential incrementing of reference va
 Structure: [column ID of component]map[node reference for each value of component (e.g., Farmer, Certifier)][statement IDs
 where component value apply]
  */
-func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node, generateRanges bool, incrementReferences bool) []map[*tree.Node][]string {
+func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*Node, generateRanges bool, incrementReferences bool) []map[*Node][]string {
 
 	if len(stmts) == 0 {
 		log.Fatal("Empty input - no statement permutations.")
@@ -97,14 +98,14 @@ func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*tree.Node, generate
 	// Number of components
 	componentCount := len(stmts[0])
 	// Collection of logical linkages ([column ids]map[Node ref component value][row IDs where component value applies])
-	compLinks := make([]map[*tree.Node][]string,0)
+	compLinks := make([]map[*Node][]string, 0)
 	// Index of component of concern in statement
 	columnIdx := 0
 
 	for columnIdx < componentCount {
 
 		// Generate map of category values that will hold statement references
-		combinationStructure := make(map[*tree.Node][]string)
+		combinationStructure := make(map[*Node][]string)
 
 		// For each statement (with id and components)
 		for id, comps := range stmts {
@@ -193,14 +194,14 @@ func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incr
 			if !stopRangeCheck && intVal == (addedId - 1) {
 				// Overwrite previous entry
 				nodeRefs[len(nodeRefs)-1] = val + rangeSeparator + strconv.Itoa(addedId)
-				Println("Overwrite existing entry with ", (val + rangeSeparator + strconv.Itoa(addedId)))
+				Println("Overwrite existing entry with ", val + rangeSeparator + strconv.Itoa(addedId))
 			} else if intVal != addedId {
 				// Create new entry
 				nodeRefs = append(nodeRefs, strconv.Itoa(addedId))
 				Println("Created new entry ", addedId)
- 			} else {
- 				// if old value and current are the same, simply omit if creating ranges, i.e., aggregating
- 				Println("Values has not been added, since identical to last value ", intVal)
+			} else {
+				// if old value and current are the same, simply omit if creating ranges, i.e., aggregating
+				Println("Values has not been added, since identical to last value ", intVal)
 			}
 		}
 	} else {
@@ -209,5 +210,3 @@ func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incr
 	}
 	return nodeRefs
 }
-
-

@@ -1054,8 +1054,8 @@ func TestNode_GetSyntheticRootNode(t *testing.T) {
 		t.Fatal("Error when populating tree.")
 	}
 
-	if rightRightChild.GetSyntheticRootNode() != &rightChild {
-		t.Fatal("Wrong identification of synthetic root node:", rightRightChild.GetSyntheticRootNode())
+	if rightRightChild.GetNodeBelowSyntheticRootNode() != &rightChild {
+		t.Fatal("Wrong identification of synthetic root node:", rightRightChild.GetNodeBelowSyntheticRootNode())
 	}
 
 	if rightRightChild.GetRootNode() != &root {

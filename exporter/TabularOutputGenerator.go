@@ -129,7 +129,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 		// Individual entry
 		entryMap := make(map[string]string)
 
-		Println("Statement ", stmtCt, ": ", statement)
+		Println("Statement (to be parsed in tabular form), ID:", stmtCt, ":", statement)
 
 		// Create new entry with individual ID
 
@@ -149,8 +149,9 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 			// Append element value as output for given cell
 			if statement[componentIdx].IsEmptyNode() {
 				// Empty entry - don't add anything
-				Println("Found empty node")
+				Println("Found empty node for component", fmt.Sprint(statement[componentIdx].GetComponentName()))
 			} else if statement[componentIdx].HasPrimitiveEntry() {
+				Println("Found primitive entry in component", fmt.Sprint(statement[componentIdx].GetComponentName()), ", Entry: ", statement[componentIdx])
 				// Regular leaf entry (i.e., component) - unless IG Core coding is intended (which implies collapsed nested components)
 
 				// Provide default values for left and right elements (potentially used hereafter)
@@ -160,22 +161,64 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 				if INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT {
 					// Prepare left and right shared elements by stringifying
 					leftString = stringifySlices(statement[componentIdx].GetSharedLeft())
-					if leftString != "" {
-						// Append whitespace
-						leftString += " "
-					}
+					// but don't append whitespace just yet - depends on matching of shared strings later
 					rightString = stringifySlices(statement[componentIdx].GetSharedRight())
 					if rightString != "" {
 						// Add preceding whitespace
 						rightString = " " + rightString
 					}
 				}
-				// Prepare value for entry
-				entryVal := leftString +
-					statement[componentIdx].Entry.(string) +
-					rightString
 
-				// HANDLE SYMBOLS THAT REQUIRE SUBSTITUTION
+				// Prepare value for entry
+				entryVal := ""
+				// Indicates whether values within cell should be comma-separated
+				skipSeparator := false
+
+				// CHECK FOR CELL SEPARATORS
+
+				// Check for preceding shared elements, and suppress left element if needed
+				if leftString != "" {
+					if ProduceDynamicOutput() {
+						// Dynamic variant
+						// Check whether value exists in cell
+						if len(entryMap[headerSymbols[componentIdx]]) > 0 &&
+							strings.HasSuffix(entryMap[headerSymbols[componentIdx]], leftString) {
+								// Suppress left shared element if identical with shared right one on existing value
+								// but add whitespace to link to previous value
+								entryVal = " " + statement[componentIdx].Entry.(string) + rightString
+								// Skip comma separation
+								skipSeparator = true
+						} else {
+							// Regular sharedLeft, whitespace + value sharedRight concatenation
+							entryVal = leftString + " " + statement[componentIdx].Entry.(string) + rightString
+						}
+					} else {
+						// Static variant
+						// Check whether value exists in cell
+						if len(entryMap[statement[componentIdx].GetComponentName()]) > 0 &&
+							strings.HasSuffix(entryMap[statement[componentIdx].GetComponentName()], leftString) {
+								// Suppress left shared element if identical with shared right one on existing value
+								// but add whitespace to link to previous value
+								entryVal = " " + statement[componentIdx].Entry.(string) + rightString
+								// Skip comma separation
+								skipSeparator = true
+						} else {
+							// Regular sharedLeft, whitespace + value sharedRight concatenation
+							entryVal = leftString + " " + statement[componentIdx].Entry.(string) + rightString
+						}
+					}
+				} else {
+					// Create regular entry (without left shared value, since that will be empty)
+					entryVal = statement[componentIdx].Entry.(string) + rightString
+				}
+
+				// Determine whether cell separation is used
+				effectiveCellSeparator := ""
+				if !skipSeparator {
+					effectiveCellSeparator = cellValueSeparator
+				}
+
+				// SPECIAL SYMBOLS (APPLICATION-SPECIFIC) --> SYMBOLS THAT REQUIRE SUBSTITUTION
 				// Substitute symbols before producing output (e.g., " with ')
 				// TODO: Review for further symbols
 				entryVal = strings.ReplaceAll(entryVal, "\"", "'")
@@ -185,13 +228,15 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 					entryVal = "'" + entryVal
 				}
 
+				// ADDING ACTUAL ENTRY
+
 				if ProduceDynamicOutput() {
 					// Dynamic variant
 					// Save entry value into entryMap for given statement and component column
 					if len(entryMap[headerSymbols[componentIdx]]) > 0 {
 						// Add separator for cell values
 						entryMap[headerSymbols[componentIdx]] = entryMap[headerSymbols[componentIdx]] +
-							cellValueSeparator + entryVal
+							effectiveCellSeparator + entryVal
 					} else {
 						// First value, hence no separator needed
 						entryMap[headerSymbols[componentIdx]] = entryVal
@@ -203,13 +248,15 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 					if len(entryMap[statement[componentIdx].GetComponentName()]) > 0 {
 						// Add separator for cell values
 						entryMap[statement[componentIdx].GetComponentName()] = entryMap[statement[componentIdx].GetComponentName()] +
-							cellValueSeparator + entryVal
+							effectiveCellSeparator + entryVal
 					} else {
 						// First value, hence no separator needed
 						entryMap[statement[componentIdx].GetComponentName()] = entryVal
 					}
 				}
 				Println("Added entry ", entryVal)
+
+				// PRIVATE NODES
 
 				// For static output, consider private nodes
 				if !ProduceDynamicOutput() && statement[componentIdx].HasPrivateNodes() {
@@ -228,6 +275,9 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 					}
 					Println("Added private nodes to given output node")
 				}
+
+				// ANNOTATIONS
+
 				// For static output, consider annotations (if activated)
 				if !ProduceDynamicOutput() && IncludeAnnotations() && statement[componentIdx].HasAnnotations() {
 
@@ -243,7 +293,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 					entryMap[statement[componentIdx].GetComponentName() + tree.ANNOTATION] = existing
 				}
 
-				Println("Current entrymap:", entryMap)
+				Println("Entry (after adding primitive entry):", entryMap)
 			} else {
 				// Nested statements are stored for later processing, but assigned IDs and references added to calling row
 				Println("Found complex entry (nested statement) in component: " + fmt.Sprint(statement[componentIdx].GetComponentName()))
@@ -261,6 +311,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 					stmts := entryVals[0].GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
 					// Flatten array and override entry values for iteration
 					entryVals = tree.Flatten(stmts)
+					Println("Flattened combination:", entryVals)
 				} else {
 					Println("Detected individual nested statement")
 				}
@@ -364,7 +415,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 					}
 				}
 			}
-			Println("Source/calling node: ", statement[componentIdx])
+			Println("Source/calling node (for nested statement): ", statement[componentIdx])
 
 			// Process component-level logical linkage
 
@@ -376,7 +427,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 			}
 		}
 
-		Println("EntryMap:", entryMap)
+		Println("Entries (complete row - before adding logical operators and nested statements):", entryMap)
 
 		// Append the logical expression at the end of each row
 		if logicalValue != "" {
@@ -560,7 +611,7 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, ann
 
 	log.Println(" Step: Generate permutations of leaf arrays (atomic statements)")
 	// Generate all permutations of logically-linked components to produce statements
-	res, err := GenerateNodeArrayPermutations(leafArrays...)
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", nil, nil, nil, err
 	}
@@ -569,7 +620,7 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, ann
 
 	log.Println(" Step: Generate logical operators for atomic statements")
 	// Extract logical operator links
-	links := GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	Println(" Links:", links)
 
@@ -673,8 +724,8 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 				Println("Root:", firstKey.GetRootNode())
 			} else {
 				// Retrieve all nodes up to synthetic linkage
-				leaves = firstKey.GetSyntheticRootNode().GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
-				Println("Synthetic Root:", firstKey.GetSyntheticRootNode())
+				leaves = firstKey.GetNodeBelowSyntheticRootNode().GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
+				Println("Synthetic Root:", firstKey.GetNodeBelowSyntheticRootNode())
 			}
 
 			if len(leaves) > 0 {
