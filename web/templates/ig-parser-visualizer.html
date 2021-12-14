@@ -86,7 +86,7 @@
     root.x0 = height / 2;
     root.y0 = 0;
 
-    // Collapse after the second level
+    // Collapse after the second level -- commenting this will ensure a expanded tree by default
     //root.children.forEach(collapse);
 
     update(root);
@@ -149,7 +149,7 @@
         nodeEnter.append('text')
             .attr("dy", ".4em")
             .attr("x", function(d) {
-                return d.children || d._children ? 12 : 25;//-13 : 13;
+                return d.children || d._children ? 12 : 25;
             })
             .style("font", function(d) {
                 return d.children || d._children ? "normal 12px Arial" : "bold 12px Arial";
@@ -219,32 +219,26 @@
             .attr("transform","translate(-50)");
 
         gGiven.append("text")
-            //.attr("class","link.text2")
             .attr("dy", ".4em")
             .style("font", "normal 12px Arial")
             .text(function (d) {
-                /*if (d.givenName){
-                    return d.givenName
-                } else {*/
-                //return "";
-                //}
                 return d.data.comp;
             });
 
         // Label the Links;
 
         gGiven.append("text")
-            //.attr("class","givenProb")
             .text(function (d){
-                /*if (d.given){
-                    return d.given;
-                }else{
-                    return "";
-                }*/
-                return d.data.properties;
+                if (d.data.properties != null) {
+                    return "(" + d.data.properties + ")";
+                } else {
+                    return ""
+                }
+
             })
-            .attr("x", "30")
-            .attr("y", "30");
+
+            .attr("x", "75")
+            .attr("y", "-10");
 
         //linkEnter.append('text')
         //.attr("class", "text")
