@@ -2,38 +2,38 @@ package converter
 
 /*
 Struct for interacting with template via handler
- */
-type ReturnStruct struct{
+*/
+type ReturnStruct struct {
 	// Indicates whether operation was successful
-	Success bool;
+	Success bool
 	// Indicates whether an error has occurred
-	Error bool;
+	Error bool
 	// Message shown to user
-	Message string;
+	Message string
 	// Original unparsed statement
-	RawStmt string;
+	RawStmt string
 	// IG-Script annotated statement
-	CodedStmt string;
+	CodedStmt string
 	// Statement ID
-	StmtId string;
+	StmtId string
 	// Dynamic output indicator
 	DynamicOutput string
 	// IG Extended output indicator
 	IGExtendedOutput string
 	// Annotation inclusion indicator
 	IncludeAnnotations string
-	// Generated tabular output
-	TabularOutput string
+	// Generated output to be rendered (e.g., tabular, visual)
+	Output string
 	// Transaction ID
-	TransactionId string;
+	TransactionId string
 	// Help message for raw statement
-	RawStmtHelp string;
+	RawStmtHelp string
 	// Help message for coded statement
-	CodedStmtHelp string;
+	CodedStmtHelp string
 	// Help message for statement ID
-	StmtIdHelp string;
+	StmtIdHelp string
 	// Help message for parameters
-	ParametersHelp string;
+	ParametersHelp string
 	// Help message for report tooltip
-	ReportHelp string;
+	ReportHelp string
 }

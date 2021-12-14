@@ -82,7 +82,7 @@ func TestStatementParsingIncludingSyntheticANDs(t *testing.T) {
 /*
 Test the correct generation of leaf arrays from statements without aggregation of implicitly linked components,
 tolerating multiple components per type.
- */
+*/
 func TestLeafArrayGenerationWithoutAggregationOfImplicitlyLinkedComponents(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -535,7 +535,7 @@ func TestComponentTwoLevelNestedStatement(t *testing.T) {
 
 /*
 Tests for component-level nesting in activation condition and separate simple combination (coexistence).
- */
+*/
 func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -733,7 +733,7 @@ func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 
 /*
 Tests multiple complex activation conditions in a statement
- */
+*/
 func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -902,7 +902,7 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 
 /*
 Tests parsing of nested statement combinations
- */
+*/
 func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 
 	input := "{Cac{E(Program Manager) F(is) P(qualified)} [AND] " +
@@ -970,9 +970,8 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 		combo.Right.Right.Entry.(tree.Statement).ConstitutiveFunction.Entry != "is" ||
 		combo.Right.Right.Entry.(tree.Statement).ConstitutingProperties.Entry != "employed" {
 
-			t.Fatal("Parsing into statements failed.")
+		t.Fatal("Parsing into statements failed.")
 	}
-
 
 }
 
@@ -993,7 +992,6 @@ func TestSpecialCharacters(t *testing.T) {
 
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
-
 
 	if s.Attributes.Entry != "A&dsisgj=" {
 		t.Fatal("Failed to detect Attributes")
@@ -1035,7 +1033,7 @@ func TestSpecialCharacters(t *testing.T) {
 
 /*
 Tests whether parser does not mistakenly pick up component properties (e.g., A,p) as components (e.g., A).
- */
+*/
 func TestUnambiguousExtractionOfComponentAndRelatedProperties(t *testing.T) {
 
 	input := "A,p(property) A,p1(another prop) A(value)"
@@ -1072,8 +1070,6 @@ func TestUnambiguousExtractionOfComponentAndRelatedProperties(t *testing.T) {
 	}
 
 }
-
-
 
 /*
 Tests extraction of suffix and annotation in statements in which only a single component of a given type is present.
@@ -1269,7 +1265,7 @@ func TestExtractSuffixAndAnnotationWithSpecialCharacters(t *testing.T) {
 
 /*
 Tests whether complete statements are parsed and suffices and annotations stored accordingly in the underlying node structure.
- */
+*/
 func TestNodeParsingOfSuffixAndAnnotationsAtomicStatement(t *testing.T) {
 
 	text := "A1[annotation1](content1) A2[annotation2](content2) A3(content3) I4[annotation=(left,right)](aim1)"
@@ -1441,7 +1437,7 @@ func TestNodeParsingOfSuffixAndAnnotationsNestedStatement(t *testing.T) {
 
 /*
 Test proper resolution of component name for primitive element, combination header and elements, and nested statement
- */
+*/
 func TestComponentNameIdentification(t *testing.T) {
 
 	text := "A(Single Element) D( must) I((combLeft [AND] combRight)) Cac{A(Nested Element) I(perform) Bdir(something)}"
@@ -1494,7 +1490,7 @@ func TestComponentNameIdentification(t *testing.T) {
 
 /*
 Tests whether annotated statements (with suffix) are properly decomposed. Case mixes private and shared properties.
- */
+*/
 func TestCorrectNodeRemovalWithSharedAndPrivateProperties(t *testing.T) {
 	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir,p(proper) Bdir1,p1(organic farming) Bdir1(provisions) and Bdir2,p2(improper) Bdir2(rulesS)"
 
@@ -1544,7 +1540,7 @@ func TestCorrectNodeRemovalWithPrivatePropertiesOnly(t *testing.T) {
 
 /*
 Tests automated extraction of component type.
- */
+*/
 func TestExtractComponentType(t *testing.T) {
 
 	// Primitive type
@@ -1746,7 +1742,7 @@ func TestSuffixAndAnnotationParsingOnNestedStatementCombination(t *testing.T) {
 
 /*
 Tests correct handling of invalid combination of nested statements.
- */
+*/
 func TestInvalidNestedCombination(t *testing.T) {
 
 	text := "{Cac{A(actor) I(action)} [XOR] Cac(simple content)}"
@@ -1767,7 +1763,7 @@ func TestInvalidNestedCombination(t *testing.T) {
 
 /*
 Tests whether presence of within-linkage (wAND) is correctly detected.
- */
+*/
 func TestHasWithinLinkage(t *testing.T) {
 
 	text := "Cex(for compliance with (left [AND] right) as well as (left1 [XOR] right1) shared) Cex(outlier)"
@@ -1805,7 +1801,7 @@ func TestHasWithinLinkage(t *testing.T) {
 
 /*
 Tests for the correct resolution of between- (bAND) and within-linked (wAND) nodes.
- */
+*/
 func TestGetSyntheticRootNode(t *testing.T) {
 
 	text := "Cex(for compliance with (left [AND] right) as well as (left1 [XOR] right1) shared) Cex(outlier)"
@@ -1847,7 +1843,7 @@ func TestGetSyntheticRootNode(t *testing.T) {
 
 /*
 Tests ExtractComponentContent() function.
- */
+*/
 /*func TestExtractComponentContent(t *testing.T) {
 
 	text := "A(content1)"

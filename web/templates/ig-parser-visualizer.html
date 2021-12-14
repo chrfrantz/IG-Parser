@@ -1,0 +1,324 @@
+{{template "top.html" . }}
+
+<style>
+
+    .node circle {
+        fill: #fff;
+        stroke: steelblue;
+        stroke-width: 3px;
+        r: 15;
+    }
+
+    .node text {
+        font: 12px sans-serif;
+        font-weight: bold;
+    }
+
+    .link {
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 2px;
+    }
+
+    .link text {
+        font: 12px sans-serif;
+    }
+
+    .link.text2 {
+        font: 20px sans-serif;
+    }
+
+</style>
+
+{{template "coding-interface.html" . }}
+
+<input value="Generate visual output" type="submit">
+{{if .Error}}
+<div class="error">
+    <label>Error: {{.Message}}</label>
+</div>
+{{end}}
+{{if ne .TransactionId ""}}
+<div class="transactionId">
+    <label>Request ID: {{.TransactionId}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a class="tooltip"
+           href="mailto:ig-parser@newinstitutionalgrammar.org?subject=%5BIG-Parser%5D%20%5BRequest%20ID%3A%20{{.TransactionId}}%5D&body=Please%20replace%20the%20body%20text%20with%20the%20observations%2C%20questions%2C%20or%20suggestions%20you%20have%20based%20on%20your%20experience%20with%20IG-Parser.%20%20If%20you%20observed%20errors%2C%20please%20provide%20a%20description%20(e.g.%2C%20specifying%20what%20you%20expected%20to%20see%2C%20and%20what%20you%20observed%3B%20error%20messages%20you%20received%2C%20etc.).%20%20Please%20also%20feel%20free%20to%20provide%20open%20feedback%20or%20suggestions%20for%20further%20improvement."
+           data-text="{{.ReportHelp}}">Report error, observations, or suggestions</a>
+    </label>
+</div>
+{{end}}
+</form>
+</div>
+    {{if .Success}}
+<!-- load the d3.js library -->
+<!--<script src="file:///D:/IG-Tree/d3.v7.min.js"></script>-->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+
+    // Read actual tree information
+    var treeData = JSON.parse({{.Output}});
+
+    // Set the dimensions and margins of the diagram
+    var margin = {top: 20, right: 90, bottom: 30, left: 90},
+        width = 960 - margin.left - margin.right,
+        height = 900 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.right + margin.left)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate("
+            + margin.left + "," + margin.top + ")");
+
+    var i = 0,
+        duration = 750,
+        root;
+
+    // declares a tree layout and assigns the size
+    var treemap = d3.tree().size([height, width]);
+
+    // Assigns parent, children, height, depth
+    root = d3.hierarchy(treeData, function(d) { return d.children; });
+    root.x0 = height / 2;
+    root.y0 = 0;
+
+    // Collapse after the second level
+    root.children.forEach(collapse);
+
+    update(root);
+
+    // Collapse the node and all it's children
+    function collapse(d) {
+        if(d.children) {
+            d._children = d.children
+            d._children.forEach(collapse)
+            d.children = null
+        }
+    }
+
+    function update(source) {
+
+        // Assigns the x and y position for the nodes
+        var treeData = treemap(root);
+
+        // Compute the new tree layout.
+        var nodes = treeData.descendants(),
+            links = treeData.descendants().slice(1);
+
+        // Normalize for fixed-depth.
+        nodes.forEach(function(d){ d.y = d.depth * 180});
+
+        // ****************** Nodes section ***************************
+
+        // Update the nodes...
+        var node = svg.selectAll('g.node')
+            .data(nodes, function(d) {return d.id || (d.id = ++i); });
+
+        // Enter any new modes at the parent's previous position.
+        var nodeEnter = node.enter().append('g')
+            .attr('class', 'node')
+            .attr("transform", function(d) {
+                return "translate(" + source.y0 + "," + source.x0 + ")";
+            })
+            .on('click', click);
+
+        // Add Circle for the nodes
+        nodeEnter.append('circle')
+            .attr('class', 'node')
+            .attr('r', 1e-6)
+            .style("fill", function(d) {
+                return d._children ? "lightsteelblue" : "#fff";
+            });
+
+        // Add component labels for the nodes
+        /*nodeEnter.append('textcomp')
+            .attr("dy", ".35em")
+            .attr("x", function(d) {
+                return d.children || d._children ? -13 : 13;
+            })
+            .attr("text-anchor", function(d) {
+                return "start";
+            })
+            .text(function(d) { return d.data.comp; });*/
+
+        // Add labels for the nodes
+        nodeEnter.append('text')
+            .attr("dy", ".35em")
+            .attr("x", function(d) {
+                return d.children || d._children ? 12 : 20;//-13 : 13;
+            })
+            .attr("text-anchor", function(d) {
+                return d.children || d._children ? "end" : "begin";
+            })
+            .text(function(d) { return d.data.name; });
+
+        // UPDATE
+        var nodeUpdate = nodeEnter.merge(node);
+
+        // Transition to the proper position for the node
+        nodeUpdate.transition()
+            .duration(duration)
+            .attr("transform", function(d) {
+                return "translate(" + d.y + "," + d.x + ")";
+            });
+
+        // Update the node attributes and style
+        nodeUpdate.select('circle.node')
+            .attr('r', 10)
+            .style("fill", function(d) {
+                return d._children ? "lightsteelblue" : "#fff";
+            })
+            .attr('cursor', 'pointer');
+
+
+        // Remove any exiting nodes
+        var nodeExit = node.exit().transition()
+            .duration(duration)
+            .attr("transform", function(d) {
+                return "translate(" + source.y + "," + source.x + ")";
+            })
+            .remove();
+
+        // On exit reduce the node circles size to 0
+        nodeExit.select('circle')
+            .attr('r', 1e-6);
+
+        // On exit reduce the opacity of text labels
+        nodeExit.select('text')
+            .style('fill-opacity', 1e-6);
+
+        // ****************** links section ***************************
+
+        // Update the links...
+        var link = svg.selectAll('path.link')
+            .data(links, function(d) { return d.id; });
+
+        // Enter any new links at the parent's previous position.
+        var linkEnter = link.enter().insert('path', "g")
+            .attr("class", "link")
+            .attr('d', function(d){
+                var o = {x: source.x0, y: source.y0}
+                return diagonal(o, o)
+            });
+
+        var gGiven = nodeEnter.filter(function (d){
+            if (d.depth!=0){
+                return true;
+            } else {
+                return false;
+            }
+        })
+            .append("g")
+            .attr("transform","translate(-50)");
+
+        gGiven.append("text")
+            .attr("class","link.text2")
+            .text(function (d) {
+                /*if (d.givenName){
+                    return d.givenName
+                } else {*/
+                //return "";
+                //}
+                return d.data.comp;
+            });
+
+        // Label the Links;
+
+        gGiven.append("text")
+            .attr("class","givenProb")
+            .text(function (d){
+                /*if (d.given){
+                    return d.given;
+                }else{
+                    return "";
+                }*/
+                return d.data.properties;
+            })
+            .attr("x", "30")
+            .attr("y", "30");
+
+        //linkEnter.append('text')
+        //.attr("class", "text")
+        //.attr("font-family", "Arial, Helvetica, sans-serif")
+        //.attr("fill", "Black")
+        //.style("font", "normal 12px Arial")
+        /*.text(function (d, i) {
+          if (d.parent && d.parent.children.length > 1) {
+            if (!d.parent.index) d.parent.index = 0;
+              return d.data.comp;
+            }
+          })*/
+        /*.text(function(d) { return d.data.comp; })
+        .attr("opacity",1)
+        .attr('dy', "-1em");*/
+
+        /*linkEnter.append('path')
+                        .attr('d', function (d) {
+                            var o = {
+                                x: source.x0,
+                                y: source.y0
+                            }
+                            return diagonal(o, o)
+                        })
+                        .on("mouseover", function(){
+                            d3.select(this.parentNode).select("text").attr("opacity",1);
+                        })
+                        .on("mouseleave", function(){
+                            d3.select(this.parentNode).select("text").attr("opacity",0);
+                        });*/
+
+        // UPDATE
+        var linkUpdate = linkEnter.merge(link);
+
+        // Transition back to the parent element position
+        linkUpdate.transition()
+            .duration(duration)
+            .attr('d', function(d){ return diagonal(d, d.parent) });
+
+        // Remove any exiting links
+        var linkExit = link.exit().transition()
+            .duration(duration)
+            .attr('d', function(d) {
+                var o = {x: source.x, y: source.y}
+                return diagonal(o, o)
+            })
+            .remove();
+
+        // Store the old positions for transition.
+        nodes.forEach(function(d){
+            d.x0 = d.x;
+            d.y0 = d.y;
+        });
+
+        // Creates a curved (diagonal) path from parent to the child nodes
+        function diagonal(s, d) {
+
+            path = `M ${s.y} ${s.x}
+            C ${(s.y + d.y) / 2} ${s.x},
+              ${(s.y + d.y) / 2} ${d.x},
+              ${d.y} ${d.x}`
+
+            return path
+        }
+
+        // Toggle children on click.
+        function click(event, d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            } else {
+                d.children = d._children;
+                d._children = null;
+            }
+            update(d);
+        }
+    }
+
+</script>
+    {{end}}
+</body>
+
+</html>

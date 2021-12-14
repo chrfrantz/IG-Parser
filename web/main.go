@@ -11,7 +11,7 @@ import (
 
 /*
 Environment variables (port, logging activation)
- */
+*/
 const ENV_VAR_PORT = "IG_PARSER_PORT"
 const ENV_VAR_LOGGING = "IG_PARSER_LOGGING"
 const ENV_VAR_LOGGING_PATH = "IG_PARSER_LOGGING_PATH"
@@ -23,9 +23,14 @@ func main() {
 	// Initializes templating and determines correct relative path for templates and CSS
 	converter.Init()
 
-	http.HandleFunc("/", converter.ConverterHandler)
+	// Conventional tabular output handler
+	http.HandleFunc("/", converter.ConverterHandlerSheets)
+	// Visual tree output handler
+	http.HandleFunc("/visual/", converter.ConverterHandlerVisual)
+	// Favicon
 	http.HandleFunc("/favicon.ico", converter.FaviconHandler)
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(converter.RelativePathPrefix + "css"))))
+	// CSS folder mapping
+	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(converter.RelativePathPrefix+"css"))))
 
 	// Check for custom port
 	port := os.Getenv(ENV_VAR_PORT)

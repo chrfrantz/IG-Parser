@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IG Parser</title></br>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="/css/default.css">
+</head>
+
+<body>
+<script>
+    function CopyToClipboard(containerid) {
+        if (document.selection) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(document.getElementById(containerid));
+            range.select().createTextRange();
+            document.execCommand("copy");
+        } else if (window.getSelection) {
+            var range = document.createRange();
+            range.selectNode(document.getElementById(containerid));
+            window.getSelection().addRange(range);
+            document.execCommand("copy");
+            //alert("Text has been copied")
+        }
+    }
+
+    function check(target) {
+        let offset = 0
+        target.style.height = 'auto';
+        target.style.height = target.scrollHeight + offset + 'px';
+
+    }
+</script>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h1>IG Parser</h1>
+<h2>A Parser for Institutional Statements encoded in the IG Script Notation introduced as part of the Institutional Grammar 2.0</h2>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div class="form">
+    <form method="POST">
+        <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
+        <textarea name="rawStatement" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
+
+        <span data-text="{{.CodedStmtHelp}}" class="tooltip">Encoded Statement:</span>
+        <textarea name="annotatedStatement" onfocusin="check(this)" onkeyup="check(this)">{{.CodedStmt}}</textarea><br />
+
+        <span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
+        <input name="stmtId" type="number" value="{{.StmtId}}"><br />
+

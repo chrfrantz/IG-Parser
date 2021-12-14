@@ -11,7 +11,7 @@ import (
 /*
 Tests the header generation function for tabular output, here as variant that does not assume component aggregation.
 Note that this test is implicitly contained in IGStatementParser_test.go
- */
+*/
 func TestHeaderRowGenerationWithoutComponentAggregation(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -171,7 +171,7 @@ func TestSimpleTabularOutput(t *testing.T) {
 	// Override cell separator symbol
 	CellSeparator = ";"
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -212,7 +212,7 @@ func TestSimpleTabularOutput(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator,"")
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -259,7 +259,7 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -344,7 +344,7 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -404,7 +404,7 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 
 /*
 Tests basic tabular output without statement-level nesting, but component-level combinations and implicitly linked components
- */
+*/
 func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -430,7 +430,7 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -517,7 +517,7 @@ func TestTabularOutputWithSharedLeftElements(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -604,7 +604,7 @@ func TestTabularOutputWithSharedRightElements(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -691,7 +691,7 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -751,7 +751,7 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 
 /*
 Tests multi-level nesting on statements, i.e., activation with own activation condition
- */
+*/
 func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -779,7 +779,7 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -840,7 +840,7 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 /*
 Tests tabular output with combination of two-level statement-level nested component and
 simple activation condition (to be linked by implicit AND).
- */
+*/
 func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -870,7 +870,7 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -930,7 +930,7 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 
 /*
 Tests combination of two nested activation conditions (single level)
- */
+*/
 func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -960,7 +960,7 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1020,7 +1020,7 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 
 /*
 Tests combination of three nested activation conditions (single level), including embedded component-level nesting
- */
+*/
 func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -1049,7 +1049,7 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1109,7 +1109,7 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 
 /*
 Tests partial AND-linked statement-level combinations, expects the inference of implicit AND to non-linked complex component
- */
+*/
 func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -1140,7 +1140,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1231,7 +1231,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testin
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1291,7 +1291,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testin
 
 /*
 Tests partial XOR-linked statement-level combinations, expects the inference of implicit AND to non-linked complex component
- */
+*/
 func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -1322,7 +1322,7 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1383,7 +1383,7 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 /*
 Tests statement-level combinations, alongside embedded component-level combinations to ensure the
 filtering of within-statement component-level combinations are filtered prior to statement assembly.
- */
+*/
 func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -1414,7 +1414,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1476,7 +1476,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 Tests statement-level combinations, alongside embedded component-level combinations to ensure the
 filtering of within-statement component-level combinations are filtered prior to statement assembly.
 Includes generation of output with shared elements.
- */
+*/
 func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWithSharedElements(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
@@ -1507,7 +1507,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1565,7 +1565,6 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 
 }
 
-
 /*
 Tests statement-level combinations on multiple components, alongside selected embedded component-level,
 alongside combination with non-nested components
@@ -1602,7 +1601,7 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1672,9 +1671,9 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 	text := "Cac{When A(Program Manager) I(reveals)	Bdir{A,p(accredited) A(certifying agent) I([is not in compliance]) " +
 		// Parser miscategorizes as combination based on nested logical operators, but should recover
 		"with the Bdir((Act [OR] regulations in this part))} " +
-		"Cac{When A(Program Manager) I((([inspects] [OR] [reviews]) [OR] [investigates])) "+
-		"Bind,p(accredited) Bind(certifying agent)}} "+
-		"A([Program Manager]) D(shall) I([send]) Bdir(notification) Bdir,p(of non-compliance) to the "+
+		"Cac{When A(Program Manager) I((([inspects] [OR] [reviews]) [OR] [investigates])) " +
+		"Bind,p(accredited) Bind(certifying agent)}} " +
+		"A([Program Manager]) D(shall) I([send]) Bdir(notification) Bdir,p(of non-compliance) to the " +
 		"Bind,p(accredited) Bind(certifying agent)."
 
 	// Dynamic output
@@ -1694,7 +1693,7 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1779,7 +1778,7 @@ func TestStaticTabularOutputOrElseAnnotations(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1870,7 +1869,7 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect), I(sustain (review [AND] (refresh [AND] drink))) " +
-		"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) "+//Bdir,p1(accredited) Bdir1(certifying agents) " +
+		"Bdir,p(approved) Bdir,p(certified) Bdir((production [operations] [AND] handling operations)) " + //Bdir,p1(accredited) Bdir1(certifying agents) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		// Activation condition 1
 		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
@@ -1894,7 +1893,7 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -1959,7 +1958,7 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 
 /*
 Tests nested combinations with focus on proper resolution of references.
- */
+*/
 func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 
 	text := "A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
@@ -1989,7 +1988,7 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2086,7 +2085,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2183,7 +2182,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAndIGCore(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2274,7 +2273,7 @@ func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2370,7 +2369,7 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2467,7 +2466,7 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2564,7 +2563,7 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2661,7 +2660,7 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2759,7 +2758,7 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2857,7 +2856,7 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -2954,7 +2953,7 @@ func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -3019,7 +3018,7 @@ func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
 
 /*
 Tests proper export of annotations on nested components.
- */
+*/
 func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 
 	text := "A,p[type=animate](National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), " +
@@ -3050,7 +3049,7 @@ func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -3147,7 +3146,7 @@ func TestStaticTabularOutputNestedStatementCombinationAnnotations(t *testing.T) 
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -3248,7 +3247,7 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotations(t *test
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -3336,7 +3335,7 @@ func TestStaticTabularOutputParsingOfWithinComponentLinkages(t *testing.T) {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
 	}
 
-	s,err := parser.ParseStatement(text)
+	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
@@ -3397,6 +3396,53 @@ func TestStaticTabularOutputParsingOfWithinComponentLinkages(t *testing.T) {
 		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
+}
+
+/*
+Tests the generation of basic tree output for visual output.
+*/
+func TestStatement_PrintTree(t *testing.T) {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Activation condition 1
+		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
+		// Activation condition 2
+		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
+
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	output := s.PrintTree(nil)
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputBasic.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
 }
 
 // test with invalid statement and empty input nodes, unbalanced parentheses, missing ID
