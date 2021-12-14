@@ -3401,7 +3401,7 @@ func TestStaticTabularOutputParsingOfWithinComponentLinkages(t *testing.T) {
 /*
 Tests the generation of basic tree output for visual output.
 */
-func TestStatement_PrintTree(t *testing.T) {
+func TestVisualOutputBasic(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -3413,16 +3413,73 @@ func TestStatement_PrintTree(t *testing.T) {
 		// Activation condition 2
 		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
 
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+
+	// Parse statement
 	s, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement", err.Error())
 	}
 
-	output := s.PrintTree(nil)
+	// Generate tree output
+	output := s.PrintTree(nil, IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputBasic.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests the generation of tree output for visual output, including annotations.
+*/
+func TestVisualOutputAnnotations(t *testing.T) {
+
+	text := "A[gov=enforcer,anim=animate](National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I[act=monitor](inspect and), I[act=enforce](sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir[gov=monitored,anim=animate](approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex[ref=(Act,part)](for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Activation condition 1
+		"Cac{E[gov=enforcer,anim=animate](Program Manager) F(is) P((approved [AND] committed))} " +
+		// Activation condition 2
+		"Cac{A[gov=monitor,anim=animate](NOP Official) I(recognizes) Bdir(Program Manager)}"
+
+	// Activate annotations
+	SetIncludeAnnotations(true)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output := s.PrintTree(nil, IncludeAnnotations())
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputAnnotations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}

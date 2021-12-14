@@ -32,6 +32,10 @@
 
 {{template "coding-interface.html" . }}
 
+<span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
+</br></br>
+Include IG Logico annotations in output (only for static output) (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}}><br />
+
 <input value="Generate visual output" type="submit">
 {{if .Error}}
 <div class="error">
@@ -218,6 +222,8 @@
             .append("g")
             .attr("transform","translate(-50)");
 
+        // Add component label
+
         gGiven.append("text")
             .attr("dy", ".4em")
             .style("font", "normal 12px Arial")
@@ -225,7 +231,7 @@
                 return d.data.comp;
             });
 
-        // Label the Links;
+        // Add properties labels
 
         gGiven.append("text")
             .text(function (d){
@@ -236,9 +242,22 @@
                 }
 
             })
-
             .attr("x", "75")
             .attr("y", "-10");
+
+        // Add annotations labels
+
+        gGiven.append("text")
+            .text(function (d){
+                if (d.data.annotations != null) {
+                    return d.data.annotations;
+                } else {
+                    return ""
+                }
+
+            })
+            .attr("x", "75")
+            .attr("y", "20");
 
         //linkEnter.append('text')
         //.attr("class", "text")

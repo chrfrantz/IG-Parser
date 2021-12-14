@@ -1,0 +1,43 @@
+{
+"name": "",
+"children": [
+{"name": "National Organic Program's Program Manager", "comp": "A", "annotations": "[gov=enforcer,anim=animate]"},
+{"name": "may", "comp": "D"},
+{"name": "bAND",
+"children": [{"name": "inspect and", "comp": "I", "annotations": "[act=monitor]"},
+{"name": "AND",
+"children": [{"name": "review", "comp": "I", "annotations": "[act=enforce]"},
+{"name": "AND",
+"children": [{"name": "refresh", "comp": "I", "annotations": "[act=enforce]"},
+{"name": "drink", "comp": "I", "annotations": "[act=enforce]"}], "comp": "I", "annotations": "[act=enforce]"}], "comp": "I", "annotations": "[act=enforce]"}], "comp": "I"},
+{"name": "AND",
+"children": [{"name": "AND",
+"children": [{"name": "certified production and", "comp": "Bdir", "annotations": "[gov=monitored,anim=animate]"},
+{"name": "handling operations and", "comp": "Bdir", "annotations": "[gov=monitored,anim=animate]"}], "comp": "Bdir", "annotations": "[gov=monitored,anim=animate]"},
+{"name": "accredited certifying agents", "comp": "Bdir", "annotations": "[gov=monitored,anim=animate]"}], "comp": "Bdir", "annotations": "[gov=monitored,anim=animate]"},
+{"name": "AND",
+"children": [{
+"name": "Cac",
+"children": [
+{"name": "Program Manager", "comp": "E", "annotations": "[gov=enforcer,anim=animate]"},
+{"name": "is", "comp": "F"},
+{"name": "AND",
+"children": [{"name": "approved", "comp": "P"},
+{"name": "committed", "comp": "P"}], "comp": "P"}
+]
+},
+{
+"name": "Cac",
+"children": [
+{"name": "NOP Official", "comp": "A", "annotations": "[gov=monitor,anim=animate]"},
+{"name": "recognizes", "comp": "I"},
+{"name": "Program Manager", "comp": "Bdir"}
+]
+}], "comp": "Cac"},
+{"name": "bAND",
+"children": [{"name": "on behalf of the Secretary", "comp": "Cex"},
+{"name": "XOR",
+"children": [{"name": "Act or", "comp": "Cex", "annotations": "[ref=(Act,part)]"},
+{"name": "regulations in this part", "comp": "Cex", "annotations": "[ref=(Act,part)]"}], "comp": "Cex", "annotations": "[ref=(Act,part)]"}], "comp": "Cex"}
+]
+}
