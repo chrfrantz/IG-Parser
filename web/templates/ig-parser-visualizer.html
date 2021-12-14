@@ -6,7 +6,7 @@
         fill: #fff;
         stroke: steelblue;
         stroke-width: 3px;
-        r: 15;
+        r: 16;
     }
 
     .node text {
@@ -62,7 +62,7 @@
     // Set the dimensions and margins of the diagram
     var margin = {top: 20, right: 90, bottom: 30, left: 90},
         width = 960 - margin.left - margin.right,
-        height = 900 - margin.top - margin.bottom;
+        height = 1000 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     // appends a 'group' element to 'svg'
@@ -87,7 +87,7 @@
     root.y0 = 0;
 
     // Collapse after the second level
-    root.children.forEach(collapse);
+    //root.children.forEach(collapse);
 
     update(root);
 
@@ -147,9 +147,12 @@
 
         // Add labels for the nodes
         nodeEnter.append('text')
-            .attr("dy", ".35em")
+            .attr("dy", ".4em")
             .attr("x", function(d) {
-                return d.children || d._children ? 12 : 20;//-13 : 13;
+                return d.children || d._children ? 12 : 25;//-13 : 13;
+            })
+            .style("font", function(d) {
+                return d.children || d._children ? "normal 12px Arial" : "bold 12px Arial";
             })
             .attr("text-anchor", function(d) {
                 return d.children || d._children ? "end" : "begin";
@@ -216,7 +219,9 @@
             .attr("transform","translate(-50)");
 
         gGiven.append("text")
-            .attr("class","link.text2")
+            //.attr("class","link.text2")
+            .attr("dy", ".4em")
+            .style("font", "normal 12px Arial")
             .text(function (d) {
                 /*if (d.givenName){
                     return d.givenName
@@ -229,7 +234,7 @@
         // Label the Links;
 
         gGiven.append("text")
-            .attr("class","givenProb")
+            //.attr("class","givenProb")
             .text(function (d){
                 /*if (d.given){
                     return d.given;

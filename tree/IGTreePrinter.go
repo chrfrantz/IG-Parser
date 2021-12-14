@@ -15,7 +15,7 @@ const TREE_PRINTER_COLLECTION_OPEN = "["
 const TREE_PRINTER_COLLECTION_CLOSE = "]"
 
 /*
-Prints output format compatible for tree visualization (using D3).
+Prints JSON output format compatible with tree visualization in D3.
 This function is tested in TabularOutputGenerator_test.go#TestStatement_PrintTree.
 */
 func (s Statement) PrintTree(parent *Node) string {
