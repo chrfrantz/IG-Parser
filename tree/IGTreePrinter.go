@@ -41,6 +41,7 @@ func (s Statement) PrintTree(parent *Node) string {
 
 	// Print individual nodes
 	components := []*Node{
+		// Regulative Side
 		s.Attributes,
 		s.AttributesPropertySimple,
 		s.AttributesPropertyComplex,
@@ -54,10 +55,7 @@ func (s Statement) PrintTree(parent *Node) string {
 		s.IndirectObjectComplex,
 		s.IndirectObjectPropertySimple,
 		s.IndirectObjectPropertyComplex,
-		s.ActivationConditionSimple,
-		s.ActivationConditionComplex,
-		s.ExecutionConstraintSimple,
-		s.ExecutionConstraintComplex,
+		// Constitutive Side
 		s.ConstitutedEntity,
 		s.ConstitutedEntityPropertySimple,
 		s.ConstitutedEntityPropertyComplex,
@@ -67,6 +65,11 @@ func (s Statement) PrintTree(parent *Node) string {
 		s.ConstitutingPropertiesComplex,
 		s.ConstitutingPropertiesPropertySimple,
 		s.ConstitutingPropertiesPropertyComplex,
+		// Shared elements
+		s.ActivationConditionSimple,
+		s.ActivationConditionComplex,
+		s.ExecutionConstraintSimple,
+		s.ExecutionConstraintComplex,
 		s.OrElse}
 
 	for _, v := range components {
