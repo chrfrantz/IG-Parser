@@ -151,17 +151,30 @@ Include IG Logico annotations in output (only for static output) (default: off)<
 
         // Add labels for the nodes
         nodeEnter.append('text')
-            .attr("dy", ".4em")
             .attr("x", function(d) {
                 return d.children || d._children ? 12 : 25;
             })
             .style("font", function(d) {
-                return d.children || d._children ? "normal 12px Arial" : "bold 12px Arial";
+                // Special styling for implicit linkages
+                if (d.data.name === "bAND" || d.data.name === "wAND") {
+                    return "italic 12px Arial"
+                } else {
+                    // Styling based on whether children exist
+                    return d.children || d._children ? "normal 12px Arial" : "bold 12px Arial";
+                }
             })
+            .style("dominant-baseline", "central")
             .attr("text-anchor", function(d) {
                 return d.children || d._children ? "end" : "begin";
             })
-            .text(function(d) { return d.data.name; });
+            // Return actual node value (override value for implicitly linked nodes)
+            .text(function(d) {
+                if (d.data.name === "bAND" || d.data.name === "wAND") {
+                    return "AND";
+                } else {
+                    return d.data.name;
+                }
+            });
 
         // UPDATE
         var nodeUpdate = nodeEnter.merge(node);
@@ -229,7 +242,8 @@ Include IG Logico annotations in output (only for static output) (default: off)<
             .style("font", "normal 12px Arial")
             .text(function (d) {
                 return d.data.comp;
-            });
+            })
+            .attr("x", "8");
 
         // Add properties labels
 

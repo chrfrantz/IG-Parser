@@ -8,19 +8,19 @@ import (
 type Statement struct {
 
 	// Regulative Statement
-	Attributes                            *Node
-	AttributesPropertySimple              *Node
-	AttributesPropertyComplex             *Node
-	Deontic                               *Node
-	Aim                                   *Node
-	DirectObject                          *Node
-	DirectObjectComplex                   *Node
-	DirectObjectPropertySimple            *Node
-	DirectObjectPropertyComplex           *Node
-	IndirectObject                        *Node
-	IndirectObjectComplex                 *Node
-	IndirectObjectPropertySimple          *Node
-	IndirectObjectPropertyComplex         *Node
+	Attributes                    *Node
+	AttributesPropertySimple      *Node
+	AttributesPropertyComplex     *Node
+	Deontic                       *Node
+	Aim                           *Node
+	DirectObject                  *Node
+	DirectObjectComplex           *Node
+	DirectObjectPropertySimple    *Node
+	DirectObjectPropertyComplex   *Node
+	IndirectObject                *Node
+	IndirectObjectComplex         *Node
+	IndirectObjectPropertySimple  *Node
+	IndirectObjectPropertyComplex *Node
 
 	//Constitutive Statement
 	ConstitutedEntity                     *Node
@@ -34,11 +34,11 @@ type Statement struct {
 	ConstitutingPropertiesPropertyComplex *Node
 
 	// Shared Components
-	ActivationConditionSimple             *Node
-	ActivationConditionComplex            *Node
-	ExecutionConstraintSimple             *Node
-	ExecutionConstraintComplex            *Node
-	OrElse                                *Node
+	ActivationConditionSimple  *Node
+	ActivationConditionComplex *Node
+	ExecutionConstraintSimple  *Node
+	ExecutionConstraintComplex *Node
+	OrElse                     *Node
 }
 
 /*
@@ -149,7 +149,7 @@ func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol st
 
 /*
 Return flat string of embedded statement (human-readable output (no symbols, no linebreaks); not IG Script)
- */
+*/
 func (s *Statement) StringFlat() string {
 	out := ""
 
@@ -403,4 +403,60 @@ func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, comp
 
 	// Return modified or generated structures
 	return nodesMap, referenceMap
+}
+
+/*
+Returns the property node corresponding to the current component. If the component does
+not possess a corresponding property, or the node itself is nil, the function returns an empty array.
+Otherwise, the properties node(s) is/are returned. Variably allows for return of primitive nodes only, 
+or also complex ones (i.e., nested statements). Where multiple primitive nodes exist, those are
+returned as combinations.
+*/
+func (s *Statement) GetPropertyComponent(n *Node, complex bool) []*Node {
+	out := make([]*Node, 0)
+
+	// Check whether node is actually not nil
+	if n == nil {
+		return out
+	}
+
+	// Explore mapping of components and properties
+	switch n.GetComponentName() {
+	case ATTRIBUTES:
+		if s.AttributesPropertySimple != nil {
+			out = append(out, s.AttributesPropertySimple)
+		}
+		if complex && s.AttributesPropertyComplex != nil {
+			out = append(out, s.AttributesPropertyComplex)
+		}
+	case DIRECT_OBJECT:
+		if s.DirectObjectPropertySimple != nil {
+			out = append(out, s.DirectObjectPropertySimple)
+		}
+		if complex && s.DirectObjectPropertyComplex != nil {
+			out = append(out, s.DirectObjectPropertyComplex)
+		}
+	case INDIRECT_OBJECT:
+		if s.IndirectObjectPropertySimple != nil {
+			out = append(out, s.IndirectObjectPropertySimple)
+		}
+		if complex && s.IndirectObjectPropertyComplex != nil {
+			out = append(out, s.IndirectObjectPropertyComplex)
+		}
+	case CONSTITUTED_ENTITY:
+		if s.ConstitutedEntityPropertySimple != nil {
+			out = append(out, s.ConstitutedEntityPropertySimple)
+		}
+		if complex && s.ConstitutedEntityPropertyComplex != nil {
+			out = append(out, s.ConstitutedEntityPropertyComplex)
+		}
+	case CONSTITUTING_PROPERTIES:
+		if s.ConstitutingPropertiesPropertySimple != nil {
+			out = append(out, s.ConstitutingPropertiesPropertySimple)
+		}
+		if complex && s.ConstitutingPropertiesPropertyComplex != nil {
+			out = append(out, s.ConstitutingPropertiesPropertyComplex)
+		}
+	}
+	return out
 }

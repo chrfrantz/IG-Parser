@@ -12,38 +12,52 @@ import (
 
 // Separator for main statement ID (e.g., 123) and suffix for introduced substatement (e.g., .1, i.e., 123.1)
 const stmtIdSeparator = "."
+
 // Separator for logical operators in enumerations of statement references (e.g., OR[650.1,650.2, ...])
 const logicalOperatorStmtRefSeparator = ","
+
 // Separator for referenced statements in cell (e.g., multiple references to activation conditions, i.e., {65}.1,{65}.2)
 const componentStmtRefSeparator = ","
+
 // Symbol separating component symbol and indices (e.g., Bdir vs. Bdir_1, Bdir_2, etc.)
 const indexSymbol = "_"
+
 // Statement ID prefix to ensure interpretation as text field (does not remove trailing zeroes)
 const stmtIdPrefix = "'"
+
 // Separator for logical operator expressions (e.g., OR[650.1,650.2]|AND[123.1,123.2])
 const logicalOperatorSeparator = ";"
+
 // Left bracket for logical combination expressions
 const logicalCombinationLeft = parser.LEFT_BRACKET
+
 // Right bracket for logical combination expressions
 const logicalCombinationRight = parser.RIGHT_BRACKET
+
 // Left brace surrounding identifier for component-level nested statements
 const componentNestedLeft = parser.LEFT_BRACE
+
 // Right brace surrounding identifier for component-level nested statements
 const componentNestedRight = parser.RIGHT_BRACE
+
 // Column identifier for Statement ID
 const stmtIdColHeader = "Statement ID"
+
 // Column identifier for logical linkage of components
 const logLinkColHeaderComps = "Logical Linkage (Components)"
+
 // Column identifier for logically linked statements (not just components)
 const logLinkColHeaderStmts = "Logical Linkage (Statements)"
+
 // Default separator used for header row generation
 var CellSeparator = "|"
+
 // Default separator for multiple items within cell
 const cellValueSeparator = ","
 
 // Structure referencing ID (based on input ID), along with (nested) statement to be decomposed
 type IdentifiedStmt struct {
-	ID string // Generated ID as provided in output
+	ID         string     // Generated ID as provided in output
 	NestedStmt *tree.Node // Single statement wrapped in Node
 }
 
@@ -64,7 +78,7 @@ Output:
 - Array of statement entry maps (i.e., values for each component in given statement, i.e., [statement]map[component]componentValue)
 - Array of header symbols (used for component linkage references)
 - Array of header symbols names (for human-readable header construction)
- */
+*/
 func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{}, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string) ([]map[string]string, []string, []string, tree.ParsingError) {
 
 	if headerSeparator == "" {
@@ -134,7 +148,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 		// Create new entry with individual ID
 
 		// Add statement ID for specific instance
-		subStmtId := generateStatementIDint(stmtId, stmtCt + 1)
+		subStmtId := generateStatementIDint(stmtId, stmtCt+1)
 		// Add statement ID to entryMap
 		entryMap[stmtIdColHeader] = subStmtId
 		// String linking all logical operators for a given row
@@ -183,11 +197,11 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 						// Check whether value exists in cell
 						if len(entryMap[headerSymbols[componentIdx]]) > 0 &&
 							strings.HasSuffix(entryMap[headerSymbols[componentIdx]], leftString) {
-								// Suppress left shared element if identical with shared right one on existing value
-								// but add whitespace to link to previous value
-								entryVal = " " + statement[componentIdx].Entry.(string) + rightString
-								// Skip comma separation
-								skipSeparator = true
+							// Suppress left shared element if identical with shared right one on existing value
+							// but add whitespace to link to previous value
+							entryVal = " " + statement[componentIdx].Entry.(string) + rightString
+							// Skip comma separation
+							skipSeparator = true
 						} else {
 							// Regular sharedLeft, whitespace + value sharedRight concatenation
 							entryVal = leftString + " " + statement[componentIdx].Entry.(string) + rightString
@@ -197,11 +211,11 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 						// Check whether value exists in cell
 						if len(entryMap[statement[componentIdx].GetComponentName()]) > 0 &&
 							strings.HasSuffix(entryMap[statement[componentIdx].GetComponentName()], leftString) {
-								// Suppress left shared element if identical with shared right one on existing value
-								// but add whitespace to link to previous value
-								entryVal = " " + statement[componentIdx].Entry.(string) + rightString
-								// Skip comma separation
-								skipSeparator = true
+							// Suppress left shared element if identical with shared right one on existing value
+							// but add whitespace to link to previous value
+							entryVal = " " + statement[componentIdx].Entry.(string) + rightString
+							// Skip comma separation
+							skipSeparator = true
 						} else {
 							// Regular sharedLeft, whitespace + value sharedRight concatenation
 							entryVal = leftString + " " + statement[componentIdx].Entry.(string) + rightString
@@ -282,7 +296,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 				if !ProduceDynamicOutput() && IncludeAnnotations() && statement[componentIdx].HasAnnotations() {
 
 					// Check for existing annotations ...
-					existing := entryMap[statement[componentIdx].GetComponentName() + tree.ANNOTATION]
+					existing := entryMap[statement[componentIdx].GetComponentName()+tree.ANNOTATION]
 					if len(existing) > 0 {
 						// ... and append if necessary
 						existing += cellValueSeparator
@@ -290,7 +304,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 					// Add actual value
 					existing += statement[componentIdx].GetAnnotations().(string)
 					// (Re)Assign to entry to be output
-					entryMap[statement[componentIdx].GetComponentName() + tree.ANNOTATION] = existing
+					entryMap[statement[componentIdx].GetComponentName()+tree.ANNOTATION] = existing
 				}
 
 				Println("Entry (after adding primitive entry):", entryMap)
@@ -361,7 +375,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 						// Save entry into entryMap for calling row
 						if entryMap[headerSymbols[componentIdx]] != "" &&
 							// Suppress separator if preceding element is a statement
-							!strings.HasSuffix(entryMap[headerSymbols[componentIdx]], logicalCombinationRight + " ") {
+							!strings.HasSuffix(entryMap[headerSymbols[componentIdx]], logicalCombinationRight+" ") {
 
 							// Add separator if already an entry
 							entryMap[headerSymbols[componentIdx]] += componentStmtRefSeparator
@@ -387,12 +401,12 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 						Println("Linking substatement ID to component", statement[componentIdx],
 							"Name: ", statement[componentIdx].GetComponentName())
 						// Save entry into entryMap for calling row
-						if entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] != "" &&
+						if entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] != "" &&
 							// Suppress separator if preceding element is a statement
-							!strings.HasSuffix(entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX], logicalCombinationRight + " ") {
+							!strings.HasSuffix(entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX], logicalCombinationRight+" ") {
 
 							// Add separator if already an entry
-							entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] += componentStmtRefSeparator
+							entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] += componentStmtRefSeparator
 						}
 
 						if ProduceIGExtendedOutput() {
@@ -404,7 +418,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 							// IG Core output without nesting
 
 							// Append flat string representation of nested statements
-							entryMap[statement[componentIdx].GetComponentName() + tree.REF_SUFFIX] += entryVal.StringFlat()
+							entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] += entryVal.StringFlat()
 
 							// Add logical operator if not last entry (and parent not empty otherwise)
 							if !last && entryVal.Parent != nil {
@@ -495,7 +509,7 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 
 /*
 Resolves all logical linkages to other statements and returns those as compound logical expression (e.g., [AND][{65}.1],[AND][{65}.2])
- */
+*/
 func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNestedStmts []IdentifiedStmt) (string, tree.ParsingError) {
 	logicalExpressionString := ""
 
@@ -546,7 +560,7 @@ func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNeste
 Generates Google Sheets output from map of categorized statement elements, as well as header columns as indices for mattrix population.
 Further requires column header names for output generation, alongside specification of separator symbol.
 Optionally writes to file (if filename is provided).
- */
+*/
 func GenerateGoogleSheetsOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string) (string, tree.ParsingError) {
 	// Quote to terminate input string for Google Sheets interpretation
 	quote := "\""
@@ -601,7 +615,7 @@ Generates all substatements and logical combination linkages in Google Sheets ou
 Additionally returns array of statement entries, header symbols and corresponding header symbol names.
 Uses separator to delimited Google Sheet output.
 If filename is provided, the result is printed to the corresponding file.
- */
+*/
 func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, annotations interface{}, stmtId string, filename string, aggregateImplicitLinkages bool, separator string) (string, []map[string]string, []string, []string, tree.ParsingError) {
 	log.Println(" Step: Extracting leaf arrays")
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
@@ -644,7 +658,7 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, ann
 /*
 Generates IG 2.0 header row and appends it to given string based on component frequency input. It further returns a slice
 containing header information.
- */
+*/
 func generateHeaderRow(stringToAppendTo string, componentFrequency map[string]int, separator string) (string, []string, []string, tree.ParsingError) {
 
 	if separator == "" {
@@ -668,9 +682,9 @@ func generateHeaderRow(stringToAppendTo string, componentFrequency map[string]in
 			// Introduce indices if multiple of the same component
 			if componentFrequency[symbol] > 1 {
 				// Append suffix for header string
-				headerSymbolsName += indexSymbol + strconv.Itoa(i + 1)
+				headerSymbolsName += indexSymbol + strconv.Itoa(i+1)
 				// Append suffix for cached header IDs (for logical operators)
-				headerSymbol += indexSymbol + strconv.Itoa(i + 1)
+				headerSymbol += indexSymbol + strconv.Itoa(i+1)
 			}
 			// Store key for header used in logical operators
 			headerSymbols = append(headerSymbols, headerSymbol)
@@ -682,7 +696,7 @@ func generateHeaderRow(stringToAppendTo string, componentFrequency map[string]in
 		}
 	}
 	// Cut off last separator
-	stringToAppendTo = stringToAppendTo[0:len(stringToAppendTo)-len(separator)]
+	stringToAppendTo = stringToAppendTo[0 : len(stringToAppendTo)-len(separator)]
 	// Return generated string as well as symbol map and mapped names
 	return stringToAppendTo, headerSymbols, headerSymbolsNames, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
@@ -694,7 +708,7 @@ In addition a slice of all header symbols is required (to generate reference to 
 as well as the logical links for a given component value. Finally, the statement ID is used to generate the corresponding
 substatement IDs used in the link references.
 It returns the link for the particular table entry.
- */
+*/
 func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionString string, statement []*tree.Node,
 	componentIdx int, headerSymbols []string, logicalLinks []map[*tree.Node][]string, stmtId string) (string, tree.ParsingError) {
 	// Check for logical operator linkage based on index
@@ -812,7 +826,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 
 /*
 Generate statement ID from main statement ID and index of iterated substatement
- */
+*/
 func generateStatementIDString(mainID string, subStmtIndex string) string {
 	return mainID + stmtIdSeparator + subStmtIndex
 }
@@ -826,7 +840,7 @@ func generateStatementIDint(mainID string, subStmtIndex int) string {
 
 /*
 Writes data to given file - overwrites file if existing
- */
+*/
 func WriteToFile(filename string, content string) error {
 
 	// Create file

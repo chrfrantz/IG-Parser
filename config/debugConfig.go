@@ -1,11 +1,11 @@
 package config
 
 var DEBUG_ALL = false
+
 //var DEBUG_NODE_PARSING = true
 var DEBUG_STATEMENT_PARSING = false
 var DEBUG_TREE_OPERATIONS = false
+
 //var DEBUG_ANNOTATION_PROCESSING = true
 var DEBUG_OUTPUT_GENERATION = false
 var DEBUG_FINAL_OUTPUT = false
-
-

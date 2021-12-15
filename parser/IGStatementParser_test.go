@@ -1842,6 +1842,82 @@ func TestGetSyntheticRootNode(t *testing.T) {
 }
 
 /*
+Tests the resolution of components and the associated properties based on the IGStatement's GetProperties() function.
+*/
+func TestComponentPropertyRelationshipResolution(t *testing.T) {
+
+	text := "A,p(Qualified) A(actor) I(does activity) on Bdir,p(qualified) " +
+		"Bdir,p{A(actor) I(does) Bdir(something)} Bdir(something) Bind(to someone) " +
+		"E,p(some) E(definiendum) F(is defined as) " +
+		// Provide multiple properties - mix of primitive and complex ones
+		"P,p(this) and P,p(that) P,p{E(something) F(is established) Cex(before)} P(definiens)"
+
+	res, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing:", err)
+	}
+
+	if len(res.GetPropertyComponent(res.Attributes, false)) != 1 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.Attributes, false)))
+	}
+
+	if len(res.GetPropertyComponent(res.Attributes, true)) != 1 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.Attributes, true)))
+	}
+
+	if res.GetPropertyComponent(res.Attributes, false)[0] != res.AttributesPropertySimple {
+		t.Fatal("Failed to identify component-associated properties.")
+	}
+
+	if len(res.GetPropertyComponent(res.DirectObject, false)) != 1 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.DirectObject, false)))
+	}
+
+	if len(res.GetPropertyComponent(res.DirectObject, true)) != 2 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.DirectObject, false)))
+	}
+
+	if res.GetPropertyComponent(res.DirectObject, false)[0] != res.DirectObjectPropertySimple {
+		t.Fatal("Failed to identify component-associated properties.")
+	}
+
+	if len(res.GetPropertyComponent(res.IndirectObject, false)) != 0 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.IndirectObject, false)))
+	}
+
+	if len(res.GetPropertyComponent(res.IndirectObject, true)) != 0 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.IndirectObject, false)))
+	}
+
+	// Test component that does not have property ever
+	if len(res.GetPropertyComponent(res.Deontic, false)) != 0 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.Deontic, false)))
+	}
+
+	if len(res.GetPropertyComponent(res.Deontic, true)) != 0 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.Deontic, false)))
+	}
+
+	if len(res.GetPropertyComponent(res.ConstitutedEntity, false)) != 1 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.ConstitutedEntity, false)))
+	}
+
+	if len(res.GetPropertyComponent(res.ConstitutedEntity, true)) != 1 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.ConstitutedEntity, true)))
+	}
+
+	// Test components that have combined properties - will only return one implicitly linked entry
+	if len(res.GetPropertyComponent(res.ConstitutingProperties, false)) != 1 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.ConstitutingProperties, false)))
+	}
+
+	if len(res.GetPropertyComponent(res.ConstitutingProperties, true)) != 2 {
+		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.ConstitutingProperties, true)))
+	}
+
+}
+
+/*
 Tests ExtractComponentContent() function.
 */
 /*func TestExtractComponentContent(t *testing.T) {
