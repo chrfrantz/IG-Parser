@@ -1,0 +1,8 @@
+{
+"name": "",
+"children": [
+{"name": "bAND",
+"children": [{"name": "General Manager", "comp": "A", "properties": "shared quality"},
+{"name": "Region Manager", "comp": "A", "properties": "shared quality, left quality, right quality, third quality"}], "comp": "A", "properties": "shared quality"}
+]
+}

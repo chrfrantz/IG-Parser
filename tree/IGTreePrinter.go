@@ -1,7 +1,6 @@
 package tree
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -112,7 +111,7 @@ func (s Statement) PrintTree(parent *Node, includeAnnotations bool) string {
 }
 
 /*
-Returns visual tree output (for D3) of individual nodes.
+Returns JSON output for visual tree rendering of individual nodes using D3.
 */
 func (n *Node) PrintNodeTree(stmt Statement, includeAnnotations bool) string {
 	out := ""
@@ -136,13 +135,18 @@ func (n *Node) PrintNodeTree(stmt Statement, includeAnnotations bool) string {
 					// Logical operator
 					"\"" + n.LogicalOperator + "\"" + TREE_PRINTER_SEPARATOR +
 					// Children
-					TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN +
-					// Left child
-					n.Left.PrintNodeTree(stmt, includeAnnotations) + TREE_PRINTER_SEPARATOR +
-					// Right child
-					n.Right.PrintNodeTree(stmt, includeAnnotations) +
-					// Closing collection
-					TREE_PRINTER_COLLECTION_CLOSE
+					TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
+				// Left child
+				out += n.Left.PrintNodeTree(stmt, includeAnnotations)
+
+				// Add separator
+				out += TREE_PRINTER_SEPARATOR
+
+				// Right child
+				out += n.Right.PrintNodeTree(stmt, includeAnnotations)
+
+				// Closing collection
+				out += TREE_PRINTER_COLLECTION_CLOSE
 			}
 
 			// Append component name as link label for any entry
@@ -167,12 +171,16 @@ func (n *Node) PrintNodeTree(stmt Statement, includeAnnotations bool) string {
 	return out
 }
 
+/*
+Appends shared and private nodes to D3-consumable JSON output string based on related properties, as well as own private nodes.
+The shared and private property nodes are combined in the order "shared, private".
+Note: In flat output mode only primitive private properties are included in the rendered output.
+Flat output implies the printing of private properties as labels for component nodes, rather than an own node hierarchy.
+Includes indication whether annotations are to be included in output.
+*/
 func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, printFlat bool, includeAnnotations bool) string {
 	// Append potential private nodes
-	if len(stmt.GetPropertyComponent(n, false)) > 0 || (len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil) {
-
-		// keeps track whether any element has been extracted
-		elementPrinted := false
+	if n != nil && len(stmt.GetPropertyComponent(n, false)) > 0 || (len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil) {
 
 		// Retrieve relevant component property and combine with private nodes before printing
 		allNodes := stmt.GetPropertyComponent(n, false)
@@ -181,8 +189,11 @@ func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, print
 		if len(allNodes) == 0 || (len(allNodes) > 0 && allNodes[0] == nil) {
 			includeAllNodes = false
 		}
+
 		// Check whether private nodes are populated
+
 		if len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil {
+
 			if includeAllNodes {
 				allNodes = append(allNodes, n.PrivateNodeLinks...)
 			} else {
@@ -193,36 +204,44 @@ func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, print
 		// Only add output if properties exist
 		if len(allNodes) > 0 && allNodes[0] != nil {
 
-			fmt.Println("Component: " + n.GetComponentName())
-			fmt.Println("Nodes: ", allNodes)
-
-			// Start general output for property
-			stringToAppendTo += ", " + TREE_PRINTER_KEY_PROPERTIES + TREE_PRINTER_EQUALS
-
 			if !printFlat {
 				stringToAppendTo += "\"Properties\"" + ", " + TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
 			}
 
+			// keeps track whether any element has been extracted
+			elementPrinted := false
+
 			// Add individual items
 			for _, privateNode := range allNodes {
-				if elementPrinted {
-					// Add separator if element has been added
-					stringToAppendTo += ", "
-				} else if printFlat {
-					// Prepend quotation
-					stringToAppendTo += "\""
+
+				// Ensure that node is only added to output if it is truely primitive, not a combination
+				if !privateNode.IsCombination() && privateNode.HasPrimitiveEntry() {
+
+					if !elementPrinted {
+						// Start general output for property only if nothing is printed yet
+						stringToAppendTo += ", " + TREE_PRINTER_KEY_PROPERTIES + TREE_PRINTER_EQUALS
+					}
+
+					if elementPrinted {
+						// Add separator if element has been added
+						stringToAppendTo += ", "
+					} else if printFlat {
+						// Prepend quotation
+						stringToAppendTo += "\""
+					}
+					// Print per-property entry
+					if printFlat {
+						// flat entry (and only append if content present)
+						if privateNode.Entry != nil && !privateNode.IsCombination() {
+							stringToAppendTo += privateNode.Entry.(string)
+						}
+					} else {
+						// nested tree structure
+						stringToAppendTo += privateNode.PrintNodeTree(stmt, includeAnnotations)
+					}
+					// Mark if initial item has been performed
+					elementPrinted = true
 				}
-				// Print per-property entry
-				if printFlat {
-					fmt.Println("Printing node: ", privateNode)
-					// flat entry
-					stringToAppendTo += privateNode.Entry.(string)
-				} else {
-					// nested tree structure
-					stringToAppendTo += privateNode.PrintNodeTree(stmt, includeAnnotations)
-				}
-				// Mark if initial item has been performed
-				elementPrinted = true
 			}
 			if elementPrinted && printFlat {
 				// Close flat entry
@@ -240,6 +259,9 @@ func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, print
 	return stringToAppendTo
 }
 
+/*
+Appends potentially existing annotations to node-specific output.
+*/
 func (n *Node) appendAnnotations(stringToAppendTo string) string {
 	// Append potential annotations
 	if n.GetAnnotations() != nil {

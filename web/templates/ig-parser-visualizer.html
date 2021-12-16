@@ -65,8 +65,8 @@ Include IG Logico annotations in output (only for static output) (default: off)<
 
     // Set the dimensions and margins of the diagram
     var margin = {top: 20, right: 90, bottom: 30, left: 90},
-        width = 960 - margin.left - margin.right,
-        height = 1000 - margin.top - margin.bottom;
+        width = 4000 - margin.left - margin.right,
+        height = 2000 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     // appends a 'group' element to 'svg'
@@ -150,6 +150,9 @@ Include IG Logico annotations in output (only for static output) (default: off)<
             .text(function(d) { return d.data.comp; });*/
 
         // Add labels for the nodes
+
+        // Main label containing logical operators or content
+
         nodeEnter.append('text')
             .attr("x", function(d) {
                 return d.children || d._children ? 12 : 25;
