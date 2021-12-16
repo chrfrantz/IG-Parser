@@ -26,6 +26,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	dynChk := r.FormValue("dynamicOutput")
 	inclAnnotations := r.FormValue("annotations")
 	igExtended := r.FormValue("compLevelNesting")
+	propertyTree := r.FormValue("propertyTree")
 
 	// Dynamic output
 	dynamicOutput := false
@@ -60,6 +61,17 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		produceIGExtendedOutput = false
 	}
 
+	// Private property printing in output
+	printFlatProperties := false
+	fmt.Println("Private property tree printing: ", propertyTree)
+	if propertyTree == "on" {
+		propertyTree = "checked"
+		printFlatProperties = false
+	} else {
+		propertyTree = "unchecked"
+		printFlatProperties = true
+	}
+
 	retStruct := ReturnStruct{
 		Success:            false,
 		Error:              false,
@@ -70,17 +82,13 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		DynamicOutput:      dynChk,
 		IGExtendedOutput:   igExtended,
 		IncludeAnnotations: inclAnnotations,
+		PrintPropertyTree:  propertyTree,
 		TransactionId:      transactionID,
 		RawStmtHelp:        HELP_RAW_STMT,
 		CodedStmtHelp:      HELP_CODED_STMT,
 		StmtIdHelp:         HELP_STMT_ID,
 		ParametersHelp:     HELP_PARAMETERS,
 		ReportHelp:         HELP_REPORT}
-
-	// Prepopulate form entries
-	retStruct.DynamicOutput = dynChk
-	retStruct.IGExtendedOutput = igExtended
-	retStruct.IncludeAnnotations = inclAnnotations
 
 	if r.Method != http.MethodPost {
 		// Just show empty form with prepopulated elements
@@ -197,7 +205,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			handleGoogleSheetsOutput(w, codedStmt, stmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			fmt.Println("Visual output requested")
-			handleVisualOutput(w, codedStmt, stmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
+			handleVisualOutput(w, codedStmt, stmtId, retStruct, printFlatProperties, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
 		} else {
 			log.Fatal("Output variant " + templateName + " not found.")
 		}
@@ -275,7 +283,7 @@ func handleGoogleSheetsOutput(w http.ResponseWriter, codedStmt string, stmtId st
 Third-level handler generating visual tree output in response to web request.
 Should be invoked by #converterHandler().
 */
-func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool) {
+func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, flatOutput bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool) {
 	// Run default configuration
 	SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
@@ -288,6 +296,9 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	// Define whether annotations are included
 	fmt.Println("Setting annotations: ", includeAnnotations)
 	exporter.SetIncludeAnnotations(includeAnnotations)
+	// Setting flat printing
+	fmt.Println("Setting flat printing of properties: ", flatOutput)
+	tree.SetFlatPrinting(flatOutput)
 	// Convert input
 	output, err2 := app.ConvertIGScriptToVisualTree(codedStmt, stmtId, "")
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {

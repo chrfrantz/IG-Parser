@@ -68,7 +68,7 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 		return "", err
 	}
 
-	output := s.PrintTree(nil, exporter.IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), exporter.IncludeAnnotations())
 
 	Println("Generated visual tree:", output)
 

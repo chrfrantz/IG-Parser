@@ -21,9 +21,10 @@ const TREE_PRINTER_COLLECTION_CLOSE = "]"
 
 /*
 Prints JSON output format compatible with tree visualization in D3.
-This function is tested in TabularOutputGenerator_test.go#TestStatement_PrintTree.
+Allows indication for flat printing (nested property tree structure vs. flat listing of properties).
+This function is tested in TabularOutputGenerator_test.go, i.e., tests with focus on visual tree output.
 */
-func (s Statement) PrintTree(parent *Node, includeAnnotations bool) string {
+func (s Statement) PrintTree(parent *Node, printFlat bool, includeAnnotations bool) string {
 
 	// Default name if statement does not have root node
 	rootName := ""
@@ -89,7 +90,7 @@ func (s Statement) PrintTree(parent *Node, includeAnnotations bool) string {
 				prepend = TREE_PRINTER_SEPARATOR
 			}
 			// Generate actual entry
-			componentString := v.PrintNodeTree(s, includeAnnotations)
+			componentString := v.PrintNodeTree(s, printFlat, includeAnnotations)
 			Println("Output for " + v.GetComponentName() + ": " + componentString)
 			if !childrenPresent && componentString != "" {
 				// Print children prefix if components are present
@@ -112,12 +113,11 @@ func (s Statement) PrintTree(parent *Node, includeAnnotations bool) string {
 
 /*
 Returns JSON output for visual tree rendering of individual nodes using D3.
+Allows indication for flat printing (nested property tree structure vs. flat listing of properties).
+Allows indication for including annotations in output.
 */
-func (n *Node) PrintNodeTree(stmt Statement, includeAnnotations bool) string {
+func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, includeAnnotations bool) string {
 	out := ""
-
-	// Indicates whether output is complex (tree structure), or a flat listing of properties
-	printFlat := true
 
 	if !n.IsNil() && !n.IsEmptyNode() {
 		if n.HasPrimitiveEntry() || n.IsCombination() {
@@ -137,13 +137,13 @@ func (n *Node) PrintNodeTree(stmt Statement, includeAnnotations bool) string {
 					// Children
 					TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
 				// Left child
-				out += n.Left.PrintNodeTree(stmt, includeAnnotations)
+				out += n.Left.PrintNodeTree(stmt, printFlat, includeAnnotations)
 
 				// Add separator
 				out += TREE_PRINTER_SEPARATOR
 
 				// Right child
-				out += n.Right.PrintNodeTree(stmt, includeAnnotations)
+				out += n.Right.PrintNodeTree(stmt, printFlat, includeAnnotations)
 
 				// Closing collection
 				out += TREE_PRINTER_COLLECTION_CLOSE
@@ -165,7 +165,7 @@ func (n *Node) PrintNodeTree(stmt Statement, includeAnnotations bool) string {
 
 		} else {
 			// Produce output for nested statement
-			out += n.Entry.(Statement).PrintTree(n, includeAnnotations)
+			out += n.Entry.(Statement).PrintTree(n, printFlat, includeAnnotations)
 		}
 	}
 	return out
@@ -204,10 +204,6 @@ func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, print
 		// Only add output if properties exist
 		if len(allNodes) > 0 && allNodes[0] != nil {
 
-			if !printFlat {
-				stringToAppendTo += "\"Properties\"" + ", " + TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
-			}
-
 			// keeps track whether any element has been extracted
 			elementPrinted := false
 
@@ -219,7 +215,13 @@ func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, print
 
 					if !elementPrinted {
 						// Start general output for property only if nothing is printed yet
-						stringToAppendTo += ", " + TREE_PRINTER_KEY_PROPERTIES + TREE_PRINTER_EQUALS
+						if printFlat {
+							// Initiate flat output for properties
+							stringToAppendTo += ", " + TREE_PRINTER_KEY_PROPERTIES + TREE_PRINTER_EQUALS
+						} else {
+							// Initiate tree structure for tree output of properties
+							stringToAppendTo += ", " + TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
+						}
 					}
 
 					if elementPrinted {
@@ -237,20 +239,20 @@ func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, print
 						}
 					} else {
 						// nested tree structure
-						stringToAppendTo += privateNode.PrintNodeTree(stmt, includeAnnotations)
+						stringToAppendTo += privateNode.PrintNodeTree(stmt, printFlat, includeAnnotations)
 					}
 					// Mark if initial item has been performed
 					elementPrinted = true
 				}
 			}
-			if elementPrinted && printFlat {
-				// Close flat entry
-				stringToAppendTo += "\""
-			}
-
-			// Close collection
-			if !printFlat {
-				stringToAppendTo += TREE_PRINTER_COLLECTION_CLOSE
+			if elementPrinted {
+				if printFlat {
+					// Close flat entry
+					stringToAppendTo += "\""
+				} else {
+					// Close collection
+					stringToAppendTo += TREE_PRINTER_COLLECTION_CLOSE
+				}
 			}
 		}
 	}

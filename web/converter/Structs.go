@@ -22,6 +22,8 @@ type ReturnStruct struct {
 	IGExtendedOutput string
 	// Annotation inclusion indicator
 	IncludeAnnotations string
+	// Property tree printing indicator
+	PrintPropertyTree string
 	// Generated output to be rendered (e.g., tabular, visual)
 	Output string
 	// Transaction ID

@@ -3513,6 +3513,8 @@ func TestVisualOutputBasic(t *testing.T) {
 
 	// Deactivate annotations
 	SetIncludeAnnotations(false)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3521,7 +3523,7 @@ func TestVisualOutputBasic(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3566,6 +3568,8 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 
 	// Deactivate annotations
 	SetIncludeAnnotations(false)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3574,7 +3578,7 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3618,6 +3622,8 @@ func TestVisualOutputAnnotations(t *testing.T) {
 
 	// Activate annotations
 	SetIncludeAnnotations(true)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3626,7 +3632,7 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3655,12 +3661,15 @@ func TestVisualOutputAnnotations(t *testing.T) {
 
 /*
 Tests proper output of proper linkages of complex private properties alongside shared properties for visual output.
+Tests flat output for properties.
 */
-func TestVisualOutputPrivateComplexNode(t *testing.T) {
+func TestVisualOutputPrivateComplexNodeFlatPrinting(t *testing.T) {
 	text := "A(General Manager) A,p(shared quality) A1(Region Manager) A1,p(left quality) A1,p(right quality) A1,p(third quality)"
 
 	// Activate annotations
 	SetIncludeAnnotations(true)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3669,11 +3678,56 @@ func TestVisualOutputPrivateComplexNode(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualTreeComplexPrivateNodes.test")
+	content, err2 := ioutil.ReadFile("TestOutputVisualTreeComplexPrivateNodesFlat.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+}
+
+/*
+Tests proper output of proper linkages of complex private properties alongside shared properties for visual output.
+Tests tree structure output for properties.
+*/
+func TestVisualOutputPrivateComplexNodeTreePrinting(t *testing.T) {
+	text := "A(General Manager) A,p(shared quality) A1(Region Manager) A1,p(left quality) A1,p(right quality) A1,p(third quality)"
+
+	// Activate annotations
+	SetIncludeAnnotations(true)
+	// Activate flat printing
+	tree.SetFlatPrinting(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputVisualTreeComplexPrivateNodesTree.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
