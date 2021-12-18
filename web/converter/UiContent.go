@@ -70,7 +70,7 @@ var HELP_CODED_STMT = "This entry field should be used to encode your institutio
 var HELP_STMT_ID = "This entry field should contain a numeric ID that is the basis for generating substatement IDs."
 
 // Help for parameter fields
-var HELP_PARAMETERS = "This section allows for output configuration, depending on the form of output."
+var HELP_PARAMETERS = "This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements."
 
 // Help for report error field
 var HELP_REPORT = "Clicking on this link should open your mail client with a pre-populated mail." + HTML_LINEBREAK +
