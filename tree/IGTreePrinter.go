@@ -22,9 +22,10 @@ const TREE_PRINTER_COLLECTION_CLOSE = "]"
 /*
 Prints JSON output format compatible with tree visualization in D3.
 Allows indication for flat printing (nested property tree structure vs. flat listing of properties).
+Allows indication for printing of binary trees, as opposed to tree aggregated by logical operators for given component.
 This function is tested in TabularOutputGenerator_test.go, i.e., tests with focus on visual tree output.
 */
-func (s Statement) PrintTree(parent *Node, printFlat bool, includeAnnotations bool) string {
+func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, includeAnnotations bool) string {
 
 	// Default name if statement does not have root node
 	rootName := ""
@@ -90,7 +91,7 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, includeAnnotations bo
 				prepend = TREE_PRINTER_SEPARATOR
 			}
 			// Generate actual entry
-			componentString := v.PrintNodeTree(s, printFlat, includeAnnotations)
+			componentString := v.PrintNodeTree(s, printFlat, printBinary, includeAnnotations)
 			Println("Output for " + v.GetComponentName() + ": " + componentString)
 			if !childrenPresent && componentString != "" {
 				// Print children prefix if components are present
@@ -114,58 +115,98 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, includeAnnotations bo
 /*
 Returns JSON output for visual tree rendering of individual nodes using D3.
 Allows indication for flat printing (nested property tree structure vs. flat listing of properties).
+Allows indication for printing of binary trees, as opposed to tree aggregated by logical operators for given component.
 Allows indication for including annotations in output.
 */
-func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, includeAnnotations bool) string {
+func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool) string {
 	out := ""
 
 	if !n.IsNil() && !n.IsEmptyNode() {
 		if n.HasPrimitiveEntry() || n.IsCombination() {
+
+			// Indicates whether full entry should be printed
+			printFullEntry := false
+
 			// If the entry is not a statement but either leaf or combination
 			if n.HasPrimitiveEntry() {
 				// Produce output for simple entry
 				out = TREE_PRINTER_OPEN_BRACE + TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS +
 					// Actual content
 					"\"" + n.Entry.(string) + "\""
+
+				// Ensure that entry is closed
+				printFullEntry = true
 			} else if n.IsCombination() {
 				// Produce output for combination
 
-				// Create logical node, two children, and delegate node entry generation to children
-				out = TREE_PRINTER_OPEN_BRACE + TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS +
-					// Logical operator
-					"\"" + n.LogicalOperator + "\"" + TREE_PRINTER_SEPARATOR +
-					// Children
-					TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
-				// Left child
-				out += n.Left.PrintNodeTree(stmt, printFlat, includeAnnotations)
+				if printBinary {
+					// Fall back to full entry parsing either way - resolving full binary tree structure
+					printFullEntry = true
+				} else {
+					// If non-binary, print only leaf entries linked via same logical operator on same component
+					// without considering logical operators in output
+					if n.Parent != nil && n.LogicalOperator == n.Parent.LogicalOperator &&
+						n.GetComponentName() == n.Parent.GetComponentName() {
+						// Print left side
+						out += n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
 
-				// Add separator
-				out += TREE_PRINTER_SEPARATOR
+						// Append separator to collapsed entries (i.e., on same level)
+						out += ", "
 
-				// Right child
-				out += n.Right.PrintNodeTree(stmt, printFlat, includeAnnotations)
+						// Print right side
+						out += n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
 
-				// Closing collection
-				out += TREE_PRINTER_COLLECTION_CLOSE
+						// Suppress printing of closing parts of entry, since further nodes of same operator on same component may be appended
+						printFullEntry = false
+					} else {
+						// Fall back to print full entry if logical operators or components don't match
+						printFullEntry = true
+					}
+				}
+				// Prints full entry as binary tree element (either applies if binary tree structure is activated,
+				// or if no nested logical operators for given component were detected (e.g., multiple nested AND linkages)
+				if printFullEntry {
+					// Create logical node, two children, and delegate node entry generation to children
+					out = TREE_PRINTER_OPEN_BRACE + TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS +
+						// Logical operator
+						"\"" + n.LogicalOperator + "\"" + TREE_PRINTER_SEPARATOR +
+						// Children
+						TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
+
+					// Left child
+					out += n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+
+					// Add separator
+					out += TREE_PRINTER_SEPARATOR
+
+					// Right child
+					out += n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+
+					// Closing collection
+					out += TREE_PRINTER_COLLECTION_CLOSE
+				}
 			}
 
-			// Append component name as link label for any entry
-			out += ", " + TREE_PRINTER_KEY_COMPONENT + TREE_PRINTER_EQUALS + "\"" + n.GetComponentName() + "\""
+			// Continue and close full entry (with component, property and annotation information) only if entry is complete,
+			// not if branches of logical operators are collapsed
+			if printFullEntry {
+				// Append component name as link label for any entry
+				out += ", " + TREE_PRINTER_KEY_COMPONENT + TREE_PRINTER_EQUALS + "\"" + n.GetComponentName() + "\""
 
-			// Print private properties
-			out = n.appendPrivateNodes(out, stmt, printFlat, includeAnnotations)
+				// Print private properties
+				out = n.appendPrivateNodes(out, stmt, printFlat, printBinary, includeAnnotations)
 
-			// Append annotations
-			if includeAnnotations {
-				out = n.appendAnnotations(out)
+				// Append annotations
+				if includeAnnotations {
+					out = n.appendAnnotations(out)
+				}
+
+				// Close entry
+				out += TREE_PRINTER_CLOSE_BRACE
 			}
-
-			// Close entry
-			out += TREE_PRINTER_CLOSE_BRACE
-
 		} else {
 			// Produce output for nested statement
-			out += n.Entry.(Statement).PrintTree(n, printFlat, includeAnnotations)
+			out += n.Entry.(Statement).PrintTree(n, printFlat, printBinary, includeAnnotations)
 		}
 	}
 	return out
@@ -176,9 +217,10 @@ Appends shared and private nodes to D3-consumable JSON output string based on re
 The shared and private property nodes are combined in the order "shared, private".
 Note: In flat output mode only primitive private properties are included in the rendered output.
 Flat output implies the printing of private properties as labels for component nodes, rather than an own node hierarchy.
+Allows indication for printing of binary trees, as opposed to tree aggregated by logical operators for given component.
 Includes indication whether annotations are to be included in output.
 */
-func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, printFlat bool, includeAnnotations bool) string {
+func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool) string {
 	// Append potential private nodes
 	if n != nil && len(stmt.GetPropertyComponent(n, false)) > 0 || (len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil) {
 
@@ -239,7 +281,7 @@ func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, print
 						}
 					} else {
 						// nested tree structure
-						stringToAppendTo += privateNode.PrintNodeTree(stmt, printFlat, includeAnnotations)
+						stringToAppendTo += privateNode.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
 					}
 					// Mark if initial item has been performed
 					elementPrinted = true

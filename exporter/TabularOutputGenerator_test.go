@@ -3515,6 +3515,8 @@ func TestVisualOutputBasic(t *testing.T) {
 	SetIncludeAnnotations(false)
 	// Activate flat printing
 	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3523,7 +3525,7 @@ func TestVisualOutputBasic(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3570,6 +3572,8 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	SetIncludeAnnotations(false)
 	// Activate flat printing
 	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3578,7 +3582,7 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3624,6 +3628,8 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	SetIncludeAnnotations(true)
 	// Activate flat printing
 	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3632,7 +3638,7 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3661,15 +3667,17 @@ func TestVisualOutputAnnotations(t *testing.T) {
 
 /*
 Tests proper output of proper linkages of complex private properties alongside shared properties for visual output.
-Tests flat output for properties.
+Tests flat output for properties (labels, as opposed to tree structure).
 */
-func TestVisualOutputPrivateComplexNodeFlatPrinting(t *testing.T) {
+func TestVisualOutputPropertyNodesFlatPrinting(t *testing.T) {
 	text := "A(General Manager) A,p(shared quality) A1(Region Manager) A1,p(left quality) A1,p(right quality) A1,p(third quality)"
 
 	// Activate annotations
 	SetIncludeAnnotations(true)
 	// Activate flat printing
 	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3678,7 +3686,7 @@ func TestVisualOutputPrivateComplexNodeFlatPrinting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3708,13 +3716,15 @@ func TestVisualOutputPrivateComplexNodeFlatPrinting(t *testing.T) {
 Tests proper output of proper linkages of complex private properties alongside shared properties for visual output.
 Tests tree structure output for properties.
 */
-func TestVisualOutputPrivateComplexNodeTreePrinting(t *testing.T) {
+func TestVisualOutputPropertyNodesTreePrinting(t *testing.T) {
 	text := "A(General Manager) A,p(shared quality) A1(Region Manager) A1,p(left quality) A1,p(right quality) A1,p(third quality)"
 
 	// Activate annotations
 	SetIncludeAnnotations(true)
 	// Activate flat printing
 	tree.SetFlatPrinting(false)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(true)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -3723,7 +3733,7 @@ func TestVisualOutputPrivateComplexNodeTreePrinting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), IncludeAnnotations())
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3747,6 +3757,111 @@ func TestVisualOutputPrivateComplexNodeTreePrinting(t *testing.T) {
 		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
+}
+
+/*
+Tests the generation of basic tree output for visual output, but as non-binary tree (i.e., collapsing entries associated with same logical operator for given component).
+*/
+func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Activation condition 1
+		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
+		// Activation condition 2
+		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputBasicNonBinary.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests the generation of complex tree output for visual output as non-binary tree (i.e., collapsing entries associated with same logical operator for given component).
+*/
+func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
+
+	// Complex entry
+	text := " The Congress finds and declares that it is the E(national policy) F([is] to (encourage [AND] assist)) the P(states) Cex{ A(states) I(to exercise) Cex(effectively) their Bdir(responsibilities) Bdir,p(in the coastal zone) Cex(through the (development [AND] implementation) of management programs to achieve wise use of the (land [AND] water) resources of the coastal zone, giving full consideration to (ecological [AND] cultural [AND] historic [AND] esthetic) values as well as the needs for compatible economic development), Cex{which E(programs) M(should) Cex(at least) F(provide for)— (A) the P1(protection) P,p1(of natural resources, including (wetlands [AND] floodplains [AND] estuaries [AND] beaches [AND] dunes [AND] barrier islands [AND] coral reefs [AND] fish and wildlife and their habitat) within the coastal zone), the P2(management) P,p2((of coastal development to minimize the loss of (life [AND] property) caused by improper development in (flood-prone [AND] storm surge [AND] geological hazard [AND] erosion-prone) areas [AND] in areas likely to be (affected by [OR] vulnerable to) (sea level rise [AND] land subsidence [AND] saltwater intrusion) [AND] by the destruction of natural protective features such as (beaches [AND] dunes [AND] wetlands [AND] barrier islands))), (C) the P3(management) P3,p(of coastal development to (improve [AND] safeguard [AND] restore) the quality of coastal waters, [AND] to protect (natural resources [AND] existing uses of those waters)), (D) P4,p1(priority) P4(consideration) P4,p2(being given to (coastal-dependent (uses [AND] orderly processes) for siting major facilities related to (national defense [AND] energy [AND] fisheries development [AND] recreation [AND] ports [AND] transportation), [AND] the location to the maximum extent practicable of new (commercial [AND] industrial) developments (in [XOR] adjacent) to areas where such development already exists)), (E) P5,p1(public) P5(access) P5,p2(to the coasts for recreation purposes), (F) P6(assistance) P6,p(in the redevelopment of (deteriorating urban (waterfronts [AND] ports) [AND] sensitive (preservation [AND] restoration) of (historic [AND] cultural [AND] esthetic) coastal features)), (G) P7(the (coordination [AND] simplification) of procedures) P7,p1(in order to ensure expedited governmental decision making for the management of coastal resources), (H) P8((continued (consultation [AND] coordination) with, [AND] the giving of adequate consideration to the views of affected Federal agencies)), (I) P9(the giving of ((timely [AND] effective) notification of , [AND] opportunities for (public [AND] local) government participation in coastal management decision making)), (J) P10(assistance) P10,p1(to support comprehensive (planning [AND] conservation [AND] management) for living marine resources) P10,p1,p1(including planning for (the siting of (pollution control [AND] aquaculture facilities) within the coastal zone [AND] improved coordination between ((State [AND] Federal) coastal zone management agencies [AND] (State [AND] wildlife) agencies))) }}"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputComplexNonBinary.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
 }
 
 // test with invalid statement and empty input nodes, unbalanced parentheses, missing ID

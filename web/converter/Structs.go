@@ -24,6 +24,8 @@ type ReturnStruct struct {
 	IncludeAnnotations string
 	// Property tree printing indicator
 	PrintPropertyTree string
+	// Binary tree printing indicator (as opposed to tree aggregation based on logical operator by component)
+	PrintBinaryTree string
 	// Generated output to be rendered (e.g., tabular, visual)
 	Output string
 	// Transaction ID

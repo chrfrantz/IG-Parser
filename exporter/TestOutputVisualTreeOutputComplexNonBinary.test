@@ -1,0 +1,66 @@
+{
+"name": "",
+"children": [
+{"name": "national policy", "comp": "E"},
+{"name": "AND",
+"children": [{"name": "encourage", "comp": "F"},
+{"name": "assist", "comp": "F"}], "comp": "F"},
+{"name": "states", "comp": "P"},
+{
+"name": "Cex",
+"children": [
+{"name": "states", "comp": "A"},
+{"name": "to exercise", "comp": "I"},
+{"name": "responsibilities", "comp": "Bdir", "properties": "in the coastal zone"},
+{"name": "bAND",
+"children": [{"name": "effectively", "comp": "Cex"},
+{"name": "wAND",
+"children": [{"name": "AND",
+"children": [{"name": "development", "comp": "Cex"},
+{"name": "implementation", "comp": "Cex"}], "comp": "Cex"}, {"name": "AND",
+"children": [{"name": "land", "comp": "Cex"},
+{"name": "water", "comp": "Cex"}], "comp": "Cex"},
+{"name": "AND",
+"children": [{"name": "ecological", "comp": "Cex"}, {"name": "cultural", "comp": "Cex"}, {"name": "historic", "comp": "Cex"},
+{"name": "esthetic", "comp": "Cex"}], "comp": "Cex"}], "comp": "Cex"}], "comp": "Cex"},
+{
+"name": "Cex",
+"children": [
+{"name": "programs", "comp": "E"},
+{"name": "should", "comp": "M"},
+{"name": "provide for", "comp": "F"},
+{"name": "bAND",
+"children": [{"name": "protection", "comp": "P"}, {"name": "management", "comp": "P"}, {"name": "management", "comp": "P"}, {"name": "consideration", "comp": "P", "properties": "priority"}, {"name": "access", "comp": "P", "properties": "public, to the coasts for recreation purposes"}, {"name": "assistance", "comp": "P"}, {"name": "AND",
+"children": [{"name": "coordination", "comp": "P"},
+{"name": "simplification", "comp": "P"}], "comp": "P"}, {"name": "AND",
+"children": [{"name": "consultation", "comp": "P"}, {"name": "coordination", "comp": "P"},
+{"name": "the giving of adequate consideration to the views of affected Federal agencies", "comp": "P"}], "comp": "P"}, {"name": "AND",
+"children": [{"name": "timely", "comp": "P"}, {"name": "effective", "comp": "P"},
+{"name": "public", "comp": "P"}, {"name": "local", "comp": "P"}], "comp": "P"},
+{"name": "assistance", "comp": "P"}], "comp": "P"},
+{"name": "bAND",
+"children": [{"name": "AND",
+"children": [{"name": "wetlands", "comp": "P,p"}, {"name": "floodplains", "comp": "P,p"}, {"name": "estuaries", "comp": "P,p"}, {"name": "beaches", "comp": "P,p"}, {"name": "dunes", "comp": "P,p"}, {"name": "barrier islands", "comp": "P,p"}, {"name": "coral reefs", "comp": "P,p"},
+{"name": "fish and wildlife and their habitat", "comp": "P,p"}], "comp": "P,p"}, {"name": "AND",
+"children": [{"name": "life", "comp": "P,p"}, {"name": "property", "comp": "P,p"}, {"name": "OR",
+"children": [{"name": "affected by", "comp": "P,p"},
+{"name": "vulnerable to", "comp": "P,p"}], "comp": "P,p"},
+{"name": "beaches", "comp": "P,p"}, {"name": "dunes", "comp": "P,p"}, {"name": "wetlands", "comp": "P,p"}, {"name": "barrier islands", "comp": "P,p"}], "comp": "P,p"}, {"name": "AND",
+"children": [{"name": "improve", "comp": "P,p"}, {"name": "safeguard", "comp": "P,p"}, {"name": "restore", "comp": "P,p"},
+{"name": "natural resources", "comp": "P,p"}, {"name": "existing uses of those waters", "comp": "P,p"}], "comp": "P,p"}, {"name": "AND",
+"children": [{"name": "uses", "comp": "P,p"}, {"name": "orderly processes", "comp": "P,p"},
+{"name": "commercial", "comp": "P,p"}, {"name": "industrial", "comp": "P,p"}], "comp": "P,p"}, {"name": "AND",
+"children": [{"name": "waterfronts", "comp": "P,p"}, {"name": "ports", "comp": "P,p"},
+{"name": "preservation", "comp": "P,p"}, {"name": "restoration", "comp": "P,p"}], "comp": "P,p"}, {"name": "in order to ensure expedited governmental decision making for the management of coastal resources", "comp": "P,p"}, {"name": "AND",
+"children": [{"name": "planning", "comp": "P,p"}, {"name": "conservation", "comp": "P,p"},
+{"name": "management", "comp": "P,p"}], "comp": "P,p"},
+{"name": "AND",
+"children": [{"name": "pollution control", "comp": "P,p"}, {"name": "aquaculture facilities", "comp": "P,p"},
+{"name": "State", "comp": "P,p"}, {"name": "Federal", "comp": "P,p"}, {"name": "State", "comp": "P,p"}, {"name": "wildlife", "comp": "P,p"}], "comp": "P,p"}], "comp": "P,p"},
+{"name": "at least", "comp": "Cex"}
+]
+}
+]
+}
+]
+}

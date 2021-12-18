@@ -27,6 +27,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	inclAnnotations := r.FormValue("annotations")
 	igExtended := r.FormValue("compLevelNesting")
 	propertyTree := r.FormValue("propertyTree")
+	binaryTree := r.FormValue("binaryTree")
 
 	// Dynamic output
 	dynamicOutput := false
@@ -72,6 +73,17 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		printFlatProperties = true
 	}
 
+	// Binary tree printing in output
+	printBinaryTree := false
+	fmt.Println("Binary tree printing: ", binaryTree)
+	if binaryTree == "on" {
+		binaryTree = "checked"
+		printBinaryTree = true
+	} else {
+		binaryTree = "unchecked"
+		printBinaryTree = false
+	}
+
 	retStruct := ReturnStruct{
 		Success:            false,
 		Error:              false,
@@ -83,6 +95,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		IGExtendedOutput:   igExtended,
 		IncludeAnnotations: inclAnnotations,
 		PrintPropertyTree:  propertyTree,
+		PrintBinaryTree:    binaryTree,
 		TransactionId:      transactionID,
 		RawStmtHelp:        HELP_RAW_STMT,
 		CodedStmtHelp:      HELP_CODED_STMT,
@@ -205,7 +218,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			handleGoogleSheetsOutput(w, codedStmt, stmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			fmt.Println("Visual output requested")
-			handleVisualOutput(w, codedStmt, stmtId, retStruct, printFlatProperties, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
+			handleVisualOutput(w, codedStmt, stmtId, retStruct, printFlatProperties, printBinaryTree, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
 		} else {
 			log.Fatal("Output variant " + templateName + " not found.")
 		}
@@ -283,7 +296,7 @@ func handleGoogleSheetsOutput(w http.ResponseWriter, codedStmt string, stmtId st
 Third-level handler generating visual tree output in response to web request.
 Should be invoked by #converterHandler().
 */
-func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, flatOutput bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool) {
+func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, flatOutput bool, binaryOutput bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool) {
 	// Run default configuration
 	SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
@@ -299,6 +312,8 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	// Setting flat printing
 	fmt.Println("Setting flat printing of properties: ", flatOutput)
 	tree.SetFlatPrinting(flatOutput)
+	fmt.Println("Setting binary tree printing: ", binaryOutput)
+	tree.SetBinaryPrinting(binaryOutput)
 	// Convert input
 	output, err2 := app.ConvertIGScriptToVisualTree(codedStmt, stmtId, "")
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {
