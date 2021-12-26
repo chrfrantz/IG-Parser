@@ -105,6 +105,13 @@ input[type="date"] {
     padding: 4px 5px;
 }
 
+input[type=checkbox] {
+    vertical-align: middle;
+    position: relative;
+    left: 220px;
+    bottom: 17px;
+}
+
 select {
     width: 100%;
     padding: 7px 0;
@@ -222,13 +229,6 @@ button:hover {
 
 .tooltip:hover:before {
     display:block;
-}
-
-input[type=checkbox] {
-    vertical-align: middle;
-    position: relative;
-    left: 220px;
-    bottom: 17px;
 }
 
 /*
