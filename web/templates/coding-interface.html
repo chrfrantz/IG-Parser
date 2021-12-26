@@ -13,16 +13,18 @@
 <script>
     function CopyToClipboard(containerid) {
         if (document.selection) {
-            var range = document.body.createTextRange();
+            let range = document.body.createTextRange();
             range.moveToElementText(document.getElementById(containerid));
             range.select().createTextRange();
             document.execCommand("copy");
         } else if (window.getSelection) {
-            var range = document.createRange();
+            let range = document.createRange();
             range.selectNode(document.getElementById(containerid));
             window.getSelection().addRange(range);
-            document.execCommand("copy");
-            //alert("Text has been copied")
+            let res = document.execCommand("copy");
+            if (res !== true) {
+                alert("Text-to-Clipboard copying failed. Please select output manually and copy via keyboard.")
+            }
         }
     }
 
