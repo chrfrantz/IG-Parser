@@ -1,11 +1,16 @@
 {{template "top.html" . }}
 {{template "coding-interface.html" . }}
 
+<!-- additional entry field -->
+<span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
+<input name="stmtId" type="number" value="{{.StmtId}}"><br />
+
+<!-- Parameters -->
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
 </br></br>
-Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)<input name="dynamicOutput" type="checkbox" {{.DynamicOutput}}>
-Produce IG Extended output (component-level nesting) (default: off)<input name="compLevelNesting" type="checkbox" {{.IGExtendedOutput}}>
-Include IG Logico annotations in output (only for static output) (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}}><br />
+<label>Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)<input name="dynamicOutput" type="checkbox" {{.DynamicOutput}} /></label>
+<label>Produce IG Extended output (component-level nesting) (default: off)<input name="compLevelNesting" type="checkbox" {{.IGExtendedOutput}} /></label>
+<label>Include IG Logico annotations in output (only for static output) (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}} /></label><br />
 
 <input value="Generate tabular output" type="submit">
 {{if .Error}}

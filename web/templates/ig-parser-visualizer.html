@@ -34,9 +34,9 @@
 
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
 </br></br>
-Include IG Logico annotations in output (only for static output) (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}}><br />
-Print private properties as tree structure (as opposed to labels associated with component) (default: off)<input name="propertyTree" type="checkbox" {{.PrintPropertyTree}}><br />
-Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)<input name="binaryTree" type="checkbox" {{.PrintBinaryTree}}><br />
+<label>Include IG Logico annotations in output (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}} /></label>
+<label>Print private properties as tree structure (as opposed to labels associated with component) (default: off)<input name="propertyTree" type="checkbox" {{.PrintPropertyTree}} /></label>
+<label>Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)<input name="binaryTree" type="checkbox" {{.PrintBinaryTree}} /></label><br />
 
 <input value="Generate visual output" type="submit">
 {{if .Error}}

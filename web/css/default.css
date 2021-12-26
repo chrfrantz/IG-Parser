@@ -224,6 +224,13 @@ button:hover {
     display:block;
 }
 
+input[type=checkbox] {
+    vertical-align: middle;
+    position: relative;
+    left: 220px;
+    bottom: 17px;
+}
+
 /*
 .tooltip {
     border-bottom: 1px dotted #000000; color: #000000; outline: none;
