@@ -194,7 +194,7 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 				out += ", " + TREE_PRINTER_KEY_COMPONENT + TREE_PRINTER_EQUALS + "\"" + n.GetComponentName() + "\""
 
 				// Print private properties
-				out = n.appendPrivateNodes(out, stmt, printFlat, printBinary, includeAnnotations)
+				out = n.appendPropertyNodes(out, stmt, printFlat, printBinary, includeAnnotations)
 
 				// Append annotations
 				if includeAnnotations {
@@ -220,9 +220,12 @@ Flat output implies the printing of private properties as labels for component n
 Allows indication for printing of binary trees, as opposed to tree aggregated by logical operators for given component.
 Includes indication whether annotations are to be included in output.
 */
-func (n *Node) appendPrivateNodes(stringToAppendTo string, stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool) string {
-	// Append potential private nodes
-	if n != nil && len(stmt.GetPropertyComponent(n, false)) > 0 || (len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil) {
+func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool) string {
+
+	// Append potential private and shared property nodes under the condition that those nodes are leaf nodes, or if flat printing is activated
+	if n != nil && (n.IsLeafNode() || printFlat) &&
+		// Check for shared and private properties
+		len(stmt.GetPropertyComponent(n, false)) > 0 || (len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil) {
 
 		// Retrieve relevant component property and combine with private nodes before printing
 		allNodes := stmt.GetPropertyComponent(n, false)

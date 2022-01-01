@@ -35,7 +35,7 @@
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
 </br></br>
 <label>Include IG Logico annotations in output (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}} /></label>
-<label>Print private properties as tree structure (as opposed to labels associated with component) (default: off)<input name="propertyTree" type="checkbox" {{.PrintPropertyTree}} /></label>
+<label>Embed component properties in tree structure (as opposed to labels associated with component) (default: off)<input name="propertyTree" type="checkbox" {{.PrintPropertyTree}} /></label>
 <label>Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)<input name="binaryTree" type="checkbox" {{.PrintBinaryTree}} /></label><br />
 
 <input value="Generate visual output" type="submit">
@@ -157,6 +157,7 @@
 
         nodeEnter.append('text')
             .attr("x", function(d) {
+                // Position of label depends on presence (i.e., visibility) of children
                 return d.children || d._children ? 12 : 25;
             })
             .style("font", function(d) {
@@ -231,7 +232,7 @@
             });
 
         var gGiven = nodeEnter.filter(function (d){
-            if (d.depth!=0){
+            if (d.depth !== 0){
                 return true;
             } else {
                 return false;
