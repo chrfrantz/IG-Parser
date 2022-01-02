@@ -28,6 +28,10 @@ type ReturnStruct struct {
 	PrintBinaryTree string
 	// Generated output to be rendered (e.g., tabular, visual)
 	Output string
+	// Width of output canvas
+	Width int
+	// Height of output canvas
+	Height int
 	// Transaction ID
 	TransactionId string
 	// Help message for raw statement

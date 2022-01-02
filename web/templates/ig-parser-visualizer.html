@@ -36,7 +36,9 @@
 </br></br>
 <label>Include IG Logico annotations in output (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}} /></label>
 <label>Embed component properties in tree structure (as opposed to labels associated with component) (default: off)<input name="propertyTree" type="checkbox" {{.PrintPropertyTree}} /></label>
-<label>Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)<input name="binaryTree" type="checkbox" {{.PrintBinaryTree}} /></label><br />
+<label>Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)<input name="binaryTree" type="checkbox" {{.PrintBinaryTree}} /></label>
+<label>Height: <input name="heightValue" type="number" value="{{.Height}}"></label>
+<label>Width: <input name="widthValue" type="number" value="{{.Width}}"></label><br />
 
 <input value="Generate visual output" type="submit">
 {{if .Error}}
@@ -67,8 +69,8 @@
 
     // Set the dimensions and margins of the diagram
     var margin = {top: 20, right: 90, bottom: 30, left: 90},
-        width = 4000 - margin.left - margin.right,
-        height = 2000 - margin.top - margin.bottom;
+        width = {{.Width}} - margin.left - margin.right,
+        height = {{.Height}} - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     // appends a 'group' element to 'svg'
@@ -92,7 +94,7 @@
     root.x0 = height / 2;
     root.y0 = 0;
 
-    // Collapse after the second level -- commenting this will ensure a expanded tree by default
+    // Collapse after the second level -- commenting this will ensure an expanded tree by default
     //root.children.forEach(collapse);
 
     update(root);
@@ -132,7 +134,7 @@
             })
             .on('click', click);
 
-        // Add Circle for the nodes
+        // Add circles around nodes
         nodeEnter.append('circle')
             .attr('class', 'node')
             .attr('r', 1e-6)
@@ -321,7 +323,7 @@
         var linkExit = link.exit().transition()
             .duration(duration)
             .attr('d', function(d) {
-                var o = {x: source.x, y: source.y}
+                let o = {x: source.x, y: source.y}
                 return diagonal(o, o)
             })
             .remove();

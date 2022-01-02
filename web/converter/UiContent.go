@@ -28,6 +28,10 @@ var ANNOTATED_STATEMENT = "A,p(Regional) A[role=enforcer,type=animate](Managers)
 // Default example ID
 var STATEMENT_ID = "650"
 
+// Default dimensions for visual output
+var HEIGHT = 2000
+var WIDTH = 4000
+
 // Help for raw statement field
 var HELP_RAW_STMT = "This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the 'Encoded Statement' field."
 

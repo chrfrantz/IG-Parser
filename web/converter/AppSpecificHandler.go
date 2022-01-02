@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 /*
@@ -28,6 +29,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	igExtended := r.FormValue("compLevelNesting")
 	propertyTree := r.FormValue("propertyTree")
 	binaryTree := r.FormValue("binaryTree")
+	heightValue := r.FormValue("heightValue")
+	widthValue := r.FormValue("widthValue")
 
 	// Dynamic output
 	dynamicOutput := false
@@ -96,12 +99,48 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		IncludeAnnotations: inclAnnotations,
 		PrintPropertyTree:  propertyTree,
 		PrintBinaryTree:    binaryTree,
+		Width:              WIDTH,
+		Height:             HEIGHT,
 		TransactionId:      transactionID,
 		RawStmtHelp:        HELP_RAW_STMT,
 		CodedStmtHelp:      HELP_CODED_STMT,
 		StmtIdHelp:         HELP_STMT_ID,
 		ParametersHelp:     HELP_PARAMETERS,
 		ReportHelp:         HELP_REPORT}
+
+	// Assign width for UI rendering
+	if widthValue != "" {
+		widthVal, err := strconv.Atoi(widthValue)
+		if err != nil || widthVal < 100 {
+			retStruct.Success = false
+			retStruct.Error = true
+			retStruct.Message = ERROR_INPUT_WIDTH
+			err := tmpl.ExecuteTemplate(w, templateName, retStruct)
+			if err != nil {
+				log.Println("Error generating error response for empty input:", err.Error())
+				http.Error(w, "Could not process request.", http.StatusInternalServerError)
+			}
+		}
+		retStruct.Width = widthVal
+	}
+
+	// Assign height for UI rendering
+	if heightValue != "" {
+		heightVal, err := strconv.Atoi(heightValue)
+		if err != nil || heightVal < 100 {
+			retStruct.Success = false
+			retStruct.Error = true
+			retStruct.Message = ERROR_INPUT_HEIGHT
+			err := tmpl.ExecuteTemplate(w, templateName, retStruct)
+			if err != nil {
+				log.Println("Error generating error response for empty input:", err.Error())
+				http.Error(w, "Could not process request.", http.StatusInternalServerError)
+			}
+		}
+		retStruct.Height = heightVal
+	}
+
+	// All parameters are processed ...
 
 	if r.Method != http.MethodPost {
 		// Just show empty form with prepopulated elements
