@@ -1,0 +1,39 @@
+{
+"name": "",
+"children": [
+{"name": "Managers", "comp": "A", "properties": "Regional", "annotations": "[role=enforcer,type=animate]"},
+{"name": "may", "comp": "D", "annotations": "[stringency=permissive]"},
+{"name": "AND",
+"children": [{"name": "review", "comp": "I", "annotations": "[act=performance]"},
+{"name": "XOR",
+"children": [{"name": "reward", "comp": "I", "annotations": "[act=performance]"},
+{"name": "sanction", "comp": "I", "annotations": "[act=performance]"}], "comp": "I", "annotations": "[act=performance]"}], "comp": "I", "annotations": "[act=performance]"},
+{"name": "bAND",
+"children": [{"name": "production [operations]", "comp": "Bdir", "properties": "approved, certified", "annotations": "[role=monitored,type=animate]"}, {"name": "handling operations", "comp": "Bdir", "properties": "approved", "annotations": "[role=monitored,type=animate]"},
+{"name": "certifying agents", "comp": "Bdir", "properties": "approved, accredited", "annotations": "[role=monitor,type=animate]"}], "comp": "Bdir", "properties": "approved"},
+{"name": "AND",
+"children": [{
+"name": "Cac",
+"children": [
+{"name": "Operations", "comp": "A", "annotations": "[role=monitored,type=animate]"},
+{"name": "OR",
+"children": [{"name": "non-compliant", "comp": "I", "annotations": "[act=violate]"},
+{"name": "violated", "comp": "I", "annotations": "[act=violate]"}], "comp": "I", "annotations": "[act=violate]"},
+{"name": "organic farming provisions", "comp": "Bdir", "annotations": "[type=inanimate]"}
+]
+},
+{
+"name": "Cac",
+"children": [
+{"name": "Manager", "comp": "A", "annotations": "[role=enforcer,type=animate]"},
+{"name": "has concluded", "comp": "I", "annotations": "[act=terminate]"},
+{"name": "investigation", "comp": "Bdir", "annotations": "[type=activity]"}
+]
+}], "comp": "Cac"},
+{"name": "bAND",
+"children": [{"name": "on behalf of the Secretary", "comp": "Cex"},
+{"name": "XOR",
+"children": [{"name": "Act or", "comp": "Cex", "annotations": "[ctx=purpose]"},
+{"name": "regulations in this part", "comp": "Cex", "annotations": "[ctx=purpose]"}], "comp": "Cex", "annotations": "[ctx=purpose]"}], "comp": "Cex"}
+]
+}

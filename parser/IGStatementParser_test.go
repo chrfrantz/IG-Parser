@@ -7,6 +7,9 @@ import (
 	"testing"
 )
 
+/*
+Tests complete statement parsing, including the consideration of synthetic ANDs.
+*/
 func TestStatementParsingIncludingSyntheticANDs(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
