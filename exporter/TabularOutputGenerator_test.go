@@ -3864,4 +3864,53 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 
 }
 
+/*
+Tests multiple combinations embedded in second level phrase/side of first-order statement.
+*/
+func TestMultiLevelEmbeddedCombinations(t *testing.T) {
+
+	// Entry containing multiple combinations on right side of first-order combination
+	text := "Cex(( left1 [XOR] shared (left [AND] right) via (left2 [XOR] right2)))"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestVisualOutputMultiCombinationsPhrase.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
 // test with invalid statement and empty input nodes, unbalanced parentheses, missing ID

@@ -36,7 +36,7 @@ the right-most outer combination (and combinations nested therein) is parsed.
 - Parsing checks for matching parentheses and stops otherwise
 - Invalid combinations (e.g., missing logical operator) are discarded
 in the processing.
- */
+*/
 func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar string) (*tree.Node, string, tree.ParsingError) {
 
 	// Check for parentheses
@@ -71,7 +71,6 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 			ErrorMessage: "The input does not contain combinations"}
 	}
 
-
 	// Return detected combinations, alongside potentially modified input string
 	combinations, _, input, err := detectCombinations(input, leftPar, rightPar)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -85,14 +84,12 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 			ErrorMessage: "The input does not contain combinations"}
 	}
 
-
 	// Now the parsing of nested combinations starts
 	Print("STARTING TREE CONSTRUCTION: Detected combinations: ")
 	Println(combinations)
 
-
-	// Depth first
-	level := 0
+	// Depth first (level is 1-based, index is 0-based)
+	level := 0 //len(combinations)
 
 	// Link input node to temporary node for incremental addition of elements - needs to be copied back prior to return
 	//if nodeTree == nil {
@@ -107,18 +104,20 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 		Println("Level " + strconv.Itoa(level))
 
 		if stop {
-			Println("Breaking out after first level with multiple combinations (stopping at Level " + strconv.Itoa(level) + ")")
+			// Breaking out, since the higher-level combinations must necessarily include higher-level combinations during deep parsing
+			Println("Breaking out after first level that contains valid combinations (stopping at Level " + strconv.Itoa(level) + ")")
 			break
 		}
 
 		Print("Combinations on level " + strconv.Itoa(level) + ": ")
-		Println(combinations[level])
+		Println(combinations[level], "- Count: ", len(combinations[level]))
 
 		idx := 0
 		//Iterate through all indices
 		for idx < len(combinations[level]) {
 
 			//Println("TREE BEFORE NEXT COMBINATION: " + node.String())
+			Println("Parsing index " + strconv.Itoa(idx) + " on level " + strconv.Itoa(level))
 
 			// Create node for assigning elements
 			node := tree.Node{}
@@ -126,12 +125,13 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 			// Parse complete combinations
 			if combinations[level][idx].Complete {
 
-				//Toggling break after this level
+				// Toggling break after the first complete combination on this level,
+				// since all combinations at higher levels must be captured based on deep parsing.
+				// If parsed explicitly again, they would appear as redundant first-order nodes.
 				if !stop {
 					stop = true
-					Println("Signalling to break out after level " + strconv.Itoa(level))
+					Println("Signalling break out after level " + strconv.Itoa(level))
 				}
-
 
 				Println("Found combination to parse on level " + strconv.Itoa(level) +
 					", Index: " + strconv.Itoa(idx) + ": " + fmt.Sprint(combinations[level][idx]))
@@ -313,9 +313,11 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 				}
 
 				// Store node for further preparation of return
-				if !nestedNode {
-					//Adds non-nested, i.e. top-level, node to map with starting character index as key - for later reconstruction of tree prior to return
-					Println("Saving tree to ordermap (Level " + strconv.Itoa(level) + ", Index: " + strconv.Itoa(idx) + "): ", node)
+				if !nestedNode || len(combinations[level]) > 1 {
+					// Either adds non-nested, i.e. top-level, node to map with starting character index as key - for later reconstruction of tree prior to return
+					// or element for nested combination that is yet to be completed and integrated into first-order expression (e.g., based on other associated statement)
+					// The latter commonly applies when facing multiple implicitly linked combinations within side of combination (e.g., left, right).
+					Println("Saving tree to ordermap (Level "+strconv.Itoa(level)+", Index: "+strconv.Itoa(idx)+"): ", node)
 					orderMap[combinations[level][idx].Left] = &node
 				} else {
 					Println("Node is nested; return without further linking")
@@ -393,7 +395,7 @@ In essence, the function provides the depth of the nesting in the expression.
 Default syntactic form of input: "( leftSide [OPERATOR] rightSide )", where
 [OPERATOR] is one of the logical operators (including brackets), and left
 and right side are either text or combinations themselves.
- */
+*/
 func detectCombinations(expression string, leftPar string, rightPar string) (map[int]map[int]tree.Boundaries, []string, string, tree.ParsingError) {
 
 	// Check for parentheses
@@ -509,48 +511,48 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 
 			}
 			// Store index reference
-			levelIdx := len(levelMap[level])-1
+			levelIdx := len(levelMap[level]) - 1
 			Println("Level before saving: " + strconv.Itoa(level) + "; Index: " + strconv.Itoa(levelIdx))
 			b := levelMap[level][levelIdx]
-				b.Right = i
+			b.Right = i
+			levelMap[level][levelIdx] = b
+			Println("Level map for level " + strconv.Itoa(level) + " (after adding right value but before assessing completeness): " + b.String())
+			Println("--> Content:", expression[b.Left:b.Right])
+			// Test whether indices are identical or immediately following - suggesting gaps in values
+			if (b.Operator + len(b.OperatorVal) + 2) == b.Right {
+				msg := "Input contains invalid combination expression in the range '" + expression[b.Left:b.Right] + "'."
+				return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
+					ErrorMessage: msg}
+			}
+			if b.Left != 0 && b.OperatorVal != "" {
+				// Update complete marker
+				//b := levelMap[level][levelIdx]
+				b.Complete = true
 				levelMap[level][levelIdx] = b
-				Println("Level map for level " + strconv.Itoa(level) + " (after adding right value but before assessing completeness): " + b.String())
-				Println("--> Content:", expression[b.Left:b.Right])
-				// Test whether indices are identical or immediately following - suggesting gaps in values
-				if (b.Operator + len(b.OperatorVal) + 2) == b.Right {
-					msg := "Input contains invalid combination expression in the range '" + expression[b.Left:b.Right] + "'."
-					return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
-						ErrorMessage: msg}
-				}
-				if b.Left != 0 && b.OperatorVal != "" {
-					// Update complete marker
-					//b := levelMap[level][levelIdx]
-					b.Complete = true
-					levelMap[level][levelIdx] = b
-					Println("Expression is complete.")
-				} else {
-					Println("Detected end, but combination incomplete (Missing operator or left parenthesis). " +
-						"Discarding combination. (Input: '" + expression + "')")
-					// Delete incomplete entry - will lead to removal of shared strings...
-					/*delete(levelMap[level], levelIdx)
-					// Check whether all information from that level has to be deleted
-					if len(levelMap[level]) == 0 {
-						delete(levelMap, level)
-					}*/
-					Print("Map on given level after processing: ")
+				Println("Expression is complete.")
+			} else {
+				Println("Detected end, but combination incomplete (Missing operator or left parenthesis). " +
+					"Discarding combination. (Input: '" + expression + "')")
+				// Delete incomplete entry - will lead to removal of shared strings...
+				/*delete(levelMap[level], levelIdx)
+				// Check whether all information from that level has to be deleted
+				if len(levelMap[level]) == 0 {
+					delete(levelMap, level)
+				}*/
+				Print("Map on given level after processing: ")
+				Println(levelMap[level])
+				// Retrieve higher level
+				/*_, ok := levelMap[level+1]
+				if !ok {
+					Print("No nested complete combination, so deleted this incomplete one: ")
 					Println(levelMap[level])
-					// Retrieve higher level
-					/*_, ok := levelMap[level+1]
-					if !ok {
-						Print("No nested complete combination, so deleted this incomplete one: ")
-						Println(levelMap[level])
-						// If no higher-level exists (within the lower level), delete this incomplete entry
-						delete(levelMap, level)
-					} else {
-						// else retain
-						Println("Nested complete combination, so incomplete higher-level combination is retained.")
-					}*/
-				}
+					// If no higher-level exists (within the lower level), delete this incomplete entry
+					delete(levelMap, level)
+				} else {
+					// else retain
+					Println("Nested complete combination, so incomplete higher-level combination is retained.")
+				}*/
+			}
 
 			// Configure mode
 			modeMap[level] = tree.PARSING_MODE_OUTSIDE_EXPRESSION
@@ -583,19 +585,19 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 			}
 			// Separately test for OR due to differing length (but remember to test for length of expression first)
 			if foundOperator == "" && len(expression) >= i+len(tree.OR_BRACKETS) &&
-					expression[i:i+len(tree.OR_BRACKETS)] == tree.OR_BRACKETS {
+				expression[i:i+len(tree.OR_BRACKETS)] == tree.OR_BRACKETS {
 				Println("Detected " + tree.OR_BRACKETS)
 				foundOperator = tree.OR
 			}
 			// Separately test for sAND WITHIN components due to differing length (but remember to test for length of expression first)
 			if foundOperator == "" && len(expression) >= i+len(tree.SAND_WITHIN_COMPONENTS_BRACKETS) &&
-					expression[i:i+len(tree.SAND_WITHIN_COMPONENTS_BRACKETS)] == tree.SAND_WITHIN_COMPONENTS_BRACKETS {
+				expression[i:i+len(tree.SAND_WITHIN_COMPONENTS_BRACKETS)] == tree.SAND_WITHIN_COMPONENTS_BRACKETS {
 				Println("Detected " + tree.SAND_WITHIN_COMPONENTS_BRACKETS)
 				foundOperator = tree.SAND_WITHIN_COMPONENTS
 			}
 			// Separately test for sAND BETWEEN components due to differing length (but remember to test for length of expression first)
 			if foundOperator == "" && len(expression) >= i+len(tree.SAND_BETWEEN_COMPONENTS_BRACKETS) &&
-					expression[i:i+len(tree.SAND_BETWEEN_COMPONENTS_BRACKETS)] == tree.SAND_BETWEEN_COMPONENTS_BRACKETS {
+				expression[i:i+len(tree.SAND_BETWEEN_COMPONENTS_BRACKETS)] == tree.SAND_BETWEEN_COMPONENTS_BRACKETS {
 				Println("Detected " + tree.SAND_BETWEEN_COMPONENTS_BRACKETS)
 				foundOperator = tree.SAND_BETWEEN_COMPONENTS
 			}
@@ -617,7 +619,7 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 						ErrorMessage: "Logical operator (e.g., [AND], [OR], [XOR]) found outside of combination. Please check for missing parentheses in input."}
 				}
 
-				levelIdx := len(levelMap[level])-1
+				levelIdx := len(levelMap[level]) - 1
 				// Check whether the logical operator is immediately adjacent to left parenthesis (e.g., ... ([AND] ... - invalid combination
 				if levelMap[level][levelIdx].Left == i {
 					msg := "Input contains invalid combination expression in the range '" + expression[levelMap[level][levelIdx].Left:] + "'."
@@ -675,7 +677,7 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 			// Note that this is called for every non-combination element; requires higher-level filtering for leaf entries
 			if modeMap[level] == tree.PARSING_MODE_OUTSIDE_EXPRESSION {
 				// Copy cached string to array if disruption in continuation in expression (e.g., combinations in between)
-				if lastCharIndex - i > 1 && nonSharedElement != "" {
+				if lastCharIndex-i > 1 && nonSharedElement != "" {
 					nonSharedElements = append(nonSharedElements, nonSharedElement)
 					nonSharedElement = ""
 				}
@@ -758,7 +760,7 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 /*
 Processes potential inheritance of shared element values from parent to child nodes,
 where both parent and child nodes have AND operators
- */
+*/
 /*
 func inheritSharedElements(node *tree.Node) {
 		SHARED_ELEMENT_INHERITANCE_MODE != SHARED_ELEMENT_INHERIT_NOTHING {
@@ -798,7 +800,7 @@ func inheritSharedElements(node *tree.Node) {
 Extracts left and right shared elements of a combination (e.g., (left shared (left [AND] right) right shared))
 Input: full string, all boundaries and reference to combination for which shared entries are sought
 Return: string arrays for left and right side shared components
- */
+*/
 func extractSharedComponents(input string, boundaries map[int]map[int]tree.Boundaries, level int, index int) ([]string, []string) {
 
 	Println("Identifying left and right shared entries for " + input[boundaries[level][index].Left:boundaries[level][index].Right])
