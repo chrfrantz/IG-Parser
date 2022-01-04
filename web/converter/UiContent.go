@@ -32,6 +32,10 @@ var STATEMENT_ID = "650"
 var HEIGHT = 2000
 var WIDTH = 4000
 
+// Minimum values
+const MIN_HEIGHT = 100
+const MIN_WIDTH = 100
+
 // Help for raw statement field
 var HELP_RAW_STMT = "This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the 'Encoded Statement' field."
 

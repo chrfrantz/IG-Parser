@@ -111,7 +111,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	// Assign width for UI rendering
 	if widthValue != "" {
 		widthVal, err := strconv.Atoi(widthValue)
-		if err != nil || widthVal < 100 {
+		if err != nil || widthVal < MIN_WIDTH {
 			retStruct.Success = false
 			retStruct.Error = true
 			retStruct.Message = ERROR_INPUT_WIDTH
@@ -120,14 +120,17 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 				log.Println("Error generating error response for empty input:", err.Error())
 				http.Error(w, "Could not process request.", http.StatusInternalServerError)
 			}
+			// Stop execution and return to UI
+			return
 		}
+		// Assign input value only in case of success
 		retStruct.Width = widthVal
 	}
 
 	// Assign height for UI rendering
 	if heightValue != "" {
 		heightVal, err := strconv.Atoi(heightValue)
-		if err != nil || heightVal < 100 {
+		if err != nil || heightVal < MIN_HEIGHT {
 			retStruct.Success = false
 			retStruct.Error = true
 			retStruct.Message = ERROR_INPUT_HEIGHT
@@ -136,7 +139,10 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 				log.Println("Error generating error response for empty input:", err.Error())
 				http.Error(w, "Could not process request.", http.StatusInternalServerError)
 			}
+			// Stop execution and return to UI
+			return
 		}
+		// Assign input value only in case of success
 		retStruct.Height = heightVal
 	}
 

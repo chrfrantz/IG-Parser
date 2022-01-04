@@ -43,7 +43,7 @@ Width of output canvas (in pixels): <input name="widthValue" type="number" value
 <input value="Generate visual output" type="submit">
 {{if .Error}}
 <div class="error">
-    <label>Error: {{.Message}}</label>
+    Error: {{.Message}}
 </div>
 {{end}}
 {{if ne .TransactionId ""}}
