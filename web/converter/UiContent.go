@@ -5,14 +5,6 @@ import (
 )
 
 /*
-Constants for URL parameter keys to pass UI input (e.g., "?rawStmt=Certifiers ...")
-*/
-
-const PARAM_RAW_STATEMENT = "rawStmt"
-const PARAM_CODED_STATEMENT = "codedStmt"
-const PARAM_STATEMENT_ID = "stmtId"
-
-/*
 Variables (de facto constants) for Web GUI.
 */
 

@@ -8,8 +8,8 @@
 <!-- Parameters -->
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
 
-<input id="dynamicOutput" name="dynamicOutput" type="checkbox" {{.DynamicOutput}} /><label for="dynamicOutput">Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)</label>
-<input id="compLevelNesting" name="compLevelNesting" type="checkbox" {{.IGExtendedOutput}} /><label for="compLevelNesting">Produce IG Extended output (component-level nesting) (default: off)</label>
+<input id="dynamicSchema" name="dynamicSchema" type="checkbox" {{.DynamicOutput}} /><label for="dynamicSchema">Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)</label>
+<input id="igExtended" name="igExtended" type="checkbox" {{.IGExtendedOutput}} /><label for="igExtended">Produce IG Extended output (component-level nesting) (default: off)</label>
 <input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (only for static output) (default: off)</label><br />
 
 <input value="Generate tabular output" type="submit">
