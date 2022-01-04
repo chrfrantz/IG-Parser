@@ -11,7 +11,6 @@ body, div, form, input, select, output, textarea, p {
     color: #666;
     line-height: 22px;
     display: block;
-    alignment: center;
 }
 
 h1 {
@@ -105,11 +104,20 @@ input[type="date"] {
     padding: 4px 5px;
 }
 
-input[type=checkbox] {
+input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    margin: 10px; /* space to next item */
     vertical-align: middle;
     position: relative;
-    left: 220px;
-    bottom: 17px;
+}
+
+/* Reserved for parameter fields */
+label {
+    display: block;
+    margin-top: -28px;
+    text-indent: 40px;
+    padding-bottom: 20px;
 }
 
 select {

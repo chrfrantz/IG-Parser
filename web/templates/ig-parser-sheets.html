@@ -7,10 +7,10 @@
 
 <!-- Parameters -->
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
-</br></br>
-<label>Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)<input name="dynamicOutput" type="checkbox" {{.DynamicOutput}} /></label>
-<label>Produce IG Extended output (component-level nesting) (default: off)<input name="compLevelNesting" type="checkbox" {{.IGExtendedOutput}} /></label>
-<label>Include IG Logico annotations in output (only for static output) (default: off)<input name="annotations" type="checkbox" {{.IncludeAnnotations}} /></label><br />
+
+<input id="dynamicOutput" name="dynamicOutput" type="checkbox" {{.DynamicOutput}} /><label for="dynamicOutput">Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)</label>
+<input id="compLevelNesting" name="compLevelNesting" type="checkbox" {{.IGExtendedOutput}} /><label for="compLevelNesting">Produce IG Extended output (component-level nesting) (default: off)</label>
+<input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (only for static output) (default: off)</label><br />
 
 <input value="Generate tabular output" type="submit">
 {{if .Error}}
@@ -20,11 +20,10 @@
 {{end}}
 {{if ne .TransactionId ""}}
 <div class="transactionId">
-    <label>Request ID: {{.TransactionId}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Request ID: {{.TransactionId}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <a class="tooltip"
            href="mailto:ig-parser@newinstitutionalgrammar.org?subject=%5BIG-Parser%5D%20%5BRequest%20ID%3A%20{{.TransactionId}}%5D&body=Please%20replace%20the%20body%20text%20with%20the%20observations%2C%20questions%2C%20or%20suggestions%20you%20have%20based%20on%20your%20experience%20with%20IG-Parser.%20%20If%20you%20observed%20errors%2C%20please%20provide%20a%20description%20(e.g.%2C%20specifying%20what%20you%20expected%20to%20see%2C%20and%20what%20you%20observed%3B%20error%20messages%20you%20received%2C%20etc.).%20%20Please%20also%20feel%20free%20to%20provide%20open%20feedback%20or%20suggestions%20for%20further%20improvement."
            data-text="{{.ReportHelp}}">Report error, observations, or suggestions</a>
-    </label>
 </div>
 {{end}}
 </form>
