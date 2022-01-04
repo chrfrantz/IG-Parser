@@ -160,14 +160,14 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
             .attr("x", function(d) {
                 // Position x differently if nested property tree (since it will be printed under node -- see y specification)
                 if (d.data.pos === "b") {
-                    return -15;
+                    return -30;
                 }
-                // Position of label depends on presence (i.e., visibility) of children
+                // Position of label depends on presence (i.e., visibility) of children (if no property tree exists)
                 return d.children || d._children ? 12 : 25;
             })
             .attr("y", function (d) {
-                // Write in bold font if positioned below node (occurs if property nodes are printed as nested tree structure)
-                return d.data.pos === "b" ? 30 : 0;
+                // Position y differently if nested property tree (will print below node)
+                return d.data.pos === "b" ? 35 : 0;
             })
             .style("font", function(d) {
                 // Special styling for implicit linkages
@@ -293,8 +293,14 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
                 }
 
             })
-            .attr("x", "75")
-            .attr("y", "20");
+            .attr("x", function(d) {
+                // Shift annotations for nodes if properties are nested trees
+                return d.data.pos === "b" ? 20 : 75;
+            })
+            .attr("y", function(d) {
+                // Shift annotations for nodes if properties are nested trees
+                return d.data.pos === "b" ? 55 : 20;
+            });
 
         //linkEnter.append('text')
         //.attr("class", "text")
