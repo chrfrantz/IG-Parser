@@ -158,20 +158,36 @@ Width of output canvas (in pixels): <input name="widthValue" type="number" value
 
         nodeEnter.append('text')
             .attr("x", function(d) {
+                // Position x differently if nested property tree (since it will be printed under node -- see y specification)
+                if (d.data.pos === "b") {
+                    return -15;
+                }
                 // Position of label depends on presence (i.e., visibility) of children
                 return d.children || d._children ? 12 : 25;
+            })
+            .attr("y", function (d) {
+                // Write in bold font if positioned below node (occurs if property nodes are printed as nested tree structure)
+                return d.data.pos === "b" ? 30 : 0;
             })
             .style("font", function(d) {
                 // Special styling for implicit linkages
                 if (d.data.name === "bAND" || d.data.name === "wAND") {
-                    return "italic 12px Arial"
+                    return "italic 12px Arial";
                 } else {
+                    // Draw bold if a particular position is defined (nested property tree)
+                    if (d.data.pos === "b") {
+                        return "bold 12px Arial";
+                    }
                     // Styling based on whether children exist
                     return d.children || d._children ? "normal 12px Arial" : "bold 12px Arial";
                 }
             })
             .style("dominant-baseline", "central")
             .attr("text-anchor", function(d) {
+                // Position at the beginning if particular position is provided (relevant if nested property trees apply)
+                if (d.data.pos === "b") {
+                    return "begin";
+                }
                 return d.children || d._children ? "end" : "begin";
             })
             // Return actual node value (override value for implicitly linked nodes)
@@ -233,11 +249,7 @@ Width of output canvas (in pixels): <input name="widthValue" type="number" value
             });
 
         var gGiven = nodeEnter.filter(function (d){
-            if (d.depth !== 0){
-                return true;
-            } else {
-                return false;
-            }
+            return d.depth !== 0;
         })
             .append("g")
             .attr("transform","translate(-50)");
@@ -250,7 +262,11 @@ Width of output canvas (in pixels): <input name="widthValue" type="number" value
             .text(function (d) {
                 return d.data.comp;
             })
-            .attr("x", "8");
+            .attr("text-anchor", function(d) {
+                // Make component labels end-oriented
+                return "end";
+            })
+            .attr("x", "25");
 
         // Add properties labels
 

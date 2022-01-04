@@ -2,7 +2,7 @@
 "name": "",
 "children": [
 {"name": "bAND",
-"children": [{"name": "General Manager", "comp": "A", "children": [{"name": "shared quality", "comp": "A,p"}]},
-{"name": "Region Manager", "comp": "A", "children": [{"name": "shared quality", "comp": "A,p"}, {"name": "left quality", "comp": "A,p"}, {"name": "right quality", "comp": "A,p"}, {"name": "third quality", "comp": "A,p"}]}], "comp": "A"}
+"children": [{"name": "General Manager", "comp": "A", "pos": "b", "children": [{"name": "shared quality", "comp": "A,p"}]},
+{"name": "Region Manager", "comp": "A", "pos": "b", "children": [{"name": "shared quality", "comp": "A,p"}, {"name": "left quality", "comp": "A,p"}, {"name": "right quality", "comp": "A,p"}, {"name": "third quality", "comp": "A,p"}]}], "comp": "A"}
 ]
 }

@@ -4,18 +4,27 @@ import (
 	"strings"
 )
 
+// Entry delimiters
 const TREE_PRINTER_OPEN_BRACE = "{"
 const TREE_PRINTER_CLOSE_BRACE = "}"
 const TREE_PRINTER_LINEBREAK = "\n"
 const TREE_PRINTER_SEPARATOR = "," + TREE_PRINTER_LINEBREAK
 
+// Key name
 const TREE_PRINTER_KEY_NAME = "\"name\""
 const TREE_PRINTER_KEY_COMPONENT = "\"comp\""
+const TREE_PRINTER_KEY_POSITION = "\"pos\""
 const TREE_PRINTER_KEY_CHILDREN = "\"children\""
 const TREE_PRINTER_KEY_PROPERTIES = "\"properties\""
 const TREE_PRINTER_KEY_ANNOTATIONS = "\"annotations\""
+
+// Separator
 const TREE_PRINTER_EQUALS = ": "
 
+// Values
+const TREE_PRINTER_VAL_POSITION_BELOW = "\"b\""
+
+// Collection delimiters
 const TREE_PRINTER_COLLECTION_OPEN = "["
 const TREE_PRINTER_COLLECTION_CLOSE = "]"
 
@@ -264,6 +273,8 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 							// Initiate flat output for properties
 							stringToAppendTo += ", " + TREE_PRINTER_KEY_PROPERTIES + TREE_PRINTER_EQUALS
 						} else {
+							// Add position information to ensure offset printing of leading node content (since it is followed by nested property structure)
+							stringToAppendTo += ", " + TREE_PRINTER_KEY_POSITION + TREE_PRINTER_EQUALS + TREE_PRINTER_VAL_POSITION_BELOW
 							// Initiate tree structure for tree output of properties
 							stringToAppendTo += ", " + TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
 						}
