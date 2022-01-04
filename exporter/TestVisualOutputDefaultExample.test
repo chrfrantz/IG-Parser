@@ -1,39 +1,39 @@
 {
 "name": "",
 "children": [
-{"name": "Managers", "comp": "A", "properties": "Regional", "annotations": "[role=enforcer,type=animate]"},
-{"name": "may", "comp": "D", "annotations": "[stringency=permissive]"},
+{"name": "Managers", "comp": "A", "prop": "Regional", "anno": "[role=enforcer,type=animate]"},
+{"name": "may", "comp": "D", "anno": "[stringency=permissive]"},
 {"name": "AND",
-"children": [{"name": "review", "comp": "I", "annotations": "[act=performance]"},
+"children": [{"name": "review", "comp": "I", "anno": "[act=performance]"},
 {"name": "XOR",
-"children": [{"name": "reward", "comp": "I", "annotations": "[act=performance]"},
-{"name": "sanction", "comp": "I", "annotations": "[act=performance]"}], "comp": "I", "annotations": "[act=performance]"}], "comp": "I", "annotations": "[act=performance]"},
+"children": [{"name": "reward", "comp": "I", "anno": "[act=performance]"},
+{"name": "sanction", "comp": "I", "anno": "[act=performance]"}], "comp": "I", "anno": "[act=performance]"}], "comp": "I", "anno": "[act=performance]"},
 {"name": "bAND",
-"children": [{"name": "production [operations]", "comp": "Bdir", "properties": "approved, certified", "annotations": "[role=monitored,type=animate]"}, {"name": "handling operations", "comp": "Bdir", "properties": "approved", "annotations": "[role=monitored,type=animate]"},
-{"name": "certifying agents", "comp": "Bdir", "properties": "approved, accredited", "annotations": "[role=monitor,type=animate]"}], "comp": "Bdir", "properties": "approved"},
+"children": [{"name": "production [operations]", "comp": "Bdir", "prop": "approved, certified", "anno": "[role=monitored,type=animate]"}, {"name": "handling operations", "comp": "Bdir", "prop": "approved", "anno": "[role=monitored,type=animate]"},
+{"name": "certifying agents", "comp": "Bdir", "prop": "approved, accredited", "anno": "[role=monitor,type=animate]"}], "comp": "Bdir", "prop": "approved"},
 {"name": "AND",
 "children": [{
 "name": "Cac",
 "children": [
-{"name": "Operations", "comp": "A", "annotations": "[role=monitored,type=animate]"},
+{"name": "Operations", "comp": "A", "anno": "[role=monitored,type=animate]"},
 {"name": "OR",
-"children": [{"name": "non-compliant", "comp": "I", "annotations": "[act=violate]"},
-{"name": "violated", "comp": "I", "annotations": "[act=violate]"}], "comp": "I", "annotations": "[act=violate]"},
-{"name": "organic farming provisions", "comp": "Bdir", "annotations": "[type=inanimate]"}
+"children": [{"name": "non-compliant", "comp": "I", "anno": "[act=violate]"},
+{"name": "violated", "comp": "I", "anno": "[act=violate]"}], "comp": "I", "anno": "[act=violate]"},
+{"name": "organic farming provisions", "comp": "Bdir", "anno": "[type=inanimate]"}
 ]
 },
 {
 "name": "Cac",
 "children": [
-{"name": "Manager", "comp": "A", "annotations": "[role=enforcer,type=animate]"},
-{"name": "has concluded", "comp": "I", "annotations": "[act=terminate]"},
-{"name": "investigation", "comp": "Bdir", "annotations": "[type=activity]"}
+{"name": "Manager", "comp": "A", "anno": "[role=enforcer,type=animate]"},
+{"name": "has concluded", "comp": "I", "anno": "[act=terminate]"},
+{"name": "investigation", "comp": "Bdir", "anno": "[type=activity]"}
 ]
 }], "comp": "Cac"},
 {"name": "bAND",
 "children": [{"name": "on behalf of the Secretary", "comp": "Cex"},
 {"name": "XOR",
-"children": [{"name": "Act or", "comp": "Cex", "annotations": "[ctx=purpose]"},
-{"name": "regulations in this part", "comp": "Cex", "annotations": "[ctx=purpose]"}], "comp": "Cex", "annotations": "[ctx=purpose]"}], "comp": "Cex"}
+"children": [{"name": "Act or", "comp": "Cex", "anno": "[ctx=purpose]"},
+{"name": "regulations in this part", "comp": "Cex", "anno": "[ctx=purpose]"}], "comp": "Cex", "anno": "[ctx=purpose]"}], "comp": "Cex"}
 ]
 }

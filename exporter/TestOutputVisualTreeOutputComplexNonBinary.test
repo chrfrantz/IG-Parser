@@ -11,7 +11,7 @@
 "children": [
 {"name": "states", "comp": "A"},
 {"name": "to exercise", "comp": "I"},
-{"name": "responsibilities", "comp": "Bdir", "properties": "in the coastal zone"},
+{"name": "responsibilities", "comp": "Bdir", "prop": "in the coastal zone"},
 {"name": "bAND",
 "children": [{"name": "effectively", "comp": "Cex"},
 {"name": "wAND",
@@ -30,7 +30,7 @@
 {"name": "should", "comp": "M"},
 {"name": "provide for", "comp": "F"},
 {"name": "bAND",
-"children": [{"name": "protection", "comp": "P"}, {"name": "management", "comp": "P"}, {"name": "management", "comp": "P"}, {"name": "consideration", "comp": "P", "properties": "priority"}, {"name": "access", "comp": "P", "properties": "public, to the coasts for recreation purposes"}, {"name": "assistance", "comp": "P"}, {"name": "AND",
+"children": [{"name": "protection", "comp": "P"}, {"name": "management", "comp": "P"}, {"name": "management", "comp": "P"}, {"name": "consideration", "comp": "P", "prop": "priority"}, {"name": "access", "comp": "P", "prop": "public, to the coasts for recreation purposes"}, {"name": "assistance", "comp": "P"}, {"name": "AND",
 "children": [{"name": "coordination", "comp": "P"},
 {"name": "simplification", "comp": "P"}], "comp": "P"}, {"name": "AND",
 "children": [{"name": "consultation", "comp": "P"}, {"name": "coordination", "comp": "P"},

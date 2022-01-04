@@ -15,8 +15,8 @@ const TREE_PRINTER_KEY_NAME = "\"name\""
 const TREE_PRINTER_KEY_COMPONENT = "\"comp\""
 const TREE_PRINTER_KEY_POSITION = "\"pos\""
 const TREE_PRINTER_KEY_CHILDREN = "\"children\""
-const TREE_PRINTER_KEY_PROPERTIES = "\"properties\""
-const TREE_PRINTER_KEY_ANNOTATIONS = "\"annotations\""
+const TREE_PRINTER_KEY_PROPERTIES = "\"prop\""
+const TREE_PRINTER_KEY_ANNOTATIONS = "\"anno\""
 
 // Separator
 const TREE_PRINTER_EQUALS = ": "
