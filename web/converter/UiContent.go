@@ -26,7 +26,7 @@ var RAW_STATEMENT = "Regional Managers, on behalf of the Secretary, may review, 
 var ANNOTATED_STATEMENT = "A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were (non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}."
 
 // Default example ID
-var STATEMENT_ID = "650"
+var STATEMENT_ID = "123"
 
 // Default dimensions for visual output
 var HEIGHT = 2000
@@ -75,7 +75,7 @@ var HELP_CODED_STMT = "This entry field should be used to encode your institutio
 	"** The Or else component only allows component-level nesting (i.e., substitution by an entire statement)."
 
 // Help for statement ID field
-var HELP_STMT_ID = "This entry field should contain a numeric ID that is the basis for generating substatement IDs."
+var HELP_STMT_ID = "This entry field should contain a statement ID (consisting of numbers and/or letters) that is the basis for generating substatement IDs."
 
 // Help for parameter fields
 var HELP_PARAMETERS = "This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements."
