@@ -8,7 +8,7 @@ package exporter
 
 /*
 Returns operators and statement IDs for target node IDs associated with target node in given input
- */
+*/
 /*
 func GetLogicalOperatorAndStatementRefs(sourceNode *tree.Node, targetNode *tree.Node, componentRefs map[*tree.Node][]int) ([]string, []int) {
 	// Find operator links from source to target

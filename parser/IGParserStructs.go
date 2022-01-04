@@ -21,7 +21,6 @@ const LOGICAL_OPERATORS = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
 const SPECIAL_SYMBOLS = "',;+\\-*/%&=$£€¤§\"#!`\\|"
 
 // Word pattern for regular expressions (including parentheses, spaces, square brackets, +, -, /, *, %, &, =, currency symbols, etc., BUT not braces!)
-//const WORDS_WITH_PARENTHESES = "([a-zA-Z" + SPECIAL_SYMBOLS + "()\\[\\]]+\\s*)+"
 const WORDS_WITH_PARENTHESES = "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "\\(\\)\\[\\]\\s]+"
 
 // Optional use of word pattern
@@ -45,15 +44,11 @@ const COMPONENT_ANNOTATION_OPTIONAL_BRACKET = "(\\[" + COMPONENT_ANNOTATION_MAIN
 const COMPONENT_ANNOTATION_OPTIONAL_PARENTHESES = "(\\(" + COMPONENT_ANNOTATION_MAIN + "\\))*"
 
 // Nested annotation syntax (e.g., [first=[left,right]])
-//const COMPONENT_ANNOTATION_OPTIONAL = "(\\[" + COMPONENT_ANNOTATION_MAIN + "\\])*"
 const COMPONENT_ANNOTATION_OPTIONAL = "(" + COMPONENT_ANNOTATION_OPTIONAL_PARENTHESES + "|" +
-										COMPONENT_ANNOTATION_OPTIONAL_BRACKET + ")"
+	COMPONENT_ANNOTATION_OPTIONAL_BRACKET + ")"
 
 // Complete annotation syntax
 const COMPONENT_ANNOTATION_SYNTAX = "(\\[(" + COMPONENT_ANNOTATION_MAIN + COMPONENT_ANNOTATION_OPTIONAL + ")+\\])?"
-
-// Regex for component annotations (e.g., semantic labels, such as "[monitor]" in "A[monitor](Program Manager)") - no whitespace is allowed in annotations
-//const COMPONENT_ANNOTATION_SYNTAX = "(\\[([0-9a-zA-Z" + SPECIAL_SYMBOLS + "{}\\[\\]\\(\\)])+\\])"
 
 // Regex for component suffix (e.g., "1" in "A1")
 const COMPONENT_SUFFIX_SYNTAX = "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "]*"
@@ -81,87 +76,55 @@ const COMPONENT_HEADER_SYNTAX = "(" +
 
 // Full syntax of components, including identifier, suffix, annotation and potentially nested or atomic content
 const FULL_COMPONENT_SYNTAX =
-	// Component identifier, with suffix and annotations
-	COMPONENT_HEADER_SYNTAX +
+// Component identifier, with suffix and annotations
+COMPONENT_HEADER_SYNTAX +
 	// Component-level nesting (e.g., { ... })
 	"(\\" + LEFT_BRACE + "\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\" + RIGHT_BRACE + "|" +
 	// atomic component content (e.g., ( ... ))
-	"\\" + LEFT_PARENTHESIS + "\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\" + RIGHT_PARENTHESIS +")"
+	"\\" + LEFT_PARENTHESIS + "\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\" + RIGHT_PARENTHESIS + ")"
 
 // Full syntax of nested component, including identifier, suffix, annotation
 const FULL_COMPONENT_SYNTAX_NESTED =
-	// Component identifier, with suffix and annotations
-	COMPONENT_HEADER_SYNTAX +
+// Component identifier, with suffix and annotations
+COMPONENT_HEADER_SYNTAX +
 	// Component-level nesting (e.g., { ... })
 	"\\" + LEFT_BRACE + "\\s\\*" + WORDS_WITH_PARENTHESES + "\\s\\*\\" + RIGHT_BRACE
 
 // Basic combination of an arbitrary number of components, variably with or without parentheses (e.g., indication of precedence)
 const NESTED_COMBINATION =
-	// Start of alternatives
+// Start of alternatives
+"(" +
+	// combination with parentheses
+	"\\" + LEFT_PARENTHESIS +
+	OPTIONAL_WORDS_WITH_PARENTHESES +
+	"(" + FULL_COMPONENT_SYNTAX + ")+" +
 	"(" +
-		// combination with parentheses
-		"\\" + LEFT_PARENTHESIS +
-		OPTIONAL_WORDS_WITH_PARENTHESES +
-		"(" + FULL_COMPONENT_SYNTAX /*+ OPTIONAL_WORDS_WITH_PARENTHESES*/ + ")+" +
-		//"\\s*(" + NESTED_TERM + "\\s*)+" +
-		//"\\s*" + RIGHT_BRACE + "\\s*" +
-		//"\\s*" +
-		"(" +
-		"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
-		OPTIONAL_WORDS_WITH_PARENTHESES +
-		"(" + FULL_COMPONENT_SYNTAX + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
-		//"\\s+(" + NESTED_TERM + "\\s*)+" +
-		")*" +
-		"\\" + RIGHT_PARENTHESIS +
+	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
+	OPTIONAL_WORDS_WITH_PARENTHESES +
+	"(" + FULL_COMPONENT_SYNTAX + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+	")*" +
+	"\\" + RIGHT_PARENTHESIS +
 	// OR
 	"|" +
-		// combinations without parentheses
-		OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX +
-			/*OPTIONAL_WORDS_WITH_PARENTHESES +*/ ")+" +
-		//"\\s*(" + NESTED_TERM + "\\s*)+" +
-		//"\\s*" + RIGHT_BRACE + "\\s*" +
-		//"\\s*" +
-		"(" +
-		"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
-		OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX +
-			OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
-		//"\\s+(" + NESTED_TERM + "\\s*)+" +
-		")*" +
+	// combinations without parentheses
+	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX + ")+" +
+	"(" +
+	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
+	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX +
+	OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+	")*" +
 	// END OF COMBINATION
 	")"
 
 // Combination of combinations to represent multi-level nesting
-const NESTED_COMBINATIONS =
-	COMPONENT_ANNOTATION_SYNTAX +
+const NESTED_COMBINATIONS = COMPONENT_ANNOTATION_SYNTAX +
 	"\\" + LEFT_BRACE +
 	"\\s*(" + NESTED_COMBINATION + "\\s+)+" +
 	"(" +
-	//"\\s*" + RIGHT_BRACE + "\\s*" +
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	"\\s+(" + NESTED_COMBINATION + "\\s*)+" +
 	")+" +
-	"\\" + RIGHT_BRACE //+ "\\s*" +
-	//"\\" + RIGHT_BRACE
-
-
-const NESTED_COMBINATIONS2 =
-		// leading annotation on combination
-		//COMPONENT_ANNOTATION_SYNTAX +
-			"\\" + LEFT_BRACE +
-			".*" +
-			"(" +
-			"\\" + RIGHT_BRACE + "\\s*\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
-			".*" +
-			")+" +
-			"\\" + RIGHT_BRACE + "\\" + RIGHT_BRACE
-
-
-// Regex for complete component
-//const COMPONENT_SYNTAX_COMPLETE = "([a-zA-Z,]+)+" + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX
-
-// Nested component prefix (word without spaces and parentheses, but [] brackets) TODO: Check for integration with other Suffix and Annotation regex
-//const NESTED_COMPONENT_SYNTAX = COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?"
-//"([a-zA-Z{}\\[\\]]+)+"
+	"\\" + RIGHT_BRACE
 
 /*
 Escapes all special symbols to prepare those for input into regex expression

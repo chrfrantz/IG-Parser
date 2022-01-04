@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-
 func TestNode_IsEmptyNode(t *testing.T) {
 	node := Node{}
 
@@ -177,7 +176,7 @@ func TestRepeatedNodeAssignment(t *testing.T) {
 /*
 Tests the distance function and retrieval of logical operators in between; applies upward, and downward search,
 and across branches
- */
+*/
 func TestNodeDistanceSearch(t *testing.T) {
 	root := Node{}
 	root.LogicalOperator = "789"
@@ -270,7 +269,6 @@ func TestNodeDistanceSearch(t *testing.T) {
 	if !res || err.ErrorCode != TREE_NO_ERROR {
 		t.Fatal("Link between nodes could not be found.")
 	}
-
 
 	if len(ops) != 3 || ops[0] != "123" || ops[1] != "789" || ops[2] != "456" {
 		t.Fatal("Logical operators are incorrectly determined.")
@@ -387,7 +385,7 @@ func TestNodeDistanceSearch(t *testing.T) {
 
 /*
 Tests the combination of nodes into new node
- */
+*/
 func TestNodeCombination(t *testing.T) {
 
 	node1 := Node{}
@@ -395,7 +393,7 @@ func TestNodeCombination(t *testing.T) {
 	leftSubnode1 := Node{Entry: "left subvalue1"}
 	leftSubnode1.ComponentType = "Type1"
 	rightSubnode1 := Node{Entry: "right subvalue1"}
-	rightSubnode1.ComponentType =  "Type1"
+	rightSubnode1.ComponentType = "Type1"
 
 	res, err := node1.InsertLeftNode(&leftSubnode1)
 	if !res || err.ErrorCode != TREE_NO_ERROR {
@@ -471,7 +469,7 @@ func TestNodeCombinationConflictingTypes(t *testing.T) {
 	leftSubnode1 := Node{Entry: "left subvalue1"}
 	leftSubnode1.ComponentType = "Type1"
 	rightSubnode1 := Node{Entry: "right subvalue1"}
-	rightSubnode1.ComponentType =  "Type1"
+	rightSubnode1.ComponentType = "Type1"
 
 	res, err := node1.InsertLeftNode(&leftSubnode1)
 	if !res || err.ErrorCode != TREE_NO_ERROR {
@@ -507,7 +505,7 @@ func TestNodeCombinationConflictingTypes(t *testing.T) {
 
 /*
 Test for inheriting shared elements using the append inheritance mode.
- */
+*/
 func TestExtractInheritAppend(t *testing.T) {
 
 	SHARED_ELEMENT_INHERITANCE_MODE = SHARED_ELEMENT_INHERIT_APPEND
@@ -895,7 +893,7 @@ func TestExtractInheritFromNextHigherCombination(t *testing.T) {
 
 /*
 Tests the removal of nodes from tree.
- */
+*/
 func TestRemoveNodeFromTree(t *testing.T) {
 
 	root := Node{}
@@ -1006,7 +1004,7 @@ func TestRemoveNodeFromTree(t *testing.T) {
 
 /*
 Tests root node retrieval functions in variants for synthetic root nodes and actual root nodes.
- */
+*/
 func TestNode_GetSyntheticRootNode(t *testing.T) {
 	root := Node{}
 	root.SharedLeft = []string{"Shared top left"}
@@ -1065,7 +1063,7 @@ func TestNode_GetSyntheticRootNode(t *testing.T) {
 
 /*
 Tests whether HasPrivateNodes function works correctly.
- */
+*/
 func TestNode_HasPrivateNodes(t *testing.T) {
 	n := Node{Entry: "random content"}
 
@@ -1085,7 +1083,7 @@ func TestNode_HasPrivateNodes(t *testing.T) {
 /*
 Test retrieval of annotations across tree with and without inheritance.
 Tests both GetAnnotations() and HasAnnotations().
- */
+*/
 func TestNode_GetAnnotationsHasAnnotations(t *testing.T) {
 	//oneNode := Node{Entry: "entry1", Annotations: "top annotation"}
 	twoNode := Node{LogicalOperator: SAND_BETWEEN_COMPONENTS, Annotations: "upper annotation"}

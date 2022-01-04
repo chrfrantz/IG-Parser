@@ -6,7 +6,7 @@ import (
 
 /*
 Tests basic addition of element to array
- */
+*/
 func TestAddingElement(t *testing.T) {
 
 	arr := []string{"One", "Two"}
@@ -27,7 +27,7 @@ func TestAddingElement(t *testing.T) {
 
 /*
 Test moving to last position, with and without addition during moving.
- */
+*/
 func TestMoveElementToFirstPosition(t *testing.T) {
 
 	arr := []string{"One", "Two", "Three"}
@@ -62,7 +62,7 @@ func TestMoveElementToFirstPosition(t *testing.T) {
 
 /*
 Test moving to last position, with and without addition during moving.
- */
+*/
 func TestMoveElementToLastPosition(t *testing.T) {
 
 	arr := []string{"One", "Two", "Three"}
@@ -108,4 +108,3 @@ func TestMoveElementToLastPosition(t *testing.T) {
 	}
 
 }
-

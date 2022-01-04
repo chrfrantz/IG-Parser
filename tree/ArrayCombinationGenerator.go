@@ -10,7 +10,7 @@ import (
 Generates all permutations of a given set of input arrays, representing an
 institutional statement alongside its components per entry.
 Output array structure is [statement][component instances of statement]
- */
+*/
 func GenerateNodeArrayPermutations(nodeArrays ...[]*Node) (stmts [][]*Node, parsingError ParsingError) {
 
 	if len(nodeArrays) == 0 {
@@ -42,7 +42,7 @@ func GenerateNodeArrayPermutations(nodeArrays ...[]*Node) (stmts [][]*Node, pars
 	out := []*Node{}
 
 	// Named loop
-	loop:
+loop:
 	for {
 		// Shift in-array position counters
 		for i := len(nodeArrays) - 1; i >= 0; i-- {
@@ -88,7 +88,7 @@ Returns an array of maps of nodes pointing to arrays of associated statement IDs
 ranges of statement references, alongside potential incrementing of reference values.
 Structure: [column ID of component]map[node reference for each value of component (e.g., Farmer, Certifier)][statement IDs
 where component value apply]
- */
+*/
 func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*Node, generateRanges bool, incrementReferences bool) []map[*Node][]string {
 
 	if len(stmts) == 0 {
@@ -139,8 +139,8 @@ const rangeSeparator = "-"
 /*
 Add value (id) to existing slice (nodeRefs), either by simple appending, or generation of ranges (e.g., 5-7 instead of
 5,6,7), and optional incrementing of references during generation (e.g., for mapping zero-based input to 1-based output)
- */
-func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incrementReferences bool) []string{
+*/
+func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incrementReferences bool) []string {
 	if nodeRefs == nil {
 		// by retrieving potentially existing references and ...
 		nodeRefs = []string{}
@@ -155,23 +155,23 @@ func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incr
 	// If generation of ranges is indicated and previous entries exist ...
 	if generateRanges && len(nodeRefs) > 0 {
 		// Retrieve previously added element
-		val := nodeRefs[len(nodeRefs) - 1]
+		val := nodeRefs[len(nodeRefs)-1]
 		if strings.Contains(val, rangeSeparator) {
 			Println("Detected existing range ", val)
 			// If range separator symbol is contained, extract prefix
 			firstEndIndex := strings.Index(val, rangeSeparator)
 			// Extract last value in range expression
-			lastValue := val[firstEndIndex+1:len(val)]
+			lastValue := val[firstEndIndex+1 : len(val)]
 			// Convert to int
 			intVal, err := strconv.Atoi(lastValue)
 			Println("Last value in range: ", intVal)
 			// Prepare for error
 			stopRangeCheck := false
 			if err != nil {
-				log.Println("Extraction of integer from ", val , " did not work.")
+				log.Println("Extraction of integer from ", val, " did not work.")
 				stopRangeCheck = true
 			}
-			if !stopRangeCheck && intVal == (addedId - 1) {
+			if !stopRangeCheck && intVal == (addedId-1) {
 				// Generate range structure first-last
 				valueToAdd := val[:firstEndIndex] + rangeSeparator + strconv.Itoa(addedId)
 				// Overwrite previous entry
@@ -187,14 +187,14 @@ func GenerateReferenceSlice(nodeRefs []string, id int, generateRanges bool, incr
 			stopRangeCheck := false
 			intVal, err := strconv.Atoi(val)
 			if err != nil {
-				log.Println("Extraction of integer from ", val , " did not work.")
+				log.Println("Extraction of integer from ", val, " did not work.")
 				stopRangeCheck = true
 			}
 			Println("Checking for previous non-range value ", val)
-			if !stopRangeCheck && intVal == (addedId - 1) {
+			if !stopRangeCheck && intVal == (addedId-1) {
 				// Overwrite previous entry
 				nodeRefs[len(nodeRefs)-1] = val + rangeSeparator + strconv.Itoa(addedId)
-				Println("Overwrite existing entry with ", val + rangeSeparator + strconv.Itoa(addedId))
+				Println("Overwrite existing entry with ", val+rangeSeparator+strconv.Itoa(addedId))
 			} else if intVal != addedId {
 				// Create new entry
 				nodeRefs = append(nodeRefs, strconv.Itoa(addedId))

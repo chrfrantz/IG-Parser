@@ -7,12 +7,12 @@ import (
 
 /*
 Indicates whether shared elements are included in output
- */
+*/
 var INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 /*
 Indicates whether the coding follows the IG Core decomposition level (or IG Extended)
- */
+*/
 var create_IG_EXTENDED_OUTPUT = true
 
 /*
@@ -25,18 +25,18 @@ var create_DYNAMIC_TABULAR_OUTPUT = false
 /*
 Indicates whether annotations should be included in output.
 Should not be directly modified, but rather using SetIncludeAnnotations().
- */
+*/
 var include_ANNOTATIONS = false
 
 /*
 Indicates whether adjacent operators should be collapsed (right now AND, sAND and bAND).
 Should not be directly modified, but rather using SetCollapseOperators().
- */
+*/
 var collapse_OPERATORS = true
 
 /*
 Sets whether produced output should be dynamic or static.
- */
+*/
 func SetDynamicOutput(dynamic bool) {
 	create_DYNAMIC_TABULAR_OUTPUT = dynamic
 	if create_DYNAMIC_TABULAR_OUTPUT {
@@ -50,7 +50,7 @@ func SetDynamicOutput(dynamic bool) {
 
 /*
 Queries whether dynamic (vs. static) output is activated.
- */
+*/
 func ProduceDynamicOutput() bool {
 	return create_DYNAMIC_TABULAR_OUTPUT
 }
@@ -71,35 +71,35 @@ func IncludeAnnotations() bool {
 
 /*
 Sets whether operators should be collapsed.
- */
+*/
 func SetCollapseOperators(collapse bool) {
 	collapse_OPERATORS = collapse
 }
 
 /*
 Indicates whether operators should be collapsed.
- */
+*/
 func CollapseOperators() bool {
 	return collapse_OPERATORS
 }
 
 /*
 Sets whether output should be IG Extended (component-level nesting) or IG Core.
- */
+*/
 func SetProduceIGExtendedOutput(extendedOutput bool) {
 	create_IG_EXTENDED_OUTPUT = extendedOutput
 }
 
 /*
 Indicates whether output included IG Extended features (specifically component-level nesting).
- */
+*/
 func ProduceIGExtendedOutput() bool {
 	return create_IG_EXTENDED_OUTPUT
 }
 
 /*
 Returns a fixed schema for tabular output
- */
+*/
 func GetStaticTabularOutputSchema() map[string]int {
 
 	// Generate static headers

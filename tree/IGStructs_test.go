@@ -25,7 +25,7 @@ func TestValidIGSymbol(t *testing.T) {
 
 /*
 Tests merging of arrays without consideration of subitems
- */
+*/
 func TestMergeSlices(t *testing.T) {
 
 	// Array2 has the same size
@@ -58,7 +58,7 @@ func TestMergeSlices(t *testing.T) {
 
 /*
 Tests the merging of slices under consideration of matching based on sub item separator.
- */
+*/
 func TestMergeSlicesWithMatching(t *testing.T) {
 
 	array1 := []string{"First", "Second", "Third", "Fourth", "Fifth"}
@@ -131,7 +131,7 @@ func TestMergeSlicesSubItemMatch(t *testing.T) {
 
 /*
 Tests collapsing adjacent operators.
- */
+*/
 func TestCollapseAdjacentOperators(t *testing.T) {
 
 	input := []string{"AND", "AND", "AND", "sAND", "XOR"}

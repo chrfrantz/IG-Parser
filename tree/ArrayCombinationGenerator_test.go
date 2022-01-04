@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerateRangesInStringSlice(t *testing.T) {
-	input := []int{1,2,3,4,6,7,8,10,11}
+	input := []int{1, 2, 3, 4, 6, 7, 8, 10, 11}
 
 	slc := []string{}
 
@@ -24,7 +24,7 @@ func TestGenerateRangesInStringSlice(t *testing.T) {
 }
 
 func TestGenerateRangesInStringSliceAndIncrementValues(t *testing.T) {
-	input := []int{1,2,3,4,6,7,8,10,11}
+	input := []int{1, 2, 3, 4, 6, 7, 8, 10, 11}
 
 	slc := []string{}
 
@@ -42,9 +42,9 @@ func TestGenerateRangesInStringSliceAndIncrementValues(t *testing.T) {
 }
 
 func TestGenerateRangesInStringSliceAndIncrementValuesPrepopulatedSlice(t *testing.T) {
-	input := []int{1,2,3,4,6,7,8,10,11}
+	input := []int{1, 2, 3, 4, 6, 7, 8, 10, 11}
 
-	slc := []string{"1","2"}
+	slc := []string{"1", "2"}
 
 	for _, v := range input {
 		slc = GenerateReferenceSlice(slc, v, true, true)
@@ -60,7 +60,7 @@ func TestGenerateRangesInStringSliceAndIncrementValuesPrepopulatedSlice(t *testi
 }
 
 func TestIncrementingSliceWithoutRanges(t *testing.T) {
-	input := []int{1,2,3,4,6,7,8,10,11}
+	input := []int{1, 2, 3, 4, 6, 7, 8, 10, 11}
 
 	slc := []string{}
 

@@ -408,7 +408,7 @@ func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, comp
 /*
 Returns the property node corresponding to the current component. If the component does
 not possess a corresponding property, or the node itself is nil, the function returns an empty array.
-Otherwise, the properties node(s) is/are returned. Variably allows for return of primitive nodes only, 
+Otherwise, the properties node(s) is/are returned. Variably allows for return of primitive nodes only,
 or also complex ones (i.e., nested statements). Where multiple primitive nodes exist, those are
 returned as combinations.
 */

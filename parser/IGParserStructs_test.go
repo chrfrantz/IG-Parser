@@ -4,7 +4,7 @@ import "testing"
 
 /*
 Tests the cleaning of input string from line breaks
- */
+*/
 func TestCleanInput(t *testing.T) {
 
 	input := "Program Manager\n has objectives \r\n and we have variable input \n\n    to clean.\n\n\n"

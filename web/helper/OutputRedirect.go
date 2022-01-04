@@ -12,7 +12,7 @@ import (
 
 /*
 Generates random unique 8-character ID and filename including current datetime in YYYYMMDDHHMMSS format and ID.
- */
+*/
 func GenerateUniqueIdAndFilename() (string, string) {
 	// Get unique ID
 	id := GenerateRandomID(8)
@@ -22,7 +22,7 @@ func GenerateUniqueIdAndFilename() (string, string) {
 
 /*
 Generates random string ID of given length
- */
+*/
 func GenerateRandomID(length int) string {
 
 	// Define relevant character set
@@ -42,7 +42,7 @@ func GenerateRandomID(length int) string {
 
 /*
 Return datetime string in YYYYMMDD-HHMMSS format
- */
+*/
 func GetDateTimeString() string {
 	// Define datetime layout
 	const layout = "20060102-150405"
@@ -54,7 +54,7 @@ func GetDateTimeString() string {
 Creates output redirection for stdout and stderr to file (and console).
 Restores original output association after call of returned function.
 Returned function allows specification of suffix appended to filename.
- */
+*/
 func SaveOutput(filename string) (func(string) error, error) {
 
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
@@ -106,7 +106,7 @@ func SaveOutput(filename string) (func(string) error, error) {
 
 	go func() {
 		// Copy all reads from pipe to MultiWriter - to ensure it is written to file and console
-		_,_ = io.Copy(mw, r)
+		_, _ = io.Copy(mw, r)
 		// Set exit signal to terminate goroutine
 		exit <- true
 	}()

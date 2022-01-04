@@ -4,8 +4,6 @@ import (
 	"IG-Parser/tree"
 )
 
-
-
 /*
 Adds element to (the end of) array if not existing.
 */
@@ -58,7 +56,7 @@ func moveElementToLastPosition(elementToMove string, arrayToModify []string, add
 
 /*
 Stringifies arrays of slices in whitespace-separated string. Does not add whitespace at beginning or end.
- */
+*/
 func stringifySlices(elements []string) string {
 	outString := ""
 	for i, v := range elements {

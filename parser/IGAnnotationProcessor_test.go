@@ -74,7 +74,7 @@ func TestExtractComponentLinkageAggregateLinkages(t *testing.T) {
 
 /*
 Tests matching of nodes in different trees based on suffix
- */
+*/
 func TestFindNodesLinkedViaSuffix(t *testing.T) {
 
 	one := tree.Node{Entry: "one"}
@@ -155,4 +155,3 @@ func TestFindNodesLinkedViaSuffix(t *testing.T) {
 		t.Fatal("Wrong linkage. Node four should be linked to node five, but is", fmt.Sprint(resMap[&four][0]))
 	}
 }
-

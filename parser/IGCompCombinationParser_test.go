@@ -179,7 +179,7 @@ func TestDeepExpression(t *testing.T) {
 
 /*
 Tests the parser's ability to handle multiple AND operators on the same level
- */
+*/
 func TestAutomatedAndExpansion(t *testing.T) {
 
 	input := "(Left side information [AND] middle information and [AND] right-side)"
@@ -325,7 +325,7 @@ func TestMultipleNonCombinationParentheses(t *testing.T) {
 
 /*
 Tests parsing of shared elements in surrounding non-combination parentheses and inclusion in resulting node
- */
+*/
 func TestSharedElements(t *testing.T) {
 
 	input := "( shared left (Left side information [XOR] middle information) shared right)"
@@ -360,7 +360,6 @@ func TestSharedElements(t *testing.T) {
 
 func TestInferenceOfLowerLevelSharedElements(t *testing.T) {
 
-
 	text := "Cex(shared left1 (left1 [XOR] left2) mid (shared left2 (lefter [XOR] (left [AND] right)) shared right2) shared right1)"
 
 	res1, res2 := ParseStatement(text)
@@ -374,7 +373,7 @@ func TestInferenceOfLowerLevelSharedElements(t *testing.T) {
 
 /*
 Tests for correct parsing of shared elements as well as decomposition of multiple AND combinations
- */
+*/
 func TestSharedElementsAndAndCombinationWithInheritance(t *testing.T) {
 
 	input := "( shared left (Left side information [AND] middle information [AND] right information) shared right)"
@@ -509,7 +508,7 @@ func TestSharedElementsAndAndCombinationWithInheritanceOverrideMode(t *testing.T
 
 /*
 Tests whether missing specification of logical operator between simple string and combination is picked up.
- */
+*/
 func TestSharedElementsAndAndCombinationWithMissingCombination(t *testing.T) {
 
 	input := "( shared left ( inner left (Far left side [AND] Left side information)) [AND] inner right [AND] right information)"
@@ -518,7 +517,6 @@ func TestSharedElementsAndAndCombinationWithMissingCombination(t *testing.T) {
 
 	// Parse provided expression
 	node, modified, err := ParseIntoNodeTree(input, false, "(", ")")
-
 
 	fmt.Println(node.String())
 
@@ -594,7 +592,7 @@ func TestSharedElementsAndAndCombinationWithoutInheritance(t *testing.T) {
 
 /*
 Tests whether inline annotations using the [text] notation are ignored
- */
+*/
 func TestInlineAnnotations(t *testing.T) {
 	input := "(Left side information [source] [AND] middle information and [AND] right-side)"
 
@@ -618,7 +616,7 @@ func TestInlineAnnotations(t *testing.T) {
 
 /*
 Tests that the parser captures non-AND operators on the same level
- */
+*/
 func TestCombinedOperators(t *testing.T) {
 
 	input := "(Left side information [AND] middle information and [XOR] right-side)"
@@ -800,7 +798,7 @@ func TestUnbalancedParentheses(t *testing.T) {
 
 /*
 Tests for statements that contain parentheses, but no combinations.
- */
+*/
 func TestSimpleStatementWithEmbeddedParentheses(t *testing.T) {
 
 	input := "Left side informat(ion middle information ) sd glkjdslk ) dksljfs("
@@ -817,4 +815,3 @@ func TestSimpleStatementWithEmbeddedParentheses(t *testing.T) {
 	}
 
 }
-

@@ -9,7 +9,7 @@ import (
 Identifies links via elements in suffices (if multiple, comma-separated ones, it extracts only first)
 between leaf nodes in source and target nodes.
 Returns map of linked nodes, with key being the source node, and the value being an array of matched target nodes.
- */
+*/
 func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[*tree.Node][]*tree.Node {
 
 	// Result structure with source node as key, and suffix-matched target nodes as value
@@ -88,7 +88,7 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 /*
 Processes reorganization of statements to convert parsed elements as private elements based on suffix-based linkages.
 Operates directly on provided statement.
- */
+*/
 func ProcessPrivateComponentLinkages(s *tree.Statement) {
 
 	Println("Statement before reviewing linkages: ", s)
