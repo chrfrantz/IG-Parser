@@ -4051,4 +4051,53 @@ func TestVisualOutputDefaultExample(t *testing.T) {
 
 }
 
+/*
+Tests escaping of symbols (e.g., quotation marks) and internal parentheses for visual output.
+*/
+func TestVisualOutputEscapingSymbols(t *testing.T) {
+
+	// Statement with quotation marks and internal parentheses
+	text := "The E(corporation) M(shall) F(be) P(a \"Type B\" corporation) Cex(pursuant to Section 201(b) of the New York State Not-for-Profit Corporation Law.)"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(true)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestVisualOutputEscapingSymbols.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
 // test with invalid statement and empty input nodes, unbalanced parentheses, missing ID

@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"IG-Parser/parser"
+	"IG-Parser/shared"
 	"IG-Parser/tree"
 	"fmt"
 	"log"
@@ -235,9 +236,9 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 				// SPECIAL SYMBOLS (APPLICATION-SPECIFIC) --> SYMBOLS THAT REQUIRE SUBSTITUTION
 				// Substitute symbols before producing output (e.g., " with ')
 				// TODO: Review for further symbols
-				entryVal = strings.ReplaceAll(entryVal, "\"", "'")
+				entryVal = shared.EscapeSymbolsForExport(entryVal)
 				// Duplicate leading ' for proper Google Sheets parsing
-				// TODO: Google Sheets specific
+				// TODO: Google Sheets specific - leave here for now, but consider exporting
 				if len(entryVal) > 0 && entryVal[0:1] == "'" {
 					entryVal = "'" + entryVal
 				}

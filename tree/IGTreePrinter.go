@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"IG-Parser/shared"
 	"strings"
 )
 
@@ -140,8 +141,8 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 			if n.HasPrimitiveEntry() {
 				// Produce output for simple entry
 				out = TREE_PRINTER_OPEN_BRACE + TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS +
-					// Actual content
-					"\"" + n.Entry.(string) + "\""
+					// Actual content (including escaping particular symbols)
+					"\"" + shared.EscapeSymbolsForExport(n.Entry.(string)) + "\""
 
 				// Ensure that entry is closed
 				printFullEntry = true
@@ -289,9 +290,9 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 					}
 					// Print per-property entry
 					if printFlat {
-						// flat entry (and only append if content present)
+						// flat entry (and only append if content present - and escape specific symbols)
 						if privateNode.Entry != nil && !privateNode.IsCombination() {
-							stringToAppendTo += privateNode.Entry.(string)
+							stringToAppendTo += shared.EscapeSymbolsForExport(privateNode.Entry.(string))
 						}
 					} else {
 						// nested tree structure
@@ -321,10 +322,10 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 Appends potentially existing annotations to node-specific output.
 */
 func (n *Node) appendAnnotations(stringToAppendTo string) string {
-	// Append potential annotations
+	// Append potential annotations (while replacing specific conflicting symbols)
 	if n.GetAnnotations() != nil {
 		stringToAppendTo += ", " + TREE_PRINTER_KEY_ANNOTATIONS + TREE_PRINTER_EQUALS
-		stringToAppendTo += "\"" + n.GetAnnotations().(string) + "\""
+		stringToAppendTo += "\"" + shared.EscapeSymbolsForExport(n.GetAnnotations().(string)) + "\""
 	}
 	// Return potentially extended string
 	return stringToAppendTo
