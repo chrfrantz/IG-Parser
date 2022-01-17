@@ -300,7 +300,7 @@ func (n *Node) StringFlat() string {
 	} else {
 		// Complex entry
 		stmt := n.Entry.(Statement)
-		return stmt.StringFlat()
+		return stmt.StringFlat(false)
 	}
 }
 

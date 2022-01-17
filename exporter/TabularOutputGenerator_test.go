@@ -3525,7 +3525,10 @@ func TestVisualOutputBasic(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3582,7 +3585,10 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3638,7 +3644,10 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3686,7 +3695,10 @@ func TestVisualOutputPropertyNodesFlatPrinting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3733,7 +3745,10 @@ func TestVisualOutputPropertyNodesTreePrinting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3788,7 +3803,10 @@ func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3817,6 +3835,7 @@ func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
 
 /*
 Tests the generation of complex tree output for visual output as non-binary tree (i.e., collapsing entries associated with same logical operator for given component).
+Does not decompose property trees.
 */
 func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 
@@ -3837,7 +3856,10 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -3886,7 +3908,10 @@ func TestMultiLevelEmbeddedCombinations(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -4024,7 +4049,10 @@ func TestVisualOutputDefaultExample(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
@@ -4073,7 +4101,10 @@ func TestVisualOutputEscapingSymbols(t *testing.T) {
 	}
 
 	// Generate tree output
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations())
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file

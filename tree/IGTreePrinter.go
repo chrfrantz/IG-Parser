@@ -2,6 +2,7 @@ package tree
 
 import (
 	"IG-Parser/shared"
+	"log"
 	"strings"
 )
 
@@ -35,7 +36,7 @@ Allows indication for flat printing (nested property tree structure vs. flat lis
 Allows indication for printing of binary trees, as opposed to tree aggregated by logical operators for given component.
 This function is tested in TabularOutputGenerator_test.go, i.e., tests with focus on visual tree output.
 */
-func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, includeAnnotations bool) string {
+func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, includeAnnotations bool) (string, ParsingError) {
 
 	// Default name if statement does not have root node
 	rootName := ""
@@ -47,6 +48,7 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 
 	// Opening tree
 	out := "{" + TREE_PRINTER_LINEBREAK
+
 	// Print statement-level node
 	out += TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS + "\"" +
 		// Root node name
@@ -56,32 +58,32 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 	// Indicates whether children have already been added below the top-level string
 	childrenPresent := false
 
-	// Print individual nodes
+	// Print individual nodes (but suppress properties, since those are handled alongside corresponding components)
 	components := []*Node{
 		// Regulative Side
 		s.Attributes,
-		s.AttributesPropertySimple,
-		s.AttributesPropertyComplex,
+		//s.AttributesPropertySimple,
+		//s.AttributesPropertyComplex,
 		s.Deontic,
 		s.Aim,
 		s.DirectObject,
 		s.DirectObjectComplex,
-		s.DirectObjectPropertySimple,
-		s.DirectObjectPropertyComplex,
+		//s.DirectObjectPropertySimple,
+		//s.DirectObjectPropertyComplex,
 		s.IndirectObject,
 		s.IndirectObjectComplex,
-		s.IndirectObjectPropertySimple,
-		s.IndirectObjectPropertyComplex,
+		//s.IndirectObjectPropertySimple,
+		//s.IndirectObjectPropertyComplex,
 		// Constitutive Side
 		s.ConstitutedEntity,
-		s.ConstitutedEntityPropertySimple,
-		s.ConstitutedEntityPropertyComplex,
+		//s.ConstitutedEntityPropertySimple,
+		//s.ConstitutedEntityPropertyComplex,
 		s.Modal,
 		s.ConstitutiveFunction,
 		s.ConstitutingProperties,
 		s.ConstitutingPropertiesComplex,
-		s.ConstitutingPropertiesPropertySimple,
-		s.ConstitutingPropertiesPropertyComplex,
+		//s.ConstitutingPropertiesPropertySimple,
+		//s.ConstitutingPropertiesPropertyComplex,
 		// Shared elements
 		s.ActivationConditionSimple,
 		s.ActivationConditionComplex,
@@ -101,7 +103,12 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 				prepend = TREE_PRINTER_SEPARATOR
 			}
 			// Generate actual entry
-			componentString := v.PrintNodeTree(s, printFlat, printBinary, includeAnnotations)
+			componentString, err := v.PrintNodeTree(s, printFlat, printBinary, includeAnnotations)
+			if err.ErrorCode != TREE_NO_ERROR {
+				// Special case of NodeError being embedded in ParsingError
+				return "", ParsingError{ErrorCode: PARSING_ERROR_EMBEDDED_NODE_ERROR, ErrorMessage: err.ErrorMessage}
+			}
+
 			Println("Output for " + v.GetComponentName() + ": " + componentString)
 			if !childrenPresent && componentString != "" {
 				// Print children prefix if components are present
@@ -119,7 +126,7 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 	// Close entire tree
 	out += TREE_PRINTER_LINEBREAK + TREE_PRINTER_CLOSE_BRACE
 
-	return out
+	return out, ParsingError{ErrorCode: PARSING_NO_ERROR}
 }
 
 /*
@@ -128,7 +135,7 @@ Allows indication for flat printing (nested property tree structure vs. flat lis
 Allows indication for printing of binary trees, as opposed to tree aggregated by logical operators for given component.
 Allows indication for including annotations in output.
 */
-func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool) string {
+func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool) (string, NodeError) {
 	out := ""
 
 	if !n.IsNil() && !n.IsEmptyNode() {
@@ -139,6 +146,7 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 
 			// If the entry is not a statement but either leaf or combination
 			if n.HasPrimitiveEntry() {
+
 				// Produce output for simple entry
 				out = TREE_PRINTER_OPEN_BRACE + TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS +
 					// Actual content (including escaping particular symbols)
@@ -157,14 +165,25 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 					// without considering logical operators in output
 					if n.Parent != nil && n.LogicalOperator == n.Parent.LogicalOperator &&
 						n.GetComponentName() == n.Parent.GetComponentName() {
+
 						// Print left side
-						out += n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+						outTmpL, err := n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+						if err.ErrorCode != TREE_NO_ERROR {
+							return "", err
+						}
+						// Append if successful parsing
+						out += outTmpL
 
 						// Append separator to collapsed entries (i.e., on same level)
 						out += ", "
 
 						// Print right side
-						out += n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+						outTmpR, err := n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+						if err.ErrorCode != TREE_NO_ERROR {
+							return "", err
+						}
+						// Append if successful parsing
+						out += outTmpR
 
 						// Suppress printing of closing parts of entry, since further nodes of same operator on same component may be appended
 						printFullEntry = false
@@ -184,13 +203,23 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 						TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
 
 					// Left child
-					out += n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+					outTmpL, err := n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+					if err.ErrorCode != TREE_NO_ERROR {
+						return "", err
+					}
+					// Append if successful parsing
+					out += outTmpL
 
 					// Add separator
 					out += TREE_PRINTER_SEPARATOR
 
 					// Right child
-					out += n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+					outTmpR, err := n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+					if err.ErrorCode != TREE_NO_ERROR {
+						return "", err
+					}
+					// Append if successful parsing
+					out += outTmpR
 
 					// Closing collection
 					out += TREE_PRINTER_COLLECTION_CLOSE
@@ -204,7 +233,11 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 				out += ", " + TREE_PRINTER_KEY_COMPONENT + TREE_PRINTER_EQUALS + "\"" + n.GetComponentName() + "\""
 
 				// Print private properties
-				out = n.appendPropertyNodes(out, stmt, printFlat, printBinary, includeAnnotations)
+				outTmp, err := n.appendPropertyNodes(out, stmt, printFlat, printBinary, includeAnnotations)
+				if err.ErrorCode != TREE_NO_ERROR {
+					return "", err
+				}
+				out = outTmp
 
 				// Append annotations
 				if includeAnnotations {
@@ -216,10 +249,15 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 			}
 		} else {
 			// Produce output for nested statement
-			out += n.Entry.(Statement).PrintTree(n, printFlat, printBinary, includeAnnotations)
+			outTmp, err := n.Entry.(Statement).PrintTree(n, printFlat, printBinary, includeAnnotations)
+			if err.ErrorCode != PARSING_NO_ERROR { // Important check on return value - different from all others in the function
+				// Special case of NodeError embedding a ParsingError produced in nested invocation.
+				return "", NodeError{ErrorCode: TREE_ERROR_EMBEDDED_PARSING_ERROR, ErrorMessage: err.ErrorMessage}
+			}
+			out += outTmp
 		}
 	}
-	return out
+	return out, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 /*
@@ -230,31 +268,50 @@ Flat output implies the printing of private properties as labels for component n
 Allows indication for printing of binary trees, as opposed to tree aggregated by logical operators for given component.
 Includes indication whether annotations are to be included in output.
 */
-func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool) string {
+func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool) (string, NodeError) {
 
 	// Append potential private and shared property nodes under the condition that those nodes are leaf nodes, or if flat printing is activated
 	if n != nil && (n.IsLeafNode() || printFlat) &&
 		// Check for shared and private properties
-		len(stmt.GetPropertyComponent(n, false)) > 0 || (len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil) {
+		len(stmt.GetPropertyComponent(n, true)) > 0 || (len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil) {
 
 		// Retrieve relevant component property and combine with private nodes before printing
-		allNodes := stmt.GetPropertyComponent(n, false)
+		allNodes := stmt.GetPropertyComponent(n, true)
+		Println("Properties associated with component node "+n.GetComponentName()+":", allNodes)
 		includeAllNodes := true
 		// Test whether shared property nodes exist
 		if len(allNodes) == 0 || (len(allNodes) > 0 && allNodes[0] == nil) {
 			includeAllNodes = false
 		}
+		Println("Append nodes are property nodes:", includeAllNodes)
 
 		// Check whether private nodes are populated
-
 		if len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil {
 
+			mergedNodes := n.PrivateNodeLinks[0]
+			// Infer AND-linkage of private nodes, de facto forming tree structure - this may be decomposed later depending on flat printing setting
+			if len(n.PrivateNodeLinks) > 1 {
+				// Start with second node if there are actually multiple, and merge using implicit between-component AND linkage
+				for _, v := range n.PrivateNodeLinks[1:] {
+					err := NodeError{}
+					mergedNodes, err = Combine(mergedNodes, v, SAND_BETWEEN_COMPONENTS)
+					if err.ErrorCode != TREE_NO_ERROR {
+						log.Println("Invalid merge of private nodes when combining private nodes (this should never happen). Nodes to be merged:", mergedNodes, "and", v)
+						return "", err
+					}
+				}
+			}
+
 			if includeAllNodes {
-				allNodes = append(allNodes, n.PrivateNodeLinks...)
+				// Append private nodes to shared nodes
+				allNodes = append(allNodes, mergedNodes)
 			} else {
-				allNodes = n.PrivateNodeLinks
+				// Override potential shared nodes
+				allNodes = []*Node{mergedNodes}
 			}
 		}
+
+		Println("Property nodes to process:", allNodes)
 
 		// Only add output if properties exist
 		if len(allNodes) > 0 && allNodes[0] != nil {
@@ -265,43 +322,65 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 			// Add individual items
 			for _, privateNode := range allNodes {
 
-				// Ensure that node is only added to output if it is truely primitive, not a combination
-				if !privateNode.IsCombination() && privateNode.HasPrimitiveEntry() {
-
-					if !elementPrinted {
-						// Start general output for property only if nothing is printed yet
-						if printFlat {
-							// Initiate flat output for properties
-							stringToAppendTo += ", " + TREE_PRINTER_KEY_PROPERTIES + TREE_PRINTER_EQUALS
-						} else {
-							// Add position information to ensure offset printing of leading node content (since it is followed by nested property structure)
-							stringToAppendTo += ", " + TREE_PRINTER_KEY_POSITION + TREE_PRINTER_EQUALS + TREE_PRINTER_VAL_POSITION_BELOW
-							// Initiate tree structure for tree output of properties
-							stringToAppendTo += ", " + TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
-						}
-					}
-
-					if elementPrinted {
-						// Add separator if element has been added
-						stringToAppendTo += ", "
-					} else if printFlat {
-						// Prepend quotation
-						stringToAppendTo += "\""
-					}
-					// Print per-property entry
+				// Initiate entry structure
+				if !elementPrinted {
+					// Start general output for property only if nothing is printed yet
 					if printFlat {
-						// flat entry (and only append if content present - and escape specific symbols)
-						if privateNode.Entry != nil && !privateNode.IsCombination() {
-							stringToAppendTo += shared.EscapeSymbolsForExport(privateNode.Entry.(string))
-						}
+						// Initiate flat output for properties
+						stringToAppendTo += ", " + TREE_PRINTER_KEY_PROPERTIES + TREE_PRINTER_EQUALS
 					} else {
-						// nested tree structure
-						stringToAppendTo += privateNode.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+						// Add position information to ensure offset printing of leading node content (since it is followed by nested property structure)
+						stringToAppendTo += ", " + TREE_PRINTER_KEY_POSITION + TREE_PRINTER_EQUALS + TREE_PRINTER_VAL_POSITION_BELOW
+						// Initiate tree structure for tree output of properties
+						stringToAppendTo += ", " + TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
 					}
-					// Mark if initial item has been performed
-					elementPrinted = true
 				}
+
+				// Add separators, or open new entry if needed
+				if elementPrinted {
+					// Add separator if element has been added
+					stringToAppendTo += ", "
+				} else if printFlat {
+					// Prepend quotation
+					stringToAppendTo += "\""
+				}
+
+				// Print per-property entry
+				if printFlat {
+					// Consider distinct treatment for complex or primitive properties in the case of flat printing
+					if privateNode.IsCombination() {
+						// Decompose and print combinations
+						nodes := privateNode.GetLeafNodes(false)
+						entryAdded := false
+						for _, v := range nodes {
+							// Add separator if previous entry exists
+							if entryAdded {
+								stringToAppendTo += ", "
+							}
+							// Append each entry individually
+							stringToAppendTo += shared.EscapeSymbolsForExport(v[0].Entry.(string))
+							entryAdded = true
+						}
+					} else if !privateNode.HasPrimitiveEntry() {
+						// Embedded statement
+						stringToAppendTo += privateNode.Entry.(Statement).StringFlatStatement(true)
+					} else {
+						// Primitive properties
+						stringToAppendTo += shared.EscapeSymbolsForExport(privateNode.Entry.(string))
+					}
+				} else {
+					// If no flat printing, append complete nested tree structure (property tree)
+					stringTmp, err := privateNode.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations)
+					if err.ErrorCode != TREE_NO_ERROR {
+						return "", err
+					}
+					stringToAppendTo += stringTmp
+				}
+				// Mark if initial item has been performed
+				elementPrinted = true
 			}
+
+			// Handle termination of entries
 			if elementPrinted {
 				if printFlat {
 					// Close flat entry
@@ -315,7 +394,7 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 	}
 
 	// Return extended string
-	return stringToAppendTo
+	return stringToAppendTo, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 /*

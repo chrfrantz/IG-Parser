@@ -21,6 +21,7 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 	log.Println(" Step: Parse input statement")
 	// Explicitly activate printing of shared elements
 	//exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
 	// Parse IGScript statement into tree
 	s, err := parser.ParseStatement(statement)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -43,7 +44,10 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 	log.Println("Output generation complete.")
 	log.Println("Writing to file ...")
 
-	output, _ = exporter.GenerateGoogleSheetsOutput(statementMap, statementHeader, statementHeaderNames, separator, filename)
+	output, err = exporter.GenerateGoogleSheetsOutput(statementMap, statementHeader, statementHeaderNames, separator, filename)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return "", err
+	}
 
 	log.Println("Writing completed.")
 
@@ -62,13 +66,19 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 	log.Println(" Step: Parse input statement")
 	// Explicitly activate printing of shared elements
 	//exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
 	// Parse IGScript statement into tree
 	s, err := parser.ParseStatement(statement)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", err
 	}
 
-	output := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations())
+	// Prepare visual output
+	log.Println(" Step: Generate visual output structure")
+	output, err := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return "", err
+	}
 
 	Println("Generated visual tree:", output)
 

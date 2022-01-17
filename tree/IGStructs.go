@@ -496,6 +496,9 @@ const PARSING_ERROR_MISSING_SEPARATOR_VALUE = "MISSING_SEPARATOR"
 // Indicates invalid combination of component types (e.g., Cac and Cex in combined node)
 const PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION = "INVALID_COMPONENT_TYPE_COMBINATION"
 
+// Indicates an embedded node error (passed via NodeError) as part of a ParsingError
+const PARSING_ERROR_EMBEDDED_NODE_ERROR = "EMBEDDED_NODE_ERROR"
+
 /*
 Error type signaling errors during statement parsing
 */
@@ -536,6 +539,9 @@ const TREE_INVALID_TREE = "TREE_STRUCTURE_INVALID"
 // Indicates combination of different component types under shared component node.
 const TREE_INVALID_COMPONENT_COMBINATIONS = "TREE_INVALID_COMPONENT_COMBINATIONS"
 const TREE_INPUT_VALIDATION = "INPUT_VALIDATION"
+
+// Indicates that a NodeError embeds a ParsingError
+const TREE_ERROR_EMBEDDED_PARSING_ERROR = "TREE_EMBEDDED_PARSING_ERROR"
 
 /*
 Collapses repeated occurrences of values in a given array (e.g., [AND] [AND] becomes [AND]).
