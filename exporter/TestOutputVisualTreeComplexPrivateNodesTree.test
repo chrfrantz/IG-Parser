@@ -1,12 +1,13 @@
 {
 "name": "",
+"level": 0, 
 "children": [
 {"name": "bAND",
-"children": [{"name": "General Manager", "comp": "A", "pos": "b", "children": [{"name": "shared quality", "comp": "A,p"}]},
-{"name": "Region Manager", "comp": "A", "pos": "b", "children": [{"name": "shared quality", "comp": "A,p"}, {"name": "bAND",
+"children": [{"name": "General Manager", "comp": "A", "level": 0, "pos": "b", "children": [{"name": "shared quality", "comp": "A,p", "level": 0}]},
+{"name": "Region Manager", "comp": "A", "level": 0, "pos": "b", "children": [{"name": "shared quality", "comp": "A,p", "level": 0}, {"name": "bAND",
 "children": [{"name": "bAND",
-"children": [{"name": "left quality", "comp": "A,p"},
-{"name": "right quality", "comp": "A,p"}], "comp": "A,p"},
-{"name": "third quality", "comp": "A,p"}], "comp": "A,p"}]}], "comp": "A"}
+"children": [{"name": "left quality", "comp": "A,p", "level": 0},
+{"name": "right quality", "comp": "A,p", "level": 0}], "comp": "A,p", "level": 0},
+{"name": "third quality", "comp": "A,p", "level": 0}], "comp": "A,p", "level": 0}]}], "comp": "A", "level": 0}
 ]
 }

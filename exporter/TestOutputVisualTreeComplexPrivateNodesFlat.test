@@ -1,8 +1,9 @@
 {
 "name": "",
+"level": 0, 
 "children": [
 {"name": "bAND",
-"children": [{"name": "General Manager", "comp": "A", "prop": "shared quality"},
-{"name": "Region Manager", "comp": "A", "prop": "shared quality, left quality, right quality, third quality"}], "comp": "A", "prop": "shared quality"}
+"children": [{"name": "General Manager", "comp": "A", "level": 0, "prop": "shared quality"},
+{"name": "Region Manager", "comp": "A", "level": 0, "prop": "shared quality, left quality, right quality, third quality"}], "comp": "A", "level": 0, "prop": "shared quality"}
 ]
 }

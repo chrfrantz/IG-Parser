@@ -1,43 +1,46 @@
 {
 "name": "",
+"level": 0, 
 "children": [
-{"name": "National Organic Program's Program Manager", "comp": "A", "anno": "[gov=enforcer,anim=animate]"},
-{"name": "may", "comp": "D"},
+{"name": "National Organic Program's Program Manager", "comp": "A", "level": 0, "anno": "[gov=enforcer,anim=animate]"},
+{"name": "may", "comp": "D", "level": 0},
 {"name": "bAND",
-"children": [{"name": "inspect and", "comp": "I", "anno": "[act=monitor]"},
+"children": [{"name": "inspect and", "comp": "I", "level": 0, "anno": "[act=monitor]"},
 {"name": "AND",
-"children": [{"name": "review", "comp": "I", "anno": "[act=enforce]"},
+"children": [{"name": "review", "comp": "I", "level": 0, "anno": "[act=enforce]"},
 {"name": "AND",
-"children": [{"name": "refresh", "comp": "I", "anno": "[act=enforce]"},
-{"name": "drink", "comp": "I", "anno": "[act=enforce]"}], "comp": "I", "anno": "[act=enforce]"}], "comp": "I", "anno": "[act=enforce]"}], "comp": "I"},
+"children": [{"name": "refresh", "comp": "I", "level": 0, "anno": "[act=enforce]"},
+{"name": "drink", "comp": "I", "level": 0, "anno": "[act=enforce]"}], "comp": "I", "level": 0, "anno": "[act=enforce]"}], "comp": "I", "level": 0, "anno": "[act=enforce]"}], "comp": "I", "level": 0},
 {"name": "AND",
 "children": [{"name": "AND",
-"children": [{"name": "certified production and", "comp": "Bdir", "anno": "[gov=monitored,anim=animate]"},
-{"name": "handling operations and", "comp": "Bdir", "anno": "[gov=monitored,anim=animate]"}], "comp": "Bdir", "anno": "[gov=monitored,anim=animate]"},
-{"name": "accredited certifying agents", "comp": "Bdir", "anno": "[gov=monitored,anim=animate]"}], "comp": "Bdir", "anno": "[gov=monitored,anim=animate]"},
+"children": [{"name": "certified production and", "comp": "Bdir", "level": 0, "anno": "[gov=monitored,anim=animate]"},
+{"name": "handling operations and", "comp": "Bdir", "level": 0, "anno": "[gov=monitored,anim=animate]"}], "comp": "Bdir", "level": 0, "anno": "[gov=monitored,anim=animate]"},
+{"name": "accredited certifying agents", "comp": "Bdir", "level": 0, "anno": "[gov=monitored,anim=animate]"}], "comp": "Bdir", "level": 0, "anno": "[gov=monitored,anim=animate]"},
 {"name": "AND",
 "children": [{
 "name": "Cac",
+"level": 1, 
 "children": [
-{"name": "Program Manager", "comp": "E", "anno": "[gov=enforcer,anim=animate]"},
-{"name": "is", "comp": "F"},
+{"name": "Program Manager", "comp": "E", "level": 1, "anno": "[gov=enforcer,anim=animate]"},
+{"name": "is", "comp": "F", "level": 1},
 {"name": "AND",
-"children": [{"name": "approved", "comp": "P"},
-{"name": "committed", "comp": "P"}], "comp": "P"}
+"children": [{"name": "approved", "comp": "P", "level": 1},
+{"name": "committed", "comp": "P", "level": 1}], "comp": "P", "level": 1}
 ]
 },
 {
 "name": "Cac",
+"level": 1, 
 "children": [
-{"name": "NOP Official", "comp": "A", "anno": "[gov=monitor,anim=animate]"},
-{"name": "recognizes", "comp": "I"},
-{"name": "Program Manager", "comp": "Bdir"}
+{"name": "NOP Official", "comp": "A", "level": 1, "anno": "[gov=monitor,anim=animate]"},
+{"name": "recognizes", "comp": "I", "level": 1},
+{"name": "Program Manager", "comp": "Bdir", "level": 1}
 ]
-}], "comp": "Cac"},
+}], "comp": "Cac", "level": 0},
 {"name": "bAND",
-"children": [{"name": "on behalf of the Secretary", "comp": "Cex"},
+"children": [{"name": "on behalf of the Secretary", "comp": "Cex", "level": 0},
 {"name": "XOR",
-"children": [{"name": "Act or", "comp": "Cex", "anno": "[ref=(Act,part)]"},
-{"name": "regulations in this part", "comp": "Cex", "anno": "[ref=(Act,part)]"}], "comp": "Cex", "anno": "[ref=(Act,part)]"}], "comp": "Cex"}
+"children": [{"name": "Act or", "comp": "Cex", "level": 0, "anno": "[ref=(Act,part)]"},
+{"name": "regulations in this part", "comp": "Cex", "level": 0, "anno": "[ref=(Act,part)]"}], "comp": "Cex", "level": 0, "anno": "[ref=(Act,part)]"}], "comp": "Cex", "level": 0}
 ]
 }

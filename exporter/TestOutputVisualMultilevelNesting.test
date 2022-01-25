@@ -1,0 +1,27 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "Actor", "comp": "A", "level": 0, "pos": "b", "children": [{"name": "First", "comp": "A,p", "level": 0}]},
+{"name": "bAND",
+"children": [{"name": "action1", "comp": "I", "level": 0},
+{"name": "action2", "comp": "I", "level": 0}], "comp": "I", "level": 0},
+{
+"name": "Bdir",
+"level": 1, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 1},
+{"name": "actionLevel2", "comp": "I", "level": 1},
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor3", "comp": "A", "level": 2},
+{"name": "actionLevel3", "comp": "I", "level": 2},
+{"name": "some object", "comp": "Bdir", "level": 2}
+]
+}
+]
+}
+]
+}

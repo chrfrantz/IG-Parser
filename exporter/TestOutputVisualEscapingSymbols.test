@@ -1,0 +1,11 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "corporation", "comp": "E", "level": 0},
+{"name": "shall", "comp": "M", "level": 0},
+{"name": "be", "comp": "F", "level": 0},
+{"name": "a 'Type B' corporation", "comp": "P", "level": 0},
+{"name": "pursuant to Section 201(b) of the New York State Not-for-Profit Corporation Law.", "comp": "Cex", "level": 0}
+]
+}

@@ -1,39 +1,42 @@
 {
 "name": "",
+"level": 0, 
 "children": [
-{"name": "National Organic Program's Program Manager", "comp": "A"},
-{"name": "may", "comp": "D"},
+{"name": "National Organic Program's Program Manager", "comp": "A", "level": 0},
+{"name": "may", "comp": "D", "level": 0},
 {"name": "bAND",
-"children": [{"name": "inspect and", "comp": "I"},
+"children": [{"name": "inspect and", "comp": "I", "level": 0},
 {"name": "AND",
-"children": [{"name": "review", "comp": "I"},
-{"name": "refresh", "comp": "I"}, {"name": "drink", "comp": "I"}], "comp": "I"}], "comp": "I"},
+"children": [{"name": "review", "comp": "I", "level": 0},
+{"name": "refresh", "comp": "I", "level": 0}, {"name": "drink", "comp": "I", "level": 0}], "comp": "I", "level": 0}], "comp": "I", "level": 0},
 {"name": "AND",
-"children": [{"name": "certified production and", "comp": "Bdir"}, {"name": "handling operations and", "comp": "Bdir"},
-{"name": "accredited certifying agents", "comp": "Bdir"}], "comp": "Bdir"},
+"children": [{"name": "certified production and", "comp": "Bdir", "level": 0}, {"name": "handling operations and", "comp": "Bdir", "level": 0},
+{"name": "accredited certifying agents", "comp": "Bdir", "level": 0}], "comp": "Bdir", "level": 0},
 {"name": "AND",
 "children": [{
 "name": "Cac",
+"level": 1, 
 "children": [
-{"name": "Program Manager", "comp": "E"},
-{"name": "is", "comp": "F"},
+{"name": "Program Manager", "comp": "E", "level": 1},
+{"name": "is", "comp": "F", "level": 1},
 {"name": "AND",
-"children": [{"name": "approved", "comp": "P"},
-{"name": "committed", "comp": "P"}], "comp": "P"}
+"children": [{"name": "approved", "comp": "P", "level": 1},
+{"name": "committed", "comp": "P", "level": 1}], "comp": "P", "level": 1}
 ]
 },
 {
 "name": "Cac",
+"level": 1, 
 "children": [
-{"name": "NOP Official", "comp": "A"},
-{"name": "recognizes", "comp": "I"},
-{"name": "Program Manager", "comp": "Bdir"}
+{"name": "NOP Official", "comp": "A", "level": 1},
+{"name": "recognizes", "comp": "I", "level": 1},
+{"name": "Program Manager", "comp": "Bdir", "level": 1}
 ]
-}], "comp": "Cac"},
+}], "comp": "Cac", "level": 0},
 {"name": "bAND",
-"children": [{"name": "on behalf of the Secretary", "comp": "Cex"},
+"children": [{"name": "on behalf of the Secretary", "comp": "Cex", "level": 0},
 {"name": "XOR",
-"children": [{"name": "Act or", "comp": "Cex"},
-{"name": "regulations in this part", "comp": "Cex"}], "comp": "Cex"}], "comp": "Cex"}
+"children": [{"name": "Act or", "comp": "Cex", "level": 0},
+{"name": "regulations in this part", "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0}
 ]
 }

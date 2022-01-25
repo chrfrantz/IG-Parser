@@ -63,6 +63,26 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
 
+    // Color for property nodes
+    var colorPropertyNodes = "lightgreen";
+
+    // Color for collapsed nested nodes
+    var colorCollapsedNestedNodes = "lightsalmon";
+
+    // Color for collapsed non-nested nodes
+    var colorCollapsedNonNestedNodes = "lightsteelblue";
+
+    // Color fill for leaf nodes
+    var colorFillLeafNodes = "#fff";
+
+    // Colors for components across nesting levels
+    var colorFirstLevel = "sienna";
+    var colorSecondLevel = "sandybrown";
+    var colorThirdLevel = "tan";
+    var colorFourthLevel = "peachpuff";
+    var colorFifthLevel = "wheat";
+    var colorHigherLevel = "linen";
+
     // Read actual tree information
     var treeData = JSON.parse({{.Output}});
 
@@ -137,8 +157,48 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
         nodeEnter.append('circle')
             .attr('class', 'node')
             .attr('r', 1e-6)
+            .style("stroke", function(d) {
+                // Draw property nodes in different stroke color
+                if (d.data.comp && d.data.comp.endsWith(",p")) {
+                    return colorPropertyNodes;
+                }
+                // Draw different stroke for expanded nested nodes
+                if (d.data.level > 0) {
+                    // Draw different color depending on nesting level
+                    switch (d.data.level) {
+                        case 1:
+                            // First level
+                            return colorFirstLevel;
+                        case 2:
+                            // Second level
+                            return colorSecondLevel;
+                        case 3:
+                            // Third level
+                            return colorThirdLevel;
+                        case 4:
+                            // Fourth level
+                            return colorFourthLevel;
+                        case 5:
+                            // Fifth level
+                            return colorFifthLevel;
+                        default:
+                            // Any higher level
+                            return colorHigherLevel;
+                    }
+                }
+            })
             .style("fill", function(d) {
-                return d._children ? "lightsteelblue" : "#fff";
+                if (d._children) {
+                    if (d.data.level > 0) {
+                        // Fill collapsed nodes that have nested elements with different color
+                        return colorCollapsedNestedNodes;
+                    }
+                    // Fill with color if collapsed non-nested node (hidden children)
+                    return colorCollapsedNonNestedNodes;
+                } else {
+                    // Fill node with color if expanded node
+                    return colorFillLeafNodes;
+                }
             });
 
         // Add component labels for the nodes
@@ -212,8 +272,48 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
         // Update the node attributes and style
         nodeUpdate.select('circle.node')
             .attr('r', 10)
+            .style("stroke", function(d) {
+                // Draw property nodes in different stroke color
+                if (d.data.comp && d.data.comp.endsWith(",p")) {
+                    return colorPropertyNodes;
+                }
+                // Draw different stroke for expanded nested nodes
+                if (d.data.level > 0) {
+                    // Draw different color depending on nesting level
+                    switch (d.data.level) {
+                        case 1:
+                            // First level
+                            return colorFirstLevel;
+                        case 2:
+                            // Second level
+                            return colorSecondLevel;
+                        case 3:
+                            // Third level
+                            return colorThirdLevel;
+                        case 4:
+                            // Fourth level
+                            return colorFourthLevel;
+                        case 5:
+                            // Fifth level
+                            return colorFifthLevel;
+                        default:
+                            // Any higher level
+                            return colorHigherLevel;
+                    }
+                }
+            })
             .style("fill", function(d) {
-                return d._children ? "lightsteelblue" : "#fff";
+                if (d._children) {
+                    if (d.data.level > 0) {
+                        // Fill collapsed nodes that have nested elements with different color
+                        return colorCollapsedNestedNodes;
+                    }
+                    // Fill with color if collapsed non-nested node (hidden children)
+                    return colorCollapsedNonNestedNodes;
+                } else {
+                    // Fill node with color if expanded node
+                    return colorFillLeafNodes;
+                }
             })
             .attr('cursor', 'pointer');
 
