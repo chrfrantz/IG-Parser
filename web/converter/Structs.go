@@ -26,6 +26,8 @@ type ReturnStruct struct {
 	PrintPropertyTree string
 	// Binary tree printing indicator (as opposed to tree aggregation based on logical operator by component)
 	PrintBinaryTree string
+	// Binary indicator whether activation conditions should be output on top of visual tree, or their regular position
+	ActivationConditionsOnTop string
 	// Generated output to be rendered (e.g., tabular, visual)
 	Output string
 	// Width of output canvas

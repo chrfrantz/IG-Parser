@@ -18,13 +18,13 @@ func handleGoogleSheetsOutput(w http.ResponseWriter, codedStmt string, stmtId st
 	SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
 	// Define whether output is dynamic
-	fmt.Println("Setting dynamic output: ", dynamicOutput)
+	fmt.Println("Setting dynamic output:", dynamicOutput)
 	exporter.SetDynamicOutput(dynamicOutput)
 	// Define whether output is IG Extended (component-level nesting)
-	fmt.Println("Setting IG Extended output: ", produceIGExtendedOutput)
+	fmt.Println("Setting IG Extended output:", produceIGExtendedOutput)
 	exporter.SetProduceIGExtendedOutput(produceIGExtendedOutput)
 	// Define whether annotations are included
-	fmt.Println("Setting annotations: ", includeAnnotations)
+	fmt.Println("Setting annotations:", includeAnnotations)
 	exporter.SetIncludeAnnotations(includeAnnotations)
 	// Convert input
 	output, err2 := app.ConvertIGScriptToGoogleSheets(codedStmt, stmtId, "")
@@ -79,24 +79,26 @@ func handleGoogleSheetsOutput(w http.ResponseWriter, codedStmt string, stmtId st
 Third-level handler generating visual tree output in response to web request.
 Should be invoked by #converterHandler().
 */
-func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, flatOutput bool, binaryOutput bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool) {
+func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, flatOutput bool, binaryOutput bool, moveActivationConditionsToTop bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool) {
 	// Run default configuration
 	SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
 	// Define whether output is dynamic
-	fmt.Println("Setting dynamic output: ", dynamicOutput)
+	fmt.Println("Setting dynamic output:", dynamicOutput)
 	exporter.SetDynamicOutput(dynamicOutput)
 	// Define whether output is IG Extended (component-level nesting)
-	fmt.Println("Setting IG Extended output: ", produceIGExtendedOutput)
+	fmt.Println("Setting IG Extended output:", produceIGExtendedOutput)
 	exporter.SetProduceIGExtendedOutput(produceIGExtendedOutput)
 	// Define whether annotations are included
-	fmt.Println("Setting annotations: ", includeAnnotations)
+	fmt.Println("Setting annotations:", includeAnnotations)
 	exporter.SetIncludeAnnotations(includeAnnotations)
 	// Setting flat printing
-	fmt.Println("Setting flat printing of properties: ", flatOutput)
+	fmt.Println("Setting flat printing of properties:", flatOutput)
 	tree.SetFlatPrinting(flatOutput)
-	fmt.Println("Setting binary tree printing: ", binaryOutput)
+	fmt.Println("Setting binary tree printing:", binaryOutput)
 	tree.SetBinaryPrinting(binaryOutput)
+	fmt.Println("Setting activation condition on top in visual output:", moveActivationConditionsToTop)
+	tree.SetMoveActivationConditionsToFront(moveActivationConditionsToTop)
 	// Convert input
 	output, err2 := app.ConvertIGScriptToVisualTree(codedStmt, stmtId, "")
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {

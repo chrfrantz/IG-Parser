@@ -39,3 +39,22 @@ Indicates whether binary printing (i.e., production of binary tree as output) is
 func BinaryPrinting() bool {
 	return print_BINARY
 }
+
+/*
+Indicates whether activation conditions are moved to the top of the output
+*/
+var moveActivationConditionsToFront = false
+
+/*
+Defines whether activation conditions are moved to the top of the visual tree output.
+*/
+func SetMoveActivationConditionsToFront(moveToFront bool) {
+	moveActivationConditionsToFront = moveToFront
+}
+
+/*
+Indicates whether activation condition output should be moved to the top in the visual tree output.
+*/
+func MoveActivationConditionsToFront() bool {
+	return moveActivationConditionsToFront
+}

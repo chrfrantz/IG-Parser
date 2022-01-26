@@ -37,6 +37,7 @@
 <input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
 <input id="propertyTree" name="propertyTree" type="checkbox" {{.PrintPropertyTree}} /><label for="propertyTree">Embed component properties in tree structure (as opposed to capturing those in labels associated with component) (default: off)</label>
 <input id="binaryTree" name="binaryTree" type="checkbox" {{.PrintBinaryTree}} /><label for="binaryTree">Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)</label>
+<input id="actCondTop" name="actCondTop" type="checkbox" {{.ActivationConditionsOnTop}} /><label for="actCondTop">Print activation conditions node (if present) as first node in output (default: off)</label>
 Height of output canvas (in pixels): <input name="canvasHeight" type="number" value="{{.Height}}">
 Width of output canvas (in pixels): <input name="canvasWidth" type="number" value="{{.Width}}"><br />
 

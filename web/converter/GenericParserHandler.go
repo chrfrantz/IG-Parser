@@ -26,6 +26,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	igExtended := r.FormValue(PARAM_EXTENDED_OUTPUT)
 	propertyTree := r.FormValue(PARAM_PROPERTY_TREE)
 	binaryTree := r.FormValue(PARAM_BINARY_TREE)
+	actCondTop := r.FormValue(PARAM_ACTIVATION_CONDITION_ON_TOP)
 	heightValue := r.FormValue(PARAM_HEIGHT)
 	widthValue := r.FormValue(PARAM_WIDTH)
 
@@ -86,29 +87,41 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		printBinaryTree = false
 	}
 
+	// Activation condition on top in output
+	printActivationConditionOnTop := false
+	fmt.Println("Activation condition on top: ", actCondTop)
+	if actCondTop == CHECKBOX_ON {
+		actCondTop = CHECKBOX_CHECKED
+		printActivationConditionOnTop = true
+	} else {
+		actCondTop = CHECKBOX_UNCHECKED
+		printActivationConditionOnTop = false
+	}
+
 	// Checkbox interpretation finished
 
 	// Prepare return structure with prepopulated information (to be refined prior to return)
 	retStruct := ReturnStruct{
-		Success:            false,
-		Error:              false,
-		Message:            message,
-		RawStmt:            rawStmt,
-		CodedStmt:          codedStmt,
-		StmtId:             stmtId,
-		DynamicOutput:      dynChk,
-		IGExtendedOutput:   igExtended,
-		IncludeAnnotations: inclAnnotations,
-		PrintPropertyTree:  propertyTree,
-		PrintBinaryTree:    binaryTree,
-		Width:              WIDTH,
-		Height:             HEIGHT,
-		TransactionId:      transactionID,
-		RawStmtHelp:        HELP_RAW_STMT,
-		CodedStmtHelp:      HELP_CODED_STMT,
-		StmtIdHelp:         HELP_STMT_ID,
-		ParametersHelp:     HELP_PARAMETERS,
-		ReportHelp:         HELP_REPORT}
+		Success:                   false,
+		Error:                     false,
+		Message:                   message,
+		RawStmt:                   rawStmt,
+		CodedStmt:                 codedStmt,
+		StmtId:                    stmtId,
+		DynamicOutput:             dynChk,
+		IGExtendedOutput:          igExtended,
+		IncludeAnnotations:        inclAnnotations,
+		PrintPropertyTree:         propertyTree,
+		PrintBinaryTree:           binaryTree,
+		ActivationConditionsOnTop: actCondTop,
+		Width:                     WIDTH,
+		Height:                    HEIGHT,
+		TransactionId:             transactionID,
+		RawStmtHelp:               HELP_RAW_STMT,
+		CodedStmtHelp:             HELP_CODED_STMT,
+		StmtIdHelp:                HELP_STMT_ID,
+		ParametersHelp:            HELP_PARAMETERS,
+		ReportHelp:                HELP_REPORT}
 
 	// Assign width for UI rendering
 	if widthValue != "" {
@@ -247,6 +260,18 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			printBinaryTree = false
 		}
 
+		// Parameter: Activation condition on top
+		val, suc = extractUrlParameters(r, PARAM_ACTIVATION_CONDITION_ON_TOP)
+		check = evaluateBooleanUrlParameters(PARAM_ACTIVATION_CONDITION_ON_TOP, val, suc)
+		// Assign values
+		if check {
+			retStruct.ActivationConditionsOnTop = CHECKBOX_CHECKED
+			printActivationConditionOnTop = true
+		} else {
+			retStruct.ActivationConditionsOnTop = CHECKBOX_UNCHECKED
+			printActivationConditionOnTop = false
+		}
+
 		// Parameter: Canvas width
 		val, suc = extractUrlParameters(r, PARAM_WIDTH)
 		if suc {
@@ -339,10 +364,11 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	} else {
 		// Produce return actual output
 		if templateName == TEMPLATE_NAME_PARSER_SHEETS {
+			fmt.Println("Google Sheets output requested")
 			handleGoogleSheetsOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			fmt.Println("Visual output requested")
-			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
+			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
 		} else {
 			log.Fatal("Output variant " + templateName + " not found.")
 		}

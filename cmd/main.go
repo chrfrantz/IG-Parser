@@ -44,9 +44,9 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Println(output.PrintTree(nil, true, false, false, 0))
+	fmt.Println(output.PrintTree(nil, true, false, false, false, 0))
 
-	out, err := output.PrintTree(nil, true, false, false, 0)
+	out, err := output.PrintTree(nil, true, false, false, false, 0)
 
 	exporter.WriteToFile("example.txt", out)
 

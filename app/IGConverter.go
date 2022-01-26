@@ -75,7 +75,7 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 
 	// Prepare visual output
 	log.Println(" Step: Generate visual output structure")
-	output, err := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(), 0)
+	output, err := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", err
 	}
