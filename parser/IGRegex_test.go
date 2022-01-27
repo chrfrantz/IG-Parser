@@ -79,11 +79,11 @@ func TestComponentCombinations(t *testing.T) {
 	fmt.Println(res)
 	fmt.Println("Count:", len(res))
 
-	/*firstElem := "{A(dlkgjsg) I[dgisg](kjsdglkds) [AND] (Bdir{djglksjdgkd} Cex(A(sdlgjlskd)) [XOR] A(dsgjslkj) E(gklsjgls))}"
+	firstElem := "{A(dlkgjsg) I[dgisg](kjsdglkds) [AND] (Bdir{djglksjdgkd} Cex(A(sdlgjlskd)) [XOR] A(dsgjslkj) E(gklsjgls))}"
 
 	if res[0] != firstElem {
 		t.Fatal("Wrong element matched. Should be", firstElem, ", but is "+res[0])
-	}*/
+	}
 
 	secondElem := "{Cac{ A(actor) I(fjhgjh) Bdir(rtyui)} [XOR] Cac{A(ertyui) I(dfghj)}}"
 
