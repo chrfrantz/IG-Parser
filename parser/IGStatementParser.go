@@ -608,7 +608,7 @@ func SeparateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 		// Iterate through identified nested statements (if any) and remove those from statement
 		for _, v := range nestedStmts {
 			// Extract statements of structure { LEFT [AND] RIGHT }
-			r2, err2 := regexp.Compile(NESTED_COMBINATIONS)
+			r2, err2 := regexp.Compile(NESTED_COMBINATIONS_TERMINATED)
 			if err2 != nil {
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
 					ErrorMessage: "Error during pattern extraction in nested statement."}

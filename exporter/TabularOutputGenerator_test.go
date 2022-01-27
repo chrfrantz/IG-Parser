@@ -4204,9 +4204,9 @@ func TestVisualOutputEscapingSymbols(t *testing.T) {
 }
 
 /*
-Tests multi-level nesting in visual output.
+Tests linear multi-level nesting in visual output (i.e., Cac{Cac{Cac{}}}).
 */
-func TestVisualOutputMultiLevelNesting(t *testing.T) {
+func TestVisualOutputLinearMultiLevelNesting(t *testing.T) {
 
 	// Statement with quotation marks and internal parentheses
 	text := "A,p(First) A(Actor) I(action1) I(action2) Bdir{A(actor2) I(actionLevel2) Cac{A(actor3) I(actionLevel3) Bdir(some object)}}"
@@ -4234,7 +4234,7 @@ func TestVisualOutputMultiLevelNesting(t *testing.T) {
 	fmt.Println("Generated output: " + output)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualMultilevelNesting.test")
+	content, err2 := ioutil.ReadFile("TestOutputVisualLinearMultilevelNesting.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4246,6 +4246,149 @@ func TestVisualOutputMultiLevelNesting(t *testing.T) {
 
 	// Compare to actual output
 	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests complex multi-level nesting in visual output (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestVisualOutputComplexMultiLevelNesting(t *testing.T) {
+
+	// Statement with multi-level nesting withe embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) {   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputVisualComplexMultilevelNesting.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests complex multi-level nesting in visual output (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNesting(t *testing.T) {
+
+	// Statement with multi-level nesting withe embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) {   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaComplexMultilevelNesting.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, nil, componentRefs, links, "650", separator)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
 		err2 := WriteToFile("errorOutput.error", output)

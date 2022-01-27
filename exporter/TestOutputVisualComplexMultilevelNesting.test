@@ -1,0 +1,35 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "actor1", "comp": "A", "level": 0},
+{"name": "aim1", "comp": "I", "level": 0},
+{
+"name": "Bdir",
+"level": 1, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 1},
+{"name": "aim2", "comp": "I", "level": 1},
+{"name": "OR",
+"children": [{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor3", "comp": "A", "level": 2},
+{"name": "aim3", "comp": "I", "level": 2},
+{"name": "something", "comp": "Bdir", "level": 2}
+]
+},
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor4", "comp": "A", "level": 2},
+{"name": "aim4", "comp": "I", "level": 2},
+{"name": "something else", "comp": "Bdir", "level": 2}
+]
+}], "comp": "Cac", "level": 1}
+]
+}
+]
+}

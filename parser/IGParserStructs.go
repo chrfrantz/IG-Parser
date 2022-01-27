@@ -116,15 +116,26 @@ const NESTED_COMBINATION =
 	// END OF COMBINATION
 	")"
 
-// Combination of combinations to represent multi-level nesting
-const NESTED_COMBINATIONS = COMPONENT_ANNOTATION_SYNTAX +
-	"\\" + LEFT_BRACE +
+// Inner part of nested combinations (i.e., without component syntax and/or termination) for flexible composition
+const INNER_NESTED_COMBINATIONS = "\\" + LEFT_BRACE +
 	"\\s*(" + NESTED_COMBINATION + "\\s+)+" +
 	"(" +
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	"\\s+(" + NESTED_COMBINATION + "\\s*)+" +
 	")+" +
 	"\\" + RIGHT_BRACE
+
+// Combination of combinations to represent multi-level nesting (does not require termination, i.e., could be embedded)
+// Used in testing
+const NESTED_COMBINATIONS = COMPONENT_ANNOTATION_SYNTAX +
+	INNER_NESTED_COMBINATIONS
+
+// Combinations of combinations for multi-combined component-level nesting, under consideration of termination for atomic matching
+// Used in production
+const NESTED_COMBINATIONS_TERMINATED = COMPONENT_ANNOTATION_SYNTAX +
+	"^" + // Ensure the tested statement only contains combinations, but no leading individual component (i.e., combination embedded in nested statement)
+	INNER_NESTED_COMBINATIONS +
+	"$" // Ensure immediate termination of combination with additional trailing components (which would imply nested statement with embedded combination)
 
 /*
 Escapes all special symbols to prepare those for input into regex expression
