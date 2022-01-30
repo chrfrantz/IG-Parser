@@ -91,51 +91,128 @@ COMPONENT_HEADER_SYNTAX +
 	"\\" + LEFT_BRACE + "\\s\\*" + WORDS_WITH_PARENTHESES + "\\s\\*\\" + RIGHT_BRACE
 
 // Basic combination of an arbitrary number of components, variably with or without parentheses (e.g., indication of precedence)
-const NESTED_COMBINATION =
+const PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS =
 // Start of alternatives
 "(" +
-	// combination with parentheses
+	// combination with parentheses, e.g., ( some words Cac{ ... } [AND] Cac{ ... } [AND] Cac{ ... } ...), or variably containing Cac ( ... ) for each element
 	"\\" + LEFT_PARENTHESIS +
-	OPTIONAL_WORDS_WITH_PARENTHESES +
-	"(" + FULL_COMPONENT_SYNTAX + ")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX + ")+" +
 	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
-	OPTIONAL_WORDS_WITH_PARENTHESES +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"(" + FULL_COMPONENT_SYNTAX + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES +
 	")*" +
 	"\\" + RIGHT_PARENTHESIS +
 	// OR
 	"|" +
-	// combinations without parentheses
+	// combinations without parentheses, e.g., some words Cac{ ... } [AND] Cac{ ... } ... (arbitrary length, but no closing parentheses)
 	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX + ")+" +
 	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
-	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX +
-	OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"(" + FULL_COMPONENT_SYNTAX + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
 	")*" +
 	// END OF COMBINATION
 	")"
 
-// Inner part of nested combinations (i.e., without component syntax and/or termination) for flexible composition
-const INNER_NESTED_COMBINATIONS = "\\" + LEFT_BRACE +
-	"\\s*(" + NESTED_COMBINATION + "\\s+)+" +
+// NOTE: From hereon it gets ugly, since multi-level nesting is represented iteratively to establish higher-order nesting - no recursion in regex
+
+// 2nd order braced combinations of combinations
+// (Inner part of nested combinations, including single combination or multiple combination pairs on either side
+// (e.g., { {Cac{ ... } [AND] Cac{ ... } } [XOR] { {Cac{ ... } [AND] Cac{ ... } }}),
+// but without leading component syntax and/or termination for flexible composition)
+const BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "\\" + LEFT_BRACE +
+	"\\s*(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "\\s+)+" +
 	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
-	"\\s+(" + NESTED_COMBINATION + "\\s*)+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\s+(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "\\s*)+" +
 	")+" +
 	"\\" + RIGHT_BRACE
 
-// Combination of combinations to represent multi-level nesting (does not require termination, i.e., could be embedded)
-// Used in testing
-const NESTED_COMBINATIONS = COMPONENT_ANNOTATION_SYNTAX +
-	INNER_NESTED_COMBINATIONS
+// 3rd order combinations of parenthesized or braced combinations, including combinations of combinations as components
+const BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "(\\" + LEFT_BRACE +
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
+	")" +
+	"\\s+)+" +
+	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\s+(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
+	")" +
+	"\\s*)+" +
+	")+" +
+	"\\" + RIGHT_BRACE + ")"
+
+// 4th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
+const BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS = "(\\" + LEFT_BRACE +
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
+	")" +
+	"\\s+)+" +
+	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\s+(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
+	")" +
+	"\\s*)+" +
+	")+" +
+	"\\" + RIGHT_BRACE + ")"
+
+// 5th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
+const BRACED_5TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS +
+	")" +
+	"\\s+)+" +
+	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\s+(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS +
+	")" +
+	"\\s*)+" +
+	")+" +
+	"\\" + RIGHT_BRACE + ")"
+
+// 6th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
+const BRACED_6TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_5TH_ORDER_COMBINATIONS +
+	")" +
+	"\\s+)+" +
+	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\s+(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_5TH_ORDER_COMBINATIONS +
+	")" +
+	"\\s*)+" +
+	")+" +
+	"\\" + RIGHT_BRACE + ")"
 
 // Combinations of combinations for multi-combined component-level nesting, under consideration of termination for atomic matching
-// Used in production
+// Used in PRODUCTION
 const NESTED_COMBINATIONS_TERMINATED = COMPONENT_ANNOTATION_SYNTAX +
 	"^" + // Ensure the tested statement only contains combinations, but no leading individual component (i.e., combination embedded in nested statement)
-	INNER_NESTED_COMBINATIONS +
+	BRACED_6TH_ORDER_COMBINATIONS +
 	"$" // Ensure immediate termination of combination with additional trailing components (which would imply nested statement with embedded combination)
+
+// Combination of combinations to represent multi-level nesting (does not require termination, i.e., could be embedded)
+// Used in TESTING
+const NESTED_COMBINATIONS = COMPONENT_ANNOTATION_SYNTAX +
+	BRACED_6TH_ORDER_COMBINATIONS
 
 /*
 Escapes all special symbols to prepare those for input into regex expression

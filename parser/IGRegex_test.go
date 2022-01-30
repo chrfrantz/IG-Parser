@@ -6,6 +6,9 @@ import (
 	"testing"
 )
 
+/*
+Testing basic component syntax, including suffices and annotations
+*/
 func TestSingleComponentSyntax(t *testing.T) {
 
 	r, err := regexp.Compile(FULL_COMPONENT_SYNTAX)
@@ -113,4 +116,46 @@ func TestComponentCombinations(t *testing.T) {
 		t.Fatal("Wrong number of matched elements. Should be 5, but is", len(res))
 	}
 
+}
+
+/*
+Tests complex statement combinations that reflect nesting characteristics.
+*/
+func TestComplexStatementCombinations(t *testing.T) {
+
+	text := "{Cac{A(actor1) I(aim1) Bdir(object1)} [AND] {Cac{A(actor2) I(aim2) Bdir(object2)} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+	//text = "{{Cac{A(actor1) I(aim1) Bdir(object1)} [AND] Cac{A(actor2) I(aim2) Bdir(object2)}}"
+	text = " {  Cac{A(actor1) I(aim1) Bdir(object1)}   [AND]   Cac{A(actor2)  I(aim2) Bdir(object2) }   } "
+	text += "{{Cac{ A(actor1) I(aim1) Bdir(object1) }   [XOR]  Cac{ fgfd A(actor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {Cac{A(actor2) I(aim2) Bdir(object2)} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+	text += " A(dfkflslkjfs) Cac(dlsgjslkdj) " // should not be found
+	text += "{{{Cac{ A(actor1) I(aim1) Bdir(object1) } [XOR] Cac{ A(actor1) I(aim1) Bdir(object1) }}   [XOR]  Cac{ fgfd A(actor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {{Cac{A(actor2) I(aim2) Bdir(object2)} dgjsksldgj[XOR] Cac{A(actor2) I(aim2) Bdir(object2)}} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+
+	r, err := regexp.Compile(BRACED_6TH_ORDER_COMBINATIONS)
+	if err != nil {
+		t.Fatal("Error during compilation:", err.Error())
+	}
+
+	res := r.FindAllString(text, -1)
+
+	if len(res) != 3 {
+		t.Fatal("Number of statements is not correct. Should be 3, but is", len(res))
+	}
+
+	firstElem := "{  Cac{A(actor1) I(aim1) Bdir(object1)}   [AND]   Cac{A(actor2)  I(aim2) Bdir(object2) }   }"
+
+	if res[0] != firstElem {
+		t.Fatal("Element incorrect. It should read '"+firstElem+"', but is", res[0])
+	}
+
+	secondElem := "{{Cac{ A(actor1) I(aim1) Bdir(object1) }   [XOR]  Cac{ fgfd A(actor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {Cac{A(actor2) I(aim2) Bdir(object2)} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+
+	if res[1] != secondElem {
+		t.Fatal("Element incorrect. It should read '"+secondElem+"', but is", res[1])
+	}
+
+	thirdElem := "{{{Cac{ A(actor1) I(aim1) Bdir(object1) } [XOR] Cac{ A(actor1) I(aim1) Bdir(object1) }}   [XOR]  Cac{ fgfd A(actor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {{Cac{A(actor2) I(aim2) Bdir(object2)} dgjsksldgj[XOR] Cac{A(actor2) I(aim2) Bdir(object2)}} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+
+	if res[2] != thirdElem {
+		t.Fatal("Element incorrect. It should read '"+thirdElem+"', but is", res[2])
+	}
 }

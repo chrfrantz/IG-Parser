@@ -1,0 +1,60 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "Managers", "comp": "A", "level": 0, "pos": "b", "children": [{"name": "Regional", "comp": "A,p", "level": 0}]},
+{"name": "may", "comp": "D", "level": 0},
+{"name": "AND",
+"children": [{"name": "review", "comp": "I", "level": 0},
+{"name": "XOR",
+"children": [{"name": "reward", "comp": "I", "level": 0},
+{"name": "sanction", "comp": "I", "level": 0}], "comp": "I", "level": 0}], "comp": "I", "level": 0},
+{"name": "bAND",
+"children": [{"name": "production [operations]", "comp": "Bdir", "level": 0, "pos": "b", "children": [{"name": "approved", "comp": "Bdir,p", "level": 0}, {"name": "certified", "comp": "Bdir,p", "level": 0}]}, {"name": "handling operations", "comp": "Bdir", "level": 0, "pos": "b", "children": [{"name": "approved", "comp": "Bdir,p", "level": 0}]},
+{"name": "certifying agents", "comp": "Bdir", "level": 0, "pos": "b", "children": [{"name": "approved", "comp": "Bdir,p", "level": 0}, {"name": "accredited", "comp": "Bdir,p", "level": 0}]}], "comp": "Bdir", "level": 0},
+{"name": "XOR",
+"children": [{"name": "AND",
+"children": [{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "Operations", "comp": "A", "level": 1},
+{"name": "OR",
+"children": [{"name": "non-compliant", "comp": "I", "level": 1},
+{"name": "violated", "comp": "I", "level": 1}], "comp": "I", "level": 1},
+{"name": "organic farming provisions", "comp": "Bdir", "level": 1}
+]
+},
+{"name": "OR",
+"children": [{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "Manager", "comp": "A", "level": 1},
+{"name": "has concluded", "comp": "I", "level": 1},
+{"name": "investigation", "comp": "Bdir", "level": 1}
+]
+},
+{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "actor5", "comp": "A", "level": 1},
+{"name": "act5", "comp": "I", "level": 1}
+]
+}], "comp": "Cac", "level": 0}], "comp": "Cac", "level": 0},
+{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "actor5", "comp": "A", "level": 1},
+{"name": "act5", "comp": "I", "level": 1}
+]
+}], "comp": "Cac", "level": 0},
+{"name": "bAND",
+"children": [{"name": "on behalf of the Secretary", "comp": "Cex", "level": 0},
+{"name": "XOR",
+"children": [{"name": "Act or", "comp": "Cex", "level": 0},
+{"name": "regulations in this part", "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0}
+]
+}
