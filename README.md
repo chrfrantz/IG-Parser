@@ -77,19 +77,24 @@ Combinations*. As indicated above, separate components of the same type are inte
 AND-combined. To explicitly specify the nature of the logical relationship (e.g., conjunction, 
 inclusive/exclusive disjunction), combinations need to be explicitly specified in the following format:
 
-`(componentAnnotation1 [logicalOperator] componentAnnotation2)`
+`componentSymbol(componentValue1 [logicalOperator] componentValue2)`
 
 Example: 
-* `(A(actor) [XOR] A(owner))`
-* `(I(report) [XOR] I(review))`
+* `A((actor [XOR] owner))`
+* `I((report [XOR] I(review))`
 
 Component combinations can be nested arbitrarily deep, i.e., any component can be a combination itself, for example:
 
-`(componentAnnotation1 [logicalOperator] (componentAnnotation2 [logicalOperator] componentAnnotation3))`
+`componentSymbol(componentValue1 [logicalOperator] (componentValue2 [logicalOperator] componentValue3))`
 
 Example:
-* `(A(certifier) [AND] (A(owner) [XOR] A(inspector)))` 
-* `((A(operator) [OR] A(certifier)) [AND] (A(owner) [XOR] A(inspector)))`
+* `A((certifier [AND] (owner [XOR] inspector)))` 
+* `A(((operator [OR] certifier) [AND] (owner [XOR] inspector)))`
+
+Where more than two components are linked by the same logical operator, the indication of precedence is optional. 
+
+Example:
+* `A((certifier [AND] owner [AND] inspector))`
 
 Supported logical operators:
 
@@ -160,6 +165,10 @@ Unlike the first example, the following one will result in an error due to missi
 
 `Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() }`
 
+Nesting can be of multi levels, i.e., similar to component combinations, braces can be used to signal precedence when linking multiple component-level nested statements.
+
+Example: `{ Cac{ A(), I(), Cex() } [AND] { Cac{ A(), I(), Cex() } [XOR] Cac{ A(), I(), Cex() } } }
+
 Note that non-nested and nested components can be used in the same statement 
 (e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ), and are implicitly AND-combined.
 
@@ -206,16 +215,18 @@ In the following, you will find selected examples that highlight the practical u
   * `A(Farmer) D(must) I(comply) with Bdir(Organic Farming provisions) Cac{A(Farmer) I(has lodged) for Bdir(application) Bdir,p(certification) Cex(successfully) with the Bind(Organic Farming Program) Cac{E(Organic Program) F(covers) P,p(relevant) P(region)}}`
 * Component-level nesting on various components (e.g., Bdir and Cac) and combinations of nested statements (Cac): 
   * `A(Program Manager) D(may) I(administer) Bdir(sanctions) {Cac{A(Program Manager) I(suspects) Bdir{A(farmer) I((violates [OR] does not comply)) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}`
+  * * *Note: This statement is currently not fully supported in the current parser version.*
 * Complex statement; showcasing combined use of various features (e.g., component-level combinations, nested statement combinations (activation conditions, Or else)): 
   * `A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), D(must) I(inspect), I((review [AND] (revise [AND] resubmit))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) if {Cac{A(Programme Manager) I((suspects [OR] establishes)) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}, or else {O{A,p(Manager's) A(supervisor) D(may) I((suspend [XOR] revoke)) Bdir,p(Program Manager's) Bdir(authority)} [XOR] O{A(regional board) D(may) I((warn [OR] fine)) Bdir,p(violating) Bdir(Program Manager)}}`
+  * *Note: This statement is currently not fully supported in the current parser version.*
 * Object-Property Relationships; showcasing linkage of private nodes with specific component instances (especially where implicit component-level combinations occur), alongside a shared property that apply to both objects (note that for this example, the AND-linkage between the different direct objects is implicit):
   * `A,p(Certified) A(agent) D(must) I(request) Bdir,p(independently) Bdir1,p(authorized) Bdir1(report) and Bdir2,p(audited) Bdir2(financial documents).`
 * Semantic annotations; showcasing the basic use of annotations on arbitrary components:
   * `A,p[property=qualitative](Certified) A[role=responsible](organic farmers) D[stringency=obligation](must) I[type=act](submit) Bdir[type=inanimate](report) to Bind[role=authority](Organic Program Representative) Cac[context=tim](at the end of each year).`
 
  ### Common issues
-  * Parentheses/braces need to match. The parser calls out if a mismatch exists. 
-  * Ensure whitespace between symbols and logical operators to ensure correct parsing. (Note: The parser has builtin tolerance toward such issues, but cannot handle this under all circumstances.)
+  * Parentheses/braces need to match. The parser calls out if a mismatch exists. Parentheses are applied when components are specified (or combinations thereof), and braces are used to signal component-level nesting (i.e., statements embedded within components) and statement combinations (i.e., combinations of component-level nested statements).
+  * Ensure whitespace between symbols and logical operators to ensure correct parsing. However, excess words between parentheses and logical operator are permissible. (Note: The parser has builtin tolerance toward various issues, but may not handle this correctly under all circumstances.)
     * This example works: `A(actor) I(act)`
     * This one is incorrect: `A(actor)I(act)` due to missing whitespace.
     * This example works: `(A(actor1) [AND] A(actor2))`
