@@ -61,7 +61,15 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 		"\"" + TREE_PRINTER_SEPARATOR
 
 	// Append nesting level for every node (includes parent node of potential nested statement)
-	out += TREE_PRINTER_KEY_NESTING_LEVEL + TREE_PRINTER_EQUALS + strconv.Itoa(nestingLevel) + ", " + TREE_PRINTER_LINEBREAK
+	out += TREE_PRINTER_KEY_NESTING_LEVEL + TREE_PRINTER_EQUALS + strconv.Itoa(nestingLevel) + ", "
+
+	// Append annotations for root node if activated (and existing)
+	if includeAnnotations {
+		out = parent.appendAnnotations(out, false, true)
+	}
+
+	// Line break to separate children visually
+	out += TREE_PRINTER_LINEBREAK
 
 	// Indicates whether children have already been added below the top-level string
 	childrenPresent := false
@@ -268,9 +276,9 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 				}
 				out = outTmp
 
-				// Append annotations
+				// Append annotations (if existing)
 				if includeAnnotations {
-					out = n.appendAnnotations(out)
+					out = n.appendAnnotations(out, true, false)
 				}
 
 				// Close entry
@@ -430,12 +438,20 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 
 /*
 Appends potentially existing annotations to node-specific output.
+Input is the string to be appended to (stringToAppendTo), as well as a parameter indicating whether
+termination separator (", ") should be added (either prepended, appended, or both) if annotations are added.
 */
-func (n *Node) appendAnnotations(stringToAppendTo string) string {
+func (n *Node) appendAnnotations(stringToAppendTo string, prependSeparator bool, appendSeparator bool) string {
 	// Append potential annotations (while replacing specific conflicting symbols)
-	if n.GetAnnotations() != nil {
-		stringToAppendTo += ", " + TREE_PRINTER_KEY_ANNOTATIONS + TREE_PRINTER_EQUALS
+	if n != nil && n.GetAnnotations() != nil {
+		if prependSeparator {
+			stringToAppendTo += ", "
+		}
+		stringToAppendTo += TREE_PRINTER_KEY_ANNOTATIONS + TREE_PRINTER_EQUALS
 		stringToAppendTo += "\"" + shared.EscapeSymbolsForExport(n.GetAnnotations().(string)) + "\""
+		if appendSeparator {
+			stringToAppendTo += ", "
+		}
 	}
 	// Return potentially extended string
 	return stringToAppendTo

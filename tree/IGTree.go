@@ -1233,7 +1233,7 @@ those are inherited.
 func (n *Node) GetAnnotations() interface{} {
 
 	// If annotations of nodes are empty
-	if n.Parent != nil && (n.Annotations == nil || len(n.Annotations.(string)) == 0) {
+	if n != nil && n.Parent != nil && (n.Annotations == nil || len(n.Annotations.(string)) == 0) {
 		// Check for parent entries
 		if n.Parent != nil && n.Parent.LogicalOperator != SAND_BETWEEN_COMPONENTS {
 			// Delegate to parent component

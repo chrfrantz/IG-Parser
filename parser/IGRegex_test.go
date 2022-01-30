@@ -123,9 +123,7 @@ Tests complex statement combinations that reflect nesting characteristics.
 */
 func TestComplexStatementCombinations(t *testing.T) {
 
-	text := "{Cac{A(actor1) I(aim1) Bdir(object1)} [AND] {Cac{A(actor2) I(aim2) Bdir(object2)} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
-	//text = "{{Cac{A(actor1) I(aim1) Bdir(object1)} [AND] Cac{A(actor2) I(aim2) Bdir(object2)}}"
-	text = " {  Cac{A(actor1) I(aim1) Bdir(object1)}   [AND]   Cac{A(actor2)  I(aim2) Bdir(object2) }   } "
+	text := " {  Cac{A(actor1) I(aim1) Bdir(object1)}   [AND]   Cac{A(actor2)  I(aim2) Bdir(object2) }   } "
 	text += "{{Cac{ A(actor1) I(aim1) Bdir(object1) }   [XOR]  Cac{ fgfd A(actor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {Cac{A(actor2) I(aim2) Bdir(object2)} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
 	text += " A(dfkflslkjfs) Cac(dlsgjslkdj) " // should not be found
 	text += "{{{Cac{ A(actor1) I(aim1) Bdir(object1) } [XOR] Cac{ A(actor1) I(aim1) Bdir(object1) }}   [XOR]  Cac{ fgfd A(actor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {{Cac{A(actor2) I(aim2) Bdir(object2)} dgjsksldgj[XOR] Cac{A(actor2) I(aim2) Bdir(object2)}} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
