@@ -3018,10 +3018,10 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 }
 
 /*
-Tests for proper replacement of special symbols for preprocessing Google Sheets output. Includes
+Tests for proper replacement of different types of quotations marks for preprocessing Google Sheets output. Includes
 complexity of previous tests.
 */
-func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
+func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbols(t *testing.T) {
 
 	text := "A,p(National Organic Program's) A(\"Program Manager\"), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -3080,7 +3080,7 @@ func TestStaticTabularOutputBasicStatementSpecialSymbols(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementSpecialSymbolsGoogleSheets.test")
+	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementEscapedQuotationMarksGoogleSheets.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4204,11 +4204,65 @@ func TestVisualOutputEscapingSymbols(t *testing.T) {
 }
 
 /*
+Tests special symbols parsing for visual output.
+*/
+func TestVisualOutputSpecialSymbols(t *testing.T) {
+
+	// Statement with quotation marks and internal parentheses
+	text := "The E(cor#po$ration) M(sh<all) F(b>e) P[1%25](a \"Type B\" cor=poration) Cex[#<=>27.14](pur.suant to Se:ct!ion 201(b) of the N;ew York St,ate £Not-for-Profit €Corporatio$n Law.)"
+
+	// Activate annotations
+	SetIncludeAnnotations(true)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestVisualOutputSpecialSymbols.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
 Tests linear multi-level nesting in visual output (i.e., Cac{Cac{Cac{}}}).
 */
 func TestVisualOutputLinearMultiLevelNesting(t *testing.T) {
 
-	// Statement with quotation marks and internal parentheses
+	// Statement with multiple levels of linear nesting (i.e., no combinations)
 	text := "A,p(First) A(Actor) I(action1) I(action2) Bdir{A(actor2) I(actionLevel2) Cac{A(actor3) I(actionLevel3) Bdir(some object)}}"
 
 	// Deactivate annotations

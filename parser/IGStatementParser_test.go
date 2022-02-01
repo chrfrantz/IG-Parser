@@ -983,7 +983,7 @@ Tests parsing of special characters in regular and nested components
 */
 func TestSpecialCharacters(t *testing.T) {
 
-	input := "A(A&dsisgj=) I(=#) Bdir((l$ef% [AND] Ri@g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg£jd*s)) Cac{A(/sd-g$s%d) D(s%k£g=js) I(s§d€k+l/g#j!ds)}"
+	input := "A(A&dsisgj=) I(=#) Bdir((l$.ef% [AND] Ri@,g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg£jd*s)) Cac{A(/sd<-g$s%d) D(s%k£g=>js) I(s§d€k+l/g#j!ds)}"
 
 	s, err := ParseStatement(input)
 
@@ -1004,11 +1004,11 @@ func TestSpecialCharacters(t *testing.T) {
 		t.Fatal("Failed to detect Aim")
 	}
 
-	if s.DirectObject.Left.Entry != "l$ef%" {
+	if s.DirectObject.Left.Entry != "l$.ef%" {
 		t.Fatal("Failed to detect Direct object left")
 	}
 
-	if s.DirectObject.Right.Entry != "Ri@g¤#" {
+	if s.DirectObject.Right.Entry != "Ri@,g¤#" {
 		t.Fatal("Failed to detect Direct object right")
 	}
 
@@ -1020,11 +1020,11 @@ func TestSpecialCharacters(t *testing.T) {
 		t.Fatal("Failed to detect Indirect object right")
 	}
 
-	if s.ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "/sd-g$s%d" {
+	if s.ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "/sd<-g$s%d" {
 		t.Fatal("Failed to detect nested Attribute")
 	}
 
-	if s.ActivationConditionComplex.Entry.(tree.Statement).Deontic.Entry != "s%k£g=js" {
+	if s.ActivationConditionComplex.Entry.(tree.Statement).Deontic.Entry != "s%k£g=>js" {
 		t.Fatal("Failed to detect nested Deontic")
 	}
 
