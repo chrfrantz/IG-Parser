@@ -4509,6 +4509,60 @@ func TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesA
 }
 
 /*
+Tests 2nd-order nested activation condition combinations that include properties in all nested statements.
+*/
+func TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties(t *testing.T) {
+
+	// Statement with 2nd-order nesting with statement combinations on activation conditions, and that includes properties in all nested statements
+	text := "{{Cac{A(actor1) I(act1) Bdir,p(prop1) Bdir(bdir1) Cex(cex1)}  [OR] Cac{A(actor2) I(act2) Bdir,p(prop2) Bdir(bdir2) Cex(cex2)}} [AND] Cac{A(actor2) I(act2) Bdir,p(prop2) Bdir(bdir2) Cex(cex2)}}"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
 Tests higher-order statement combinations ({Cac{ ... } [AND] Cac{ ... } [XOR] {Cac{ ... } [AND] Cac{ ... }}}) or component-level nesting combinations in visual output
 using an extended version of the default example statement.
 NOTE: Nesting works until seven levels at this stage
