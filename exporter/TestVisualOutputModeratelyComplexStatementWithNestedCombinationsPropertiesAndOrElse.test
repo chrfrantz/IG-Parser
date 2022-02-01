@@ -1,0 +1,67 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 0, "pos": "b", "children": [{"name": "National Organic Program's", "comp": "A,p", "level": 0}]},
+{"name": "must", "comp": "D", "level": 0},
+{"name": "bAND",
+"children": [{"name": "inspect", "comp": "I", "level": 0},
+{"name": "AND",
+"children": [{"name": "review", "comp": "I", "level": 0},
+{"name": "revise", "comp": "I", "level": 0}, {"name": "resubmit", "comp": "I", "level": 0}], "comp": "I", "level": 0}], "comp": "I", "level": 0},
+{"name": "AND",
+"children": [{"name": "certified production and", "comp": "Bdir", "level": 0}, {"name": "handling operations and", "comp": "Bdir", "level": 0},
+{"name": "accredited certifying agents", "comp": "Bdir", "level": 0}], "comp": "Bdir", "level": 0},
+{"name": "AND",
+"children": [{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 1},
+{"name": "OR",
+"children": [{"name": "suspects", "comp": "I", "level": 1},
+{"name": "establishes", "comp": "I", "level": 1}], "comp": "I", "level": 1},
+{"name": "violations", "comp": "Bdir", "level": 1}
+]
+},
+{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "Program Manager", "comp": "E", "level": 1},
+{"name": "is authorized", "comp": "F", "level": 1},
+{"name": "region", "comp": "P", "level": 1, "pos": "b", "children": [{"name": "relevant", "comp": "P,p", "level": 1}]}
+]
+}], "comp": "Cac", "level": 0},
+{"name": "bAND",
+"children": [{"name": "on behalf of the Secretary", "comp": "Cex", "level": 0},
+{"name": "XOR",
+"children": [{"name": "Act or", "comp": "Cex", "level": 0},
+{"name": "regulations in this part", "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0},
+{"name": "XOR",
+"children": [{
+"name": "O",
+"level": 1, 
+"children": [
+{"name": "supervisor", "comp": "A", "level": 1, "pos": "b", "children": [{"name": "Manager's", "comp": "A,p", "level": 1}]},
+{"name": "may", "comp": "D", "level": 1},
+{"name": "XOR",
+"children": [{"name": "suspend", "comp": "I", "level": 1},
+{"name": "revoke", "comp": "I", "level": 1}], "comp": "I", "level": 1},
+{"name": "authority", "comp": "Bdir", "level": 1, "pos": "b", "children": [{"name": "Program Manager's", "comp": "Bdir,p", "level": 1}]}
+]
+},
+{
+"name": "O",
+"level": 1, 
+"children": [
+{"name": "regional board", "comp": "A", "level": 1},
+{"name": "may", "comp": "D", "level": 1},
+{"name": "OR",
+"children": [{"name": "warn", "comp": "I", "level": 1},
+{"name": "fine", "comp": "I", "level": 1}], "comp": "I", "level": 1},
+{"name": "Program Manager", "comp": "Bdir", "level": 1, "pos": "b", "children": [{"name": "violating", "comp": "Bdir,p", "level": 1}]}
+]
+}], "comp": "O", "level": 0}
+]
+}

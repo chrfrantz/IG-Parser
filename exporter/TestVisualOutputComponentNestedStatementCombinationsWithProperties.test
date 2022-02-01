@@ -1,0 +1,27 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "AND",
+"children": [{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 1, "pos": "b", "children": [{"name": "Resident", "comp": "A,p", "level": 1}]},
+{"name": "OR",
+"children": [{"name": "suspects", "comp": "I", "level": 1},
+{"name": "establishes", "comp": "I", "level": 1}], "comp": "I", "level": 1},
+{"name": "violations", "comp": "Bdir", "level": 1}
+]
+},
+{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "Program Manager", "comp": "E", "level": 1},
+{"name": "is authorized", "comp": "F", "level": 1},
+{"name": "region", "comp": "P", "level": 1, "pos": "b", "children": [{"name": "relevant", "comp": "P,p", "level": 1}]}
+]
+}], "comp": "Cac", "level": 0}
+]
+}

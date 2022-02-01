@@ -216,7 +216,7 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		prefix := ""
 		isProperty := false
 
-		//TODO: Test prefix for nested statements
+		// Test prefix for nested statements (and remove is present before further exploring component)
 		leadIdx := strings.Index(v, LEFT_BRACE)
 		if leadIdx != -1 {
 			prefix = v[:leadIdx]
@@ -272,7 +272,7 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		// Extracting suffices and annotations
 		suffix, annotation, _, err := extractSuffixAndAnnotations(component, isProperty, v, LEFT_BRACE, RIGHT_BRACE)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			fmt.Print("Error during extraction of suffices and annotations: " + err.ErrorCode)
+			fmt.Println("Error during extraction of suffices and annotations on component '" + component + "': " + err.ErrorCode)
 			return err
 		}
 
@@ -430,15 +430,22 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 		// Parse all entries in tree from string to statement (walks through entire tree linked to node)
 		err := combo.ParseAllEntries(func(oldValue string) (tree.Statement, tree.ParsingError) {
 
-			// Extract component type
-			compType, prop, err := extractComponentType(oldValue)
+			// Check whether the combination element contains a nested structure ...
+			tempComponentType := oldValue
+			if strings.Contains(oldValue, LEFT_BRACE) {
+				// ... and remove the nested element prior to parsing
+				tempComponentType = oldValue[:strings.Index(oldValue, LEFT_BRACE)]
+			}
+
+			// Extract component type (after stripping potential nested statements)
+			compType, prop, err := extractComponentType(tempComponentType)
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
 				return tree.Statement{}, err
 			}
 			// Extracting suffices and annotations
 			suffix, annotation, content, err := extractSuffixAndAnnotations(compType, prop, oldValue, LEFT_BRACE, RIGHT_BRACE)
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
-				fmt.Print("Error during extraction of suffices and annotations: " + err.ErrorCode)
+				fmt.Println("Error during extraction of suffices and annotations of component '" + compType + "': " + err.ErrorCode)
 				return tree.Statement{}, err
 			}
 
@@ -1006,7 +1013,6 @@ func extractSuffixAndAnnotations(component string, propertyComponent bool, input
 		Println("Found annotation in component:", res)
 		// Extract semantic annotation string
 		res = res[:len(res)-1]
-		//Println("Annotations:", res)
 		pos := strings.Index(strippedInput, res)
 		suffix := ""
 
@@ -1015,13 +1021,13 @@ func extractSuffixAndAnnotations(component string, propertyComponent bool, input
 			propIdx := strings.Index(strippedInput[:pos], tree.PROPERTY_SYNTAX_SUFFIX)
 			if propIdx == -1 {
 				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
-					tree.PROPERTY_SYNTAX_SUFFIX + " spread over string (e.g., A1,p) could not be found in input " + strippedInput}
+					tree.PROPERTY_SYNTAX_SUFFIX + " (under consideration of potential suffix (e.g., A1,p)) could not be found in input " + strippedInput}
 			}
 			// Find original component identifier
 			leadIdx := strings.Index(component, tree.PROPERTY_SYNTAX_SUFFIX)
 			if leadIdx == -1 {
 				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
-					tree.PROPERTY_SYNTAX_SUFFIX + " as concise prefix (e.g., A,p) could not be found in input " + strippedInput}
+					tree.PROPERTY_SYNTAX_SUFFIX + " (e.g., A,p) could not be found in input " + strippedInput}
 			}
 			if propIdx > leadIdx {
 				// Extract difference between index in original component and new identifier
@@ -1052,13 +1058,13 @@ func extractSuffixAndAnnotations(component string, propertyComponent bool, input
 			propIdx := strings.Index(strippedInput[:contentStartPos], tree.PROPERTY_SYNTAX_SUFFIX)
 			if propIdx == -1 {
 				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
-					tree.PROPERTY_SYNTAX_SUFFIX + " spread over string (e.g., A1,p) could not be found in input " + strippedInput}
+					tree.PROPERTY_SYNTAX_SUFFIX + " (under consideration of potential suffix (e.g., A1,p)) could not be found in input " + strippedInput}
 			}
 			// Find original component identifier
 			leadIdx := strings.Index(component, tree.PROPERTY_SYNTAX_SUFFIX)
 			if leadIdx == -1 {
 				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
-					tree.PROPERTY_SYNTAX_SUFFIX + " as concise prefix (e.g., A,p) could not be found in input " + strippedInput}
+					tree.PROPERTY_SYNTAX_SUFFIX + " (e.g., A,p) could not be found in input " + strippedInput}
 			}
 			if propIdx > leadIdx {
 				// Extract difference between index in original component and new identifier

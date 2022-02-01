@@ -1190,16 +1190,25 @@ func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) 
 		// Execute actual function
 		newEntry, err := function(n.Entry.(string))
 		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
 			return err
 		}
-		// and reassign parsed element
+		// and reassign parsed element (i.e., substitute previous string element with node representation of statement)
 		n.Entry = newEntry
 	}
 	if !n.Left.IsNil() {
-		n.Left.ParseAllEntries(function)
+		err := n.Left.ParseAllEntries(function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing left-hand nested statement.")
+			return err
+		}
 	}
 	if !n.Right.IsNil() {
-		n.Right.ParseAllEntries(function)
+		err := n.Right.ParseAllEntries(function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing right-hand nested statement.")
+			return err
+		}
 	}
 	return ParsingError{ErrorCode: PARSING_NO_ERROR}
 }
