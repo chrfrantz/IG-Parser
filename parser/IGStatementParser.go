@@ -192,6 +192,10 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 	if len(nestedStmts) > 0 {
 		log.Println("Found nested statements ...")
 		err = parseNestedStatements(&s, nestedStmts)
+		// Check whether nested statements have been ignored entirely
+		if err.ErrorCode == tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
+			return s, err
+		}
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return s, err
 		}
@@ -203,13 +207,23 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 }
 
 /*
-Parses nested statements (but not combinations) and attaches those to the top-level statement
+Parses nested statements (but not combinations) and attaches those to the top-level statement.
+Returns an error other than tree.PARSING_NO_ERROR if no issues during parsing.
+Returns err tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS if parsing did not pose problems per se,
+but elements have been ignored during parsing (warranting syntax review). In this case, the statements of concern
+are returned in a string array contained in the error object.
 */
 func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string) tree.ParsingError {
 
+	// Copy reference statement for comparison (to check whether modification took place based on parsed element)
+	cachedStmtPriorToNestedParsing := stmtToAttachTo.String()
+
+	// Array to keep track of ignored statements
+	nestedStmtsNotConsideredDuringParsing := make([]string, 0)
+
 	for _, v := range nestedStmts {
 
-		log.Println("Found nested statement")
+		log.Println("Processing nested statement: ", v)
 		// Extract nested statement content and parse
 
 		component := ""
@@ -283,7 +297,7 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 
 		stmt, errStmt := ParseStatement(v[strings.Index(v, LEFT_BRACE)+1 : strings.LastIndex(v, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
-			fmt.Print("Error when parsing nested statements: " + errStmt.ErrorCode)
+			fmt.Println("Error when parsing nested statements: ", errStmt.Error())
 			return errStmt
 		}
 
@@ -357,7 +371,25 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		}
+
+		// Check if the iterated nested statement has been ignored entirely --> indicates failed detection as nested (as opposed to mere parsing problem)
+		if cachedStmtPriorToNestedParsing == stmtToAttachTo.String() {
+			log.Println("Nested statement has not been considered during parsing:", v)
+			nestedStmtsNotConsideredDuringParsing = append(nestedStmtsNotConsideredDuringParsing, v)
+		}
+		// Overwrite cached content in any case to ensure capturing further statement potentially ignored during parsing
+		cachedStmtPriorToNestedParsing = stmtToAttachTo.String()
+
 	}
+	if len(nestedStmtsNotConsideredDuringParsing) > 0 {
+		// Indicate if elements have been ignored entirely (and return info to screen), but no further parsing errors per se
+		msg := "Selected nested elements have been ignored during parsing: '" + strings.Join(nestedStmtsNotConsideredDuringParsing[:], ",") +
+			"'. Please review the input coding accordingly."
+		return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS,
+			ErrorMessage:         msg,
+			ErrorIgnoredElements: nestedStmtsNotConsideredDuringParsing}
+	}
+	// if parsing worked out and if no elements have been ignored
 	return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 

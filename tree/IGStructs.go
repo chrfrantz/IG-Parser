@@ -447,6 +447,9 @@ const PARSING_ERROR_LOGICAL_OPERATOR_OUTSIDE_COMBINATION = "LOGICAL_OPERATOR_OUT
 // Indicates that there were no issues during parsing
 const PARSING_NO_ERROR = "NO_ERROR_DURING_PARSING"
 
+// Indicates nested statements ignored during coding (relevant when parsing nested statements) - in contrast to #PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING
+const PARSING_ERROR_IGNORED_NESTED_ELEMENTS = "IGNORED_ELEMENTS_NESTED_STATEMENT_PARSING"
+
 // Signals that no combinations were found in input
 const PARSING_NO_COMBINATIONS = "NO_COMBINATIONS_IN_INPUT"
 
@@ -462,8 +465,8 @@ const PARSING_ERROR_IMBALANCED_PARENTHESES = "IMBALANCED_PARENTHESES"
 // Indicates that component was not found during preprocessing
 const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 
-// Indicates ignored elements during parsing
-const PARSING_ERROR_IGNORED_ELEMENTS = "IGNORED_ELEMENTS"
+// Indicates ignored elements during parsing (applies when parsing into tree) - in contrast to #PARSING_ERROR_IGNORED_NESTED_ELEMENTS
+const PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING = "IGNORED_ELEMENTS_NODE_PARSING"
 
 // Indicates problems when generating logical operator references
 const PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION = "LOGICAL_EXPRESSION_GENERATION"

@@ -128,6 +128,7 @@ func TestComplexStatementCombinations(t *testing.T) {
 	text += " A(dfkflslkjfs) Cac(dlsgjslkdj) " // should not be found
 	text += "{{{Cac{ A(actor1) I(aim1) Bdir(object1) } [XOR] Cac{ A(actor1) I(aim1) Bdir(object1) }}   [XOR]  Cac{ fgfd A(actor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {{Cac{A(actor2) I(aim2) Bdir(object2)} dgjsksldgj[XOR] Cac{A(actor2) I(aim2) Bdir(object2)}} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
 	text += "{Cac{A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac(condition2)}} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}"
+	text += "{Cac{A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac(condition2)}}, [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}"
 
 	r, err := regexp.Compile(BRACED_6TH_ORDER_COMBINATIONS)
 	if err != nil {
@@ -136,7 +137,7 @@ func TestComplexStatementCombinations(t *testing.T) {
 
 	res := r.FindAllString(text, -1)
 
-	if len(res) != 4 {
+	if len(res) != 5 {
 		t.Fatal("Number of statements is not correct. Should be 3, but is", len(res))
 	}
 
@@ -162,5 +163,12 @@ func TestComplexStatementCombinations(t *testing.T) {
 
 	if res[3] != fourthElem {
 		t.Fatal("Element incorrect. It should read '"+fourthElem+"', but is", res[3])
+	}
+
+	// Tests for tolerance toward comma following logical operator
+	fifthElem := "{Cac{A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac(condition2)}}, [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}"
+
+	if res[4] != fifthElem {
+		t.Fatal("Element incorrect. It should read '"+fifthElem+"', but is", res[4])
 	}
 }

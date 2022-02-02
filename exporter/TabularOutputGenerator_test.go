@@ -4781,4 +4781,58 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testi
 
 }
 
+/*
+Tests the presence of excess symbols in input and parser tolerance (based on Regex).
+*/
+func TestVisualOutputExcessiveSymbolsInNestedComponentCombinations(t *testing.T) {
+
+	// Standard book statement, but including excess comma preceding logical operator
+	text := "The A(Program Manager) D(may) I(initiate) Bdir,p((suspension [XOR] revocation)) Bdir(proceedings) against a Bind,p(certified) Bind(operation): {Cac{when the A(Program Manager) I(believes) that Bdir{a A,p(certified) A(operation) I((has violated [OR] is not in compliance)) Bdir(with (the Act [OR] regulations in this part))}}, [OR] Cac{when a A((certifying agent [OR] State organic program’s governing State official)) I(fails to enforce) Bdir((the Act [OR] regulations in this part)).}}"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestVisualOutputExcessiveSymbolsInNestedComponentCombinations.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
 // test with invalid statement and empty input nodes, unbalanced parentheses, missing ID

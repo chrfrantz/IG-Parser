@@ -169,11 +169,11 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 
 				// Left side (potentially modifying input string)
 				leftCombos, leftNonShared, left, err := detectCombinations(left, leftPar, rightPar)
-				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
+				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING {
 					log.Println("Error when parsing left side: " + err.ErrorMessage)
 					return &node, input, err
 				}
-				if err.ErrorCode == tree.PARSING_ERROR_IGNORED_ELEMENTS {
+				if err.ErrorCode == tree.PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING {
 					log.Print("Warning: Discarded elements during deep left parsing: " + tree.PrintArray(err.ErrorIgnoredElements))
 				}
 
@@ -242,11 +242,11 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 
 				// Right side (potentially modifying input string)
 				rightCombos, rightNonShared, right, err := detectCombinations(right, leftPar, rightPar)
-				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS {
+				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING {
 					log.Println("Error when parsing right side: " + err.ErrorMessage)
 					return &node, input, err
 				}
-				if err.ErrorCode == tree.PARSING_ERROR_IGNORED_ELEMENTS {
+				if err.ErrorCode == tree.PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING {
 					log.Print("Warning: Discarded elements during deep right parsing: " + tree.PrintArray(err.ErrorIgnoredElements))
 				}
 
@@ -744,7 +744,7 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 			errorString += suffix
 		}
 		Println("Returning expression (ignored elements: " + errorString + "): " + expression)
-		return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IGNORED_ELEMENTS,
+		return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING,
 			ErrorMessage: "Parsing was successful, but expression parts were ignored during coding (" + errorString + "). " +
 			"This commonly occurs when logical operators between simple strings and combinations are omitted " +
 			"(e.g., ... some string (left [AND] right) ...) and not wrapped by parentheses to signal shared elements. " +

@@ -1,0 +1,48 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 0},
+{"name": "may", "comp": "D", "level": 0},
+{"name": "initiate", "comp": "I", "level": 0},
+{"name": "proceedings", "comp": "Bdir", "level": 0, "pos": "b", "children": [{"name": "XOR",
+"children": [{"name": "suspension", "comp": "Bdir,p", "level": 0},
+{"name": "revocation", "comp": "Bdir,p", "level": 0}], "comp": "Bdir,p", "level": 0}]},
+{"name": "operation", "comp": "Bind", "level": 0, "pos": "b", "children": [{"name": "certified", "comp": "Bind,p", "level": 0}]},
+{"name": "OR",
+"children": [{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 1},
+{"name": "believes", "comp": "I", "level": 1},
+{
+"name": "Bdir",
+"level": 2, 
+"children": [
+{"name": "operation", "comp": "A", "level": 2, "pos": "b", "children": [{"name": "certified", "comp": "A,p", "level": 2}]},
+{"name": "OR",
+"children": [{"name": "has violated", "comp": "I", "level": 2},
+{"name": "is not in compliance", "comp": "I", "level": 2}], "comp": "I", "level": 2},
+{"name": "OR",
+"children": [{"name": "the Act", "comp": "Bdir", "level": 2},
+{"name": "regulations in this part", "comp": "Bdir", "level": 2}], "comp": "Bdir", "level": 2}
+]
+}
+]
+},
+{
+"name": "Cac",
+"level": 1, 
+"children": [
+{"name": "OR",
+"children": [{"name": "certifying agent", "comp": "A", "level": 1},
+{"name": "State organic program’s governing State official", "comp": "A", "level": 1}], "comp": "A", "level": 1},
+{"name": "fails to enforce", "comp": "I", "level": 1},
+{"name": "OR",
+"children": [{"name": "the Act", "comp": "Bdir", "level": 1},
+{"name": "regulations in this part", "comp": "Bdir", "level": 1}], "comp": "Bdir", "level": 1}
+]
+}], "comp": "Cac", "level": 0}
+]
+}

@@ -18,7 +18,7 @@ const RIGHT_BRACKET = "]"
 const LOGICAL_OPERATORS = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
 
 // Special symbols supported in content, suffix and annotations (wide range of special characters, as well as +, -, /, *, %, &, =, currency symbols, periods (.), relative operators (<,>), etc., BUT not braces!)
-const SPECIAL_SYMBOLS = "',;.<>+:\\-*/%&=$£€¤§\"#!`\\|"
+const SPECIAL_SYMBOLS = "'’,;.<>+:\\-*/%&=$£€¤§\"#!`\\|"
 
 // Word pattern for regular expressions (including parentheses, spaces, square brackets, and all symbols contained in SPECIAL_SYMBOLS).
 const WORDS_WITH_PARENTHESES = "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "\\(\\)\\[\\]\\s]+"
@@ -148,7 +148,7 @@ const BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "\\" + LEFT_
 const BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "(\\" + LEFT_BRACE +
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
-	")" +
+	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
 	"\\s+)+" +
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
@@ -165,7 +165,7 @@ const BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENT
 const BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS = "(\\" + LEFT_BRACE +
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
-	")" +
+	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
 	"\\s+)+" +
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
@@ -182,7 +182,7 @@ const BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATI
 const BRACED_5TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS +
-	")" +
+	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
 	"\\s+)+" +
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
@@ -199,7 +199,7 @@ const BRACED_5TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
 const BRACED_6TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_5TH_ORDER_COMBINATIONS +
-	")" +
+	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
 	"\\s+)+" +
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator

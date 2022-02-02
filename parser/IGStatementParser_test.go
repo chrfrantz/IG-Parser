@@ -1921,6 +1921,31 @@ func TestComponentPropertyRelationshipResolution(t *testing.T) {
 }
 
 /*
+Tests the proper error response when parsing nested statements (leading to the nested elements being ignored).
+Here, this is provoked by excessive braces in input.
+*/
+func TestNestedStatementParsingError(t *testing.T) {
+
+	// Statement with excess braces around first activation condition element (i.e, Cac{{ <-- should only be one)
+	text := "{Cac{{when the A(Program Manager) I(believes) that Bdir{a A,p(certified) A(operation) I((has violated [OR] is not in compliance))" +
+		" Bdir(with (the Act [OR] regulations in this part))}}}, [OR] Cac{when a A((certifying agent [OR] State organic program’s governing State official)) I(fails to enforce) Bdir((the Act [OR] regulations in this part)).}}"
+
+	res, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
+		t.Fatal("Parsing should have caused error "+tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+", but returned error:", err)
+	}
+
+	if err.ErrorIgnoredElements == nil || len(err.ErrorIgnoredElements) == 0 ||
+		strings.Join(err.ErrorIgnoredElements[:], ",") != "{when the A(Program Manager) I(believes) that Bdir{a A,p(certified) A(operation) I((has violated [OR] is not in compliance)) Bdir(with (the Act [OR] regulations in this part))}}" {
+		t.Fatal("The error should contain ignored elements, but contained: " + strings.Join(err.ErrorIgnoredElements[:], ","))
+	}
+
+	if res.String() != "" {
+		t.Fatal("Returned statements should be empty, but is ", res.String())
+	}
+}
+
+/*
 Tests ExtractComponentContent() function.
 */
 /*func TestExtractComponentContent(t *testing.T) {
