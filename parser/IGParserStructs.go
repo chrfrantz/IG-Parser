@@ -75,7 +75,7 @@ const COMPONENT_HEADER_SYNTAX = "(" +
 	")" +
 	COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX
 
-// Full syntax of components, including identifier, suffix, annotation and potentially nested or atomic content
+// Full syntax of components, including identifier, suffix, annotation and potentially nested or atomic content (but without consideration of embedded component-level nesting)
 const FULL_COMPONENT_SYNTAX =
 // Component identifier, with suffix and annotations
 COMPONENT_HEADER_SYNTAX +
@@ -83,6 +83,15 @@ COMPONENT_HEADER_SYNTAX +
 	"(\\" + LEFT_BRACE + "\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\" + RIGHT_BRACE + "|" +
 	// atomic component content (e.g., ( ... ))
 	"\\" + LEFT_PARENTHESIS + "\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\" + RIGHT_PARENTHESIS + ")"
+
+// Full syntax of components, including identifier, suffix, annotation and potentially multi-level nested or atomic content, with consideration of component-level nesting embedded within expression
+const FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS =
+// Component identifier, with suffix and annotations
+COMPONENT_HEADER_SYNTAX +
+	// Component-level nesting (e.g., { ... }), including potentially embedded second-order nesting on component(s)
+	"(\\" + LEFT_BRACE + "\\s*" + "(" + WORDS_WITH_PARENTHESES + "|" + WORDS_WITH_PARENTHESES + FULL_COMPONENT_SYNTAX + ")" + "\\s*\\" + RIGHT_BRACE + "|" +
+	// atomic component content (e.g., ( ... )), including potentially embedded second-order nesting on component(s)
+	"\\" + LEFT_PARENTHESIS + "\\s*" + "(" + WORDS_WITH_PARENTHESES + "|" + WORDS_WITH_PARENTHESES + FULL_COMPONENT_SYNTAX + ")" + "\\s*\\" + RIGHT_PARENTHESIS + ")"
 
 // Full syntax of nested component, including identifier, suffix, annotation
 const FULL_COMPONENT_SYNTAX_NESTED =
@@ -97,24 +106,24 @@ const PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS =
 "(" +
 	// combination with parentheses, e.g., ( some words Cac{ ... } [AND] Cac{ ... } [AND] Cac{ ... } ...), or variably containing Cac ( ... ) for each element
 	"\\" + LEFT_PARENTHESIS +
-	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX + ")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS + ")+" +
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
-	"(" + FULL_COMPONENT_SYNTAX + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+	"(" + FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
 	OPTIONAL_WORDS_WITH_PARENTHESES +
 	")*" +
 	"\\" + RIGHT_PARENTHESIS +
 	// OR
 	"|" +
 	// combinations without parentheses, e.g., some words Cac{ ... } [AND] Cac{ ... } ... (arbitrary length, but no closing parentheses)
-	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX + ")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS + ")+" +
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
-	"(" + FULL_COMPONENT_SYNTAX + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
+	"(" + FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
 	")*" +
 	// END OF COMBINATION
 	")"

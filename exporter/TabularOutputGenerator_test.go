@@ -4727,4 +4727,58 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinations(t *testing.
 
 }
 
+/*
+Tests component-level statement combinations that contain embedded component-level nesting.
+*/
+func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testing.T) {
+
+	// Statement with component-level nesting embedded in statement combinations (i.e., {Cac{ Bdir{} } [AND] Cac{ ... }})
+	text := "A(Program Manager) D(may) I(administer) Bdir(sanctions) {Cac{A(Program Manager) I(suspects) Bdir{A(farmer) I((violates [OR] does not comply)) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestVisualOutputComponentLevelNestingInNestedComponentCombinations.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
 // test with invalid statement and empty input nodes, unbalanced parentheses, missing ID
