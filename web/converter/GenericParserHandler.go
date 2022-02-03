@@ -239,6 +239,10 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Parameter: Property tree
 		val, suc = extractUrlParameters(r, PARAM_PROPERTY_TREE)
 		check = evaluateBooleanUrlParameters(PARAM_PROPERTY_TREE, val, suc)
+		// Manually override if not set - effectively defines default setting
+		if !suc {
+			check = true
+		}
 		// Assign values
 		if check {
 			retStruct.PrintPropertyTree = CHECKBOX_CHECKED
