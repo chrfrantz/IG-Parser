@@ -465,6 +465,9 @@ const PARSING_ERROR_IMBALANCED_PARENTHESES = "IMBALANCED_PARENTHESES"
 // Indicates that component was not found during preprocessing
 const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 
+// Indicates that multiple component symbols have been found in component specification -- points to incorrect coding
+const PARSING_ERROR_MULTIPLE_COMPONENTS_FOUND = "MULTIPLE_COMPONENTS_FOUND"
+
 // Indicates ignored elements during parsing (applies when parsing into tree) - in contrast to #PARSING_ERROR_IGNORED_NESTED_ELEMENTS
 const PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING = "IGNORED_ELEMENTS_NODE_PARSING"
 

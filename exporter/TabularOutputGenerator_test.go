@@ -4733,7 +4733,9 @@ Tests component-level statement combinations that contain embedded component-lev
 func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testing.T) {
 
 	// Statement with component-level nesting embedded in statement combinations (i.e., {Cac{ Bdir{} } [AND] Cac{ ... }})
-	text := "A(Program Manager) D(may) I(administer) Bdir(sanctions) {Cac{A(Program Manager) I(suspects) Bdir{A(farmer) I((violates [OR] does not comply)) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}"
+	text := "A(Program Manager) D(may) I(administer) Bdir(sanctions) {Cac{A(Program Manager) I(suspects) Bdir{A(farmer) " +
+		"I((violates [OR] does not comply)) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) " +
+		"Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}"
 
 	// Deactivate annotations
 	SetIncludeAnnotations(false)
@@ -4782,12 +4784,17 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testi
 }
 
 /*
-Tests the presence of excess symbols in input and parser tolerance (based on Regex).
+Tests the presence of excess symbols or missing separating whitespaces in input and parser tolerance (based on Regex).
 */
-func TestVisualOutputExcessiveSymbolsInNestedComponentCombinations(t *testing.T) {
+func TestVisualOutputExcessiveSymbolsOrMissingWhitespaceInNestedComponentCombinations(t *testing.T) {
 
-	// Standard book statement, but including excess comma preceding logical operator
-	text := "The A(Program Manager) D(may) I(initiate) Bdir,p((suspension [XOR] revocation)) Bdir(proceedings) against a Bind,p(certified) Bind(operation): {Cac{when the A(Program Manager) I(believes) that Bdir{a A,p(certified) A(operation) I((has violated [OR] is not in compliance)) Bdir(with (the Act [OR] regulations in this part))}}, [OR] Cac{when a A((certifying agent [OR] State organic program’s governing State official)) I(fails to enforce) Bdir((the Act [OR] regulations in this part)).}}"
+	// Standard book statement, but including excess comma preceding logical operator (, [OR]),
+	// excessive text in combination parentheses (unnecessary Text,.;  , unnecessary text),
+	// and missing whitespace between logical operator and component specification ([OR]Cac)
+	text := "The A(Program Manager) D(may) I(initiate) Bdir,p((suspension [XOR] revocation)) Bdir(proceedings) against a Bind,p(certified) Bind(operation): " +
+		"{unnecessary Text,.Cac{when the A(Program Manager) I(believes) that Bdir{a A,p(certified) A(operation) I((has violated [OR] is not in compliance)) " +
+		"Bdir(with (the Act [OR] regulations in this part))}}, [OR]Cac{when a A((certifying agent [OR] State organic program’s governing State official)) " +
+		"I(fails to enforce) Bdir((the Act [OR] regulations in this part)).} , unnecessary text}"
 
 	// Deactivate annotations
 	SetIncludeAnnotations(false)

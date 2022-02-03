@@ -128,88 +128,98 @@ const PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS =
 	// END OF COMBINATION
 	")"
 
-// NOTE: From hereon it gets ugly, since multi-level nesting is represented iteratively to establish higher-order nesting - no recursion in regex
+// TODO NOTE: From hereon it gets hacky, since multi-level nesting is represented iteratively to establish higher-order nesting - no recursion in regex; needs to be expanded per demand
 
 // 2nd order braced combinations of combinations
 // (Inner part of nested combinations, including single combination or multiple combination pairs on either side
 // (e.g., { {Cac{ ... } [AND] Cac{ ... } } [XOR] { {Cac{ ... } [AND] Cac{ ... } }}),
 // but without leading component syntax and/or termination for flexible composition)
 const BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "\\" + LEFT_BRACE +
-	"\\s*(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "\\s+)+" +
+	// Testing of potential excessive words preceding component specification is captured in left component matching
+	"\\s*(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "\\s*)+" + // tolerate presence or absence of separating spaces
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
-	"\\s+(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "\\s*)+" +
+	"\\s*(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "\\s*)+" +
 	")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
 	"\\" + RIGHT_BRACE
 
 // 3rd order combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "(\\" + LEFT_BRACE +
+	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
 	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
-	"\\s+)+" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
-	"\\s+(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
 	")" +
-	"\\s*)+" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
 	")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
 	"\\" + RIGHT_BRACE + ")"
 
 // 4th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS = "(\\" + LEFT_BRACE +
+	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
 	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
-	"\\s+)+" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
-	"\\s+(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
 	")" +
-	"\\s*)+" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
 	")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
 	"\\" + RIGHT_BRACE + ")"
 
 // 5th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_5TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
+	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS +
 	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
-	"\\s+)+" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
-	"\\s+(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS +
 	")" +
-	"\\s*)+" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
 	")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
 	"\\" + RIGHT_BRACE + ")"
 
 // 6th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_6TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
+	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_5TH_ORDER_COMBINATIONS +
 	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
-	"\\s+)+" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
-	"\\s+(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_5TH_ORDER_COMBINATIONS +
 	")" +
-	"\\s*)+" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
 	")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
 	"\\" + RIGHT_BRACE + ")"
 
 // Combinations of combinations for multi-combined component-level nesting, under consideration of termination for atomic matching

@@ -383,7 +383,7 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 	}
 	if len(nestedStmtsNotConsideredDuringParsing) > 0 {
 		// Indicate if elements have been ignored entirely (and return info to screen), but no further parsing errors per se
-		msg := "Selected nested elements have been ignored during parsing: '" + strings.Join(nestedStmtsNotConsideredDuringParsing[:], ",") +
+		msg := "Selected nested elements could not be properly parsed: '" + strings.Join(nestedStmtsNotConsideredDuringParsing[:], ",") +
 			"'. Please review the input coding accordingly."
 		return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS,
 			ErrorMessage:         msg,
@@ -432,7 +432,8 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 			}
 			prefix, prop, err := extractComponentType(entry[:strings.Index(entry, LEFT_BRACE)])
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
-				return tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: "Error when extracting component type from nested statement."}
+				// Return error and propagate error message from called function
+				return tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: "Error when extracting component type from nested statement: " + err.ErrorMessage}
 			}
 			// Extract suffix and annotation
 			suffix, annotation, _, err := extractSuffixAndAnnotations(prefix, prop, entry, LEFT_BRACE, RIGHT_BRACE)
@@ -995,18 +996,25 @@ func extractComponentType(input string) (string, bool, tree.ParsingError) {
 	}
 
 	for _, v := range tree.IGComponentSymbols {
-		if strings.Index(input, v) == 0 {
+		// Check whether component is contained - introduces tolerance to excess text (as opposed to exact matching)
+		if strings.Contains(input, v) {
+			if ret != "" {
+				return ret, prop, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_MULTIPLE_COMPONENTS_FOUND, ErrorMessage: "Multiple component specifications found (" + ret + " and " + v + ") " +
+					"when parsing component specification '" + input + "'."}
+			}
 			// Assign identified label
 			ret = v
+			// Test whether component of concern is a property
 			if strings.Contains(input, tree.PROPERTY_SYNTAX_SUFFIX) {
 				ret += tree.PROPERTY_SYNTAX_SUFFIX
 				prop = true
 			}
-			break
+			// continue iteration to check whether conflicting identification of component (i.e., multiple component labels)
 		}
 	}
 	if ret == "" {
-		return "", prop, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND}
+		return "", prop, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
+			ErrorMessage: "Component specification could not be found in input phrase '" + input + "'."}
 	}
 
 	return ret, prop, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}

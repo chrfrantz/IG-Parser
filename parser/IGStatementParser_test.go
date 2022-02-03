@@ -1542,9 +1542,9 @@ func TestCorrectNodeRemovalWithPrivatePropertiesOnly(t *testing.T) {
 }
 
 /*
-Tests automated extraction of component type.
+Tests automated extraction of component type as well as property and suffix.
 */
-func TestExtractComponentType(t *testing.T) {
+func TestExtractComponentTypeIncludingPropertyAndSuffix(t *testing.T) {
 
 	// Primitive type
 
@@ -1683,6 +1683,9 @@ func TestExtractComponentType(t *testing.T) {
 
 }
 
+/*
+Tests proper suffix and annotation parsing on regular nested statement.
+*/
 func TestSuffixAndAnnotationParsingOnSimpleNestedStatement(t *testing.T) {
 
 	input := "A(Actor) D(must) I(review) Bdir(subjects) CacA[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)}"
@@ -1706,10 +1709,13 @@ func TestSuffixAndAnnotationParsingOnSimpleNestedStatement(t *testing.T) {
 
 }
 
+/*
+Tests proper parsing of component specifications when parsing nested combinations.
+*/
 func TestSuffixAndAnnotationParsingOnNestedStatementCombination(t *testing.T) {
 
 	input := "A(Actor) D(must) I(review) Bdir(subjects) " +
-		"{CacA[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)} [XOR] " +
+		"{CacB[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)} [XOR] " +
 		"Cac1[annotA]{A(other actor) I(does) Bdir(something)}}"
 
 	s, err := ParseStatement(input)
@@ -1725,7 +1731,7 @@ func TestSuffixAndAnnotationParsingOnNestedStatementCombination(t *testing.T) {
 		t.Fatal("Logical operator incorrectly identified as", s.ActivationConditionComplex.LogicalOperator)
 	}
 
-	if s.ActivationConditionComplex.Left.Suffix != "A" {
+	if s.ActivationConditionComplex.Left.Suffix != "B" {
 		t.Fatal("Suffix on complex nested statement is incorrect:", s.ActivationConditionComplex.Left.Suffix)
 	}
 
@@ -1741,6 +1747,22 @@ func TestSuffixAndAnnotationParsingOnNestedStatementCombination(t *testing.T) {
 		t.Fatal("Annotations on complex nested statement are incorrect:", s.ActivationConditionComplex.Right.Annotations.(string))
 	}
 
+}
+
+/*
+Tests detection of conflicting component specifications when parsing nested combinations.
+*/
+func TestMultipleComponentSpecificationWhenParsingOnNestedStatementCombination(t *testing.T) {
+
+	// Parsing of this statement should fail, because CacA specification contains multiple component symbols
+	input := "A(Actor) D(must) I(review) Bdir(subjects) " +
+		"{CacA[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)} [XOR] " +
+		"Cac1[annotA]{A(other actor) I(does) Bdir(something)}}"
+
+	_, err := ParseStatement(input)
+	if err.ErrorCode != tree.PARSING_ERROR_MULTIPLE_COMPONENTS_FOUND {
+		t.Fatal("Error during parsing:", err)
+	}
 }
 
 /*
