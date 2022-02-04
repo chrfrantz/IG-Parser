@@ -391,14 +391,18 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 						// Decompose and print combinations
 						nodes := privateNode.GetLeafNodes(false)
 						entryAdded := false
-						for _, v := range nodes {
-							// Add separator if previous entry exists
-							if entryAdded {
-								stringToAppendTo += ", "
+						// Check outer element
+						for _, v1 := range nodes {
+							// Check inner element
+							for _, v := range v1 {
+								// Add separator if previous entry exists
+								if entryAdded {
+									stringToAppendTo += ", "
+								}
+								// Append each entry individually
+								stringToAppendTo += shared.EscapeSymbolsForExport(v.Entry.(string))
+								entryAdded = true
 							}
-							// Append each entry individually
-							stringToAppendTo += shared.EscapeSymbolsForExport(v[0].Entry.(string))
-							entryAdded = true
 						}
 					} else if !privateNode.HasPrimitiveEntry() {
 						// Embedded statement (is printed as flat string, e.g., A: actor I: action, Cac: context)

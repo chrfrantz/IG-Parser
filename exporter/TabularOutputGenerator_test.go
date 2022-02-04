@@ -3733,6 +3733,58 @@ func TestVisualOutputPropertyNodesFlatPrinting(t *testing.T) {
 }
 
 /*
+Tests proper flat output of combined shared properties for visual output.
+Tests flat output for properties (labels, as opposed to tree structure).
+*/
+func TestVisualOutputSharedPropertyNodesFlatPrinting(t *testing.T) {
+	text := "The A(Program Manager) D(may) I(initiate) Bdir,p((suspension [XOR] revocation)) Bdir(proceedings)"
+
+	// Activate annotations
+	SetIncludeAnnotations(true)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(true)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+	fmt.Println("Generated output: " + output)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestVisualOutputSharedPropertyNodesFlatPrinting.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+}
+
+/*
 Tests proper output of proper linkages of complex private properties alongside shared properties for visual output.
 Tests tree structure output for properties.
 */

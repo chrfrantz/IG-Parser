@@ -1,0 +1,10 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 0},
+{"name": "may", "comp": "D", "level": 0},
+{"name": "initiate", "comp": "I", "level": 0},
+{"name": "proceedings", "comp": "Bdir", "level": 0, "prop": "suspension, revocation"}
+]
+}
