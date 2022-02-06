@@ -2531,6 +2531,180 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 }
 
 /*
+Tests private properties on indexed components.
+*/
+func TestStaticTabularOutputBasicStatementPrivatePropertiesOnly(t *testing.T) {
+
+	text := "Bdir1,p(organic farming) Bdir1(provisions) and Bdir2,p(improper) Bdir2(rules)"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// With shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 1 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestStaticTabularOutputBasicStatementPrivatePropertiesOnly.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, nil, componentRefs, links, "650", separator)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+}
+
+/*
+Tests private and shared properties combinations with combinations of indexed components.
+*/
+func TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents(t *testing.T) {
+
+	text := "Bdir1((left [OR] right)) Bdir1,p((private [AND] public)) Bdir(general object) Bdir,p((shared [XOR] non-shared))"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// With shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 2 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateTabularStatementOutput(res, nil, componentRefs, links, "650", separator)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+}
+
+/*
 Tests combination of two nested activation conditions (single level) for static output and tests for a mix
 of shared and private properties (on top level) and private properties only on nested level
 */
@@ -3904,7 +4078,7 @@ Does not decompose property trees.
 func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 
 	// Complex entry
-	text := " The Congress finds and declares that it is the E(national policy) F([is] to (encourage [AND] assist)) the P(states) Cex{ A(states) I(to exercise) Cex(effectively) their Bdir(responsibilities) Bdir,p(in the coastal zone) Cex(through the (development [AND] implementation) of management programs to achieve wise use of the (land [AND] water) resources of the coastal zone, giving full consideration to (ecological [AND] cultural [AND] historic [AND] esthetic) values as well as the needs for compatible economic development), Cex{which E(programs) M(should) Cex(at least) F(provide for)— (A) the P1(protection) P,p1(of natural resources, including (wetlands [AND] floodplains [AND] estuaries [AND] beaches [AND] dunes [AND] barrier islands [AND] coral reefs [AND] fish and wildlife and their habitat) within the coastal zone), the P2(management) P,p2((of coastal development to minimize the loss of (life [AND] property) caused by improper development in (flood-prone [AND] storm surge [AND] geological hazard [AND] erosion-prone) areas [AND] in areas likely to be (affected by [OR] vulnerable to) (sea level rise [AND] land subsidence [AND] saltwater intrusion) [AND] by the destruction of natural protective features such as (beaches [AND] dunes [AND] wetlands [AND] barrier islands))), (C) the P3(management) P3,p(of coastal development to (improve [AND] safeguard [AND] restore) the quality of coastal waters, [AND] to protect (natural resources [AND] existing uses of those waters)), (D) P4,p1(priority) P4(consideration) P4,p2(being given to (coastal-dependent (uses [AND] orderly processes) for siting major facilities related to (national defense [AND] energy [AND] fisheries development [AND] recreation [AND] ports [AND] transportation), [AND] the location to the maximum extent practicable of new (commercial [AND] industrial) developments (in [XOR] adjacent) to areas where such development already exists)), (E) P5,p1(public) P5(access) P5,p2(to the coasts for recreation purposes), (F) P6(assistance) P6,p(in the redevelopment of (deteriorating urban (waterfronts [AND] ports) [AND] sensitive (preservation [AND] restoration) of (historic [AND] cultural [AND] esthetic) coastal features)), (G) P7(the (coordination [AND] simplification) of procedures) P7,p1(in order to ensure expedited governmental decision making for the management of coastal resources), (H) P8((continued (consultation [AND] coordination) with, [AND] the giving of adequate consideration to the views of affected Federal agencies)), (I) P9(the giving of ((timely [AND] effective) notification of , [AND] opportunities for (public [AND] local) government participation in coastal management decision making)), (J) P10(assistance) P10,p1(to support comprehensive (planning [AND] conservation [AND] management) for living marine resources) P10,p1,p1(including planning for (the siting of (pollution control [AND] aquaculture facilities) within the coastal zone [AND] improved coordination between ((State [AND] Federal) coastal zone management agencies [AND] (State [AND] wildlife) agencies))) }}"
+	text := "The Congress finds and declares that it is the E(national policy) F([is] to (encourage [AND] assist)) the P(states) Cex{ A(states) I(to exercise) Cex(effectively) their Bdir(responsibilities) Bdir,p(in the coastal zone) Cex(through the (development [AND] implementation) of management programs to achieve wise use of the (land [AND] water) resources of the coastal zone, giving full consideration to (ecological [AND] cultural [AND] historic [AND] esthetic) values as well as the needs for compatible economic development), Cex{which E(programs) M(should) Cex(at least) F(provide for)— (A) the P1(protection) P1,p1(of natural resources, including (wetlands [AND] floodplains [AND] estuaries [AND] beaches [AND] dunes [AND] barrier islands [AND] coral reefs [AND] fish and wildlife and their habitat) within the coastal zone), the P2(management) P2,p2((of coastal development to minimize the loss of (life [AND] property) caused by improper development in (flood-prone [AND] storm surge [AND] geological hazard [AND] erosion-prone) areas [AND] in areas likely to be (affected by [OR] vulnerable to) (sea level rise [AND] land subsidence [AND] saltwater intrusion) [AND] by the destruction of natural protective features such as (beaches [AND] dunes [AND] wetlands [AND] barrier islands))), (C) the P3(management) P3,p(of coastal development to (improve [AND] safeguard [AND] restore) the quality of coastal waters, [AND] to protect (natural resources [AND] existing uses of those waters)), (D) P4,p1(priority) P4(consideration) P4,p2(being given to (coastal-dependent (uses [AND] orderly processes) for siting major facilities related to (national defense [AND] energy [AND] fisheries development [AND] recreation [AND] ports [AND] transportation), [AND] the location to the maximum extent practicable of new (commercial [AND] industrial) developments (in [XOR] adjacent) to areas where such development already exists)), (E) P5,p1(public) P5(access) P5,p2(to the coasts for recreation purposes), (F) P6(assistance) P6,p(in the redevelopment of (deteriorating urban (waterfronts [AND] ports) [AND] sensitive (preservation [AND] restoration) of (historic [AND] cultural [AND] esthetic) coastal features)), (G) P7(the (coordination [AND] simplification) of procedures) P7,p1(in order to ensure expedited governmental decision making for the management of coastal resources), (H) P8((continued (consultation [AND] coordination) with, [AND] the giving of adequate consideration to the views of affected Federal agencies)), (I) P9(the giving of ((timely [AND] effective) notification of , [AND] opportunities for (public [AND] local) government participation in coastal management decision making)), (J) P10(assistance) P10,p1(to support comprehensive (planning [AND] conservation [AND] management) for living marine resources) P10,p1,p1(including planning for (the siting of (pollution control [AND] aquaculture facilities) within the coastal zone [AND] improved coordination between ((State [AND] Federal) coastal zone management agencies [AND] (State [AND] wildlife) agencies))) }}"
 
 	// Deactivate annotations
 	SetIncludeAnnotations(false)

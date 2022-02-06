@@ -129,8 +129,8 @@ func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol st
 			// Append complex node-specific information to the end of nested statement
 			// Assumes that suffix and annotations are in string format for nodes that have nested statements
 			// TODO: see whether that needs to be adjusted
-			if node.Suffix != nil {
-				complexSuffix += " (Suffix: " + node.Suffix.(string) + ")"
+			if node.GetSuffix() != "" {
+				complexSuffix += " (Suffix: " + node.GetSuffix() + ")"
 			}
 			if node.Annotations != nil {
 				complexSuffix += " (Annotation: " + node.Annotations.(string) + ")"
@@ -293,8 +293,6 @@ an entry '"ATTRIBUTES": 2', etc.
 
 The parameter aggregateImplicitLinkages indicates whether implicitly linked trees of nodes should be returned as a single
 tree, or as separate trees.
-The parameter level indicates whether all nodes should be returned, or only ones that contain suffix information.
-
 */
 func (s *Statement) GenerateLeafArraysSuffixOnly(aggregateImplicitLinkages bool) ([][]*Node, map[string]int) {
 	return s.generateLeafArrays(aggregateImplicitLinkages, 1)
@@ -436,6 +434,7 @@ func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, comp
 
 	// Check for complex content
 	if complex {
+
 		// Embed nested statement in node structure, before adding to node map
 		nodesMap = append(nodesMap, []*Node{componentNode})
 
@@ -446,8 +445,23 @@ func getComponentLeafArray(nodesMap [][]*Node, referenceMap map[string]int, comp
 		i := 0
 		// Add array of leaf nodes attached to general array
 		for _, v := range componentNode.GetLeafNodes(aggregateImplicitLinkages) {
-			nodesMap = append(nodesMap, v)
-			i++
+			if level == 1 {
+				Println("Leaf nodes to consider for suffix:", v)
+				// Iterate through nodes to detect suffix
+				for _, v2 := range v {
+					Println("Node to check for suffix:", v2)
+					// Check for presence of suffix before adding individually
+					if v2.GetSuffix() != "" {
+						Println("Found suffix in node:", v2)
+						nodesMap = append(nodesMap, []*Node{v2})
+						i++
+					}
+				}
+			} else {
+				// In all other cases, simple add all leaf nodes (no checking for suffix-only nodes)
+				nodesMap = append(nodesMap, v)
+				i++
+			}
 		}
 		// Add number of nodes referring to a particular component
 		referenceMap[componentSymbol] = i

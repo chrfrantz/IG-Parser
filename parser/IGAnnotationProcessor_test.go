@@ -98,6 +98,7 @@ func TestFindNodesLinkedViaSuffix(t *testing.T) {
 	six := tree.Node{Entry: "six"}
 	seven := tree.Node{Entry: "seven", Suffix: "2"}
 	eight := tree.Node{Entry: "eight", Suffix: "2,89"}
+	nine := tree.Node{Entry: "nine"}
 
 	fiveSix := tree.Node{LogicalOperator: "XOR"}
 	fiveSix.InsertLeftNode(&five)
@@ -106,6 +107,7 @@ func TestFindNodesLinkedViaSuffix(t *testing.T) {
 	sevenEight := tree.Node{LogicalOperator: "AND"}
 	sevenEight.InsertLeftNode(&seven)
 	sevenEight.InsertRightNode(&eight)
+	sevenEight.InsertRightNode(&nine)
 
 	rootTwo := tree.Node{}
 	rootTwo.InsertLeftNode(&fiveSix)

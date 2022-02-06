@@ -2,6 +2,7 @@ package parser
 
 import (
 	"IG-Parser/tree"
+	"reflect"
 	"strings"
 )
 
@@ -33,10 +34,10 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 
 	// Iterate through source components
 	for _, v := range sourceArrays {
-		//Println("Val:", v)
+		Println("Source node:", v)
 		val := v
-		if val.Suffix != nil && len(val.Suffix.(string)) > 0 {
-			rawSuffix := val.Suffix.(string)
+		if val.GetSuffix() != "" {
+			rawSuffix := val.GetSuffix()
 			// Assign full suffix by default
 			sourceElem := rawSuffix
 			// Extract first element from suffix
@@ -53,10 +54,10 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 			// Now check target side to see if there is matching suffix
 			for _, v2 := range targetArrays {
 				val2 := v2
-				//Println("Target val:", val2)
-				if val2.Suffix != nil && len(val2.Suffix.(string)) > 0 {
-					rawTargetSuffix := val2.Suffix.(string)
-					//Println("Found target suffix", rawTargetSuffix)
+				Println("Target node to test:", val2)
+				if val2.GetSuffix() != "" {
+					rawTargetSuffix := val2.GetSuffix()
+					Println("Found target suffix", rawTargetSuffix)
 					// Assign full suffix by default
 					targetElem := rawTargetSuffix
 					// Extract first element from candidate target suffix
@@ -101,6 +102,15 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 		return
 	}
 
+	// Pairs of matched component-private property linkages
+	type Pair struct {
+		Src *tree.Node
+		Tgt *tree.Node
+	}
+
+	// Array to keep track of identified linkages for post-processing (i.e., removal from tree)
+	identifiedLinkages := []Pair{}
+
 	// Identify links starting from top-level components
 	for _, v := range leafArrays {
 
@@ -144,36 +154,68 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 						linkComps = append(linkComps, tgtComp)
 						// Attach to node
 						srcComp.PrivateNodeLinks = linkComps
-						// Remove private node from original tree structure
-						rt, err := tree.RemoveNodeFromTree(tgtComp)
-						if err.ErrorCode != tree.TREE_NO_ERROR {
-							// Do not deal with error, since false will always refer to need for node removal from statement
-						}
-						// If return value is false, this implies that the remaining node is the last element - and to be removed from statement
-						if !rt {
-							// Identify corresponding element from statement and remove from statement tree
-							Println("Element", srcComp, "will be removed from parent tree (last element)")
-							switch sourceComponentElement.GetComponentName() {
-							case tree.ATTRIBUTES:
-								s.AttributesPropertySimple = nil
-							case tree.AIM:
-								s.ExecutionConstraintSimple = nil
-							case tree.DIRECT_OBJECT:
-								s.DirectObjectPropertySimple = nil
-							case tree.INDIRECT_OBJECT:
-								s.IndirectObjectPropertySimple = nil
-							case tree.CONSTITUTED_ENTITY:
-								s.ConstitutedEntityPropertySimple = nil
-							case tree.CONSTITUTING_PROPERTIES:
-								s.ConstitutingPropertiesPropertySimple = nil
-							default:
-								Println("Node deletion from tree: Could not find match for component name", sourceComponentElement.GetComponentName())
-							}
-						}
+						// Keep track of linked nodes for later removal -- see below
+						identifiedLinkages = append(identifiedLinkages, Pair{Src: sourceComponentElement, Tgt: tgtComp})
+
 						Println("Component", srcComp.GetComponentName(), ": Added private link for node", tgtComp)
 					}
 				}
 			}
 		}
 	}
+	Println("Private node linkages to remove from main tree:", identifiedLinkages)
+
+	// Post process linkages for removal of private nodes from property tree, and potential removal of source node if empty
+	for _, pair := range identifiedLinkages {
+
+		Println("-> Processing removal of identified private node from statement tree structure. Node: " + pair.Tgt.String())
+
+		// Remove private node from original tree structure
+		rt, err := tree.RemoveNodeFromTree(pair.Tgt)
+		if err.ErrorCode != tree.TREE_NO_ERROR {
+			// Do not deal with error, since false will always refer to need for node removal from statement
+			Println("Response when attempting to remove private node from tree (likely final element in component):", err.Error())
+		}
+
+		// If return value is false (e.g., node is disconnected), this may imply that the node is the last element, confirm (if statement is its own root) and reset node linkage from statement perspective
+		if !rt {
+			// Identify corresponding element from statement and remove from statement tree
+			Println("Statement-side reset of linkages to removed node. Resetting of corresponding property if element", pair.Tgt, "is last (private) element")
+			switch pair.Src.GetComponentName() {
+			case tree.ATTRIBUTES:
+				if reflect.DeepEqual(pair.Tgt, s.AttributesPropertySimple) {
+					Println("Reset A,p ...")
+					s.AttributesPropertySimple = nil
+				}
+			case tree.AIM:
+				if reflect.DeepEqual(pair.Tgt, s.ExecutionConstraintSimple) {
+					Println("Reset Cex ...")
+					s.ExecutionConstraintSimple = nil
+				}
+			case tree.DIRECT_OBJECT:
+				if reflect.DeepEqual(pair.Tgt, s.DirectObjectPropertySimple) {
+					Println("Reset Bdir,p ...")
+					s.DirectObjectPropertySimple = nil
+				}
+			case tree.INDIRECT_OBJECT:
+				if reflect.DeepEqual(pair.Tgt, s.IndirectObjectPropertySimple) {
+					Println("Reset Bind,p ...")
+					s.IndirectObjectPropertySimple = nil
+				}
+			case tree.CONSTITUTED_ENTITY:
+				if reflect.DeepEqual(pair.Tgt, s.ConstitutedEntityPropertySimple) {
+					Println("Reset E,p ...")
+					s.ConstitutedEntityPropertySimple = nil
+				}
+			case tree.CONSTITUTING_PROPERTIES:
+				if reflect.DeepEqual(pair.Tgt, s.ConstitutingPropertiesPropertySimple) {
+					Println("Reset P,p ...")
+					s.ConstitutingPropertiesPropertySimple = nil
+				}
+			default:
+				Println("Node deletion from tree: Could not find match for component name", pair.Src.GetComponentName())
+			}
+		}
+	}
+	// Now linkages should have been inferred, and deleted from property tree (as well as deletion of empty source nodes)
 }

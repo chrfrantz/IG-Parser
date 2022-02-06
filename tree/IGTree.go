@@ -324,8 +324,8 @@ func (n *Node) String() string {
 
 			retVal = retVal + n.Entry.(string)
 			// Assumes that suffix and annotations are in string form
-			if n.Suffix != nil {
-				retVal = retVal + " (Suffix: " + n.Suffix.(string) + ")"
+			if n.GetSuffix() != "" {
+				retVal = retVal + " (Suffix: " + n.GetSuffix() + ")"
 			}
 			if n.Annotations != nil {
 				retVal = retVal + " (Annotation: " + n.Annotations.(string) + ")"
@@ -381,8 +381,8 @@ func (n *Node) String() string {
 
 		// Assumes that suffix and annotations are in string format for nodes that have nested statements
 		// TODO: see whether that needs to be adjusted
-		if n.Suffix != nil {
-			retPrep += " (Suffix: " + n.Suffix.(string) + ")"
+		if n.GetSuffix() != "" {
+			retPrep += " (Suffix: " + n.GetSuffix() + ")"
 		}
 		if n.Annotations != nil {
 			retPrep += " (Annotation: " + n.Annotations.(string) + ")"
@@ -579,7 +579,7 @@ func RemoveNodeFromTree(node *Node) (bool, NodeError) {
 		return true, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 	// else tag the removal as invalid
-	errorMsg := "Attempted to remove already disconnected node from parent tree"
+	errorMsg := "Attempted to remove already disconnected node (" + node.String() + ") from parent tree"
 	return false, NodeError{ErrorCode: TREE_INVALID_NODE_REMOVAL, ErrorMessage: errorMsg}
 }
 
@@ -1211,6 +1211,25 @@ func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) 
 		}
 	}
 	return ParsingError{ErrorCode: PARSING_NO_ERROR}
+}
+
+/*
+Returns suffix of given node, or, if nested, of parent node if it has logical operator.
+Inheritance only works up to node with logical operator.
+Returns empty string if no suffix present.
+*/
+func (n *Node) GetSuffix() string {
+	if n.Suffix != nil {
+		// Return suffix
+		return n.Suffix.(string)
+	} else {
+		// Delegate to parent
+		if n.Parent != nil && n.Parent.hasLogicalOperator() {
+			return n.Parent.GetSuffix()
+		}
+	}
+	// Default suffix value
+	return ""
 }
 
 /*

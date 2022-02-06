@@ -1154,4 +1154,44 @@ func TestNode_GetAnnotationsHasAnnotations(t *testing.T) {
 	}
 }
 
+/*
+Tests retrieval of suffix from nodes across tree (or parent if existing).
+*/
+func TestNode_GetSuffix(t *testing.T) {
+
+	left := Node{Entry: "Left", Suffix: "1"}
+	// No suffix
+	rightLeft := Node{Entry: "rightLeft"}
+	rightRight := Node{Entry: "rightRight", Suffix: "24"}
+	right := Node{LogicalOperator: AND}
+	right.InsertLeftNode(&rightLeft)
+	right.InsertRightNode(&rightRight)
+	root := Node{Entry: "TopNode", LogicalOperator: OR, Suffix: "17"}
+	root.InsertLeftNode(&left)
+	root.InsertRightNode(&right)
+
+	if left.GetSuffix() != "1" {
+		t.Fatal("Did not extract correct suffix: " + left.GetSuffix())
+	}
+
+	// Only inherit from logical operator node
+	if rightLeft.GetSuffix() != "" {
+		t.Fatal("Did not extract correct suffix: " + rightLeft.GetSuffix())
+	}
+
+	if rightRight.GetSuffix() != "24" {
+		t.Fatal("Did not extract correct suffix: " + rightRight.GetSuffix())
+	}
+
+	// only inherit until higher logical operator
+	if right.GetSuffix() != "" {
+		t.Fatal("Did not extract correct suffix: " + right.GetSuffix())
+	}
+
+	// Returns own suffix
+	if root.GetSuffix() != "17" {
+		t.Fatal("Did not extract correct suffix: " + root.GetSuffix())
+	}
+}
+
 //Collapse adjacent entries in logical operators - CollapseAdjacentOperators()
