@@ -170,6 +170,9 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 
 		Println("-> Processing removal of identified private node from statement tree structure. Node: " + pair.Tgt.String())
 
+		// Copy potentially inherited component name into target node directly (which will be lost after node removal)
+		pair.Tgt.ComponentType = pair.Tgt.GetComponentName()
+
 		// Remove private node from original tree structure
 		rt, err := tree.RemoveNodeFromTree(pair.Tgt)
 		if err.ErrorCode != tree.TREE_NO_ERROR {

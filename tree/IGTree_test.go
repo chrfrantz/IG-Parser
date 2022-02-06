@@ -1194,4 +1194,41 @@ func TestNode_GetSuffix(t *testing.T) {
 	}
 }
 
+/*
+Tests retrieval of component names across tree (or parent if existing).
+*/
+func TestNode_GetComponentName(t *testing.T) {
+
+	left := Node{Entry: "Left", ComponentType: "leftComp"}
+	// No suffix
+	rightLeft := Node{Entry: "rightLeft"}
+	rightRight := Node{Entry: "rightRight"}
+	right := Node{LogicalOperator: AND, ComponentType: "rightComp"}
+	right.InsertLeftNode(&rightLeft)
+	right.InsertRightNode(&rightRight)
+	root := Node{Entry: "TopNode", LogicalOperator: OR, ComponentType: "topComp"}
+	root.InsertLeftNode(&left)
+	root.InsertRightNode(&right)
+
+	if left.GetComponentName() != "leftComp" {
+		t.Fatal("Did not extract correct component: " + left.GetComponentName())
+	}
+
+	if rightLeft.GetComponentName() != "rightComp" {
+		t.Fatal("Did not extract correct component: " + rightLeft.GetComponentName())
+	}
+
+	if rightRight.GetComponentName() != "rightComp" {
+		t.Fatal("Did not extract correct component: " + rightRight.GetComponentName())
+	}
+
+	if right.GetComponentName() != "rightComp" {
+		t.Fatal("Did not extract correct component: " + right.GetComponentName())
+	}
+
+	if root.GetComponentName() != "topComp" {
+		t.Fatal("Did not extract correct component: " + root.GetComponentName())
+	}
+}
+
 //Collapse adjacent entries in logical operators - CollapseAdjacentOperators()
