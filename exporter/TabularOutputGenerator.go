@@ -569,8 +569,8 @@ func GenerateGoogleSheetsOutput(statementMap []map[string]string, headerCols []s
 	prefix := "=SPLIT(" + quote
 	// Linebreak at the end of each entry
 	linebreak := "\n"
-	// Line suffix for Google Sheets
-	suffix := quote + ", \"" + separator + "\")" + linebreak
+	// Line suffix for Google Sheets (e.g., "; "|")" )
+	suffix := quote + "; \"" + separator + "\")" + linebreak
 
 	// Generate header column row based on names
 	output := prefix
@@ -593,8 +593,6 @@ func GenerateGoogleSheetsOutput(statementMap []map[string]string, headerCols []s
 				output += entry[header] + separator
 			}
 		}
-		// Trim last separator
-		output = output[:len(output)-1]
 		// Append Google Sheets-specific suffix to complete row
 		output += suffix
 	}
@@ -719,6 +717,13 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 	// Node key array (maintaining order of iteration)
 	nodesKeys := []*tree.Node{}
 
+	// Switch to assess whether first operator string has already been appended (to ensure correct separation of additional logical operator expressions)
+	logicalStringInitiated := false
+	if len(logicalExpressionString) > 0 {
+		// since the operator string is not empty, it must already contain decomposed operator strings - thus requiring separation of further entries
+		logicalStringInitiated = true
+	}
+
 	if len(linksForElement) > 0 {
 		// Retrieve keys to determine order of iteration
 		var firstKey *tree.Node
@@ -769,6 +774,7 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 
 			// if target node is different ...
 			if otherNode != statement[componentIdx] {
+
 				if len(linkedElement) > 0 {
 					Println("Testing other node: ", otherNode, " with elements ", linkedElement)
 					// find operator
@@ -786,6 +792,13 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						}
 
 						Println("Node has linkage ", ops)
+						if logicalStringInitiated {
+							// Append logical operator separator if logical operator linkage already exists
+							logicalExpressionString += logicalOperatorSeparator
+						} else {
+							// Any further printing of logical operators for given component will lead to addition of separator
+							logicalStringInitiated = true
+						}
 						// ... and append to logical expression column string
 						logicalExpressionString += fmt.Sprint(ops)
 						// Statement component identifier
@@ -811,8 +824,8 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 							}
 						}
 
-						// Add trailing bracket and column ref (to be reviewed)
-						logicalExpressionString += stmtsRefs + logicalCombinationRight + logicalOperatorSeparator
+						// Add statement reference and trailing bracket
+						logicalExpressionString += stmtsRefs + logicalCombinationRight
 					}
 					Println("Added logical relationships for value", otherNode, ", elements:", logicalExpressionString)
 				} else {
