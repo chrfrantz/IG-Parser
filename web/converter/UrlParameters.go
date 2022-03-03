@@ -31,6 +31,9 @@ const PARAM_EXTENDED_OUTPUT = "igExtended"
 // Annotations
 const PARAM_LOGICO_OUTPUT = "annotations"
 
+// Output type
+const PARAM_OUTPUT_TYPE = "outputType"
+
 // VISUAL ONLY
 
 // Properties as tree structure

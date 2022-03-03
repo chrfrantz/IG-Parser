@@ -23,7 +23,7 @@ const componentStmtRefSeparator = ","
 // Symbol separating component symbol and indices (e.g., Bdir vs. Bdir_1, Bdir_2, etc.)
 const indexSymbol = "_"
 
-// Statement ID prefix to ensure interpretation as text field (does not remove trailing zeroes)
+// Statement ID prefix to ensure interpretation as text field in Google Sheets (does not remove trailing zeroes)
 const stmtIdPrefix = "'"
 
 // Separator for logical operator expressions (e.g., OR[650.1,650.2]|AND[123.1,123.2])
@@ -75,12 +75,14 @@ Input:
   (e.g., AND[row1, row2, etc.])
 - ID to be used as prefix for generation of substatement IDs (e.g., ID 5 produces substatements 5.1, 5.2, etc.)
 - headerSeparator used for generation of header row (e.g., ";")
+- outputType allows for the specification of target output type to introduce necessary preprocessing as part of the matrix generation (e.g., prefixing quotes).
+  Valid output types are defined in TabularOutputGeneratorConfig (e.g., #OUTPUT_TYPE_GOOGLE_SHEETS, etc.)
 Output:
 - Array of statement entry maps (i.e., values for each component in given statement, i.e., [statement]map[component]componentValue)
 - Array of header symbols (used for component linkage references)
 - Array of header symbols names (for human-readable header construction)
 */
-func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{}, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string) ([]map[string]string, []string, []string, tree.ParsingError) {
+func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string, outputType string) ([]map[string]string, []string, []string, tree.ParsingError) {
 
 	if headerSeparator == "" {
 		return nil, nil, nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_MISSING_SEPARATOR_VALUE,
@@ -237,10 +239,15 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 				// Substitute symbols before producing output (e.g., " with ')
 				// TODO: Review for further symbols
 				entryVal = shared.EscapeSymbolsForExport(entryVal)
-				// Duplicate leading ' for proper Google Sheets parsing
-				// TODO: Google Sheets specific - leave here for now, but consider exporting
-				if len(entryVal) > 0 && entryVal[0:1] == "'" {
-					entryVal = "'" + entryVal
+
+				// HANDLE OUTPUT-SPECIFIC MODIFICATIONS
+
+				// TODO: Google Sheets specific - consider adaption to support further formats
+				if outputType == OUTPUT_TYPE_GOOGLE_SHEETS {
+					// Duplicate leading ' for proper Google Sheets parsing
+					if len(entryVal) > 0 && entryVal[0:1] == "'" {
+						entryVal = "'" + entryVal
+					}
 				}
 
 				// ADDING ACTUAL ENTRY
@@ -461,8 +468,8 @@ func generateTabularStatementOutput(stmts [][]*tree.Node, annotations interface{
 		Println("Nested Statement to parse, ID:", val.ID, ", Annotations:", val.NestedStmt.Annotations, ", Stmt:", val.NestedStmt)
 
 		log.Println("Parsing nested statement ...")
-		// Parse individual nested statements on component level
-		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateGoogleSheetsOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.NestedStmt.Annotations, val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator)
+		// Parse individual nested statements on component level in order to attach those to main output
+		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateTabularOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.NestedStmt.Annotations, val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, nil, nil, errorVal
 		}
@@ -558,31 +565,32 @@ func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNeste
 }
 
 /*
-Generates Google Sheets output from map of categorized statement elements, as well as header columns as indices for mattrix population.
-Further requires column header names for output generation, alongside specification of separator symbol.
-Optionally writes to file (if filename is provided).
-*/
-func GenerateGoogleSheetsOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string) (string, tree.ParsingError) {
-	// Quote to terminate input string for Google Sheets interpretation
-	quote := "\""
-	// Line prefix for Google Sheets
-	prefix := "=SPLIT(" + quote
-	// Linebreak at the end of each entry
-	linebreak := "\n"
-	// Line suffix for Google Sheets (e.g., "; "|")" )
-	suffix := quote + "; \"" + separator + "\")" + linebreak
+Generates final tabular output based on input statement matrices, alongside header information and optionally prints it to file.
 
+Input includes
+statement matrix (i.e., parsed institutional statements decomposed into matrix structure),
+header symbols (ordered IG component symbols associated with matrix columns),
+header names (ordered and associated with header symbols),
+row prefix (prefix for each row - to accommodate specific output formats),
+stmtIdPrefix (prefix for statement ID to ensure parsing of output as text),
+row suffix (suffix for each row - to accommodate specific output formats),
+separator used to separate individual cells per row,
+filename the output should be printed to (should be "" if no output is to be printed)
+
+Returns string containing flat output as well as potential parsing error
+*/
+func printTabularOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string) (string, tree.ParsingError) {
 	// Generate header column row based on names
-	output := prefix
+	output := rowPrefix
 	for _, v := range headerColsNames {
 		output += v + separator
 	}
-	output += suffix
+	output += rowSuffix
 
 	// Generate all entry rows
 	for _, entry := range statementMap {
-		// Create new row with Google Sheets syntax and leading ' to ensure text interpretation of ID
-		output += prefix + stmtIdPrefix
+		// Create new row with given syntax and potential statement ID prefix (e.g., ' to ensure text interpretation of ID).
+		output += rowPrefix + stmtIdPrefix
 		// Reconstruct based on header column order
 		for _, header := range headerCols {
 			if entry[header] == "" {
@@ -594,7 +602,7 @@ func GenerateGoogleSheetsOutput(statementMap []map[string]string, headerCols []s
 			}
 		}
 		// Append Google Sheets-specific suffix to complete row
-		output += suffix
+		output += rowSuffix
 	}
 
 	// Write file
@@ -609,13 +617,48 @@ func GenerateGoogleSheetsOutput(statementMap []map[string]string, headerCols []s
 }
 
 /*
+Generates CSV output from map of categorized statement elements, as well as header columns (symbols and names) for output generation.
+Further requires column header names for output generation, alongside specification of separator symbol.
+Optionally writes to file (if filename is provided).
+*/
+func generateCSVOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string) (string, tree.ParsingError) {
+
+	// Linebreak at the end of each entry
+	suffix := "\n"
+
+	// Delegate actual printing
+	return printTabularOutput(statementMap, headerCols, headerColsNames, "", stmtIdPrefix, suffix, separator, filename)
+}
+
+/*
+Generates Google Sheets output from map of categorized statement elements, as well as header columns (symbols and names) for output generation.
+Further requires column header names for output generation, alongside specification of separator symbol.
+Optionally writes to file (if filename is provided).
+*/
+func generateGoogleSheetsOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string) (string, tree.ParsingError) {
+
+	// Quote to terminate input string for Google Sheets interpretation
+	quote := "\""
+	// Line prefix for Google Sheets
+	prefix := "=SPLIT(" + quote
+	// Linebreak at the end of each entry
+	linebreak := "\n"
+	// Line suffix for Google Sheets (e.g., "; "|")" )
+	suffix := quote + "; \"" + separator + "\")" + linebreak
+
+	// Delegate actual printing
+	return printTabularOutput(statementMap, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename)
+}
+
+/*
 Generates Google Sheets tabular output for a given parsed statement, with a given statement ID.
 Generates all substatements and logical combination linkages in Google Sheets output format.
 Additionally returns array of statement entries, header symbols and corresponding header symbol names.
-Uses separator to delimited Google Sheet output.
+Allows for specification of separator to delimit generated flat file output.
+Allows for specification of output file type (e.g., Google Sheets, CSV) based on constants #OUTPUT_TYPE_GOOGLE_SHEETS or #OUTPUT_TYPE_CSV.
 If filename is provided, the result is printed to the corresponding file.
 */
-func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, annotations interface{}, stmtId string, filename string, aggregateImplicitLinkages bool, separator string) (string, []map[string]string, []string, []string, tree.ParsingError) {
+func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotations interface{}, stmtId string, filename string, aggregateImplicitLinkages bool, separator string, outputFormat string) (string, []map[string]string, []string, []string, tree.ParsingError) {
 	log.Println(" Step: Extracting leaf arrays")
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := statement.GenerateLeafArrays(aggregateImplicitLinkages)
@@ -639,16 +682,33 @@ func GenerateGoogleSheetsOutputFromParsedStatement(statement tree.Statement, ann
 
 	log.Println(" Step: Generate tabular output")
 
-	// Prepare export to Google Sheets format
-	statementMap, statementHeaders, statementHeaderNames, err := generateTabularStatementOutput(res, annotations, componentRefs, links, stmtId, separator)
+	// Prepare export to tabular output
+	statementMap, statementHeaders, statementHeaderNames, err := generateStatementMatrix(res, annotations, componentRefs, links, stmtId, separator, outputFormat)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", nil, nil, nil, err
 	}
 
-	// Create Google Sheets output based on generated map, alongside header names as output
-	output, err := GenerateGoogleSheetsOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	// Default output
+	output := ""
+
+	switch outputFormat {
+	case OUTPUT_TYPE_NONE:
+		// No output generated (useful for internal use such as parsing of nested statements) - simply return matrices and empty flat output
 		return output, statementMap, statementHeaders, statementHeaderNames, err
+	case OUTPUT_TYPE_GOOGLE_SHEETS:
+		// Create Google Sheets output based on generated map, alongside header names as output
+		output, err = generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename)
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return output, statementMap, statementHeaders, statementHeaderNames, err
+		}
+	case OUTPUT_TYPE_CSV:
+		// Create CSV output based on generated map, alongside header names as output
+		output, err = generateCSVOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename)
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return output, statementMap, statementHeaders, statementHeaderNames, err
+		}
+	default:
+		return "", nil, nil, nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OUTPUT_TYPE, ErrorMessage: "Invalid output type specified. Should be Google Sheets or CSV."}
 	}
 
 	return output, statementMap, statementHeaders, statementHeaderNames, err

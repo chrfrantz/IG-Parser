@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"IG-Parser/exporter"
 	"IG-Parser/web/helper"
 	"fmt"
 	"log"
@@ -24,6 +25,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	dynChk := r.FormValue(PARAM_DYNAMIC_SCHEMA)
 	inclAnnotations := r.FormValue(PARAM_LOGICO_OUTPUT)
 	igExtended := r.FormValue(PARAM_EXTENDED_OUTPUT)
+	outputType := r.FormValue(PARAM_OUTPUT_TYPE)
 	propertyTree := r.FormValue(PARAM_PROPERTY_TREE)
 	binaryTree := r.FormValue(PARAM_BINARY_TREE)
 	actCondTop := r.FormValue(PARAM_ACTIVATION_CONDITION_ON_TOP)
@@ -111,6 +113,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		DynamicOutput:             dynChk,
 		IGExtendedOutput:          igExtended,
 		IncludeAnnotations:        inclAnnotations,
+		OutputType:                outputType,
+		OutputTypes:               exporter.OUTPUT_TYPES,
 		PrintPropertyTree:         propertyTree,
 		PrintBinaryTree:           binaryTree,
 		ActivationConditionsOnTop: actCondTop,
@@ -121,6 +125,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		CodedStmtHelp:             HELP_CODED_STMT,
 		StmtIdHelp:                HELP_STMT_ID,
 		ParametersHelp:            HELP_PARAMETERS,
+		OutputTypeHelp:            HELP_OUTPUT_TYPE,
 		ReportHelp:                HELP_REPORT}
 
 	// Assign width for UI rendering
@@ -369,7 +374,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Produce return actual output
 		if templateName == TEMPLATE_NAME_PARSER_SHEETS {
 			fmt.Println("Google Sheets output requested")
-			handleGoogleSheetsOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
+			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, outputType)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			fmt.Println("Visual output requested")
 			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations)

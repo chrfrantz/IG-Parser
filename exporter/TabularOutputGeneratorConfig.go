@@ -6,6 +6,26 @@ import (
 )
 
 /*
+Output generated for Google Sheets processing
+*/
+const OUTPUT_TYPE_GOOGLE_SHEETS = "Google Sheets"
+
+/*
+Output generated for generic CSV processing (e.g., Excel Text-to-Columns)
+*/
+const OUTPUT_TYPE_CSV = "CSV format"
+
+/*
+No flat output to be generated
+*/
+const OUTPUT_TYPE_NONE = "NONE"
+
+/*
+Output types available for output generation
+*/
+var OUTPUT_TYPES = []string{OUTPUT_TYPE_GOOGLE_SHEETS, OUTPUT_TYPE_CSV}
+
+/*
 Indicates whether shared elements are included in output
 */
 var INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true

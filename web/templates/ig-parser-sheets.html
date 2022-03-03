@@ -12,6 +12,14 @@
 <input id="igExtended" name="igExtended" type="checkbox" {{.IGExtendedOutput}} /><label for="igExtended">Produce IG Extended output (component-level nesting) (default: off)</label>
 <input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (only for static output) (default: off)</label><br />
 
+<!-- Output type -->
+<span data-text="{{.OutputTypeHelp}}" class="tooltip">Output format:</span>
+<select id="outputType" name="outputType" type="select">
+{{ range $type := .OutputTypes }}
+<option value="{{ $type }}" {{ if eq $.OutputType $type }}selected="selected"{{ end }}>{{ $type }}</option>
+{{ end }}
+</select>
+
 <input value="Generate tabular output" type="submit">
 {{if .Error}}
 <div class="error">
@@ -30,7 +38,7 @@
 </div>
     {{if .Success}}
         <div class="output">
-            <h3>Google Sheets Output:</h3><br />
+            <h3>{{.OutputType}} Output:</h3><br />
             <button class="button1" id="button1" onclick="CopyToClipboard('output')" width="100px">Copy generated statements to clipboard</button>
 
             <pre>

@@ -32,7 +32,7 @@ func main() {
 	//text := "Cac(do (something [AND] (reside [OR] own) sufficient (agricultural [OR] forest) land to ...))"
 	//text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) {Cac{A(actor3) I(aim3) Bdir(something)} [OR] Cac{A(actor4) I(aim4) Bdir(something else)}}}"
 	text := "Bdir{A(actor2) I(aim2) (((Cac{A(actor3) I(aim3) Bdir(something)} [OR] Cac{A(actor4) I(aim4) Bdir(something else)}) [AND] Cac{A(actor55)}))}"
-	text = "Bdir{A(actor2) I(aim2) (Cac{A(actor3) I(aim3) Bdir(something)} [OR] (Cac{A(actor4) I(aim4) Bdir(something else)} [AND] Cac{A(actor55)}))}"
+	text = "Bdir1((left [OR] right)) Bdir1,p(private) Bdir10(general object) Bdir10,p(shared)"
 
 	exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	exporter.SetDynamicOutput(false)
@@ -46,6 +46,11 @@ func main() {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		log.Fatal(err.Error())
 	}
+
+	fmt.Println(output.String())
+
+	//fmt.Println(output.DirectObject.Left.Left.String())
+	//fmt.Println(output.DirectObject.Left.Left.GetSuffix())
 
 	//fmt.Println(output.PrintTree(nil, true, false, false, false, 0))
 

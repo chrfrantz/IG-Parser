@@ -67,11 +67,14 @@ var HELP_CODED_STMT = "This entry field should be used to encode your institutio
 	"** The Or else component only allows component-level nesting (i.e., substitution by an entire statement)."
 
 // Help for statement ID field
-var HELP_STMT_ID = "This entry field should contain a statement ID (consisting of numbers and/or letters) that is the basis for generating substatement IDs."
+const HELP_STMT_ID = "This entry field should contain a statement ID (consisting of numbers and/or letters) that is the basis for generating substatement IDs."
 
 // Help for parameter fields
-var HELP_PARAMETERS = "This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements."
+const HELP_PARAMETERS = "This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements."
+
+// Help for output field
+const HELP_OUTPUT_TYPE = "The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol ('|') as delimiter/separator."
 
 // Help for report error field
-var HELP_REPORT = "Clicking on this link should open your mail client with a pre-populated mail." + HTML_LINEBREAK +
+const HELP_REPORT = "Clicking on this link should open your mail client with a pre-populated mail." + HTML_LINEBREAK +
 	"Alternatively, right-click on the link, copy the e-mail address, and send a mail manually. Ensure to provide the Request ID in the subject line or body of your mail."

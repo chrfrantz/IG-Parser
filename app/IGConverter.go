@@ -10,10 +10,11 @@ import (
 /*
 Consumes statement as input and produces outfile
 Arguments include the IGScript-annotated statement, statement ID based on which substatements are generated,
+the nature of the output type (see TabularOutputGeneratorConfig #OUTPUT_TYPE_CSV, #OUTPUT_TYPE_GOOGLE_SHEETS)
 and a filename for the output. If the filename is empty, no output will be written.
 Returns Google Sheets output as string, and error (defaults to tree.PARSING_NO_ERROR).
 */
-func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename string) (string, tree.ParsingError) {
+func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType string, filename string) (string, tree.ParsingError) {
 
 	// Use separator specified by default
 	separator := exporter.CellSeparator
@@ -31,7 +32,7 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 	Println("Parsed statement:", s.String())
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateGoogleSheetsOutputFromParsedStatement(s, "", stmtId, "", tree.AGGREGATE_IMPLICIT_LINKAGES, separator)
+	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateTabularOutputFromParsedStatement(s, "", stmtId, filename, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", err
 	}
@@ -42,14 +43,6 @@ func ConvertIGScriptToGoogleSheets(statement string, stmtId string, filename str
 	Println(statementMap)
 
 	log.Println("Output generation complete.")
-	log.Println("Writing to file ...")
-
-	output, err = exporter.GenerateGoogleSheetsOutput(statementMap, statementHeader, statementHeaderNames, separator, filename)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return "", err
-	}
-
-	log.Println("Writing completed.")
 
 	return output, err
 

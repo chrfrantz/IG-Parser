@@ -22,6 +22,10 @@ type ReturnStruct struct {
 	IGExtendedOutput string
 	// Annotation inclusion indicator
 	IncludeAnnotations string
+	// Output type indicator (e.g., Google Sheets, CSV)
+	OutputType string
+	// Output types (to populate UI)
+	OutputTypes []string
 	// Property tree printing indicator
 	PrintPropertyTree string
 	// Binary tree printing indicator (as opposed to tree aggregation based on logical operator by component)
@@ -44,6 +48,8 @@ type ReturnStruct struct {
 	StmtIdHelp string
 	// Help message for parameters
 	ParametersHelp string
+	// Help message for output format
+	OutputTypeHelp string
 	// Help message for report tooltip
 	ReportHelp string
 }
