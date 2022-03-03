@@ -187,7 +187,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 				}
 
 				// Prepare value for entry
-				entryVal := ""
+				entryVal := strings.Builder{}
 				// Indicates whether values within cell should be comma-separated
 				skipSeparator := false
 
@@ -202,12 +202,17 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 							strings.HasSuffix(entryMap[headerSymbols[componentIdx]], leftString) {
 							// Suppress left shared element if identical with shared right one on existing value
 							// but add whitespace to link to previous value
-							entryVal = " " + statement[componentIdx].Entry.(string) + rightString
+							entryVal.WriteString(" ")
+							entryVal.WriteString(statement[componentIdx].Entry.(string))
+							entryVal.WriteString(rightString)
 							// Skip comma separation
 							skipSeparator = true
 						} else {
 							// Regular sharedLeft, whitespace + value sharedRight concatenation
-							entryVal = leftString + " " + statement[componentIdx].Entry.(string) + rightString
+							entryVal.WriteString(leftString)
+							entryVal.WriteString(" ")
+							entryVal.WriteString(statement[componentIdx].Entry.(string))
+							entryVal.WriteString(rightString)
 						}
 					} else {
 						// Static variant
@@ -216,17 +221,23 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 							strings.HasSuffix(entryMap[statement[componentIdx].GetComponentName()], leftString) {
 							// Suppress left shared element if identical with shared right one on existing value
 							// but add whitespace to link to previous value
-							entryVal = " " + statement[componentIdx].Entry.(string) + rightString
+							entryVal.WriteString(" ")
+							entryVal.WriteString(statement[componentIdx].Entry.(string))
+							entryVal.WriteString(rightString)
 							// Skip comma separation
 							skipSeparator = true
 						} else {
 							// Regular sharedLeft, whitespace + value sharedRight concatenation
-							entryVal = leftString + " " + statement[componentIdx].Entry.(string) + rightString
+							entryVal.WriteString(leftString)
+							entryVal.WriteString(" ")
+							entryVal.WriteString(statement[componentIdx].Entry.(string))
+							entryVal.WriteString(rightString)
 						}
 					}
 				} else {
 					// Create regular entry (without left shared value, since that will be empty)
-					entryVal = statement[componentIdx].Entry.(string) + rightString
+					entryVal.WriteString(statement[componentIdx].Entry.(string))
+					entryVal.WriteString(rightString)
 				}
 
 				// Determine whether cell separation is used
@@ -238,15 +249,15 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 				// SPECIAL SYMBOLS (APPLICATION-SPECIFIC) --> SYMBOLS THAT REQUIRE SUBSTITUTION
 				// Substitute symbols before producing output (e.g., " with ')
 				// TODO: Review for further symbols
-				entryVal = shared.EscapeSymbolsForExport(entryVal)
+				entryValStr := shared.EscapeSymbolsForExport(entryVal.String())
 
 				// HANDLE OUTPUT-SPECIFIC MODIFICATIONS
 
 				// TODO: Google Sheets specific - consider adaption to support further formats
 				if outputType == OUTPUT_TYPE_GOOGLE_SHEETS {
 					// Duplicate leading ' for proper Google Sheets parsing
-					if len(entryVal) > 0 && entryVal[0:1] == "'" {
-						entryVal = "'" + entryVal
+					if len(entryValStr) > 0 && entryValStr[0:1] == "'" {
+						entryValStr = "'" + entryValStr
 					}
 				}
 
@@ -257,11 +268,14 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 					// Save entry value into entryMap for given statement and component column
 					if len(entryMap[headerSymbols[componentIdx]]) > 0 {
 						// Add separator for cell values
-						entryMap[headerSymbols[componentIdx]] = entryMap[headerSymbols[componentIdx]] +
-							effectiveCellSeparator + entryVal
+						b := strings.Builder{}
+						b.WriteString(entryMap[headerSymbols[componentIdx]])
+						b.WriteString(effectiveCellSeparator)
+						b.WriteString(entryValStr)
+						entryMap[headerSymbols[componentIdx]] = b.String()
 					} else {
 						// First value, hence no separator needed
-						entryMap[headerSymbols[componentIdx]] = entryVal
+						entryMap[headerSymbols[componentIdx]] = entryValStr
 					}
 				} else {
 					// Static variant
@@ -269,14 +283,17 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 					// Save entry for a given field matched based on node's component type
 					if len(entryMap[statement[componentIdx].GetComponentName()]) > 0 {
 						// Add separator for cell values
-						entryMap[statement[componentIdx].GetComponentName()] = entryMap[statement[componentIdx].GetComponentName()] +
-							effectiveCellSeparator + entryVal
+						b := strings.Builder{}
+						b.WriteString(entryMap[statement[componentIdx].GetComponentName()])
+						b.WriteString(effectiveCellSeparator)
+						b.WriteString(entryValStr)
+						entryMap[statement[componentIdx].GetComponentName()] = b.String()
 					} else {
 						// First value, hence no separator needed
-						entryMap[statement[componentIdx].GetComponentName()] = entryVal
+						entryMap[statement[componentIdx].GetComponentName()] = entryValStr
 					}
 				}
-				Println("Added entry ", entryVal)
+				Println("Added entry ", entryValStr)
 
 				// PRIVATE NODES
 
@@ -359,11 +376,13 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 						} else {
 							// ... else create new one
 							// Generate ID for component-level nested statement
-							nestedStmtId := componentNestedLeft +
-								stmtId +
-								componentNestedRight +
-								stmtIdSeparator +
-								strconv.Itoa(nestedStatementIdx)
+							b := strings.Builder{}
+							b.WriteString(componentNestedLeft)
+							b.WriteString(stmtId)
+							b.WriteString(componentNestedRight)
+							b.WriteString(stmtIdSeparator)
+							b.WriteString(strconv.Itoa(nestedStatementIdx))
+							nestedStmtId := b.String()
 							Println("Generated ID for nested statement:", nestedStmtId)
 							// Add component-level nested statement
 							componentNestedStmts = append(componentNestedStmts,
@@ -400,8 +419,13 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 
 							// Add logical operator if not last entry (and parent not empty otherwise)
 							if !last && entryVal.Parent != nil {
-								entryMap[headerSymbols[componentIdx]] +=
-									" " + logicalCombinationLeft + entryVal.Parent.LogicalOperator + logicalCombinationRight + " "
+								b := strings.Builder{}
+								b.WriteString(" ")
+								b.WriteString(logicalCombinationLeft)
+								b.WriteString(entryVal.Parent.LogicalOperator)
+								b.WriteString(logicalCombinationRight)
+								b.WriteString(" ")
+								entryMap[headerSymbols[componentIdx]] += b.String()
 							}
 						}
 					} else {
@@ -430,8 +454,14 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 
 							// Add logical operator if not last entry (and parent not empty otherwise)
 							if !last && entryVal.Parent != nil {
-								entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] +=
-									" " + logicalCombinationLeft + entryVal.Parent.LogicalOperator + logicalCombinationRight + " "
+								b := strings.Builder{}
+								b.WriteString(" ")
+								b.WriteString(logicalCombinationLeft)
+								b.WriteString(entryVal.Parent.LogicalOperator)
+								b.WriteString(logicalCombinationRight)
+								b.WriteString(" ")
+								entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] += b.String()
+
 							}
 						}
 					}
@@ -519,7 +549,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 Resolves all logical linkages to other statements and returns those as compound logical expression (e.g., [AND][{65}.1],[AND][{65}.2])
 */
 func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNestedStmts []IdentifiedStmt) (string, tree.ParsingError) {
-	logicalExpressionString := ""
+	builder := strings.Builder{}
 
 	// Iterate over all nested statements
 	for _, targetEntry := range allNestedStmts {
@@ -545,23 +575,24 @@ func generateLogicalLinksExpressionForStatements(sourceStmt *tree.Node, allNeste
 
 				Println("Node has linkage ", ops)
 
-				if logicalExpressionString != "" {
-					logicalExpressionString += logicalOperatorStmtRefSeparator
+				if builder.String() != "" {
+					builder.WriteString(logicalOperatorStmtRefSeparator)
 				}
 				// ... and append to logical expression column string
-				logicalExpressionString += fmt.Sprint(ops)
+				builder.WriteString(fmt.Sprint(ops))
 				// Leading bracket
-				logicalExpressionString += logicalCombinationLeft
+				builder.WriteString(logicalCombinationLeft)
 
 				Println("Target node IDs: ", targetID)
 				// Add trailing bracket and column ref (to be reviewed)
-				logicalExpressionString += targetID + logicalCombinationRight
+				builder.WriteString(targetID)
+				builder.WriteString(logicalCombinationRight)
 			}
 
 		}
 	}
 	// Return generated string
-	return logicalExpressionString, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	return builder.String(), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
@@ -581,39 +612,44 @@ Returns string containing flat output as well as potential parsing error
 */
 func printTabularOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string) (string, tree.ParsingError) {
 	// Generate header column row based on names
-	output := rowPrefix
+	builder := strings.Builder{}
+	builder.WriteString(rowPrefix)
 	for _, v := range headerColsNames {
-		output += v + separator
+		builder.WriteString(v)
+		builder.WriteString(separator)
 	}
-	output += rowSuffix
+	builder.WriteString(rowSuffix)
 
 	// Generate all entry rows
 	for _, entry := range statementMap {
 		// Create new row with given syntax and potential statement ID prefix (e.g., ' to ensure text interpretation of ID).
-		output += rowPrefix + stmtIdPrefix
+		builder.WriteString(rowPrefix)
+		builder.WriteString(stmtIdPrefix)
 		// Reconstruct based on header column order
 		for _, header := range headerCols {
 			if entry[header] == "" {
 				// if entry for given header is empty, add space
-				output += " " + separator
+				builder.WriteString(" ")
+				builder.WriteString(separator)
 			} else {
 				// else add entry value
-				output += entry[header] + separator
+				builder.WriteString(entry[header])
+				builder.WriteString(separator)
 			}
 		}
-		// Append Google Sheets-specific suffix to complete row
-		output += rowSuffix
+		// Append format-specific row suffix
+		builder.WriteString(rowSuffix)
 	}
 
 	// Write file
 	if filename != "" {
-		err := WriteToFile(filename, output)
+		err := WriteToFile(filename, builder.String())
 		if err != nil {
-			return output, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_WRITE, ErrorMessage: err.Error()}
+			return builder.String(), tree.ParsingError{ErrorCode: tree.PARSING_ERROR_WRITE, ErrorMessage: err.Error()}
 		}
 	}
 
-	return output, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	return builder.String(), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
@@ -640,11 +676,20 @@ func generateGoogleSheetsOutput(statementMap []map[string]string, headerCols []s
 	// Quote to terminate input string for Google Sheets interpretation
 	quote := "\""
 	// Line prefix for Google Sheets
-	prefix := "=SPLIT(" + quote
+	bpre := strings.Builder{}
+	bpre.WriteString("=SPLIT(")
+	bpre.WriteString(quote)
+	prefix := bpre.String()
 	// Linebreak at the end of each entry
 	linebreak := "\n"
 	// Line suffix for Google Sheets (e.g., "; "|")" )
-	suffix := quote + "; \"" + separator + "\")" + linebreak
+	bsuf := strings.Builder{}
+	bsuf.WriteString(quote)
+	bsuf.WriteString("; \"")
+	bsuf.WriteString(separator)
+	bsuf.WriteString("\")")
+	bsuf.WriteString(linebreak)
+	suffix := bsuf.String()
 
 	// Delegate actual printing
 	return printTabularOutput(statementMap, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename)
@@ -725,6 +770,11 @@ func generateHeaderRow(stringToAppendTo string, componentFrequency map[string]in
 			ErrorMessage: "Value for separator symbol is invalid."}
 	}
 
+	// Builder to append to input
+	builder := strings.Builder{}
+	// Add original string
+	builder.WriteString(stringToAppendTo)
+
 	// Header symbols to be returned for later use (used in logical operators)
 	headerSymbols := []string{}
 	// Header symbol names to be returned for column header construction
@@ -749,11 +799,13 @@ func generateHeaderRow(stringToAppendTo string, componentFrequency map[string]in
 			headerSymbols = append(headerSymbols, headerSymbol)
 			headerSymbolsNames = append(headerSymbolsNames, headerSymbolsName)
 			// Append full header names to string
-			stringToAppendTo += headerSymbolsName
-			stringToAppendTo += separator
+			builder.WriteString(headerSymbolsName)
+			builder.WriteString(separator)
 			i++
 		}
 	}
+	// Convert to string
+	stringToAppendTo = builder.String()
 	// Cut off last separator
 	stringToAppendTo = stringToAppendTo[0 : len(stringToAppendTo)-len(separator)]
 	// Return generated string as well as symbol map and mapped names
@@ -823,6 +875,10 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 		Println("Sorted keys: ", nodesKeys)
 	}
 
+	// Builder for string generation
+	builder := strings.Builder{}
+	builder.WriteString(logicalExpressionString)
+
 	// Check that entries for own component value exist
 	if linksForElement[statement[componentIdx]] != nil {
 		// Iterate through all component values based on ordered keys
@@ -854,38 +910,43 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 						Println("Node has linkage ", ops)
 						if logicalStringInitiated {
 							// Append logical operator separator if logical operator linkage already exists
-							logicalExpressionString += logicalOperatorSeparator
+							builder.WriteString(logicalOperatorSeparator)
 						} else {
 							// Any further printing of logical operators for given component will lead to addition of separator
 							logicalStringInitiated = true
 						}
 						// ... and append to logical expression column string
-						logicalExpressionString += fmt.Sprint(ops)
+						builder.WriteString(fmt.Sprint(ops))
 						// Statement component identifier
 						if ProduceDynamicOutput() {
 							// Based on index or parsed input nodes
-							logicalExpressionString += "." + headerSymbols[componentIdx] + "."
+							builder.WriteString(".")
+							builder.WriteString(headerSymbols[componentIdx])
+							builder.WriteString(".")
 						} else {
 							// Based on name of current element
-							logicalExpressionString += "." + statement[componentIdx].GetComponentName() + "."
+							builder.WriteString(".")
+							builder.WriteString(statement[componentIdx].GetComponentName())
+							builder.WriteString(".")
 						}
 						// Leading bracket
-						logicalExpressionString += logicalCombinationLeft
+						builder.WriteString(logicalCombinationLeft)
 						// Prepare intermediate structure to store statement references
-						stmtsRefs := ""
+						stmtsRefs := strings.Builder{}
 
 						Println("Target node IDs: ", linkedElement)
 						for lks := range linkedElement {
 							//Println("Found pointer from ", statement[componentIdx] ," to ", otherNode , " as ", generateStatementID(stmtId, lks + 1))
 							// Append actual statement id
-							stmtsRefs += generateStatementIDString(stmtId, linkedElement[lks])
+							stmtsRefs.WriteString(generateStatementIDString(stmtId, linkedElement[lks]))
 							if lks < len(linkedElement)-1 {
-								stmtsRefs += logicalOperatorStmtRefSeparator
+								stmtsRefs.WriteString(logicalOperatorStmtRefSeparator)
 							}
 						}
 
 						// Add statement reference and trailing bracket
-						logicalExpressionString += stmtsRefs + logicalCombinationRight
+						builder.WriteString(stmtsRefs.String())
+						builder.WriteString(logicalCombinationRight)
 					}
 					Println("Added logical relationships for value", otherNode, ", elements:", logicalExpressionString)
 				} else {
@@ -895,21 +956,29 @@ func generateLogicalLinksExpressionForGivenComponentValue(logicalExpressionStrin
 		}
 	}
 	// Return generated logical expression for given component
-	return logicalExpressionString, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	return builder.String(), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
 Generate statement ID from main statement ID and index of iterated substatement
 */
 func generateStatementIDString(mainID string, subStmtIndex string) string {
-	return mainID + stmtIdSeparator + subStmtIndex
+	b := strings.Builder{}
+	b.WriteString(mainID)
+	b.WriteString(stmtIdSeparator)
+	b.WriteString(subStmtIndex)
+	return b.String()
 }
 
 /*
 Generate statement ID from main statement ID and index of iterated substatement
 */
 func generateStatementIDint(mainID string, subStmtIndex int) string {
-	return mainID + stmtIdSeparator + strconv.Itoa(subStmtIndex)
+	b := strings.Builder{}
+	b.WriteString(mainID)
+	b.WriteString(stmtIdSeparator)
+	b.WriteString(strconv.Itoa(subStmtIndex))
+	return b.String()
 }
 
 /*
