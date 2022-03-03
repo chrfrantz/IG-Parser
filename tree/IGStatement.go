@@ -3,6 +3,7 @@ package tree
 import (
 	"fmt"
 	"log"
+	"strings"
 )
 
 type Statement struct {
@@ -95,10 +96,16 @@ Returns string for printing
 */
 func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol string, complex bool, flatOutput bool, includeComponentSymbol bool) string {
 
+	b := strings.Builder{}
+	b.WriteString(inputString)
+
 	sep := ": "
 	suffix := "\n"
 	complexPrefix := "{\n"
+
 	complexSuffix := "\n}"
+	complexSuffixBuilder := strings.Builder{}
+	complexSuffixBuilder.WriteString(complexSuffix)
 
 	// If node is not nil
 	if node != nil {
@@ -109,10 +116,17 @@ func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol st
 			if len(content) > 0 {
 				if includeComponentSymbol {
 					// Includes component symbol in output
-					return inputString + nodeSymbol + "(" + content + ")" + " "
+					b.WriteString(nodeSymbol)
+					b.WriteString("(")
+					b.WriteString(content)
+					b.WriteString(")")
+					b.WriteString(" ")
+					return b.String()
 				} else {
 					// If output present, append to existing output and append whitespace (to be pruned prior to final print)
-					return inputString + content + " "
+					b.WriteString(content)
+					b.WriteString(" ")
+					return b.String()
 				}
 			} else {
 				// Else simply forward input information
@@ -121,7 +135,8 @@ func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol st
 		}
 
 		// Print symbol
-		inputString += nodeSymbol + sep
+		b.WriteString(nodeSymbol)
+		b.WriteString(sep)
 		// Add core content
 		if complex {
 			// Complex (i.e., nested) node output
@@ -130,27 +145,37 @@ func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol st
 			// Assumes that suffix and annotations are in string format for nodes that have nested statements
 			// TODO: see whether that needs to be adjusted
 			if node.GetSuffix() != "" {
-				complexSuffix += " (Suffix: " + node.GetSuffix() + ")"
+				complexSuffixBuilder.WriteString(" (Suffix: ")
+				complexSuffixBuilder.WriteString(node.GetSuffix())
+				complexSuffixBuilder.WriteString(")")
 			}
 			if node.Annotations != nil {
-				complexSuffix += " (Annotation: " + node.Annotations.(string) + ")"
+				complexSuffixBuilder.WriteString(" (Annotation: ")
+				complexSuffixBuilder.WriteString(node.Annotations.(string))
+				complexSuffixBuilder.WriteString(")")
 			}
 			if node.PrivateNodeLinks != nil {
-				complexSuffix += " (Private links: " + fmt.Sprint(node.PrivateNodeLinks) + ")"
+				complexSuffixBuilder.WriteString(" (Private links: ")
+				complexSuffixBuilder.WriteString(fmt.Sprint(node.PrivateNodeLinks))
+				complexSuffixBuilder.WriteString(")")
 			}
 			if node.GetComponentName() != "" {
-				complexSuffix += " (Component name: " + fmt.Sprint(node.GetComponentName()) + ")"
+				complexSuffixBuilder.WriteString(" (Component name: ")
+				complexSuffixBuilder.WriteString(fmt.Sprint(node.GetComponentName()))
+				complexSuffixBuilder.WriteString(")")
 			}
 
-			inputString += complexPrefix + node.String() + complexSuffix
+			b.WriteString(complexPrefix)
+			b.WriteString(node.String())
+			b.WriteString(complexSuffixBuilder.String())
 		} else {
 			// Simple output
-			inputString += node.String()
+			b.WriteString(node.String())
 		}
 		// Append suffix
-		inputString += suffix
+		b.WriteString(suffix)
 	}
-	return inputString
+	return b.String()
 }
 
 /*
