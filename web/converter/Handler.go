@@ -91,7 +91,13 @@ Serves favicon.
 */
 func FaviconHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received favicon request")
-	dir, _ := os.Getwd()
-	fmt.Println("Current location:", dir)
 	http.ServeFile(w, r, "web/css/favicon.ico")
+}
+
+/*
+Serves D3 library.
+*/
+func D3Handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Received D3 library request")
+	http.ServeFile(w, r, "web/libraries/d3.v7.min.js")
 }

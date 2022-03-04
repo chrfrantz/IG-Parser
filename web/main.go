@@ -18,6 +18,8 @@ const ENV_VAR_LOGGING_PATH = "IG_PARSER_LOGGING_PATH"
 
 const DEFAULT_PORT = "8080"
 
+const VISUAL_PATH = "visual"
+
 func main() {
 
 	// Initializes templating and determines correct relative path for templates and CSS
@@ -26,9 +28,12 @@ func main() {
 	// Conventional tabular output handler
 	http.HandleFunc("/", converter.ConverterHandlerSheets)
 	// Visual tree output handler
-	http.HandleFunc("/visual/", converter.ConverterHandlerVisual)
-	// Favicon
+	http.HandleFunc("/"+VISUAL_PATH+"/", converter.ConverterHandlerVisual)
+	// Favicon (served for regular and visual output)
 	http.HandleFunc("/favicon.ico", converter.FaviconHandler)
+	http.HandleFunc("/"+VISUAL_PATH+"/favicon.ico", converter.FaviconHandler)
+	// D3 (served for visual output)
+	http.HandleFunc("/"+VISUAL_PATH+"/d3.v7.min.js", converter.D3Handler)
 	// CSS folder mapping
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(converter.RelativePathPrefix+"css"))))
 
