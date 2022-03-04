@@ -33,7 +33,9 @@ func main() {
 	http.HandleFunc("/favicon.ico", converter.FaviconHandler)
 	http.HandleFunc("/"+VISUAL_PATH+"/favicon.ico", converter.FaviconHandler)
 	// D3 (served for visual output)
-	http.HandleFunc("/"+VISUAL_PATH+"/d3.v7.min.js", converter.D3Handler)
+	//http.HandleFunc("/"+VISUAL_PATH+"/d3.v7.min.js", converter.D3Handler)
+	//http.Handle("/"+VISUAL_PATH+"/d3.v7.min.js", http.StripPrefix("/d3.v7.min.js", http.FileServer(http.Dir(converter.RelativePathPrefix+"libraries/d3.v7.min.js"))))
+	http.Handle("/libraries/", http.StripPrefix("/libraries/", http.FileServer(http.Dir(converter.RelativePathPrefix+"libraries"))))
 	// CSS folder mapping
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(converter.RelativePathPrefix+"css"))))
 
