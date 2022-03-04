@@ -41,7 +41,7 @@ Allows indication as to whether activation conditions should be moved to the beg
 Requires specification of nesting level the nodes exists on (Default: 0).
 This function is tested in TabularOutputGenerator_test.go, i.e., tests with focus on visual tree output.
 */
-func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, includeAnnotations bool, moveActivationConditionsToFront bool, nestingLevel int) (string, ParsingError) {
+func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, includeAnnotations bool, moveActivationConditionsToFront bool, nestingLevel int) (strings.Builder, ParsingError) {
 
 	// Default name if statement does not have root node
 	rootName := ""
@@ -52,24 +52,32 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 	}
 
 	// Opening tree
-	out := "{" + TREE_PRINTER_LINEBREAK
+	out := strings.Builder{}
+	out.WriteString("{")
+	out.WriteString(TREE_PRINTER_LINEBREAK)
 
 	// Print statement-level node
-	out += TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS + "\"" +
-		// Root node name
-		rootName +
-		"\"" + TREE_PRINTER_SEPARATOR
+	out.WriteString(TREE_PRINTER_KEY_NAME)
+	out.WriteString(TREE_PRINTER_EQUALS)
+	out.WriteString("\"")
+	// Root node name
+	out.WriteString(rootName)
+	out.WriteString("\"")
+	out.WriteString(TREE_PRINTER_SEPARATOR)
 
 	// Append nesting level for every node (includes parent node of potential nested statement)
-	out += TREE_PRINTER_KEY_NESTING_LEVEL + TREE_PRINTER_EQUALS + strconv.Itoa(nestingLevel) + ", "
+	out.WriteString(TREE_PRINTER_KEY_NESTING_LEVEL)
+	out.WriteString(TREE_PRINTER_EQUALS)
+	out.WriteString(strconv.Itoa(nestingLevel))
+	out.WriteString(", ")
 
 	// Append annotations for root node if activated (and existing)
 	if includeAnnotations {
-		out = parent.appendAnnotations(out, false, true)
+		out.WriteString(parent.appendAnnotations("", false, true))
 	}
 
 	// Line break to separate children visually
-	out += TREE_PRINTER_LINEBREAK
+	out.WriteString(TREE_PRINTER_LINEBREAK)
 
 	// Indicates whether children have already been added below the top-level string
 	childrenPresent := false
@@ -138,25 +146,31 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 			componentString, err := v.PrintNodeTree(s, printFlat, printBinary, includeAnnotations, moveActivationConditionsToFront, nestingLevel)
 			if err.ErrorCode != TREE_NO_ERROR {
 				// Special case of NodeError being embedded in ParsingError
-				return "", ParsingError{ErrorCode: PARSING_ERROR_EMBEDDED_NODE_ERROR, ErrorMessage: err.ErrorMessage}
+				return strings.Builder{}, ParsingError{ErrorCode: PARSING_ERROR_EMBEDDED_NODE_ERROR, ErrorMessage: err.ErrorMessage}
 			}
 
 			Println("Output for " + v.GetComponentName() + ": " + componentString)
 			if !childrenPresent && componentString != "" {
 				// Print children prefix if components are present
-				out += TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN + TREE_PRINTER_LINEBREAK
+				out.WriteString(TREE_PRINTER_KEY_CHILDREN)
+				out.WriteString(TREE_PRINTER_EQUALS)
+				out.WriteString(TREE_PRINTER_COLLECTION_OPEN)
+				out.WriteString(TREE_PRINTER_LINEBREAK)
 				childrenPresent = true
 			}
 			// Add the actual content
-			out += prepend + componentString
+			out.WriteString(prepend)
+			out.WriteString(componentString)
 		}
 	}
 	// Close children
 	if childrenPresent {
-		out += TREE_PRINTER_LINEBREAK + TREE_PRINTER_COLLECTION_CLOSE
+		out.WriteString(TREE_PRINTER_LINEBREAK)
+		out.WriteString(TREE_PRINTER_COLLECTION_CLOSE)
 	}
 	// Close entire tree
-	out += TREE_PRINTER_LINEBREAK + TREE_PRINTER_CLOSE_BRACE
+	out.WriteString(TREE_PRINTER_LINEBREAK)
+	out.WriteString(TREE_PRINTER_CLOSE_BRACE)
 
 	return out, ParsingError{ErrorCode: PARSING_NO_ERROR}
 }
@@ -170,7 +184,7 @@ Allows indication as to whether activation conditions should be moved to the beg
 Requires specification of nesting level for node exists on (Default: 0).
 */
 func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool, moveActivationConditionsToFront bool, nestingLevel int) (string, NodeError) {
-	out := ""
+	out := strings.Builder{}
 
 	if !n.IsNil() && !n.IsEmptyNode() {
 		if n.HasPrimitiveEntry() || n.IsCombination() {
@@ -182,9 +196,13 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 			if n.HasPrimitiveEntry() {
 
 				// Produce output for simple entry
-				out = TREE_PRINTER_OPEN_BRACE + TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS +
-					// Actual content (including escaping particular symbols)
-					"\"" + shared.EscapeSymbolsForExport(n.Entry.(string)) + "\""
+				out.WriteString(TREE_PRINTER_OPEN_BRACE)
+				out.WriteString(TREE_PRINTER_KEY_NAME)
+				out.WriteString(TREE_PRINTER_EQUALS)
+				// Actual content (including escaping particular symbols)
+				out.WriteString("\"")
+				out.WriteString(shared.EscapeSymbolsForExport(n.Entry.(string)))
+				out.WriteString("\"")
 
 				// Ensure that entry is closed
 				printFullEntry = true
@@ -206,10 +224,10 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 							return "", err
 						}
 						// Append if successful parsing
-						out += outTmpL
+						out.WriteString(outTmpL)
 
 						// Append separator to collapsed entries (i.e., on same level)
-						out += ", "
+						out.WriteString(", ")
 
 						// Print right side
 						outTmpR, err := n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations, moveActivationConditionsToFront, nestingLevel)
@@ -217,7 +235,7 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 							return "", err
 						}
 						// Append if successful parsing
-						out += outTmpR
+						out.WriteString(outTmpR)
 
 						// Suppress printing of closing parts of entry, since further nodes of same operator on same component may be appended
 						printFullEntry = false
@@ -230,11 +248,18 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 				// or if no nested logical operators for given component were detected (e.g., multiple nested AND linkages)
 				if printFullEntry {
 					// Create logical node, two children, and delegate node entry generation to children
-					out = TREE_PRINTER_OPEN_BRACE + TREE_PRINTER_KEY_NAME + TREE_PRINTER_EQUALS +
-						// Logical operator
-						"\"" + n.LogicalOperator + "\"" + TREE_PRINTER_SEPARATOR +
-						// Children
-						TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
+					out.WriteString(TREE_PRINTER_OPEN_BRACE)
+					out.WriteString(TREE_PRINTER_KEY_NAME)
+					out.WriteString(TREE_PRINTER_EQUALS)
+					// Logical operator
+					out.WriteString("\"")
+					out.WriteString(n.LogicalOperator)
+					out.WriteString("\"")
+					out.WriteString(TREE_PRINTER_SEPARATOR)
+					// Children
+					out.WriteString(TREE_PRINTER_KEY_CHILDREN)
+					out.WriteString(TREE_PRINTER_EQUALS)
+					out.WriteString(TREE_PRINTER_COLLECTION_OPEN)
 
 					// Left child
 					outTmpL, err := n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations, moveActivationConditionsToFront, nestingLevel)
@@ -242,10 +267,10 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 						return "", err
 					}
 					// Append if successful parsing
-					out += outTmpL
+					out.WriteString(outTmpL)
 
 					// Add separator
-					out += TREE_PRINTER_SEPARATOR
+					out.WriteString(TREE_PRINTER_SEPARATOR)
 
 					// Right child
 					outTmpR, err := n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations, moveActivationConditionsToFront, nestingLevel)
@@ -253,10 +278,10 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 						return "", err
 					}
 					// Append if successful parsing
-					out += outTmpR
+					out.WriteString(outTmpR)
 
 					// Closing collection
-					out += TREE_PRINTER_COLLECTION_CLOSE
+					out.WriteString(TREE_PRINTER_COLLECTION_CLOSE)
 				}
 			}
 
@@ -264,25 +289,34 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 			// not if branches of logical operators are collapsed
 			if printFullEntry {
 				// Append component name as link label for any entry
-				out += ", " + TREE_PRINTER_KEY_COMPONENT + TREE_PRINTER_EQUALS + "\"" + n.GetComponentName() + "\""
+				out.WriteString(", ")
+				out.WriteString(TREE_PRINTER_KEY_COMPONENT)
+				out.WriteString(TREE_PRINTER_EQUALS)
+				out.WriteString("\"")
+				out.WriteString(n.GetComponentName())
+				out.WriteString("\"")
 
 				// Append nesting level for every node
-				out += ", " + TREE_PRINTER_KEY_NESTING_LEVEL + TREE_PRINTER_EQUALS + strconv.Itoa(nestingLevel)
+				out.WriteString(", ")
+				out.WriteString(TREE_PRINTER_KEY_NESTING_LEVEL)
+				out.WriteString(TREE_PRINTER_EQUALS)
+				out.WriteString(strconv.Itoa(nestingLevel))
 
 				// Print private properties
-				outTmp, err := n.appendPropertyNodes(out, stmt, printFlat, printBinary, includeAnnotations, moveActivationConditionsToFront, nestingLevel)
+				outTmp, err := n.appendPropertyNodes("", stmt, printFlat, printBinary, includeAnnotations, moveActivationConditionsToFront, nestingLevel)
 				if err.ErrorCode != TREE_NO_ERROR {
 					return "", err
 				}
-				out = outTmp
 
 				// Append annotations (if existing)
 				if includeAnnotations {
-					out = n.appendAnnotations(out, true, false)
+					outTmp = n.appendAnnotations(outTmp, true, false)
 				}
 
+				out.WriteString(outTmp)
+
 				// Close entry
-				out += TREE_PRINTER_CLOSE_BRACE
+				out.WriteString(TREE_PRINTER_CLOSE_BRACE)
 			}
 		} else {
 			// Produce output for nested statement
@@ -291,10 +325,10 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 				// Special case of NodeError embedding a ParsingError produced in nested invocation.
 				return "", NodeError{ErrorCode: TREE_ERROR_EMBEDDED_PARSING_ERROR, ErrorMessage: err.ErrorMessage}
 			}
-			out += outTmp
+			out.WriteString(outTmp.String())
 		}
 	}
-	return out, NodeError{ErrorCode: TREE_NO_ERROR}
+	return out.String(), NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 /*
@@ -307,7 +341,10 @@ Includes indication whether annotations are to be included in output.
 Allows indication as to whether activation conditions should be moved to the beginning of the visual tree output
 Requires specification of nesting level the property node lies on (Lowest level: 0)
 */
-func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool, moveActivationConditionsToFront bool, nestingLevel int) (string, NodeError) {
+func (n *Node) appendPropertyNodes(stringToPrepend string, stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool, moveActivationConditionsToFront bool, nestingLevel int) (string, NodeError) {
+
+	stringToAppendTo := strings.Builder{}
+	stringToAppendTo.WriteString(stringToPrepend)
 
 	// Append potential private and shared property nodes under the condition that those nodes are leaf nodes, or if flat printing is activated
 	if n != nil && (n.IsLeafNode() || printFlat) &&
@@ -366,22 +403,30 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 					// Start general output for property only if nothing is printed yet
 					if printFlat {
 						// Initiate flat output for properties
-						stringToAppendTo += ", " + TREE_PRINTER_KEY_PROPERTIES + TREE_PRINTER_EQUALS
+						stringToAppendTo.WriteString(", ")
+						stringToAppendTo.WriteString(TREE_PRINTER_KEY_PROPERTIES)
+						stringToAppendTo.WriteString(TREE_PRINTER_EQUALS)
 					} else {
 						// Add position information to ensure offset printing of leading node content (since it is followed by nested property structure)
-						stringToAppendTo += ", " + TREE_PRINTER_KEY_POSITION + TREE_PRINTER_EQUALS + TREE_PRINTER_VAL_POSITION_BELOW
+						stringToAppendTo.WriteString(", ")
+						stringToAppendTo.WriteString(TREE_PRINTER_KEY_POSITION)
+						stringToAppendTo.WriteString(TREE_PRINTER_EQUALS)
+						stringToAppendTo.WriteString(TREE_PRINTER_VAL_POSITION_BELOW)
 						// Initiate tree structure for tree output of properties
-						stringToAppendTo += ", " + TREE_PRINTER_KEY_CHILDREN + TREE_PRINTER_EQUALS + TREE_PRINTER_COLLECTION_OPEN
+						stringToAppendTo.WriteString(", ")
+						stringToAppendTo.WriteString(TREE_PRINTER_KEY_CHILDREN)
+						stringToAppendTo.WriteString(TREE_PRINTER_EQUALS)
+						stringToAppendTo.WriteString(TREE_PRINTER_COLLECTION_OPEN)
 					}
 				}
 
 				// Add separators, or open new entry if needed
 				if elementPrinted {
 					// Add separator if element has been added
-					stringToAppendTo += ", "
+					stringToAppendTo.WriteString(", ")
 				} else if printFlat {
 					// Prepend quotation
-					stringToAppendTo += "\""
+					stringToAppendTo.WriteString("\"")
 				}
 
 				// Print per-property entry
@@ -397,19 +442,19 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 							for _, v := range v1 {
 								// Add separator if previous entry exists
 								if entryAdded {
-									stringToAppendTo += ", "
+									stringToAppendTo.WriteString(", ")
 								}
 								// Append each entry individually
-								stringToAppendTo += shared.EscapeSymbolsForExport(v.Entry.(string))
+								stringToAppendTo.WriteString(shared.EscapeSymbolsForExport(v.Entry.(string)))
 								entryAdded = true
 							}
 						}
 					} else if !privateNode.HasPrimitiveEntry() {
 						// Embedded statement (is printed as flat string, e.g., A: actor I: action, Cac: context)
-						stringToAppendTo += privateNode.Entry.(Statement).StringFlatStatement(true)
+						stringToAppendTo.WriteString(privateNode.Entry.(Statement).StringFlatStatement(true))
 					} else {
 						// Primitive properties
-						stringToAppendTo += shared.EscapeSymbolsForExport(privateNode.Entry.(string))
+						stringToAppendTo.WriteString(shared.EscapeSymbolsForExport(privateNode.Entry.(string)))
 					}
 				} else {
 					// If no flat printing, append complete nested tree structure (property tree)
@@ -417,7 +462,7 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 					if err.ErrorCode != TREE_NO_ERROR {
 						return "", err
 					}
-					stringToAppendTo += stringTmp
+					stringToAppendTo.WriteString(stringTmp)
 				}
 				// Mark if initial item has been performed
 				elementPrinted = true
@@ -427,17 +472,17 @@ func (n *Node) appendPropertyNodes(stringToAppendTo string, stmt Statement, prin
 			if elementPrinted {
 				if printFlat {
 					// Close flat entry
-					stringToAppendTo += "\""
+					stringToAppendTo.WriteString("\"")
 				} else {
 					// Close collection
-					stringToAppendTo += TREE_PRINTER_COLLECTION_CLOSE
+					stringToAppendTo.WriteString(TREE_PRINTER_COLLECTION_CLOSE)
 				}
 			}
 		}
 	}
 
 	// Return extended string
-	return stringToAppendTo, NodeError{ErrorCode: TREE_NO_ERROR}
+	return stringToAppendTo.String(), NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 /*
@@ -445,18 +490,25 @@ Appends potentially existing annotations to node-specific output.
 Input is the string to be appended to (stringToAppendTo), as well as a parameter indicating whether
 termination separator (", ") should be added (either prepended, appended, or both) if annotations are added.
 */
-func (n *Node) appendAnnotations(stringToAppendTo string, prependSeparator bool, appendSeparator bool) string {
+func (n *Node) appendAnnotations(stringToPrepend string, prependSeparator bool, appendSeparator bool) string {
+
+	stringToAppendTo := strings.Builder{}
+	stringToAppendTo.WriteString(stringToPrepend)
+
 	// Append potential annotations (while replacing specific conflicting symbols)
 	if n != nil && n.GetAnnotations() != nil {
 		if prependSeparator {
-			stringToAppendTo += ", "
+			stringToAppendTo.WriteString(", ")
 		}
-		stringToAppendTo += TREE_PRINTER_KEY_ANNOTATIONS + TREE_PRINTER_EQUALS
-		stringToAppendTo += "\"" + shared.EscapeSymbolsForExport(n.GetAnnotations().(string)) + "\""
+		stringToAppendTo.WriteString(TREE_PRINTER_KEY_ANNOTATIONS)
+		stringToAppendTo.WriteString(TREE_PRINTER_EQUALS)
+		stringToAppendTo.WriteString("\"")
+		stringToAppendTo.WriteString(shared.EscapeSymbolsForExport(n.GetAnnotations().(string)))
+		stringToAppendTo.WriteString("\"")
 		if appendSeparator {
-			stringToAppendTo += ", "
+			stringToAppendTo.WriteString(", ")
 		}
 	}
 	// Return potentially extended string
-	return stringToAppendTo
+	return stringToAppendTo.String()
 }

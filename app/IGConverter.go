@@ -80,7 +80,7 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 	if filename != "" {
 		log.Println("Writing to file ...")
 
-		err2 := exporter.WriteToFile(filename, output)
+		err2 := exporter.WriteToFile(filename, output.String())
 		if err2 != nil {
 			log.Println("Problems when writing file "+filename+", Error:", err2)
 		}
@@ -88,6 +88,6 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 		log.Println("Writing completed.")
 	}
 
-	return output, err
+	return output.String(), err
 
 }

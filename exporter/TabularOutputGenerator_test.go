@@ -3903,7 +3903,10 @@ func TestVisualOutputBasic(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputBasic.test")
@@ -3917,10 +3920,10 @@ func TestVisualOutputBasic(t *testing.T) {
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	if output != expectedOutput {
+	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", output)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -3965,7 +3968,10 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + output.String())
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputNestedProperties.test")
@@ -3976,13 +3982,13 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4026,7 +4032,10 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputAnnotations.test")
@@ -4037,13 +4046,13 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4079,7 +4088,10 @@ func TestVisualOutputPropertyNodesFlatPrinting(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualTreeComplexPrivateNodesFlat.test")
@@ -4093,10 +4105,10 @@ func TestVisualOutputPropertyNodesFlatPrinting(t *testing.T) {
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4131,7 +4143,10 @@ func TestVisualOutputSharedPropertyNodesFlatPrinting(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputSharedPropertyNodesFlatPrinting.test")
@@ -4145,10 +4160,10 @@ func TestVisualOutputSharedPropertyNodesFlatPrinting(t *testing.T) {
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4183,7 +4198,10 @@ func TestVisualOutputPropertyNodesTreePrinting(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualTreeComplexPrivateNodesTree.test")
@@ -4194,13 +4212,13 @@ func TestVisualOutputPropertyNodesTreePrinting(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4243,7 +4261,10 @@ func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputBasicNonBinary.test")
@@ -4254,13 +4275,13 @@ func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4298,7 +4319,10 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputComplexNonBinary.test")
@@ -4309,13 +4333,13 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4350,7 +4374,10 @@ func TestMultiLevelEmbeddedCombinations(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualMultiCombinationsPhrase.test")
@@ -4361,13 +4388,13 @@ func TestMultiLevelEmbeddedCombinations(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4493,7 +4520,10 @@ func TestVisualOutputDefaultExample(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualDefaultExample.test")
@@ -4504,13 +4534,13 @@ func TestVisualOutputDefaultExample(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4547,7 +4577,10 @@ func TestVisualOutputDefaultExampleActivationConditionsFirst(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualDefaultExampleActivationConditionsFirst.test")
@@ -4558,13 +4591,13 @@ func TestVisualOutputDefaultExampleActivationConditionsFirst(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4601,7 +4634,10 @@ func TestVisualOutputEscapingSymbols(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualEscapingSymbols.test")
@@ -4615,10 +4651,10 @@ func TestVisualOutputEscapingSymbols(t *testing.T) {
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4655,7 +4691,10 @@ func TestVisualOutputSpecialSymbols(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputSpecialSymbols.test")
@@ -4669,10 +4708,10 @@ func TestVisualOutputSpecialSymbols(t *testing.T) {
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4709,7 +4748,10 @@ func TestVisualOutputLinearMultiLevelNesting(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualLinearMultilevelNesting.test")
@@ -4720,13 +4762,13 @@ func TestVisualOutputLinearMultiLevelNesting(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4763,7 +4805,10 @@ func TestVisualOutputComplexMultiLevelNesting(t *testing.T) {
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestOutputVisualComplexMultilevelNesting.test")
@@ -4774,13 +4819,13 @@ func TestVisualOutputComplexMultiLevelNesting(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4906,7 +4951,10 @@ func TestVisualOutputComponentNestedStatementCombinationsWithProperties(t *testi
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputComponentNestedStatementCombinationsWithProperties.test")
@@ -4917,13 +4965,13 @@ func TestVisualOutputComponentNestedStatementCombinationsWithProperties(t *testi
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -4960,7 +5008,10 @@ func TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesA
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesAndOrElse.test")
@@ -4971,13 +5022,13 @@ func TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesA
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -5014,7 +5065,10 @@ func TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties(t *testin
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties.test")
@@ -5025,13 +5079,13 @@ func TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties(t *testin
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -5070,7 +5124,10 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultStatement.test")
@@ -5084,10 +5141,10 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -5125,7 +5182,10 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinations(t *testing.
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinations.test")
@@ -5136,13 +5196,13 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinations(t *testing.
 	// Extract expected output
 	expectedOutput := string(content)
 
-	fmt.Println("Output:", output)
+	fmt.Println("Output:", outputString)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -5181,7 +5241,10 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testi
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputComponentLevelNestingInNestedComponentCombinations.test")
@@ -5195,10 +5258,10 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testi
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
@@ -5240,7 +5303,10 @@ func TestVisualOutputExcessiveSymbolsOrMissingWhitespaceInNestedComponentCombina
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
-	fmt.Println("Generated output: " + output)
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputExcessiveSymbolsInNestedComponentCombinations.test")
@@ -5254,10 +5320,10 @@ func TestVisualOutputExcessiveSymbolsOrMissingWhitespaceInNestedComponentCombina
 	fmt.Println("Output:", output)
 
 	// Compare to actual output
-	if output != expectedOutput {
-		fmt.Println("Produced output:\n", output)
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err2 := WriteToFile("errorOutput.error", output)
+		err2 := WriteToFile("errorOutput.error", outputString)
 		if err2 != nil {
 			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 		}
