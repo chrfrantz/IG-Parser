@@ -38,11 +38,6 @@ Indicates folder to log to
 var LoggingPath = ""
 
 /*
-Relative path prefix for all web resources (templates, CSS files)
-*/
-var RelativePathPrefix = ""
-
-/*
 Success suffix
 */
 const SUCCESS_SUFFIX = ".success"
