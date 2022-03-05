@@ -56,24 +56,8 @@ const ERROR_SUFFIX = ".error"
 Init needs to be called from main to instantiate templates.
 */
 func Init() {
-	/*dir, err := os.Getwd()
-	if err != nil {
-		// Sensible to terminate in this case
-		log.Fatal(err)
-	}
-
-	fmt.Println("Working directory: " + dir)
-	// If in docker container
-	if dir == "/" {
-		// relative to web folder
-		RelativePathPrefix = "../"
-	} else {
-		// else started from repository root
-		RelativePathPrefix = "./web/converter/"
-	}*/
-	RelativePathPrefix = ""
-	// Load all templates in folder, and address specific ones during writing by name (see TEMPLATE_NAME_ constants).
-	tpl, err := template.ParseFS(files, RelativePathPrefix+"templates/*")
+	// Load all templates in folder, and address specific ones during processing by name (see TEMPLATE_NAME_ constants).
+	tpl, err := template.ParseFS(files, "templates/*")
 	if err != nil {
 		log.Fatal("Failed to load website templates. Error:", err)
 	}
