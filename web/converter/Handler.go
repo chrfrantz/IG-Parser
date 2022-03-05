@@ -1,11 +1,10 @@
 package converter
 
 import (
-	"fmt"
+	"embed"
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 )
 
 /*
@@ -16,6 +15,10 @@ var tmpl *template.Template
 // Frontend templates for user interaction
 const TEMPLATE_NAME_PARSER_SHEETS = "ig-parser-sheets.html"
 const TEMPLATE_NAME_PARSER_VISUAL = "ig-parser-visualizer.html"
+
+// Embed templates in compiled binary
+//go:embed templates/*
+var files embed.FS
 
 /*
 Dummy function in case logging is not activated
@@ -53,7 +56,7 @@ const ERROR_SUFFIX = ".error"
 Init needs to be called from main to instantiate templates.
 */
 func Init() {
-	dir, err := os.Getwd()
+	/*dir, err := os.Getwd()
 	if err != nil {
 		// Sensible to terminate in this case
 		log.Fatal(err)
@@ -66,10 +69,16 @@ func Init() {
 		RelativePathPrefix = "../"
 	} else {
 		// else started from repository root
-		RelativePathPrefix = "./web/"
-	}
+		RelativePathPrefix = "./web/converter/"
+	}*/
+	RelativePathPrefix = ""
 	// Load all templates in folder, and address specific ones during writing by name (see TEMPLATE_NAME_ constants).
-	tmpl = template.Must(template.ParseGlob(RelativePathPrefix + "templates/*"))
+	tpl, err := template.ParseFS(files, RelativePathPrefix+"templates/*")
+	if err != nil {
+		log.Fatal("Failed to load website templates. Error:", err)
+	}
+	// Assign to global variable upon successful load
+	tmpl = tpl
 }
 
 /*
@@ -84,20 +93,4 @@ Handler for visualization.
 */
 func ConverterHandlerVisual(w http.ResponseWriter, r *http.Request) {
 	converterHandler(w, r, TEMPLATE_NAME_PARSER_VISUAL)
-}
-
-/*
-Serves favicon.
-*/
-func FaviconHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Received favicon request")
-	http.ServeFile(w, r, "web/css/favicon.ico")
-}
-
-/*
-Serves D3 library.
-*/
-func D3Handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Received D3 library request")
-	http.ServeFile(w, r, "web/libraries/d3.v7.min.js")
 }

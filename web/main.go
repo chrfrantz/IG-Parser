@@ -2,6 +2,7 @@ package main
 
 import (
 	"IG-Parser/web/converter"
+	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,6 +21,13 @@ const DEFAULT_PORT = "8080"
 
 const VISUAL_PATH = "visual"
 
+// Embed files in compiled binary
+//go:embed css/default.css css/favicon.ico
+var cssFiles embed.FS
+
+//go:embed libraries/d3.v7.min.js
+var libraryFiles embed.FS
+
 func main() {
 
 	// Initializes templating and determines correct relative path for templates and CSS
@@ -30,9 +38,9 @@ func main() {
 	// Visual tree output handler
 	http.HandleFunc("/"+VISUAL_PATH+"/", converter.ConverterHandlerVisual)
 	// D3 (served for visual output)
-	http.Handle("/libraries/", http.StripPrefix("/libraries/", http.FileServer(http.Dir(converter.RelativePathPrefix+"libraries"))))
+	http.Handle("/libraries/", http.FileServer(http.FS(libraryFiles)))
 	// CSS folder mapping (for CSS and favicon)
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(converter.RelativePathPrefix+"css"))))
+	http.Handle("/css/", http.FileServer(http.FS(cssFiles)))
 
 	// Check for custom port
 	port := os.Getenv(ENV_VAR_PORT)
