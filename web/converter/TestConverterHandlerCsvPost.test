@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IG Parser</title></br>
+    <link rel="shortcut icon" type="image/x-icon" href="/css/favicon.ico">
+    <link rel="stylesheet" href="/css/default.css">
+</head>
+
+<body>
+<script>
+    function CopyToClipboard(containerid) {
+        if (document.selection) {
+            let range = document.body.createTextRange();
+            range.moveToElementText(document.getElementById(containerid));
+            range.select().createTextRange();
+            document.execCommand("copy");
+        } else if (window.getSelection) {
+            let range = document.createRange();
+            range.selectNode(document.getElementById(containerid));
+            window.getSelection().addRange(range);
+            let res = document.execCommand("copy");
+            if (res !== true) {
+                alert("Text-to-Clipboard copying failed. Please select output manually and copy via keyboard.")
+            }
+        }
+    }
+
+    function check(target) {
+        let offset = 0
+        target.style.height = 'auto';
+        target.style.height = target.scrollHeight + offset + 'px';
+
+    }
+</script>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h1>IG Parser</h1>
+<h2>A Parser for Institutional Statements encoded in the IG Script Notation introduced as part of the Institutional Grammar 2.0</h2>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div class="form">
+    <form method="POST">
+        <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip">Original Statement:</span>
+        <textarea name="rawStmt" onfocusin="check(this)" onkeyup="check(this)">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea><br />
+
+        <span data-text="This entry field should be used to encode your institutional statement using the IG-Script notation.
+The basic structure of a statement is the component symbol (e.g., &#39;A&#39;), immediately followed by the coded text in parentheses, e.g., &#39;A(certifying agent)&#39;.
+Within the coded component, logical combinations of type [AND], [OR], and [XOR] are supported, e.g., &#39;A(Both (certifying agent [AND] inspector)) ...&#39;. 
+Note the parentheses indicating the combination scope within the component; these need to be explicitly specified for every logical operator (i.e., &#39;A((first [AND] second))&#39;; &#39;A(first [AND] second)&#39; will lead to an error).
+
+In addition, the notion of statement-level nesting is supported (i.e., the substitution of component content with entire statements), e.g., &#39;Cac{A(certifier) I(observes) Bdir(violation)}&#39;, including the combination of nested statements, e.g., &#39;{Cac{A(certifier) I(observes) Bdir(violation)} [AND] Cac{A(certifier) I(sanctions) Bdir(violation)}}&#39; (note the outer braces).
+Nesting is supported on all property types (as detailed below), Activation conditions (Cac{}), Execution constraints (Cex{}),  and the Or else component (O{}).
+Additional features include the use of suffices to indicate private linkages between properties and associated components (e.g., &#39;Bdir,p1(violating) Bdir1(citizens) as well as Bdir,p2(compliant) Bdir2(customers)&#39;).
+The parser further supports the encoding of IG Logico annotations to capture semantic information associated with component values (e.g., &#39;A[type=animate](Officer)&#39;). Such annotations can be combined with suffices indicating private component relationships (e.g., &#39;A,p1[prop=qualitative](personal) A1[type=animate](agent)&#39;).
+
+Supported component symbols include (with indication of optional component-level nesting):
+A() --&gt; Attributes
+A,p() --&gt; Attributes Property*
+D() --&gt; Deontic
+I() --&gt; Aim
+Bdir() --&gt; Direct Object*
+Bdir,p() --&gt; Direct Object Property*
+Bind() --&gt; Indirect Object*
+Bind,p() --&gt; Indirect Object Property*
+Cac() --&gt; Activation Condition*
+Cex() --&gt; Execution Constraint*
+E() --&gt; Constituted Entity
+E,p() --&gt; Constituted Entity Property*
+M() --&gt; Modal
+F() --&gt; Constitutive Function
+P() --&gt; Constituting Properties*
+P,p() --&gt; Constituting Properties Properties*
+O{} --&gt; Or Else**
+* In addition to component annotation, these components support component-level nesting, with braces scoping the nested statements (e.g., Bdir,p{ ... }).
+** The Or else component only allows component-level nesting (i.e., substitution by an entire statement)." class="tooltip">Encoded Statement:</span>
+        <textarea name="codedStmt" onfocusin="check(this)" onkeyup="check(this)">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were (non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</textarea><br />
+
+
+
+<span data-text="This entry field should contain a statement ID (consisting of numbers and/or letters) that is the basis for generating substatement IDs." class="tooltip">Statement ID:</span>
+<input name="stmtId" type="text" value="123"><br />
+
+
+<span data-text="This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements." class="tooltip">Parameters:</span>
+
+<input id="dynamicSchema" name="dynamicSchema" type="checkbox" unchecked /><label for="dynamicSchema">Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)</label>
+<input id="igExtended" name="igExtended" type="checkbox" checked /><label for="igExtended">Produce IG Extended output (component-level nesting) (default: off)</label>
+<input id="annotations" name="annotations" type="checkbox" unchecked /><label for="annotations">Include IG Logico annotations in output (only for static output) (default: off)</label><br />
+
+
+<span data-text="The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol (&#39;|&#39;) as delimiter/separator." class="tooltip">Output format:</span>
+<select id="outputType" name="outputType" type="select">
+
+<option value="Google Sheets" >Google Sheets</option>
+
+<option value="CSV format" selected="selected">CSV format</option>
+
+</select>
+
+<input value="Generate tabular output" type="submit">
+
+
+<div class="transactionId">
+    Request ID: KyaqtgwE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a class="tooltip"
+           href="mailto:ig-parser@newinstitutionalgrammar.org?subject=%5BIG-Parser%5D%20%5BRequest%20ID%3A%20KyaqtgwE%5D&body=Please%20replace%20the%20body%20text%20with%20the%20observations%2C%20questions%2C%20or%20suggestions%20you%20have%20based%20on%20your%20experience%20with%20IG-Parser.%20%20If%20you%20observed%20errors%2C%20please%20provide%20a%20description%20(e.g.%2C%20specifying%20what%20you%20expected%20to%20see%2C%20and%20what%20you%20observed%3B%20error%20messages%20you%20received%2C%20etc.).%20%20Please%20also%20feel%20free%20to%20provide%20open%20feedback%20or%20suggestions%20for%20further%20improvement."
+           data-text="Clicking on this link should open your mail client with a pre-populated mail.
+Alternatively, right-click on the link, copy the e-mail address, and send a mail manually. Ensure to provide the Request ID in the subject line or body of your mail.">Report error, observations, or suggestions</a>
+</div>
+
+</form>
+</div>
+
+    <div class="output">
+        <h3>CSV format Output:</h3><br />
+        <button class="button1" id="button1" onclick="CopyToClipboard('output')" width="100px">Copy generated statements to clipboard</button>
+
+        <pre>
+            <div id="output" class="divtext" contentEditable>Statement ID|Attributes|Attributes Property|Attributes Property Reference|Deontic|Aim|Direct Object|Direct Object Reference|Direct Object Property|Direct Object Property Reference|Indirect Object|Indirect Object Reference|Indirect Object Property|Indirect Object Property Reference|Activation Condition|Activation Condition Reference|Execution Constraint|Execution Constraint Reference|Constituted Entity|Constituted Entity Property|Constituted Entity Property Reference|Modal|Constitutive Function|Constituting Properties|Constituting Properties Reference|Constituting Properties Properties|Constituting Properties Properties Reference|Or Else Reference|Logical Linkage (Statements)|Logical Linkage (Components)|
+&#39;123.1|Managers|Regional| |may|review|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.2|Managers|Regional| |may|review|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.3|Managers|Regional| |may|review|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;123.4|Managers|Regional| |may|review|handling operations| |approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.5|Managers|Regional| |may|review|handling operations| |approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.6|Managers|Regional| |may|review|handling operations| |approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;123.7|Managers|Regional| |may|review|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.8|Managers|Regional| |may|review|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.9|Managers|Regional| |may|review|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[AND XOR].I.[123.10-18];[AND XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;123.10|Managers|Regional| |may|reward|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.11|Managers|Regional| |may|reward|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.12|Managers|Regional| |may|reward|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;123.13|Managers|Regional| |may|reward|handling operations| |approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.14|Managers|Regional| |may|reward|handling operations| |approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.15|Managers|Regional| |may|reward|handling operations| |approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;123.16|Managers|Regional| |may|reward|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.17|Managers|Regional| |may|reward|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.18|Managers|Regional| |may|reward|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.19-27];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;123.19|Managers|Regional| |may|sanction|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.20|Managers|Regional| |may|sanction|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.21|Managers|Regional| |may|sanction|production [operations]| |certified,approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;123.22|Managers|Regional| |may|sanction|handling operations| |approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.23|Managers|Regional| |may|sanction|handling operations| |approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.24|Managers|Regional| |may|sanction|handling operations| |approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.7-9,123.16-18,123.25-27];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;123.25|Managers|Regional| |may|sanction|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|on behalf of the Secretary| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[bAND XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26];[bAND XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.26|Managers|Regional| |may|sanction|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|for compliance with the Act or| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.3,123.6,123.9,123.12,123.15,123.18,123.21,123.24,123.27]|
+&#39;123.27|Managers|Regional| |may|sanction|certifying agents| |accredited,approved| | | | | | |{123}.1,{123}.2|for compliance with the regulations in this part| | | | | | | | | | | | |[XOR].I.[123.1-9];[XOR].I.[123.10-18];[bAND].Bdir.[123.1-3,123.10-12,123.19-21];[bAND].Bdir.[123.4-6,123.13-15,123.22-24];[XOR].Cex.[123.1,123.4,123.7,123.10,123.13,123.16,123.19,123.22,123.25];[XOR].Cex.[123.2,123.5,123.8,123.11,123.14,123.17,123.20,123.23,123.26]|
+&#39;{123}.1.1|Operations| | | |were non-compliant|organic farming provisions| | | | | | | | | | | | | | | | | | | | | |[AND][{123}.2]|[OR].I.[{123}.1.2]|
+&#39;{123}.1.2|Operations| | | |were violated|organic farming provisions| | | | | | | | | | | | | | | | | | | | | |[AND][{123}.2]|[OR].I.[{123}.1.1]|
+&#39;{123}.2.1|Manager| | | |has concluded|investigation| | | | | | | | | | | | | | | | | | | | | |[AND][{123}.1]| |
+</div>
+        </pre>
+    </div>
+
+</body>
+
+</html>

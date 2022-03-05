@@ -36,16 +36,16 @@
 {{end}}
 </form>
 </div>
-    {{if .Success}}
-        <div class="output">
-            <h3>{{.OutputType}} Output:</h3><br />
-            <button class="button1" id="button1" onclick="CopyToClipboard('output')" width="100px">Copy generated statements to clipboard</button>
+{{if .Success}}
+    <div class="output">
+        <h3>{{.OutputType}} Output:</h3><br />
+        <button class="button1" id="button1" onclick="CopyToClipboard('output')" width="100px">Copy generated statements to clipboard</button>
 
-            <pre>
-                <div id="output" class="divtext" contentEditable>{{.Output}}</div>
-            </pre>
-        </div>
-    {{end}}
+        <pre>
+            <div id="output" class="divtext" contentEditable>{{.Output}}</div>
+        </pre>
+    </div>
+{{end}}
 </body>
 
 </html>
