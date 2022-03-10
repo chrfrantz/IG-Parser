@@ -78,6 +78,9 @@ func main() {
 	log.Printf("Listening on %s ...\n", addr)
 	log.Println("Logging: " + fmt.Sprint(converter.Logging))
 	log.Println("Logging path: " + fmt.Sprint(converter.LoggingPath))
-	log.Fatal(http.ListenAndServe(addr, nil))
+	err := http.ListenAndServe(addr, nil)
+	if err != nil {
+		log.Fatal("Web service stopped. Error:", err)
+	}
 
 }

@@ -199,27 +199,17 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			retStruct.CodedStmt = ""
 		}
 
+		// TABULAR OUTPUT PARAMETERS
+
 		// Parameter: Statement ID
 		val, suc = extractUrlParameters(r, PARAM_STATEMENT_ID)
 		if suc {
 			retStruct.StmtId = val
 		}
 
-		// Parameter: IG Logico annotations
-		val, suc = extractUrlParameters(r, PARAM_LOGICO_OUTPUT)
-		check := evaluateBooleanUrlParameters(PARAM_LOGICO_OUTPUT, val, suc)
-		// Assign values
-		if check {
-			retStruct.IncludeAnnotations = CHECKBOX_CHECKED
-			includeAnnotations = true
-		} else {
-			retStruct.IncludeAnnotations = CHECKBOX_UNCHECKED
-			includeAnnotations = false
-		}
-
 		// Parameter: Dynamic output
 		val, suc = extractUrlParameters(r, PARAM_DYNAMIC_SCHEMA)
-		check = evaluateBooleanUrlParameters(PARAM_DYNAMIC_SCHEMA, val, suc)
+		check := evaluateBooleanUrlParameters(PARAM_DYNAMIC_SCHEMA, val, suc)
 		// Assign values
 		if check {
 			retStruct.DynamicOutput = CHECKBOX_CHECKED
@@ -240,6 +230,40 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			retStruct.IGExtendedOutput = CHECKBOX_UNCHECKED
 			produceIGExtendedOutput = false
 		}
+
+		// Parameter: IG Logico annotations
+		val, suc = extractUrlParameters(r, PARAM_LOGICO_OUTPUT)
+		check = evaluateBooleanUrlParameters(PARAM_LOGICO_OUTPUT, val, suc)
+		// Assign values
+		if check {
+			retStruct.IncludeAnnotations = CHECKBOX_CHECKED
+			includeAnnotations = true
+		} else {
+			retStruct.IncludeAnnotations = CHECKBOX_UNCHECKED
+			includeAnnotations = false
+		}
+
+		// Parameter: Output type
+		val, suc = extractUrlParameters(r, PARAM_OUTPUT_TYPE)
+		if val != "" {
+			// Read from parameter
+			retStruct.OutputType = val
+		} else {
+			// Use default parameter
+			retStruct.OutputType = exporter.DEFAULT_OUTPUT_TYPES
+			fmt.Println("Set default output type: " + exporter.DEFAULT_OUTPUT_TYPES)
+		}
+
+		// Assign values
+		if check {
+			retStruct.IncludeAnnotations = CHECKBOX_CHECKED
+			includeAnnotations = true
+		} else {
+			retStruct.IncludeAnnotations = CHECKBOX_UNCHECKED
+			includeAnnotations = false
+		}
+
+		// VISUAL PARAMETERS
 
 		// Parameter: Property tree
 		val, suc = extractUrlParameters(r, PARAM_PROPERTY_TREE)
@@ -374,7 +398,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Produce return actual output
 		if templateName == TEMPLATE_NAME_PARSER_SHEETS {
 			fmt.Println("Google Sheets output requested")
-			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, outputType)
+			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			fmt.Println("Visual output requested")
 			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations)

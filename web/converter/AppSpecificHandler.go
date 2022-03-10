@@ -26,6 +26,8 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	// Define whether annotations are included
 	fmt.Println("Setting annotations:", includeAnnotations)
 	exporter.SetIncludeAnnotations(includeAnnotations)
+	// Output type
+	fmt.Println("Output type:", outputType)
 	// Convert input
 	output, err2 := app.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "")
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {

@@ -15,7 +15,7 @@ const PARAM_CODED_STATEMENT = "codedStmt"
 // Indicates whether parser is directly invoked with passed information
 const PARAM_EXECUTE_PARSER = "execute"
 
-// SHEETS ONLY
+// TABULAR ONLY
 
 // Statement ID
 const PARAM_STATEMENT_ID = "stmtId"
@@ -26,13 +26,13 @@ const PARAM_DYNAMIC_SCHEMA = "dynamicSchema"
 // Component-level nesting
 const PARAM_EXTENDED_OUTPUT = "igExtended"
 
-// SHARED AMONGST SHEETS AND VISUAL OUTPUT
+// Output type
+const PARAM_OUTPUT_TYPE = "outputType"
+
+// SHARED AMONGST TABULAR AND VISUAL OUTPUT
 
 // Annotations
 const PARAM_LOGICO_OUTPUT = "annotations"
-
-// Output type
-const PARAM_OUTPUT_TYPE = "outputType"
 
 // VISUAL ONLY
 
