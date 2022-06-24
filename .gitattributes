@@ -1,4 +1,6 @@
 # Ensure LF line ending for all test files upon check in
 *.test text=auto
+*.html text=auto
 # Ensure LF line ending for all test files upon clone
 *.test eol=lf
+*.html eol=lf
