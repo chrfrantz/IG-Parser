@@ -26,6 +26,8 @@ func TestHeaderRowGenerationWithoutComponentAggregation(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 
 	// Test for correct configuration for dynamic output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
@@ -97,6 +99,8 @@ func TestHeaderRowGenerationWithComponentAggregation(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// OVERRIDE dynamic output setting
 	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
@@ -163,6 +167,8 @@ func TestSimpleTabularOutput(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 	// OVERRIDE dynamic output setting
@@ -207,12 +213,99 @@ func TestSimpleTabularOutput(t *testing.T) {
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests simple tabular output without any combinations or nesting, without header row in output.
+*/
+func TestSimpleTabularOutputNoHeaders(t *testing.T) {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect)" +
+		"Bdir(certified production facilities) "
+
+	// Dynamic output
+	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(false)
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	// OVERRIDE dynamic output setting
+	tree.AGGREGATE_IMPLICIT_LINKAGES = true
+
+	// Override cell separator symbol
+	CellSeparator = ";"
+
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 5 {
+		t.Fatal("Number of statement reference links is incorrect. Value: ", len(links))
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputSimpleTabularOutputNoHeaders.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -248,6 +341,8 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -292,12 +387,100 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", output)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests basic tabular output without statement-level nesting, but component-level combinations; no implicit combinations,
+no headers
+*/
+func TestBasicTabularOutputCombinationsNoHeaders(t *testing.T) {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) "
+
+	// Dynamic output
+	SetDynamicOutput(true)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(false)
+	// No shared elements
+	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for dynamic output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != false {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 5 {
+		t.Fatal("Number of statement reference links is incorrect. Value: ", len(links))
+	}
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingWithCombinationsNoHeaders.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -333,6 +516,8 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -377,12 +562,12 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -419,6 +604,8 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -463,12 +650,12 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -506,6 +693,8 @@ func TestTabularOutputWithSharedLeftElements(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -550,12 +739,12 @@ func TestTabularOutputWithSharedLeftElements(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -593,6 +782,8 @@ func TestTabularOutputWithSharedRightElements(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -637,12 +828,12 @@ func TestTabularOutputWithSharedRightElements(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -680,6 +871,8 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -724,12 +917,12 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -768,6 +961,8 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -812,12 +1007,12 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -859,6 +1054,8 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -903,12 +1100,12 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -949,6 +1146,8 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -993,12 +1192,12 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1038,6 +1237,8 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1082,12 +1283,12 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1129,6 +1330,8 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1173,12 +1376,12 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1220,6 +1423,8 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testin
 	SetProduceIGExtendedOutput(false)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1264,12 +1469,12 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testin
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1311,6 +1516,8 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1355,12 +1562,12 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1403,6 +1610,8 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1447,12 +1656,12 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1496,6 +1705,8 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -1540,12 +1751,12 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1590,6 +1801,8 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1636,12 +1849,12 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1682,6 +1895,8 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1728,12 +1943,12 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1767,6 +1982,8 @@ func TestStaticTabularOutputOrElseAnnotations(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Activate annotations
 	SetIncludeAnnotations(true)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
 
@@ -1813,12 +2030,12 @@ func TestStaticTabularOutputOrElseAnnotations(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1882,6 +2099,8 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -1930,12 +2149,12 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1977,6 +2196,8 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2025,12 +2246,12 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2074,6 +2295,8 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2122,12 +2345,12 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2171,6 +2394,8 @@ func TestStaticTabularOutputNestedCombinationsImplicitAndIGCore(t *testing.T) {
 	SetProduceIGExtendedOutput(false)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2219,12 +2444,12 @@ func TestStaticTabularOutputNestedCombinationsImplicitAndIGCore(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2269,6 +2494,8 @@ func TestStaticTabularOutputNestedProperties(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2317,12 +2544,12 @@ func TestStaticTabularOutputNestedProperties(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2360,6 +2587,8 @@ func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2408,12 +2637,12 @@ func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2456,6 +2685,8 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2504,12 +2735,12 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2543,6 +2774,8 @@ func TestStaticTabularOutputBasicStatementPrivatePropertiesOnly(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2591,12 +2824,12 @@ func TestStaticTabularOutputBasicStatementPrivatePropertiesOnly(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2630,6 +2863,8 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents(t *
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2678,12 +2913,12 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents(t *
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2727,6 +2962,8 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// With shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2775,12 +3012,12 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2824,6 +3061,8 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2872,12 +3111,12 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2921,6 +3160,8 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -2969,12 +3210,12 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3019,6 +3260,8 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3067,12 +3310,12 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3117,6 +3360,8 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3165,12 +3410,12 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3214,6 +3459,8 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsGoogleSheets(t
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -3262,12 +3509,12 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsGoogleSheets(t
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3311,6 +3558,8 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsCSV(t *testing
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(false)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 	// No shared elements
 	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -3359,12 +3608,12 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsCSV(t *testing
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_CSV)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_CSV, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateCSVOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateCSVOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3407,6 +3656,8 @@ func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3455,12 +3706,12 @@ func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3504,6 +3755,8 @@ func TestStaticTabularOutputNestedStatementCombinationAnnotations(t *testing.T) 
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3552,12 +3805,12 @@ func TestStaticTabularOutputNestedStatementCombinationAnnotations(t *testing.T) 
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3605,6 +3858,8 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsGoogleSh
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3653,12 +3908,12 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsGoogleSh
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3706,6 +3961,8 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsCSV(t *t
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+	// Indicates whether header row is included in output.
+	SetIncludeHeaders(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3754,12 +4011,12 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsCSV(t *t
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_CSV)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_CSV, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateCSVOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateCSVOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3842,12 +4099,12 @@ func TestStaticTabularOutputParsingOfWithinComponentLinkages(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4465,12 +4722,12 @@ func TestTabularOutputDefaultExample(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4896,12 +5153,12 @@ func TestTabularOutputComplexMultilevelNesting(t *testing.T) {
 	// Extract expected output
 	expectedOutput := string(content)
 
-	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS)
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "")
+	output, err := generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeadersNames, separator, "", IncludeHeader())
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}

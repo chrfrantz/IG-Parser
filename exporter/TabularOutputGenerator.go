@@ -77,12 +77,13 @@ Input:
 - headerSeparator used for generation of header row (e.g., ";")
 - outputType allows for the specification of target output type to introduce necessary preprocessing as part of the matrix generation (e.g., prefixing quotes).
   Valid output types are defined in TabularOutputGeneratorConfig (e.g., #OUTPUT_TYPE_GOOGLE_SHEETS, etc.)
+- printHeaders indicates whether header row is included in output.
 Output:
 - Array of statement entry maps (i.e., values for each component in given statement, i.e., [statement]map[component]componentValue)
 - Array of header symbols (used for component linkage references)
 - Array of header symbols names (for human-readable header construction)
 */
-func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string, outputType string) ([]map[string]string, []string, []string, tree.ParsingError) {
+func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string, outputType string, printHeaders bool) ([]map[string]string, []string, []string, tree.ParsingError) {
 
 	if headerSeparator == "" {
 		return nil, nil, nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_MISSING_SEPARATOR_VALUE,
@@ -499,7 +500,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 
 		log.Println("Parsing nested statement ...")
 		// Parse individual nested statements on component level in order to attach those to main output
-		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateTabularOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.NestedStmt.Annotations, val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType)
+		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateTabularOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.NestedStmt.Annotations, val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, nil, nil, errorVal
 		}
@@ -610,15 +611,20 @@ filename the output should be printed to (should be "" if no output is to be pri
 
 Returns string containing flat output as well as potential parsing error
 */
-func printTabularOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string) (string, tree.ParsingError) {
-	// Generate header column row based on names
+func printTabularOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string, printHeaders bool) (string, tree.ParsingError) {
+
+	// Prepare builder
 	builder := strings.Builder{}
-	builder.WriteString(rowPrefix)
-	for _, v := range headerColsNames {
-		builder.WriteString(v)
-		builder.WriteString(separator)
+
+	if printHeaders {
+		// Generate header column row based on names
+		builder.WriteString(rowPrefix)
+		for _, v := range headerColsNames {
+			builder.WriteString(v)
+			builder.WriteString(separator)
+		}
+		builder.WriteString(rowSuffix)
 	}
-	builder.WriteString(rowSuffix)
 
 	// Generate all entry rows
 	for _, entry := range statementMap {
@@ -657,13 +663,13 @@ Generates CSV output from map of categorized statement elements, as well as head
 Further requires column header names for output generation, alongside specification of separator symbol.
 Optionally writes to file (if filename is provided).
 */
-func generateCSVOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string) (string, tree.ParsingError) {
+func generateCSVOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string, printHeaders bool) (string, tree.ParsingError) {
 
 	// Linebreak at the end of each entry
 	suffix := "\n"
 
 	// Delegate actual printing
-	return printTabularOutput(statementMap, headerCols, headerColsNames, "", stmtIdPrefix, suffix, separator, filename)
+	return printTabularOutput(statementMap, headerCols, headerColsNames, "", stmtIdPrefix, suffix, separator, filename, printHeaders)
 }
 
 /*
@@ -671,7 +677,7 @@ Generates Google Sheets output from map of categorized statement elements, as we
 Further requires column header names for output generation, alongside specification of separator symbol.
 Optionally writes to file (if filename is provided).
 */
-func generateGoogleSheetsOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string) (string, tree.ParsingError) {
+func generateGoogleSheetsOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string, printHeaders bool) (string, tree.ParsingError) {
 
 	// Quote to terminate input string for Google Sheets interpretation
 	quote := "\""
@@ -692,7 +698,7 @@ func generateGoogleSheetsOutput(statementMap []map[string]string, headerCols []s
 	suffix := bsuf.String()
 
 	// Delegate actual printing
-	return printTabularOutput(statementMap, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename)
+	return printTabularOutput(statementMap, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename, printHeaders)
 }
 
 /*
@@ -702,8 +708,9 @@ Additionally returns array of statement entries, header symbols and correspondin
 Allows for specification of separator to delimit generated flat file output.
 Allows for specification of output file type (e.g., Google Sheets, CSV) based on constants #OUTPUT_TYPE_GOOGLE_SHEETS or #OUTPUT_TYPE_CSV.
 If filename is provided, the result is printed to the corresponding file.
+If printHeaders is true, the header row will be included in output.
 */
-func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotations interface{}, stmtId string, filename string, aggregateImplicitLinkages bool, separator string, outputFormat string) (string, []map[string]string, []string, []string, tree.ParsingError) {
+func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotations interface{}, stmtId string, filename string, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool) (string, []map[string]string, []string, []string, tree.ParsingError) {
 	log.Println(" Step: Extracting leaf arrays")
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := statement.GenerateLeafArrays(aggregateImplicitLinkages)
@@ -728,7 +735,7 @@ func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotati
 	log.Println(" Step: Generate tabular output")
 
 	// Prepare export to tabular output
-	statementMap, statementHeaders, statementHeaderNames, err := generateStatementMatrix(res, annotations, componentRefs, links, stmtId, separator, outputFormat)
+	statementMap, statementHeaders, statementHeaderNames, err := generateStatementMatrix(res, annotations, componentRefs, links, stmtId, separator, outputFormat, printHeaders)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", nil, nil, nil, err
 	}
@@ -742,13 +749,13 @@ func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotati
 		return output, statementMap, statementHeaders, statementHeaderNames, err
 	case OUTPUT_TYPE_GOOGLE_SHEETS:
 		// Create Google Sheets output based on generated map, alongside header names as output
-		output, err = generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename)
+		output, err = generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename, printHeaders)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return output, statementMap, statementHeaders, statementHeaderNames, err
 		}
 	case OUTPUT_TYPE_CSV:
 		// Create CSV output based on generated map, alongside header names as output
-		output, err = generateCSVOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename)
+		output, err = generateCSVOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename, printHeaders)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return output, statementMap, statementHeaders, statementHeaderNames, err
 		}

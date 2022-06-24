@@ -18,7 +18,7 @@ func TestValidStatementGoogleSheets(t *testing.T) {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	_, err := ConvertIGScriptToTabularOutput(text, "650", exporter.OUTPUT_TYPE_GOOGLE_SHEETS, "")
+	_, err := ConvertIGScriptToTabularOutput(text, "650", exporter.OUTPUT_TYPE_GOOGLE_SHEETS, "", true)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Statement parsing should not fail")
 	}
@@ -36,7 +36,7 @@ func TestValidStatementNestingGoogleSheets(t *testing.T) {
 		// This is the essential line
 		"Cac{A(Program Manager) I(has gained) Bdir(competence)}"
 
-	_, err := ConvertIGScriptToTabularOutput(text, "650", exporter.OUTPUT_TYPE_GOOGLE_SHEETS, "")
+	_, err := ConvertIGScriptToTabularOutput(text, "650", exporter.OUTPUT_TYPE_GOOGLE_SHEETS, "", true)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Statement parsing should not fail")
 	}
@@ -55,7 +55,7 @@ func TestInvalidAttributeStatementGoogleSheets(t *testing.T) {
 		")" +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	_, err := ConvertIGScriptToTabularOutput(text, "650", exporter.OUTPUT_TYPE_GOOGLE_SHEETS, "")
+	_, err := ConvertIGScriptToTabularOutput(text, "650", exporter.OUTPUT_TYPE_GOOGLE_SHEETS, "", true)
 	if err.ErrorCode == tree.PARSING_NO_ERROR {
 		t.Fatal("Statement parsing should produce error")
 	}

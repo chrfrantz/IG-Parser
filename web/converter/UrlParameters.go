@@ -26,6 +26,9 @@ const PARAM_DYNAMIC_SCHEMA = "dynamicSchema"
 // Component-level nesting
 const PARAM_EXTENDED_OUTPUT = "igExtended"
 
+// Header printing
+const PARAM_PRINT_HEADERS = "includeHeaders"
+
 // Output type
 const PARAM_OUTPUT_TYPE = "outputType"
 

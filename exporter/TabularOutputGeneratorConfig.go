@@ -54,6 +54,12 @@ Should not be directly modified, but rather using SetIncludeAnnotations().
 var include_ANNOTATIONS = false
 
 /*
+Indicates whether header row is to be included in output.
+Should not be directly modified, but rather using SetIncludeHeaders().
+*/
+var include_HEADERS = true
+
+/*
 Indicates whether adjacent operators should be collapsed (right now AND, sAND and bAND).
 Should not be directly modified, but rather using SetCollapseOperators().
 */
@@ -92,6 +98,20 @@ Indicates whether annotations should be included in output.
 */
 func IncludeAnnotations() bool {
 	return include_ANNOTATIONS
+}
+
+/*
+Defines whether header is included in tabular output.
+*/
+func SetIncludeHeaders(include bool) {
+	include_HEADERS = include
+}
+
+/*
+Indicates whether header row is included in tabular output.
+*/
+func IncludeHeader() bool {
+	return include_HEADERS
 }
 
 /*

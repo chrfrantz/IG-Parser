@@ -10,7 +10,8 @@
 
 <input id="dynamicSchema" name="dynamicSchema" type="checkbox" {{.DynamicOutput}} /><label for="dynamicSchema">Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)</label>
 <input id="igExtended" name="igExtended" type="checkbox" {{.IGExtendedOutput}} /><label for="igExtended">Produce IG Extended output (component-level nesting) (default: off)</label>
-<input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (only for static output) (default: off)</label><br />
+<input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (only for static output) (default: off)</label>
+<input id="includeHeaders" name="includeHeaders" type="checkbox" {{.IncludeHeaders}} /><label for="includeHeaders">Include header row in output (only for static output) (default: on)</label><br />
 
 <!-- Output type -->
 <span data-text="{{.OutputTypeHelp}}" class="tooltip">Output format:</span>

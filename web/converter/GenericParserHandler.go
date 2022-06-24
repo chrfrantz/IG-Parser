@@ -25,6 +25,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	dynChk := r.FormValue(PARAM_DYNAMIC_SCHEMA)
 	inclAnnotations := r.FormValue(PARAM_LOGICO_OUTPUT)
 	igExtended := r.FormValue(PARAM_EXTENDED_OUTPUT)
+	includeHeaders := r.FormValue(PARAM_PRINT_HEADERS)
 	outputType := r.FormValue(PARAM_OUTPUT_TYPE)
 	propertyTree := r.FormValue(PARAM_PROPERTY_TREE)
 	binaryTree := r.FormValue(PARAM_BINARY_TREE)
@@ -65,6 +66,21 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	} else {
 		igExtended = CHECKBOX_UNCHECKED
 		produceIGExtendedOutput = false
+	}
+
+	// Print headers in output
+	printHeaders := false
+	// If not set, set default setting
+	if includeHeaders == "" {
+		includeHeaders = CHECKBOX_ON
+	}
+	fmt.Println("Include headers in output: ", includeHeaders)
+	if includeHeaders == CHECKBOX_ON {
+		includeHeaders = CHECKBOX_CHECKED
+		printHeaders = true
+	} else {
+		includeHeaders = CHECKBOX_UNCHECKED
+		printHeaders = false
 	}
 
 	// Private property printing in output
@@ -113,6 +129,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		DynamicOutput:             dynChk,
 		IGExtendedOutput:          igExtended,
 		IncludeAnnotations:        inclAnnotations,
+		IncludeHeaders:            includeHeaders,
 		OutputType:                outputType,
 		OutputTypes:               exporter.OUTPUT_TYPES,
 		PrintPropertyTree:         propertyTree,
@@ -243,6 +260,22 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			includeAnnotations = false
 		}
 
+		// Parameter: Header row printing
+		val, suc = extractUrlParameters(r, PARAM_PRINT_HEADERS)
+		check = evaluateBooleanUrlParameters(PARAM_PRINT_HEADERS, val, suc)
+		// Manually override if not set - effectively defines default setting
+		if !suc {
+			check = true
+		}
+		// Assign values
+		if check {
+			retStruct.IncludeHeaders = CHECKBOX_CHECKED
+			printHeaders = true
+		} else {
+			retStruct.IncludeHeaders = CHECKBOX_UNCHECKED
+			printHeaders = false
+		}
+
 		// Parameter: Output type
 		val, suc = extractUrlParameters(r, PARAM_OUTPUT_TYPE)
 		if val != "" {
@@ -254,14 +287,15 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			fmt.Println("Set default output type: " + exporter.DEFAULT_OUTPUT_TYPES)
 		}
 
-		// Assign values
-		if check {
-			retStruct.IncludeAnnotations = CHECKBOX_CHECKED
-			includeAnnotations = true
-		} else {
-			retStruct.IncludeAnnotations = CHECKBOX_UNCHECKED
-			includeAnnotations = false
-		}
+		/*
+			// Assign values
+			if check {
+				retStruct.IncludeAnnotations = CHECKBOX_CHECKED
+				includeAnnotations = true
+			} else {
+				retStruct.IncludeAnnotations = CHECKBOX_UNCHECKED
+				includeAnnotations = false
+			}*/
 
 		// VISUAL PARAMETERS
 
@@ -398,7 +432,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Produce return actual output
 		if templateName == TEMPLATE_NAME_PARSER_SHEETS {
 			fmt.Println("Google Sheets output requested")
-			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType)
+			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType, printHeaders)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			fmt.Println("Visual output requested")
 			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations)

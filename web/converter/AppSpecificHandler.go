@@ -13,7 +13,7 @@ import (
 Third-level handler generating tabular output in response to web request.
 Should be invoked by #converterHandler().
 */
-func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, outputType string) {
+func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, outputType string, printHeaders bool) {
 	// Run default configuration
 	SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
@@ -26,10 +26,13 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	// Define whether annotations are included
 	fmt.Println("Setting annotations:", includeAnnotations)
 	exporter.SetIncludeAnnotations(includeAnnotations)
+	// Define whether header row is included
+	fmt.Println("Setting header row:", printHeaders)
+	exporter.SetIncludeHeaders(printHeaders)
 	// Output type
 	fmt.Println("Output type:", outputType)
 	// Convert input
-	output, err2 := app.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "")
+	output, err2 := app.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", exporter.IncludeHeader())
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {
 		retStruct.Success = false
 		retStruct.Error = true

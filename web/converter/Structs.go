@@ -22,6 +22,8 @@ type ReturnStruct struct {
 	IGExtendedOutput string
 	// Annotation inclusion indicator
 	IncludeAnnotations string
+	// Include headers in output
+	IncludeHeaders string
 	// Output type indicator (e.g., Google Sheets, CSV)
 	OutputType string
 	// Output types (to populate UI)
