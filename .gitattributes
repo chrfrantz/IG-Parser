@@ -1,0 +1,2 @@
+# Ensure LF line ending for all test files
+*.test text=auto
