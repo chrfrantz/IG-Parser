@@ -222,7 +222,7 @@ func TestConverterHandlerVisualPost(t *testing.T) {
 }
 
 /*
-Tests POST request with given input for Google Sheets output
+Tests POST request with given input for Google Sheets output without header line
 */
 func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
 
@@ -321,7 +321,7 @@ func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
 }
 
 /*
-Tests POST request with given input for CSV output, with implicit header line (default)
+Tests POST request with given input for CSV output, without header line
 */
 func TestConverterHandlerCSVPost(t *testing.T) {
 
@@ -468,7 +468,7 @@ func TestConverterHandlerCSVPostWithExplicitHeader(t *testing.T) {
 	responseHead := outputString[:endIdx]
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerCsvPost.test")
+	content, err5 := ioutil.ReadFile("TestConverterHandlerCsvPostExplicitHeaders.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}

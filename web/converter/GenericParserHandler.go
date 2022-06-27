@@ -70,8 +70,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Print headers in output
 	printHeaders := false
-	// If not set, set default setting
-	if includeHeaders == "" {
+	// If not received by POST, set headers as default setting
+	if includeHeaders == "" && r.Method != http.MethodPost {
 		includeHeaders = CHECKBOX_ON
 	}
 	fmt.Println("Include headers in output: ", includeHeaders)
@@ -263,17 +263,22 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Parameter: Header row printing
 		val, suc = extractUrlParameters(r, PARAM_PRINT_HEADERS)
 		check = evaluateBooleanUrlParameters(PARAM_PRINT_HEADERS, val, suc)
-		// Manually override if not set - effectively defines default setting
-		if !suc {
-			check = true
-		}
-		// Assign values
-		if check {
-			retStruct.IncludeHeaders = CHECKBOX_CHECKED
-			printHeaders = true
-		} else {
-			retStruct.IncludeHeaders = CHECKBOX_UNCHECKED
-			printHeaders = false
+		// Sets default if no information is passed along in form (e.g., deactivation of headers);
+		// Note that includeHeaders will be prepopulated based on earlier form processing
+		if includeHeaders != CHECKBOX_ON {
+
+			// Fall back and assess whether the URL contained relevant parameter
+			if !suc {
+				check = true
+			}
+			// Assign values
+			if check {
+				retStruct.IncludeHeaders = CHECKBOX_CHECKED
+				printHeaders = true
+			} else {
+				retStruct.IncludeHeaders = CHECKBOX_UNCHECKED
+				printHeaders = false
+			}
 		}
 
 		// Parameter: Output type
@@ -287,15 +292,6 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			fmt.Println("Set default output type: " + exporter.DEFAULT_OUTPUT_TYPES)
 		}
 
-		/*
-			// Assign values
-			if check {
-				retStruct.IncludeAnnotations = CHECKBOX_CHECKED
-				includeAnnotations = true
-			} else {
-				retStruct.IncludeAnnotations = CHECKBOX_UNCHECKED
-				includeAnnotations = false
-			}*/
 
 		// VISUAL PARAMETERS
 
