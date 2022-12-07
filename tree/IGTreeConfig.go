@@ -37,3 +37,15 @@ const SHARED_ELEMENT_INHERIT_OVERRIDE = "SHARED_ELEMENT_INHERIT_OVERRIDE"
  elements to parent elements in child node
 */
 const SHARED_ELEMENT_INHERIT_APPEND = "SHARED_ELEMENT_INHERIT_APPEND"
+
+// Constants related to Node State
+
+/*
+Indicates a nil node.
+*/
+const NODE_STATE_NIL = "NODE_STATE_NIL"
+
+/*
+Indicates a non-nil node.
+*/
+const NODE_STATE_NON_NIL = "NODE_STATE_NON_NIL"

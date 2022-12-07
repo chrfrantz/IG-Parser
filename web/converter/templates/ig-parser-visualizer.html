@@ -35,6 +35,7 @@
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
 
 <input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
+<input id="dov" name="dov" type="checkbox" {{.IncludeDoV}} /><label for="dov">Include Degree of Variability (accumulated toward root node) in output (default: off)</label>
 <input id="propertyTree" name="propertyTree" type="checkbox" {{.PrintPropertyTree}} /><label for="propertyTree">Embed component properties in tree structure (as opposed to capturing those in labels associated with component) (default: on)</label>
 <input id="binaryTree" name="binaryTree" type="checkbox" {{.PrintBinaryTree}} /><label for="binaryTree">Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)</label>
 <input id="actCondTop" name="actCondTop" type="checkbox" {{.ActivationConditionsOnTop}} /><label for="actCondTop">Print activation conditions node (if present) as first node in output (default: off)</label>
@@ -127,6 +128,32 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
         }
     }
 
+    // Wraps text greater than a given width.
+    // Code is based on: http://jsfiddle.net/robschmuecker/5nHGz/1/
+    function wrap(text, width, x, y) {
+        text.each(function() {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, // ems
+                x = text.attr("x"),
+                y = text.attr("y"),
+                tspan = text.text(null).append("tspan").attr("x", x).attr("y", y);
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", x).attr("y", ++lineNumber * lineHeight + y + "em").text(word);
+                }
+            }
+        });
+    }
+
     function update(source) {
 
         // Assigns the x and y position for the nodes
@@ -136,8 +163,12 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
         var nodes = treeData.descendants(),
             links = treeData.descendants().slice(1);
 
-        // Normalize for fixed-depth.
-        nodes.forEach(function(d){ d.y = d.depth * 180});
+        // Define depth for levels (d.depth contains level, e.g., 0, 1, ...)
+        // The left-oriented layout means horizontal shift of nodes when modifying y.
+        //nodes.forEach(function(d){ d.y = d.depth * 380});
+        // Here: first level 180, all higher levels respective higher value 380)
+        nodes.forEach(function(d){ d.y = (d.depth === 0 ? d.depth * 50 : d.depth * 380) });
+        //nodes.forEach(function(d){ d.y = (d.data.name.length <= 30 ? d.depth * 50 : d.depth * 150 ) })
 
         // ****************** Nodes section ***************************
 
@@ -145,7 +176,7 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
         var node = svg.selectAll('g.node')
             .data(nodes, function(d) {return d.id || (d.id = ++i); });
 
-        // Enter any new modes at the parent's previous position.
+        // Enter any new nodes at the parent's previous position.
         var nodeEnter = node.enter().append('g')
             .attr('class', 'node')
             .attr("transform", function(d) {
@@ -201,21 +232,9 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
                 }
             });
 
-        // Add component labels for the nodes
-        /*nodeEnter.append('textcomp')
-            .attr("dy", ".35em")
-            .attr("x", function(d) {
-                return d.children || d._children ? -13 : 13;
-            })
-            .attr("text-anchor", function(d) {
-                return "start";
-            })
-            .text(function(d) { return d.data.comp; });*/
+        // Add content labels for the nodes
 
-        // Add labels for the nodes
-
-        // Main label containing logical operators or content
-
+        // Component value label containing logical operators or content
         nodeEnter.append('text')
             .attr("x", function(d) {
                 // Position x differently if nested property tree (since it will be printed under node -- see y specification)
@@ -226,8 +245,17 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
                 return d.children || d._children ? 12 : 25;
             })
             .attr("y", function (d) {
-                // Position y differently if nested property tree (will print below node)
-                return d.data.pos === "b" ? 35 : 0;
+                // Test for position of name (based on nested property tree) and presence of state information
+                if (d.data.pos === "b" && d.data.dov != null) {
+                    // Position below node if nested property tree and complexity present
+                    return 45;
+                } else if (d.data.pos === "b") {
+                    // Position y below if nested property tree
+                    return 35;
+                } else {
+                    // Standard position
+                    return 0;
+                }
             })
             .style("font", function(d) {
                 // Special styling for implicit linkages
@@ -257,7 +285,8 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
                 } else {
                     return d.data.name;
                 }
-            });
+              // ensures that text is wrapped if too long (see function)
+            }).call(wrap, 300, 0, 0);
 
         // UPDATE
         var nodeUpdate = nodeEnter.merge(node);
@@ -350,12 +379,12 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
 
         var gGiven = nodeEnter.filter(function (d){
             return d.depth !== 0;
-        })
+            })
             .append("g")
             .attr("transform","translate(-50)");
 
-        // Add component label
 
+        // Add component label
         gGiven.append("text")
             .attr("dy", ".4em")
             .style("font", "normal 12px Arial")
@@ -368,39 +397,72 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
             })
             .attr("x", "25");
 
-        // Add properties labels
 
+        // Add properties labels
         gGiven.append("text")
             .text(function (d){
                 if (d.data.prop != null) {
                     return "(" + d.data.prop + ")";
                 } else {
-                    return ""
+                    return "";
                 }
-
             })
             .attr("x", "75")
             .attr("y", "-10");
 
-        // Add annotations labels
 
+        // Add annotations labels
         gGiven.append("text")
+            // Italicize annotations
+            .style("font", "italic 12px Arial")
             .text(function (d){
+                // Add annotation text if it exists
                 if (d.data.anno != null) {
                     return d.data.anno;
                 } else {
-                    return ""
+                    return "";
                 }
-
             })
             .attr("x", function(d) {
-                // Shift annotations for nodes if properties are nested trees
-                return d.data.pos === "b" ? 20 : 75;
+                return 75;
             })
             .attr("y", function(d) {
-                // Shift annotations for nodes if properties are nested trees
-                return d.data.pos === "b" ? 55 : 20;
+                // Move up annotations if properties are printed
+                return d.data.prop != null ? -25 : -12;
             });
+
+
+        // Add state option information
+        gGiven.append("text")
+            // Italicize annotations
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                // Add annotation text if it exists
+                if (d.data.options != null) {
+                    return "Options: " + d.data.options;
+                } else {
+                    return "";
+                }
+            })
+            .attr("x", 40)
+            .attr("y", 55);
+
+
+        // Add complexity information
+        gGiven.append("text")
+            // Italicize annotations
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                // Add annotation text if it exists
+                if (d.data.dov != null) {
+                    return "DoV: " + d.data.dov;
+                } else {
+                    return "";
+                }
+            })
+            // fixed position below node
+            .attr("x", 20)
+            .attr("y", 30);
 
         //linkEnter.append('text')
         //.attr("class", "text")

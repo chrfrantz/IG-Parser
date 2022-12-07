@@ -114,6 +114,7 @@ O{} --&gt; Or Else**
 <span data-text="This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements." class="tooltip">Parameters:</span>
 
 <input id="annotations" name="annotations" type="checkbox" unchecked /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
+<input id="dov" name="dov" type="checkbox" unchecked /><label for="dov">Include Degree of Variability (accumulated toward root node) in output (default: off)</label>
 <input id="propertyTree" name="propertyTree" type="checkbox" checked /><label for="propertyTree">Embed component properties in tree structure (as opposed to capturing those in labels associated with component) (default: on)</label>
 <input id="binaryTree" name="binaryTree" type="checkbox" unchecked /><label for="binaryTree">Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)</label>
 <input id="actCondTop" name="actCondTop" type="checkbox" unchecked /><label for="actCondTop">Print activation conditions node (if present) as first node in output (default: off)</label>
@@ -122,14 +123,6 @@ Width of output canvas (in pixels): <input name="canvasWidth" type="number" valu
 
 <input value="Generate visual output" type="submit">
 
-
-<div class="transactionId">
-    Request ID: yZBu6HTz &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <a class="tooltip"
-           href="mailto:ig-parser@newinstitutionalgrammar.org?subject=%5BIG-Parser%5D%20%5BRequest%20ID%3A%20yZBu6HTz%5D&body=Please%20replace%20the%20body%20text%20with%20the%20observations%2C%20questions%2C%20or%20suggestions%20you%20have%20based%20on%20your%20experience%20with%20IG-Parser.%20%20If%20you%20observed%20errors%2C%20please%20provide%20a%20description%20(e.g.%2C%20specifying%20what%20you%20expected%20to%20see%2C%20and%20what%20you%20observed%3B%20error%20messages%20you%20received%2C%20etc.).%20%20Please%20also%20feel%20free%20to%20provide%20open%20feedback%20or%20suggestions%20for%20further%20improvement."
-           data-text="Clicking on this link should open your mail client with a pre-populated mail.
-Alternatively, right-click on the link, copy the e-mail address, and send a mail manually. Ensure to provide the Request ID in the subject line or body of your mail.">Report error, observations, or suggestions</a>
-</div>
 
 </form>
 </div>
@@ -203,6 +196,32 @@ Alternatively, right-click on the link, copy the e-mail address, and send a mail
         }
     }
 
+    
+    
+    function wrap(text, width, x, y) {
+        text.each(function() {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, 
+                x = text.attr("x"),
+                y = text.attr("y"),
+                tspan = text.text(null).append("tspan").attr("x", x).attr("y", y);
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", x).attr("y", ++lineNumber * lineHeight + y + "em").text(word);
+                }
+            }
+        });
+    }
+
     function update(source) {
 
         
@@ -213,7 +232,11 @@ Alternatively, right-click on the link, copy the e-mail address, and send a mail
             links = treeData.descendants().slice(1);
 
         
-        nodes.forEach(function(d){ d.y = d.depth * 180});
+        
+        
+        
+        nodes.forEach(function(d){ d.y = (d.depth === 0 ? d.depth * 50 : d.depth * 380) });
+        
 
         
 
@@ -278,13 +301,8 @@ Alternatively, right-click on the link, copy the e-mail address, and send a mail
             });
 
         
-        
-
 
         
-
-        
-
         nodeEnter.append('text')
             .attr("x", function(d) {
                 
@@ -296,7 +314,16 @@ Alternatively, right-click on the link, copy the e-mail address, and send a mail
             })
             .attr("y", function (d) {
                 
-                return d.data.pos === "b" ? 35 : 0;
+                if (d.data.pos === "b" && d.data.dov != null) {
+                    
+                    return 45;
+                } else if (d.data.pos === "b") {
+                    
+                    return 35;
+                } else {
+                    
+                    return 0;
+                }
             })
             .style("font", function(d) {
                 
@@ -326,7 +353,8 @@ Alternatively, right-click on the link, copy the e-mail address, and send a mail
                 } else {
                     return d.data.name;
                 }
-            });
+              
+            }).call(wrap, 300, 0, 0);
 
         
         var nodeUpdate = nodeEnter.merge(node);
@@ -419,12 +447,12 @@ Alternatively, right-click on the link, copy the e-mail address, and send a mail
 
         var gGiven = nodeEnter.filter(function (d){
             return d.depth !== 0;
-        })
+            })
             .append("g")
             .attr("transform","translate(-50)");
 
-        
 
+        
         gGiven.append("text")
             .attr("dy", ".4em")
             .style("font", "normal 12px Arial")
@@ -437,39 +465,72 @@ Alternatively, right-click on the link, copy the e-mail address, and send a mail
             })
             .attr("x", "25");
 
-        
 
+        
         gGiven.append("text")
             .text(function (d){
                 if (d.data.prop != null) {
                     return "(" + d.data.prop + ")";
                 } else {
-                    return ""
+                    return "";
                 }
-
             })
             .attr("x", "75")
             .attr("y", "-10");
 
-        
 
+        
         gGiven.append("text")
+            
+            .style("font", "italic 12px Arial")
             .text(function (d){
+                
                 if (d.data.anno != null) {
                     return d.data.anno;
                 } else {
-                    return ""
+                    return "";
                 }
-
             })
             .attr("x", function(d) {
-                
-                return d.data.pos === "b" ? 20 : 75;
+                return 75;
             })
             .attr("y", function(d) {
                 
-                return d.data.pos === "b" ? 55 : 20;
+                return d.data.prop != null ? -25 : -12;
             });
+
+
+        
+        gGiven.append("text")
+            
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                
+                if (d.data.options != null) {
+                    return "Options: " + d.data.options;
+                } else {
+                    return "";
+                }
+            })
+            .attr("x", 40)
+            .attr("y", 55);
+
+
+        
+        gGiven.append("text")
+            
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                
+                if (d.data.dov != null) {
+                    return "DoV: " + d.data.dov;
+                } else {
+                    return "";
+                }
+            })
+            
+            .attr("x", 20)
+            .attr("y", 30);
 
         
         

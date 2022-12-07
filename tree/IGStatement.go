@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"IG-Parser/shared"
 	"fmt"
 	"log"
 	"strings"
@@ -550,4 +551,292 @@ func (s *Statement) GetPropertyComponent(n *Node, complex bool) []*Node {
 		}
 	}
 	return out
+}
+
+/*
+Calculates a statement's complexity and returns a populated StateComplexity struct
+that contains options per component, associated states per component, and total
+state complexity. It takes into account nested complex statements, as well as leaf elements.
+*/
+func (s *Statement) CalculateComplexity() StateComplexity {
+
+	// Prepare results structure
+	results := StateComplexity{}
+
+	// Regulative
+
+	// Attributes
+
+	results.AttributesOptions = s.Attributes.CountLeaves()
+	attributesComplexity, err := s.Attributes.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.AttributesComplexity = attributesComplexity
+
+	// Attributes Property
+
+	results.AttributesPropertySimpleOptions = s.AttributesPropertySimple.CountLeaves()
+	attributesPropertySimpleComplexity, err := s.AttributesPropertySimple.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.AttributesPropertySimpleComplexity = attributesPropertySimpleComplexity
+
+	results.AttributesPropertyComplexOptions = s.AttributesPropertyComplex.CountLeaves()
+	attributesPropertyComplexComplexity, err := s.AttributesPropertyComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.AttributesPropertyComplexComplexity = attributesPropertyComplexComplexity
+
+	// Deontic
+
+	results.DeonticOptions = s.Deontic.CountLeaves()
+	deonticComplexity, err := s.Deontic.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.DeonticComplexity = deonticComplexity
+
+	// Aim
+
+	results.AimOptions = s.Aim.CountLeaves()
+	aimComplexity, err := s.Aim.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.AimComplexity = aimComplexity
+
+	// Direct Object
+
+	results.DirectObjectSimpleOptions = s.DirectObject.CountLeaves()
+	directObjectSimpleComplexity, err := s.DirectObject.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.DirectObjectSimpleComplexity = directObjectSimpleComplexity
+
+	results.DirectObjectComplexOptions = s.DirectObjectComplex.CountLeaves()
+	directObjectComplexComplexity, err := s.DirectObjectComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.DirectObjectComplexComplexity = directObjectComplexComplexity
+
+	// Direct Object Property
+
+	results.DirectObjectPropertySimpleOptions = s.DirectObjectPropertySimple.CountLeaves()
+	directObjectPropertySimpleComplexity, err := s.DirectObjectPropertySimple.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.DirectObjectPropertySimpleComplexity = directObjectPropertySimpleComplexity
+
+	results.DirectObjectPropertyComplexOptions = s.DirectObjectPropertyComplex.CountLeaves()
+	directObjectPropertyComplexComplexity, err := s.DirectObjectPropertyComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.DirectObjectComplexComplexity = directObjectPropertyComplexComplexity
+
+	// Indirect Object
+
+	results.IndirectObjectSimpleOptions = s.IndirectObject.CountLeaves()
+	indirectObjectSimpleComplexity, err := s.IndirectObject.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.IndirectObjectSimpleComplexity = indirectObjectSimpleComplexity
+
+	results.IndirectObjectComplexComplexity = s.IndirectObjectComplex.CountLeaves()
+	indirectObjectComplexComplexity, err := s.IndirectObjectComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.IndirectObjectComplexComplexity = s.IndirectObjectComplex.CountLeaves()
+
+	// Indirect Object Property
+
+	results.IndirectObjectPropertySimpleOptions = s.IndirectObjectPropertySimple.CountLeaves()
+	indirectObjectPropertySimpleComplexity, err := s.IndirectObjectPropertySimple.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.IndirectObjectSimpleComplexity = indirectObjectPropertySimpleComplexity
+
+	results.IndirectObjectPropertyComplexComplexity = s.IndirectObjectPropertyComplex.CountLeaves()
+	indirectObjectPropertyComplexComplexity, err := s.IndirectObjectPropertyComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.IndirectObjectComplexComplexity = indirectObjectPropertyComplexComplexity
+
+	// Constitutive
+
+	// Constituted Entity
+
+	results.ConstitutedEntityOptions = s.ConstitutedEntity.CountLeaves()
+	constitutedEntityComplexity, err := s.ConstitutedEntity.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ConstitutedEntityComplexity = constitutedEntityComplexity
+
+	// Constituted Entity Property
+
+	results.ConstitutedEntityPropertySimpleOptions = s.ConstitutedEntityPropertySimple.CountLeaves()
+	constitutedEntityPropertySimpleComplexity, err := s.ConstitutedEntityPropertySimple.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ConstitutedEntityPropertySimpleComplexity = constitutedEntityPropertySimpleComplexity
+
+	results.ConstitutedEntityPropertyComplexOptions = s.ConstitutedEntityPropertyComplex.CountLeaves()
+	constitutedEntityPropertyComplexComplexity, err := s.ConstitutedEntityPropertyComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ConstitutedEntityPropertyComplexComplexity = constitutedEntityPropertyComplexComplexity
+
+	// Modal
+
+	results.ModalOptions = s.Modal.CountLeaves()
+	modalComplexity, err := s.Modal.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ModalComplexity = modalComplexity
+
+	// Constitutive Function
+
+	results.ConstitutiveFunctionOptions = s.ConstitutiveFunction.CountLeaves()
+	constitutiveFunctionComplexity, err := s.ConstitutiveFunction.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ConstitutiveFunctionComplexity = constitutiveFunctionComplexity
+
+	// Constituting Properties
+
+	results.ConstitutingPropertiesSimpleOptions = s.ConstitutingProperties.CountLeaves()
+	constitutingPropertiesSimpleComplexity, err := s.ConstitutingProperties.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ConstitutingPropertiesSimpleComplexity = constitutingPropertiesSimpleComplexity
+
+	results.ConstitutingPropertiesComplexOptions = s.ConstitutingPropertiesComplex.CountLeaves()
+	constitutingPropertiesComplexComplexity, err := s.ConstitutingPropertiesComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ConstitutingPropertiesComplexComplexity = constitutingPropertiesComplexComplexity
+
+	// Constituting Properties Property
+
+	results.ConstitutingPropertiesPropertiesSimpleOptions = s.ConstitutingPropertiesPropertySimple.CountLeaves()
+	constitutingPropertiesPropertiesSimpleComplexity, err := s.ConstitutingPropertiesPropertySimple.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ConstitutingPropertiesPropertiesSimpleComplexity = constitutingPropertiesPropertiesSimpleComplexity
+
+	results.ConstitutingPropertiesPropertiesComplexOptions = s.ConstitutingPropertiesPropertyComplex.CountLeaves()
+	constitutingPropertiesPropertiesComplexComplexity, err := s.ConstitutingPropertiesPropertyComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ConstitutingPropertiesPropertiesComplexComplexity = constitutingPropertiesPropertiesComplexComplexity
+
+	// Context
+
+	// Activation conditions
+
+	results.ActivationConditionSimpleOptions = s.ActivationConditionSimple.CountLeaves()
+	activationConditionSimpleComplexity, err := s.ActivationConditionSimple.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ActivationConditionSimpleComplexity = activationConditionSimpleComplexity
+
+	results.ActivationConditionComplexOptions = s.ActivationConditionComplex.CountLeaves()
+	activationConditionComplexComplexity, err := s.ActivationConditionComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ActivationConditionComplexComplexity = activationConditionComplexComplexity
+
+	// Execution constraints
+
+	results.ExecutionConstraintSimpleOptions = s.ExecutionConstraintSimple.CountLeaves()
+	executionConstraintSimpleComplexity, err := s.ExecutionConstraintSimple.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ExecutionConstraintSimpleComplexity = executionConstraintSimpleComplexity
+
+	results.ExecutionConstraintComplexOptions = s.ExecutionConstraintComplex.CountLeaves()
+	executionConstraintComplexComplexity, err := s.ExecutionConstraintComplex.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.ExecutionConstraintComplexComplexity = executionConstraintComplexComplexity
+
+	// Or else
+	orElseComplexity, err := s.OrElse.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		fmt.Println(err)
+	}
+	results.OrElseComplexity = orElseComplexity
+
+	// Composing overall complexity
+
+	// Find highest state complexity on given level
+	leadingStmtStates :=
+		[]int{ // regulative components
+			attributesComplexity,
+			attributesPropertySimpleComplexity,
+			attributesPropertyComplexComplexity,
+			deonticComplexity,
+			aimComplexity,
+			directObjectSimpleComplexity,
+			directObjectComplexComplexity,
+			directObjectPropertySimpleComplexity,
+			directObjectPropertyComplexComplexity,
+			indirectObjectSimpleComplexity,
+			indirectObjectComplexComplexity,
+			indirectObjectPropertySimpleComplexity,
+			indirectObjectPropertyComplexComplexity,
+			// constitutive components
+			constitutedEntityComplexity,
+			constitutedEntityPropertySimpleComplexity,
+			constitutedEntityPropertyComplexComplexity,
+			modalComplexity,
+			constitutiveFunctionComplexity,
+			constitutingPropertiesSimpleComplexity,
+			constitutingPropertiesComplexComplexity,
+			constitutingPropertiesPropertiesSimpleComplexity,
+			constitutingPropertiesPropertiesComplexComplexity,
+			// execution constraints
+			executionConstraintSimpleComplexity,
+			executionConstraintComplexComplexity}
+
+	statesOnGivenLevel := shared.AggregateIfGreaterThan(leadingStmtStates, 1, 1)
+
+	// Conditions are handled separately, since they are preconditions, and possibly
+	// statements on their own. Default state is 1 (at all times).
+	// TODO: Review for accuracy
+	conditionsComplexity :=
+		shared.FindMaxValue([]int{activationConditionSimpleComplexity +
+			activationConditionComplexComplexity}, 1)
+
+	// Consequences are handled separately, since they are separate activities
+
+	// Multiplication of preconditions and leading statement complexity
+	results.TotalStateComplexity =
+		statesOnGivenLevel * conditionsComplexity
+
+	return results
+
 }

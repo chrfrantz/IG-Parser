@@ -45,6 +45,9 @@ const PARAM_PROPERTY_TREE = "propertyTree"
 // Strictly binary tree structure (for debugging)
 const PARAM_BINARY_TREE = "binaryTree"
 
+// Include Degree of Variability in output (for debugging)
+const PARAM_DOV = "dov"
+
 // Printing of activation condition on top in visual tree output
 const PARAM_ACTIVATION_CONDITION_ON_TOP = "actCondTop"
 

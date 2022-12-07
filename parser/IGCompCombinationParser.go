@@ -211,7 +211,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					}
 
 					// Check whether returned node is empty
-					if leftNode.IsEmptyNode() {
+					if leftNode.IsEmptyOrNilNode() {
 						// If so, assign original input value as leaf entry
 						Println("Deep parsing: Returned node is empty; assigning complete value as left leaf")
 						left = strings.Trim(left, " ")
@@ -283,7 +283,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					}
 
 					// Check whether returned node is empty
-					if rightNode.IsEmptyNode() {
+					if rightNode.IsEmptyOrNilNode() {
 						// If so, assign original input value as leaf entry
 						Println("Deep parsing: Returned node is empty; assigning complete value as right leaf")
 						right = strings.Trim(right, " ")

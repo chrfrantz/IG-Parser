@@ -84,7 +84,7 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 Third-level handler generating visual tree output in response to web request.
 Should be invoked by #converterHandler().
 */
-func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, flatOutput bool, binaryOutput bool, moveActivationConditionsToTop bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool) {
+func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, flatOutput bool, binaryOutput bool, moveActivationConditionsToTop bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, includeDoV bool) {
 	// Run default configuration
 	SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
@@ -97,6 +97,9 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	// Define whether annotations are included
 	fmt.Println("Setting annotations:", includeAnnotations)
 	exporter.SetIncludeAnnotations(includeAnnotations)
+	// Define whether Degree of Variability is included
+	fmt.Println("Setting Degree of Variability (DoV):", includeDoV)
+	exporter.SetIncludeDegreeOfVariability(includeDoV)
 	// Setting flat printing
 	fmt.Println("Setting flat printing of properties:", flatOutput)
 	tree.SetFlatPrinting(flatOutput)

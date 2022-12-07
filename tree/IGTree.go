@@ -3,6 +3,7 @@ package tree
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -307,8 +308,19 @@ func (n *Node) StringFlat() string {
 var PrintValueOrder = false
 
 /*
-Prints node content in human-readable form (for printing on console).
-For parseable version, look at Stringify().
+ Returns node state.
+*/
+func (n *Node) GetNodeState() string {
+	if n == nil {
+		return NODE_STATE_NIL
+	} else {
+		return NODE_STATE_NON_NIL
+	}
+}
+
+/*
+   Prints node content in human-readable form (for printing on console).
+   For parseable version, look at Stringify().
 */
 func (n *Node) String() string {
 
@@ -319,6 +331,9 @@ func (n *Node) String() string {
 		// TODO: Check for correct printing
 		if n.Entry == nil {
 			retVal = retVal + "nil (detected in String())"
+			if n.LogicalOperator != "" {
+				retVal = retVal + "\nLogical Operator: " + n.LogicalOperator
+			}
 		} else if n.HasPrimitiveEntry() {
 			// Primitive component
 
@@ -399,9 +414,9 @@ func (n *Node) String() string {
 }
 
 /*
-Makes the given node parent of the current (calling node).
-Should only be internally used, since it does not deal with child assignment on parent node.
-Use InsertLeftNode() or InsertRightNode() instead.
+   Makes the given node parent of the current (calling node).
+   Should only be internally used, since it does not deal with child assignment on parent node.
+   Use InsertLeftNode() or InsertRightNode() instead.
 */
 func (n *Node) assignParent(node *Node) (bool, NodeError) {
 	if n == node {
@@ -414,11 +429,11 @@ func (n *Node) assignParent(node *Node) (bool, NodeError) {
 }
 
 /*
-Insert left subnode to node
+   Insert left subnode to node
 */
 func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
-	if n.Left != nil {
-		errorMsg := "Attempting to add left node to node already containing left leaf. Node: " + n.String()
+	if !n.Left.IsEmptyOrNilNode() {
+		errorMsg := "Attempting to add left node to node already containing left leaf. Node:" + n.Left.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
 	}
@@ -438,10 +453,10 @@ func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
 }
 
 /*
-Insert right subnode to node
+   Insert right subnode to node
 */
 func (n *Node) InsertRightNode(entry *Node) (bool, NodeError) {
-	if n.Right != nil {
+	if !n.Right.IsEmptyOrNilNode() {
 		errorMsg := "Attempting to add right node to node already containing right leaf. Node: " + n.String()
 		log.Println(errorMsg)
 		return false, NodeError{ErrorCode: TREE_INVALID_NODE_ADDITION, ErrorMessage: errorMsg}
@@ -462,7 +477,7 @@ func (n *Node) InsertRightNode(entry *Node) (bool, NodeError) {
 }
 
 /*
-Insert left leaf to node based on string entry
+   Insert left leaf to node based on string entry
 */
 func (n *Node) InsertLeftLeaf(entry string) (bool, NodeError) {
 	if n.Left != nil {
@@ -483,7 +498,7 @@ func (n *Node) InsertLeftLeaf(entry string) (bool, NodeError) {
 }
 
 /*
-Insert right leaf to node based on string entry
+   Insert right leaf to node based on string entry
 */
 func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 	if n.Right != nil {
@@ -504,10 +519,10 @@ func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 }
 
 /*
-Removes the given node from the tree structure it is embedded in, i.e.,
-it does not have a parent and the parent is no longer aware of this child.
+   Removes the given node from the tree structure it is embedded in, i.e.,
+   it does not have a parent and the parent is no longer aware of this child.
 
-Returns boolean indicating success and potential error (in success case TREE_NO_ERROR).
+   Returns boolean indicating success and potential error (in success case TREE_NO_ERROR).
 */
 func RemoveNodeFromTree(node *Node) (bool, NodeError) {
 
@@ -584,10 +599,10 @@ func RemoveNodeFromTree(node *Node) (bool, NodeError) {
 }
 
 /*
-Finds logical linkages between a source and target node in the tree they are embedded in.
-Returns true if a link is found, and provides the logical operators on that path.
-It further returns an error in case of navigation challenges (with error case TREE_NO_ERROR
-signaling successful navigation irrespective of outcome.
+   Finds logical linkages between a source and target node in the tree they are embedded in.
+   Returns true if a link is found, and provides the logical operators on that path.
+   It further returns an error in case of navigation challenges (with error case TREE_NO_ERROR
+   signaling successful navigation irrespective of outcome.
 */
 func FindLogicalLinkage(sourceNode *Node, targetNode *Node) (bool, []string, NodeError) {
 
@@ -616,11 +631,11 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node) (bool, []string, Nod
 }
 
 /*
-Searches for a given node upward in the tree structure by recursively moving upwards, while excluding previously explored
-unsuccessful branches (Parameter lastNode). The parameter originNode and targetNode are retained as reference to the search
-origin and target. opsPath retains all logical operators along the path.
-Returns true in case of successful outcome, with logical operators provided alongside. It further returns an error
-(per default with error code TREE_NO_ERROR indicating that no navigation issue occurred throughout the tree - irrespective of the outcome).
+   Searches for a given node upward in the tree structure by recursively moving upwards, while excluding previously explored
+   unsuccessful branches (Parameter lastNode). The parameter originNode and targetNode are retained as reference to the search
+   origin and target. opsPath retains all logical operators along the path.
+   Returns true in case of successful outcome, with logical operators provided alongside. It further returns an error
+   (per default with error code TREE_NO_ERROR indicating that no navigation issue occurred throughout the tree - irrespective of the outcome).
 */
 func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []string) (bool, []string, NodeError) {
 
@@ -648,12 +663,12 @@ func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []
 }
 
 /*
-Searches downwards from a given node (startNode), exploring any left branch first (recursively), followed by the right one (recursively).
-The lastNode indicates the last node explored in preceding search (i.e., a nested node), preventing the exploration of the underlying path.
-The originNode retains the reference to the search origin, and targetNode is the reference to the target.
-opsPath retains all operators found along the path.
-Returns true if successful, alongside the relevant logical operators along the path, as well as an error
-(per default with error code TREE_NO_ERROR indicating that no navigation issue occurred throughout the tree - irrespective of the outcome).
+   Searches downwards from a given node (startNode), exploring any left branch first (recursively), followed by the right one (recursively).
+   The lastNode indicates the last node explored in preceding search (i.e., a nested node), preventing the exploration of the underlying path.
+   The originNode retains the reference to the search origin, and targetNode is the reference to the target.
+   opsPath retains all operators found along the path.
+   Returns true if successful, alongside the relevant logical operators along the path, as well as an error
+   (per default with error code TREE_NO_ERROR indicating that no navigation issue occurred throughout the tree - irrespective of the outcome).
 */
 func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNode *Node, opsPath []string) (bool, []string, NodeError) {
 
@@ -763,19 +778,19 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 }
 
 /*
-Combines existing nodes into new node and returns newly generated node.
-Returns an error if component types of input nodes differ (should not be combined).
+   Combines existing nodes into new node and returns newly generated node.
+   Returns an error if component types of input nodes differ (should not be combined).
 */
 func Combine(leftNode *Node, rightNode *Node, logicalOperator string) (*Node, NodeError) {
 
 	if leftNode == nil && rightNode == nil {
 		log.Fatal("Illegal call to Combine() with nil nodes")
 	}
-	if leftNode == nil || leftNode.IsEmptyNode() {
+	if leftNode == nil || leftNode.IsEmptyOrNilNode() {
 		Println("Combining nodes returns right node (other node is nil or empty)")
 		return rightNode, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
-	if rightNode == nil || rightNode.IsEmptyNode() {
+	if rightNode == nil || rightNode.IsEmptyOrNilNode() {
 		Println("Combining nodes returns left node (other node is nil or empty)")
 		return leftNode, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
@@ -803,15 +818,15 @@ func Combine(leftNode *Node, rightNode *Node, logicalOperator string) (*Node, No
 }
 
 /**
-Adds non-shared values to the node, i.e., values that are not shared across subnodes, but attached to the
-node itself.
+  Adds non-shared values to the node, i.e., values that are not shared across subnodes, but attached to the
+  node itself.
 */
 func (n *Node) InsertNonSharedValues(value string) {
 	n.ElementOrder = append(n.ElementOrder, value)
 }
 
 /*
-Creates a generic node, with various options
+   Creates a generic node, with various options
 */
 func ComponentNode(entry string, leftValue string, rightValue string, componentType string, sharedValueLeft []string, sharedValueRight []string, logicalOperator string) *Node {
 
@@ -880,7 +895,7 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 }
 
 /*
-Validates all nodes from this node downwards with respect to population as linking node or leaf node.
+   Validates all nodes from this node downwards with respect to population as linking node or leaf node.
 */
 func (n *Node) Validate() (bool, NodeError) {
 	if n.Entry == nil && (n.Left == nil || n.Right == nil) {
@@ -922,7 +937,7 @@ func (n *Node) Validate() (bool, NodeError) {
 }
 
 /*
-Counts the number of leaves of node tree
+   Counts the number of leaves of node tree
 */
 func (n *Node) CountLeaves() int {
 	if n == nil {
@@ -949,9 +964,57 @@ func (n *Node) CountLeaves() int {
 }
 
 /*
-Returns root node of given tree the node is embedded in
-up to the level at which nodes are linked by synthetic AND (bAND and wAND).
-I.e., it returns the last node level below an sAND or bAND linkage.
+   Calculates state complexity for given node and returns the result.
+   Number of options on which the calculation is based can be retrieved using CountLeaves().
+*/
+func (n *Node) CalculateStateComplexity() (int, NodeError) {
+	if n == nil {
+		// Uninitialized node
+		return 0, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+	if n.Left == nil && n.Right == nil && n.Entry == "" {
+		// Must be empty node
+		return 0, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+	if n.Left == nil && n.Right == nil && n.HasPrimitiveEntry() && n.Entry != "" {
+		// Must be single leaf node (entry)
+		return 1, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+	if n.Left == nil && n.Right == nil && !n.HasPrimitiveEntry() {
+		// Must be nested statement, so delegate execution to statement
+		stmt := n.Entry.(Statement)
+		return stmt.CalculateComplexity().TotalStateComplexity, NodeError{ErrorCode: TREE_NO_ERROR}
+	}
+	// Check if nested elements contain complexity
+	if n.Left != nil && n.Right != nil {
+		leftComplexity, err1 := n.Left.CalculateStateComplexity()
+		if err1.ErrorCode != TREE_NO_ERROR {
+			return -1, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Invalid tree structure in left nested tree: " + err1.ErrorMessage}
+		}
+		rightComplexity, err2 := n.Right.CalculateStateComplexity()
+		if err2.ErrorCode != TREE_NO_ERROR {
+			return -1, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Invalid tree structure in right nested tree: " + err2.ErrorMessage}
+		}
+
+		// Check for operator - note that AND can be explicit, or implicit (bAND, wAND)
+		if n.LogicalOperator == AND || n.LogicalOperator == SAND_BETWEEN_COMPONENTS || n.LogicalOperator == SAND_WITHIN_COMPONENTS {
+			// Discount for AND on this level, and return
+			return leftComplexity + rightComplexity - 1, NodeError{ErrorCode: TREE_NO_ERROR}
+		} else if n.LogicalOperator == XOR {
+			// Return sum of left and right complexity (since either or applies)
+			return leftComplexity + rightComplexity, NodeError{ErrorCode: TREE_NO_ERROR}
+		} else if n.LogicalOperator == OR {
+			// Return sum of both, alongside additional state (their combined applicability)
+			return leftComplexity + rightComplexity + 1, NodeError{ErrorCode: TREE_NO_ERROR}
+		}
+	}
+	return -1, NodeError{ErrorCode: TREE_INVALID_TREE, ErrorMessage: "Invalid tree structure absence of left or right leaf in combination."}
+}
+
+/*
+   Returns root node of given tree the node is embedded in
+   up to the level at which nodes are linked by synthetic AND (bAND and wAND).
+   I.e., it returns the last node level below an sAND or bAND linkage.
 */
 // TODO: Check for the need to refine considerations of SAND_WITHIN_COMPONENTS
 func (n *Node) GetNodeBelowSyntheticRootNode() *Node {
@@ -966,8 +1029,8 @@ func (n *Node) GetNodeBelowSyntheticRootNode() *Node {
 }
 
 /*
-Indicates whether a given node has a linkage (wAND) within the same component
-(e.g., Cex(shared (left [AND] right) middle (left2 [XOR] right2) shared)).
+   Indicates whether a given node has a linkage (wAND) within the same component
+   (e.g., Cex(shared (left [AND] right) middle (left2 [XOR] right2) shared)).
 */
 func (n *Node) HasWithinComponentLinkage() bool {
 	if n.Parent != nil && n.Parent.LogicalOperator == SAND_WITHIN_COMPONENTS {
@@ -983,7 +1046,7 @@ func (n *Node) HasWithinComponentLinkage() bool {
 }
 
 /*
-Returns all nodes that are in the same branch under a within-component linkage (i.e., wAND operators).
+   Returns all nodes that are in the same branch under a within-component linkage (i.e., wAND operators).
 */
 func (n *Node) getAllNodesInWithinComponentLinkageBranch() []*Node {
 	if n.Parent != nil && n.Parent.LogicalOperator == SAND_WITHIN_COMPONENTS {
@@ -997,7 +1060,7 @@ func (n *Node) getAllNodesInWithinComponentLinkageBranch() []*Node {
 }
 
 /*
-Returns root node of given tree the node independent of linking logical operators.
+   Returns root node of given tree the node independent of linking logical operators.
 */
 func (n *Node) GetRootNode() *Node {
 	if n.Parent == nil {
@@ -1011,10 +1074,10 @@ func (n *Node) GetRootNode() *Node {
 }
 
 /*
-Returns leaf nodes of a given node as arrays of arrays of nodes.
-The two-dimensional array allows for separate storage of multiple arrays for a given component (e.g., multiple attributes, aims, etc.).
-The parameter aggregateImplicitLinkages indicates whether the nodes for a given tree with implicitly linked branches
-should be returned as a single tree, or multiple trees.
+   Returns leaf nodes of a given node as arrays of arrays of nodes.
+   The two-dimensional array allows for separate storage of multiple arrays for a given component (e.g., multiple attributes, aims, etc.).
+   The parameter aggregateImplicitLinkages indicates whether the nodes for a given tree with implicitly linked branches
+   should be returned as a single tree, or multiple trees.
 */
 func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
 
@@ -1082,9 +1145,9 @@ func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
 }
 
 /*
-Enables different forms of node aggregation, where aggregationType 0 indicates flat combination of nodes in array ([ ..., one, two, ...]),
-and aggregationType 1 indicates returning node arrays within node array ([ ..., [one, two], ...])
-Takes populated leaf arrays as input and prepared return structure for output.
+   Enables different forms of node aggregation, where aggregationType 0 indicates flat combination of nodes in array ([ ..., one, two, ...]),
+   and aggregationType 1 indicates returning node arrays within node array ([ ..., [one, two], ...])
+   Takes populated leaf arrays as input and prepared return structure for output.
 */
 func aggregateNodes(aggregationType int, leftNodes [][]*Node, rightNodes [][]*Node, returnNode [][]*Node) [][]*Node {
 	switch aggregationType {
@@ -1118,7 +1181,7 @@ func aggregateNodes(aggregationType int, leftNodes [][]*Node, rightNodes [][]*No
 }
 
 /*
-Calculate depth of node tree
+   Calculate depth of node tree
 */
 func (n *Node) CalculateDepth() int {
 	if n == nil {
@@ -1143,14 +1206,14 @@ func (n *Node) CalculateDepth() int {
 }
 
 /*
-Indicates whether node is leaf node
+   Indicates whether node is leaf node
 */
 func (n *Node) IsLeafNode() bool {
 	return n == nil || (n.Left == nil && n.Right == nil)
 }
 
 /*
-Indicates whether node contains valid combination (i.e., left and right and logical operator are populated).
+   Indicates whether node contains valid combination (i.e., left and right and logical operator are populated).
 */
 func (n *Node) IsCombination() bool {
 	return n.Entry == nil && !n.Left.IsNil() &&
@@ -1158,34 +1221,50 @@ func (n *Node) IsCombination() bool {
 }
 
 /*
-Indicates whether node has populated logical operator, but does not check for proper assignment of left and right children.
+   Indicates whether node has populated logical operator, but does not check for proper assignment of left and right children.
 */
 func (n *Node) hasLogicalOperator() bool {
 	return n.LogicalOperator != ""
 }
 
 /*
-Indicates whether node is empty
+   Indicates whether node is empty (i.e., has "zero values" in fields) or is nil (implies empty node).
 */
-func (n *Node) IsEmptyNode() bool {
-	return n.IsLeafNode() && n.Entry == nil
+func (n *Node) IsEmptyOrNilNode() bool {
+
+	if n.GetNodeState() == NODE_STATE_NON_NIL {
+		return !reflect.ValueOf(n.Entry).IsValid() &&
+			n.LogicalOperator == "" &&
+			n.ComponentType == "" &&
+			n.Parent == nil &&
+			n.Left == nil &&
+			n.Right == nil &&
+			n.Suffix == nil &&
+			n.Annotations == nil &&
+			n.SharedLeft == nil &&
+			n.SharedRight == nil &&
+			n.PrivateNodeLinks == nil &&
+			n.ElementOrder == nil
+	}
+	// Node is nil, and hence implied empty
+	return true
 }
 
 /*
-Indicates if node is nil
+   Indicates if node is nil.
 */
 func (n *Node) IsNil() bool {
 	return n == nil
 }
 
 /*
-Applies statement parsing function to all entries below a given node.
+   Applies statement parsing function to all entries below a given node.
 */
 func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) ParsingError {
 	if n.IsNil() {
 		return ParsingError{ErrorCode: PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Attempted to parse nil element."}
 	}
-	if !n.IsEmptyNode() && n.Entry != nil {
+	if !n.IsEmptyOrNilNode() && n.Entry != nil {
 
 		// Execute actual function
 		newEntry, err := function(n.Entry.(string))
@@ -1214,9 +1293,10 @@ func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) 
 }
 
 /*
-Returns suffix of given node, or, if nested, of parent node if it has logical operator.
-Inheritance only works up to node with logical operator.
-Returns empty string if no suffix present.
+   Returns suffix of given node, or, if nested, of parent node if it has logical operator.
+   Inheritance only works up to node with logical operator and populated suffix
+   (i.e., will walk upward until finding node with logical operator and suffix).
+   Returns empty string if no suffix present.
 */
 func (n *Node) GetSuffix() string {
 	if n.Suffix != nil {
@@ -1226,6 +1306,8 @@ func (n *Node) GetSuffix() string {
 		// Delegate to parent
 		if n.Parent != nil && n.Parent.hasLogicalOperator() {
 			return n.Parent.GetSuffix()
+		} else if n.Parent != nil && !n.Parent.hasLogicalOperator() {
+			fmt.Println("Parent node is missing logical operator (and hence child nodes do not inherit suffix)")
 		}
 	}
 	// Default suffix value
@@ -1233,7 +1315,7 @@ func (n *Node) GetSuffix() string {
 }
 
 /*
-Indicates whether node has own private nodes (referenced via PrivateNodes field)
+   Indicates whether node has own private nodes (referenced via PrivateNodes field)
 */
 func (n *Node) HasPrivateNodes() bool {
 	if n.PrivateNodeLinks != nil && len(n.PrivateNodeLinks) > 0 {
@@ -1244,7 +1326,7 @@ func (n *Node) HasPrivateNodes() bool {
 }
 
 /*
-Indicates whether node has annotations (referenced via Annotations field)
+   Indicates whether node has annotations (referenced via Annotations field)
 */
 func (n *Node) HasAnnotations() bool {
 	if n.GetAnnotations() != nil && n.GetAnnotations() != nil && len(n.GetAnnotations().(string)) > 0 {
@@ -1255,8 +1337,8 @@ func (n *Node) HasAnnotations() bool {
 }
 
 /*
-Returns annotations for specific node. If non-synthetic parent nodes hold annotations,
-those are inherited.
+   Returns annotations for specific node. If non-synthetic parent nodes hold annotations,
+   those are inherited.
 */
 func (n *Node) GetAnnotations() interface{} {
 

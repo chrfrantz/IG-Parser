@@ -624,7 +624,7 @@ func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 		t.Fatal("Node should not be nil")
 	}
 
-	if element[0].IsEmptyNode() {
+	if element[0].IsEmptyOrNilNode() {
 		t.Fatal("Node should not be empty")
 	}
 
@@ -1965,6 +1965,97 @@ func TestNestedStatementParsingError(t *testing.T) {
 	if res.String() != "" {
 		t.Fatal("Returned statements should be empty, but is ", res.String())
 	}
+}
+
+/*
+Tests complexity calculation of parsed statements.
+*/
+func TestStatement_CalculateComplexity(t *testing.T) {
+
+	testStmt := "A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate]((were non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}."
+
+	stmt, err := ParseStatement(testStmt)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing of statement should not have failed. Error:", err)
+	}
+
+	// Calculate actual complexity
+	complexity := stmt.CalculateComplexity()
+
+	// Evaluate
+
+	if complexity.AttributesOptions != 1 {
+		t.Fatal("Attributes options are incorrect. Value: ", complexity.AttributesOptions)
+	}
+
+	if complexity.AttributesComplexity != 1 {
+		t.Fatal("Attributes complexity is incorrect. Value: ", complexity.AttributesComplexity)
+	}
+
+	if complexity.AttributesPropertySimpleOptions != 1 {
+		t.Fatal("Attributes Properties options are incorrect. Value: ", complexity.AttributesPropertySimpleOptions)
+	}
+
+	if complexity.AttributesPropertySimpleComplexity != 1 {
+		t.Fatal("Attributes Properties complexity is incorrect. Value: ", complexity.AttributesPropertySimpleComplexity)
+	}
+
+	if complexity.DeonticOptions != 1 {
+		t.Fatal("Deontic options are incorrect. Value: ", complexity.DeonticOptions)
+	}
+
+	if complexity.DeonticComplexity != 1 {
+		t.Fatal("Deontic complexity is incorrect. Value: ", complexity.DeonticComplexity)
+	}
+
+	if complexity.AimOptions != 3 {
+		t.Fatal("Aim options are incorrect. Value: ", complexity.AimOptions)
+	}
+
+	if complexity.AimComplexity != 2 {
+		t.Fatal("Aim complexity is incorrect. Value: ", complexity.AimComplexity)
+	}
+
+	if complexity.DirectObjectSimpleOptions != 3 {
+		t.Fatal("Direct Object options are incorrect. Value: ", complexity.DirectObjectSimpleOptions)
+	}
+
+	if complexity.DirectObjectSimpleComplexity != 1 {
+		t.Fatal("Direct Object complexity is incorrect. Value: ", complexity.DirectObjectSimpleComplexity)
+	}
+
+	if complexity.DirectObjectPropertySimpleOptions != 1 {
+		t.Fatal("Direct Object Property options are incorrect. Value: ", complexity.DirectObjectPropertySimpleOptions)
+	}
+
+	if complexity.DirectObjectPropertySimpleComplexity != 1 {
+		t.Fatal("Direct Object Property complexity is incorrect. Value: ", complexity.DirectObjectPropertySimpleComplexity)
+	}
+
+	if complexity.ExecutionConstraintSimpleOptions != 3 {
+		t.Fatal("Execution constraints options are incorrect. Value: ", complexity.ExecutionConstraintSimpleOptions)
+	}
+
+	if complexity.ExecutionConstraintSimpleComplexity != 2 {
+		t.Fatal("Execution constraints complexity is incorrect. Value: ", complexity.ExecutionConstraintSimpleComplexity)
+	}
+
+	if complexity.ActivationConditionComplexComplexity != 3 {
+		t.Fatal("Activation conditions complexity is incorrect. Value: ", complexity.ActivationConditionComplexComplexity)
+	}
+
+	if complexity.ActivationConditionComplexOptions != 2 {
+		t.Fatal("Activation conditions options are incorrect. Value: ", complexity.ActivationConditionComplexOptions)
+	}
+
+	if complexity.ActivationConditionComplexComplexity != 3 {
+		t.Fatal("Activation conditions complexity is incorrect. Value: ", complexity.ActivationConditionComplexComplexity)
+	}
+
+	if complexity.TotalStateComplexity != 12 {
+		t.Fatal("Total State Complexity is incorrect. Value: ", complexity.TotalStateComplexity)
+	}
+
 }
 
 /*

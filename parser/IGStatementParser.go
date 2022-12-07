@@ -11,7 +11,9 @@ import (
 )
 
 /*
-Parses statement tree from input string.
+Parses statement tree from input string. Returns statement tree, and error.
+If parsing is successful, error code tree.PARSING_NO_ERROR is returned, else
+other context-specific codes are returned.
 */
 func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 
@@ -1203,14 +1205,14 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 			Println("Component string after:", componentWithoutIdentifier)
 
 			// Parse first component into node
-			if node.IsEmptyNode() {
+			if node.IsEmptyOrNilNode() {
 				node1, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
 				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
 					log.Println("Error when parsing synthetically linked element. Error:", err)
 					return nil, err
 				}
 				// Assign to main node if not populated and new node not nil
-				if !node1.IsEmptyNode() {
+				if !node1.IsEmptyOrNilNode() {
 					node = node1
 					// Attach component name to element (will be accessible to children via GetComponentName())
 					node.ComponentType = component
@@ -1231,7 +1233,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 					log.Println("Error when parsing synthetically linked element. Error:", err)
 					return nil, err
 				}
-				if !node2.IsEmptyNode() {
+				if !node2.IsEmptyOrNilNode() {
 					// Attach component name to element (will be accessible to children via GetComponentName())
 					node2.ComponentType = component
 					// Attach node-specific suffix
@@ -1285,7 +1287,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 			return nil, err
 		}
 		// Attach component name to top-level element (will be accessible to children via GetComponentName())
-		if !node1.IsEmptyNode() {
+		if !node1.IsEmptyOrNilNode() {
 			node1.ComponentType = component
 			// Attach node-specific suffix
 			if componentSuffix != "" {

@@ -19,101 +19,113 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	// Reading form to prepopulate response
 	message := ""
 	transactionID := ""
-	rawStmt := r.FormValue(PARAM_RAW_STATEMENT)
-	codedStmt := r.FormValue(PARAM_CODED_STATEMENT)
-	stmtId := r.FormValue(PARAM_STATEMENT_ID)
-	dynChk := r.FormValue(PARAM_DYNAMIC_SCHEMA)
-	inclAnnotations := r.FormValue(PARAM_LOGICO_OUTPUT)
-	igExtended := r.FormValue(PARAM_EXTENDED_OUTPUT)
-	includeHeaders := r.FormValue(PARAM_PRINT_HEADERS)
-	outputType := r.FormValue(PARAM_OUTPUT_TYPE)
-	propertyTree := r.FormValue(PARAM_PROPERTY_TREE)
-	binaryTree := r.FormValue(PARAM_BINARY_TREE)
-	actCondTop := r.FormValue(PARAM_ACTIVATION_CONDITION_ON_TOP)
-	heightValue := r.FormValue(PARAM_HEIGHT)
-	widthValue := r.FormValue(PARAM_WIDTH)
+	formValueRawStmt := r.FormValue(PARAM_RAW_STATEMENT)
+	formValueCodedStmt := r.FormValue(PARAM_CODED_STATEMENT)
+	formValueStmtId := r.FormValue(PARAM_STATEMENT_ID)
+	formValueDynamicOutput := r.FormValue(PARAM_DYNAMIC_SCHEMA)
+	formValueIncludeAnnotations := r.FormValue(PARAM_LOGICO_OUTPUT)
+	formValueIncludeDoV := r.FormValue(PARAM_DOV)
+	formValueIgExtendedOutput := r.FormValue(PARAM_EXTENDED_OUTPUT)
+	formValueIncludeHeaders := r.FormValue(PARAM_PRINT_HEADERS)
+	formValueOutputType := r.FormValue(PARAM_OUTPUT_TYPE)
+	formValuePropertyTree := r.FormValue(PARAM_PROPERTY_TREE)
+	formValueBinaryTree := r.FormValue(PARAM_BINARY_TREE)
+	formValueMoveActivationConditionsToTop := r.FormValue(PARAM_ACTIVATION_CONDITION_ON_TOP)
+	formValueCanvasHeightValue := r.FormValue(PARAM_HEIGHT)
+	formValueCanvasWidthValue := r.FormValue(PARAM_WIDTH)
 
 	// EVALUATE INDIVIDUAL CHECKBOX INPUTS
 
 	// Dynamic output
 	dynamicOutput := false
-	fmt.Println("Dynamic: ", dynChk)
-	if dynChk == CHECKBOX_ON {
-		dynChk = CHECKBOX_CHECKED
+	fmt.Println("Dynamic: ", formValueDynamicOutput)
+	if formValueDynamicOutput == CHECKBOX_ON {
+		formValueDynamicOutput = CHECKBOX_CHECKED
 		dynamicOutput = true
 	} else {
-		dynChk = CHECKBOX_UNCHECKED
+		formValueDynamicOutput = CHECKBOX_UNCHECKED
 		dynamicOutput = false
 	}
 
 	// Annotations in output
 	includeAnnotations := false
-	fmt.Println("Annotations: ", inclAnnotations)
-	if inclAnnotations == CHECKBOX_ON {
-		inclAnnotations = CHECKBOX_CHECKED
+	fmt.Println("Annotations: ", formValueIncludeAnnotations)
+	if formValueIncludeAnnotations == CHECKBOX_ON {
+		formValueIncludeAnnotations = CHECKBOX_CHECKED
 		includeAnnotations = true
 	} else {
-		inclAnnotations = CHECKBOX_UNCHECKED
+		formValueIncludeAnnotations = CHECKBOX_UNCHECKED
 		includeAnnotations = false
+	}
+
+	// DoV in output
+	includeDoV := false
+	fmt.Println("DoV: ", formValueIncludeDoV)
+	if formValueIncludeDoV == CHECKBOX_ON {
+		formValueIncludeDoV = CHECKBOX_CHECKED
+		includeDoV = true
+	} else {
+		formValueIncludeDoV = CHECKBOX_UNCHECKED
+		includeDoV = false
 	}
 
 	// Component-level nesting in output
 	produceIGExtendedOutput := false
-	fmt.Println("IG Extended output: ", igExtended)
-	if igExtended == CHECKBOX_ON {
-		igExtended = CHECKBOX_CHECKED
+	fmt.Println("IG Extended output: ", formValueIgExtendedOutput)
+	if formValueIgExtendedOutput == CHECKBOX_ON {
+		formValueIgExtendedOutput = CHECKBOX_CHECKED
 		produceIGExtendedOutput = true
 	} else {
-		igExtended = CHECKBOX_UNCHECKED
+		formValueIgExtendedOutput = CHECKBOX_UNCHECKED
 		produceIGExtendedOutput = false
 	}
 
 	// Print headers in output
 	printHeaders := false
 	// If not received by POST, set headers as default setting
-	if includeHeaders == "" && r.Method != http.MethodPost {
-		includeHeaders = CHECKBOX_ON
+	if formValueIncludeHeaders == "" && r.Method != http.MethodPost {
+		formValueIncludeHeaders = CHECKBOX_ON
 	}
-	fmt.Println("Include headers in output: ", includeHeaders)
-	if includeHeaders == CHECKBOX_ON {
-		includeHeaders = CHECKBOX_CHECKED
+	fmt.Println("Include headers in output: ", formValueIncludeHeaders)
+	if formValueIncludeHeaders == CHECKBOX_ON {
+		formValueIncludeHeaders = CHECKBOX_CHECKED
 		printHeaders = true
 	} else {
-		includeHeaders = CHECKBOX_UNCHECKED
+		formValueIncludeHeaders = CHECKBOX_UNCHECKED
 		printHeaders = false
 	}
 
 	// Private property printing in output
 	printFlatProperties := false
-	fmt.Println("Private property tree printing: ", propertyTree)
-	if propertyTree == CHECKBOX_ON {
-		propertyTree = CHECKBOX_CHECKED
+	fmt.Println("Private property tree printing: ", formValuePropertyTree)
+	if formValuePropertyTree == CHECKBOX_ON {
+		formValuePropertyTree = CHECKBOX_CHECKED
 		printFlatProperties = false
 	} else {
-		propertyTree = CHECKBOX_UNCHECKED
+		formValuePropertyTree = CHECKBOX_UNCHECKED
 		printFlatProperties = true
 	}
 
 	// Binary tree printing in output
 	printBinaryTree := false
-	fmt.Println("Binary tree printing: ", binaryTree)
-	if binaryTree == CHECKBOX_ON {
-		binaryTree = CHECKBOX_CHECKED
+	fmt.Println("Binary tree printing: ", formValueBinaryTree)
+	if formValueBinaryTree == CHECKBOX_ON {
+		formValueBinaryTree = CHECKBOX_CHECKED
 		printBinaryTree = true
 	} else {
-		binaryTree = CHECKBOX_UNCHECKED
+		formValueBinaryTree = CHECKBOX_UNCHECKED
 		printBinaryTree = false
 	}
 
 	// Activation condition on top in output
-	printActivationConditionOnTop := false
-	fmt.Println("Activation condition on top: ", actCondTop)
-	if actCondTop == CHECKBOX_ON {
-		actCondTop = CHECKBOX_CHECKED
-		printActivationConditionOnTop = true
+	printActivationConditionsOnTop := false
+	fmt.Println("Activation conditions on top: ", formValueMoveActivationConditionsToTop)
+	if formValueMoveActivationConditionsToTop == CHECKBOX_ON {
+		formValueMoveActivationConditionsToTop = CHECKBOX_CHECKED
+		printActivationConditionsOnTop = true
 	} else {
-		actCondTop = CHECKBOX_UNCHECKED
-		printActivationConditionOnTop = false
+		formValueMoveActivationConditionsToTop = CHECKBOX_UNCHECKED
+		printActivationConditionsOnTop = false
 	}
 
 	// Checkbox interpretation finished
@@ -123,18 +135,19 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		Success:                   false,
 		Error:                     false,
 		Message:                   message,
-		RawStmt:                   rawStmt,
-		CodedStmt:                 codedStmt,
-		StmtId:                    stmtId,
-		DynamicOutput:             dynChk,
-		IGExtendedOutput:          igExtended,
-		IncludeAnnotations:        inclAnnotations,
-		IncludeHeaders:            includeHeaders,
-		OutputType:                outputType,
+		RawStmt:                   formValueRawStmt,
+		CodedStmt:                 formValueCodedStmt,
+		StmtId:                    formValueStmtId,
+		DynamicOutput:             formValueDynamicOutput,
+		IGExtendedOutput:          formValueIgExtendedOutput,
+		IncludeAnnotations:        formValueIncludeAnnotations,
+		IncludeDoV:                formValueIncludeDoV,
+		IncludeHeaders:            formValueIncludeHeaders,
+		OutputType:                formValueOutputType,
 		OutputTypes:               exporter.OUTPUT_TYPES,
-		PrintPropertyTree:         propertyTree,
-		PrintBinaryTree:           binaryTree,
-		ActivationConditionsOnTop: actCondTop,
+		PrintPropertyTree:         formValuePropertyTree,
+		PrintBinaryTree:           formValueBinaryTree,
+		ActivationConditionsOnTop: formValueMoveActivationConditionsToTop,
 		Width:                     WIDTH,
 		Height:                    HEIGHT,
 		TransactionId:             transactionID,
@@ -146,8 +159,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		ReportHelp:                HELP_REPORT}
 
 	// Assign width for UI rendering
-	if widthValue != "" {
-		widthVal, err := strconv.Atoi(widthValue)
+	if formValueCanvasWidthValue != "" {
+		widthVal, err := strconv.Atoi(formValueCanvasWidthValue)
 		if err != nil || widthVal < MIN_WIDTH {
 			retStruct.Success = false
 			retStruct.Error = true
@@ -165,8 +178,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	}
 
 	// Assign height for UI rendering
-	if heightValue != "" {
-		heightVal, err := strconv.Atoi(heightValue)
+	if formValueCanvasHeightValue != "" {
+		heightVal, err := strconv.Atoi(formValueCanvasHeightValue)
 		if err != nil || heightVal < MIN_HEIGHT {
 			retStruct.Success = false
 			retStruct.Error = true
@@ -264,8 +277,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		val, suc = extractUrlParameters(r, PARAM_PRINT_HEADERS)
 		check = evaluateBooleanUrlParameters(PARAM_PRINT_HEADERS, val, suc)
 		// Sets default if no information is passed along in form (e.g., deactivation of headers);
-		// Note that includeHeaders will be prepopulated based on earlier form processing
-		if includeHeaders != CHECKBOX_ON {
+		// Note that formValueIncludeHeaders will be prepopulated based on earlier form processing
+		if formValueIncludeHeaders != CHECKBOX_ON {
 
 			// Fall back and assess whether the URL contained relevant parameter
 			if !suc {
@@ -292,7 +305,6 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			fmt.Println("Set default output type: " + exporter.DEFAULT_OUTPUT_TYPES)
 		}
 
-
 		// VISUAL PARAMETERS
 
 		// Parameter: Property tree
@@ -309,6 +321,22 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		} else {
 			retStruct.PrintPropertyTree = CHECKBOX_UNCHECKED
 			printFlatProperties = true
+		}
+
+		// Parameter: DoV
+		val, suc = extractUrlParameters(r, PARAM_DOV)
+		check = evaluateBooleanUrlParameters(PARAM_DOV, val, suc)
+		// Manually override if not set - effectively defines default setting
+		if !suc {
+			check = false
+		}
+		// Assign values
+		if check {
+			retStruct.IncludeDoV = CHECKBOX_CHECKED
+			includeDoV = true
+		} else {
+			retStruct.IncludeDoV = CHECKBOX_UNCHECKED
+			includeDoV = false
 		}
 
 		// Parameter: Binary tree
@@ -329,10 +357,10 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Assign values
 		if check {
 			retStruct.ActivationConditionsOnTop = CHECKBOX_CHECKED
-			printActivationConditionOnTop = true
+			printActivationConditionsOnTop = true
 		} else {
 			retStruct.ActivationConditionsOnTop = CHECKBOX_UNCHECKED
-			printActivationConditionOnTop = false
+			printActivationConditionsOnTop = false
 		}
 
 		// Parameter: Canvas width
@@ -431,7 +459,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType, printHeaders)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			fmt.Println("Visual output requested")
-			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations)
+			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionsOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations, includeDoV)
 		} else {
 			log.Fatal("Output variant " + templateName + " not found.")
 		}

@@ -165,7 +165,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 		// Iterate over component index (i.e., column) covering conventional components
 		for componentIdx := range statement {
 			// Append element value as output for given cell
-			if statement[componentIdx].IsEmptyNode() {
+			if statement[componentIdx].IsEmptyOrNilNode() {
 				// Empty entry - don't add anything
 				Println("Found empty node for component", fmt.Sprint(statement[componentIdx].GetComponentName()))
 			} else if statement[componentIdx].HasPrimitiveEntry() {

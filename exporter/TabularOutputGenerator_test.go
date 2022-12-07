@@ -4148,6 +4148,8 @@ func TestVisualOutputBasic(t *testing.T) {
 	tree.SetBinaryPrinting(true)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4156,7 +4158,7 @@ func TestVisualOutputBasic(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4213,6 +4215,8 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	tree.SetBinaryPrinting(true)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4221,7 +4225,7 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4277,6 +4281,8 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	tree.SetBinaryPrinting(true)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4285,7 +4291,7 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4333,6 +4339,8 @@ func TestVisualOutputPropertyNodesFlatPrinting(t *testing.T) {
 	tree.SetBinaryPrinting(true)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4341,7 +4349,7 @@ func TestVisualOutputPropertyNodesFlatPrinting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4388,6 +4396,8 @@ func TestVisualOutputSharedPropertyNodesFlatPrinting(t *testing.T) {
 	tree.SetBinaryPrinting(true)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4396,7 +4406,7 @@ func TestVisualOutputSharedPropertyNodesFlatPrinting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4443,6 +4453,8 @@ func TestVisualOutputPropertyNodesTreePrinting(t *testing.T) {
 	tree.SetBinaryPrinting(true)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4451,7 +4463,7 @@ func TestVisualOutputPropertyNodesTreePrinting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4506,6 +4518,8 @@ func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4514,7 +4528,7 @@ func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4564,6 +4578,8 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4572,7 +4588,7 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4619,6 +4635,8 @@ func TestMultiLevelEmbeddedCombinations(t *testing.T) {
 	tree.SetFlatPrinting(true)
 	// Activate binary tree printing
 	tree.SetBinaryPrinting(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4627,7 +4645,7 @@ func TestMultiLevelEmbeddedCombinations(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4674,6 +4692,8 @@ func TestTabularOutputDefaultExample(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -4765,6 +4785,8 @@ func TestVisualOutputDefaultExample(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4773,7 +4795,7 @@ func TestVisualOutputDefaultExample(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4822,6 +4844,8 @@ func TestVisualOutputDefaultExampleActivationConditionsFirst(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Move activation conditions to the top
 	tree.SetMoveActivationConditionsToFront(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4830,7 +4854,7 @@ func TestVisualOutputDefaultExampleActivationConditionsFirst(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4879,6 +4903,8 @@ func TestVisualOutputEscapingSymbols(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4887,7 +4913,7 @@ func TestVisualOutputEscapingSymbols(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4936,6 +4962,8 @@ func TestVisualOutputSpecialSymbols(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -4944,7 +4972,7 @@ func TestVisualOutputSpecialSymbols(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -4993,6 +5021,8 @@ func TestVisualOutputLinearMultiLevelNesting(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5001,7 +5031,7 @@ func TestVisualOutputLinearMultiLevelNesting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -5050,6 +5080,8 @@ func TestVisualOutputComplexMultiLevelNesting(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5058,7 +5090,7 @@ func TestVisualOutputComplexMultiLevelNesting(t *testing.T) {
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -5105,6 +5137,8 @@ func TestTabularOutputComplexMultilevelNesting(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -5196,6 +5230,8 @@ func TestVisualOutputComponentNestedStatementCombinationsWithProperties(t *testi
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5204,7 +5240,7 @@ func TestVisualOutputComponentNestedStatementCombinationsWithProperties(t *testi
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -5253,6 +5289,8 @@ func TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesA
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5261,7 +5299,7 @@ func TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesA
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -5310,6 +5348,8 @@ func TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties(t *testin
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5318,7 +5358,7 @@ func TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties(t *testin
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -5369,6 +5409,8 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5377,7 +5419,7 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -5388,6 +5430,68 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 
 	// Read reference file
 	content, err2 := ioutil.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultStatement.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err2 := WriteToFile("errorOutput.error", outputString)
+		if err2 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests higher-order statement combinations ({Cac{ ... } [AND] Cac{ ... } [XOR] {Cac{ ... } [AND] Cac{ ... }}}) or component-level nesting combinations in visual output
+using an extended version of the default example statement.
+Tests the statement with complexity output.
+NOTE: Nesting works until seven levels at this stage
+*/
+func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExampleWithComplexity(t *testing.T) {
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were (non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] {Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)} [OR] Cac{A(actor5) I(act5)}}} [XOR] Cac{A(actor5) I(act5)}}"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(true)
+
+	// Parse statement
+	s, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err2 := ioutil.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultStatementWithComplexity.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5427,6 +5531,8 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinations(t *testing.
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5435,7 +5541,7 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinations(t *testing.
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -5486,6 +5592,8 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testi
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5494,7 +5602,7 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testi
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}
@@ -5548,6 +5656,8 @@ func TestVisualOutputExcessiveSymbolsOrMissingWhitespaceInNestedComponentCombina
 	tree.SetBinaryPrinting(false)
 	// Deactivate moving of activation conditions
 	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
 
 	// Parse statement
 	s, err := parser.ParseStatement(text)
@@ -5556,7 +5666,7 @@ func TestVisualOutputExcessiveSymbolsOrMissingWhitespaceInNestedComponentCombina
 	}
 
 	// Generate tree output
-	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), tree.MoveActivationConditionsToFront(), 0)
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(), IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err1.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
 	}

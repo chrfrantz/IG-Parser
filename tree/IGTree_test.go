@@ -8,7 +8,7 @@ import (
 func TestNode_IsEmptyNode(t *testing.T) {
 	node := Node{}
 
-	if !node.IsEmptyNode() {
+	if !node.IsEmptyOrNilNode() {
 		t.Fatal("Node should be considered empty")
 	}
 
@@ -17,7 +17,29 @@ func TestNode_IsEmptyNode(t *testing.T) {
 	}
 
 	node.Entry = "some value"
-	if node.IsEmptyNode() {
+	if node.IsEmptyOrNilNode() {
+		t.Fatal("Node should not be considered empty")
+	}
+
+	if !node.IsLeafNode() {
+		t.Fatal("Node should be leaf node")
+	}
+
+}
+
+func TestNode_IsEmptyNodeNonEntryValue(t *testing.T) {
+	node := Node{}
+
+	if !node.IsEmptyOrNilNode() {
+		t.Fatal("Node should be considered empty")
+	}
+
+	if node.IsNil() {
+		t.Fatal("Node should not be nil")
+	}
+
+	node.Annotations = "testAnnotations"
+	if node.IsEmptyOrNilNode() {
 		t.Fatal("Node should not be considered empty")
 	}
 
@@ -30,7 +52,10 @@ func TestNode_IsEmptyNode(t *testing.T) {
 func TestTreeCreation(t *testing.T) {
 
 	root := Node{}
-	if !root.IsEmptyNode() {
+	if root.IsNil() {
+		t.Fatal("Node should not be nil (but be empty).")
+	}
+	if !root.IsEmptyOrNilNode() {
 		t.Fatal("Node has not been correctly detected as empty.")
 	}
 
@@ -1159,33 +1184,89 @@ Tests retrieval of suffix from nodes across tree (or parent if existing).
 */
 func TestNode_GetSuffix(t *testing.T) {
 
-	left := Node{Entry: "Left", Suffix: "1"}
+	left := Node{LogicalOperator: XOR, Suffix: "1"}
 	// No suffix
+	leftLeft := Node{Entry: "leftLeft"}
+	leftRight := Node{Entry: "leftRight"}
 	rightLeft := Node{Entry: "rightLeft"}
 	rightRight := Node{Entry: "rightRight", Suffix: "24"}
 	right := Node{LogicalOperator: AND}
-	right.InsertLeftNode(&rightLeft)
-	right.InsertRightNode(&rightRight)
-	root := Node{Entry: "TopNode", LogicalOperator: OR, Suffix: "17"}
-	root.InsertLeftNode(&left)
-	root.InsertRightNode(&right)
+	res, err := right.InsertLeftNode(&rightLeft)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = right.InsertRightNode(&rightRight)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	root := Node{LogicalOperator: OR, Suffix: "17"}
+	res, err = root.InsertLeftNode(&left)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	// Add to left node after adding to root
+	res, err = left.InsertLeftNode(&leftLeft)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	// Add to left node after adding to root
+	res, err = left.InsertRightNode(&leftRight)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = root.InsertRightNode(&right)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
 
+	// Assigned suffix
 	if left.GetSuffix() != "1" {
 		t.Fatal("Did not extract correct suffix: " + left.GetSuffix())
 	}
 
-	// Only inherit from logical operator node
-	if rightLeft.GetSuffix() != "" {
+	// Inherit from top-level node, i.e., inherit across multiple levels (top-level node has logical operator and suffix)
+	if rightLeft.GetSuffix() != "17" {
 		t.Fatal("Did not extract correct suffix: " + rightLeft.GetSuffix())
 	}
 
+	// Explicitly assigned suffix
 	if rightRight.GetSuffix() != "24" {
 		t.Fatal("Did not extract correct suffix: " + rightRight.GetSuffix())
 	}
 
 	// only inherit until higher logical operator
-	if right.GetSuffix() != "" {
+	if right.GetSuffix() != "17" {
 		t.Fatal("Did not extract correct suffix: " + right.GetSuffix())
+	}
+
+	fmt.Println(root.String())
+
+	// Inherit from next higher node (which has logical operator and suffix)
+	if leftLeft.GetSuffix() != "1" {
+		t.Fatal("Did not extract correct suffix: " + leftLeft.GetSuffix())
+	}
+
+	// Inherit from next higher node (which has logical operator and suffix)
+	if leftRight.GetSuffix() != "1" {
+		t.Fatal("Did not extract correct suffix: " + leftRight.GetSuffix())
 	}
 
 	// Returns own suffix
@@ -1204,11 +1285,35 @@ func TestNode_GetComponentName(t *testing.T) {
 	rightLeft := Node{Entry: "rightLeft"}
 	rightRight := Node{Entry: "rightRight"}
 	right := Node{LogicalOperator: AND, ComponentType: "rightComp"}
-	right.InsertLeftNode(&rightLeft)
-	right.InsertRightNode(&rightRight)
-	root := Node{Entry: "TopNode", LogicalOperator: OR, ComponentType: "topComp"}
-	root.InsertLeftNode(&left)
-	root.InsertRightNode(&right)
+	res, err := right.InsertLeftNode(&rightLeft)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = right.InsertRightNode(&rightRight)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	root := Node{LogicalOperator: OR, ComponentType: "topComp"}
+	res, err = root.InsertLeftNode(&left)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = root.InsertRightNode(&right)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
 
 	if left.GetComponentName() != "leftComp" {
 		t.Fatal("Did not extract correct component: " + left.GetComponentName())
@@ -1229,6 +1334,58 @@ func TestNode_GetComponentName(t *testing.T) {
 	if root.GetComponentName() != "topComp" {
 		t.Fatal("Did not extract correct component: " + root.GetComponentName())
 	}
+}
+
+/*
+Tests calculation of state complexity
+*/
+func TestNode_CalculateStateComplexity(t *testing.T) {
+
+	left := Node{Entry: "Left", ComponentType: "leftComp"}
+	// No suffix
+	rightLeft := Node{Entry: "rightLeft"}
+	rightRight := Node{Entry: "rightRight"}
+	right := Node{LogicalOperator: AND, ComponentType: "rightComp"}
+	res, err := right.InsertLeftNode(&rightLeft)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = right.InsertRightNode(&rightRight)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	root := Node{LogicalOperator: OR, ComponentType: "topComp"}
+	res, err = root.InsertLeftNode(&left)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = root.InsertRightNode(&right)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+
+	r := &root
+
+	complexity, err := r.CalculateStateComplexity()
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when calculating complexity:", err)
+	}
+	if complexity != 3 {
+		t.Error("Test returning wrong state complexity. Value:", complexity)
+	}
+
 }
 
 //Collapse adjacent entries in logical operators - CollapseAdjacentOperators()

@@ -54,6 +54,12 @@ Should not be directly modified, but rather using SetIncludeAnnotations().
 var include_ANNOTATIONS = false
 
 /*
+Indicates whether Degree of Variability should be included in output.
+Should not be directly modified, but rather using SetIncludeDegreeOfVariability().
+*/
+var include_DEGREE_OF_VARIABILITY = false
+
+/*
 Indicates whether header row is to be included in output.
 Should not be directly modified, but rather using SetIncludeHeaders().
 */
@@ -98,6 +104,20 @@ Indicates whether annotations should be included in output.
 */
 func IncludeAnnotations() bool {
 	return include_ANNOTATIONS
+}
+
+/*
+Defines whether Degree of Variability should be included in output.
+*/
+func SetIncludeDegreeOfVariability(include bool) {
+	include_DEGREE_OF_VARIABILITY = include
+}
+
+/*
+Indicates whether Degree of Variability should be included in output.
+*/
+func IncludeDegreeOfVariability() bool {
+	return include_DEGREE_OF_VARIABILITY
 }
 
 /*

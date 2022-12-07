@@ -553,6 +553,153 @@ const TREE_INPUT_VALIDATION = "INPUT_VALIDATION"
 const TREE_ERROR_EMBEDDED_PARSING_ERROR = "TREE_EMBEDDED_PARSING_ERROR"
 
 /*
+StateComplexity struct containing number of individual options per component,
+as well as calculated state complexity per component, as well as in total
+*/
+type StateComplexity struct {
+	AttributesOptions                       int
+	AttributesComplexity                    int
+	AttributesPropertySimpleOptions         int
+	AttributesPropertySimpleComplexity      int
+	AttributesPropertyComplexOptions        int
+	AttributesPropertyComplexComplexity     int
+	DeonticOptions                          int
+	DeonticComplexity                       int
+	AimOptions                              int
+	AimComplexity                           int
+	DirectObjectSimpleOptions               int
+	DirectObjectSimpleComplexity            int
+	DirectObjectComplexOptions              int
+	DirectObjectComplexComplexity           int
+	DirectObjectPropertySimpleOptions       int
+	DirectObjectPropertySimpleComplexity    int
+	DirectObjectPropertyComplexOptions      int
+	DirectObjectPropertyComplexComplexity   int
+	IndirectObjectSimpleOptions             int
+	IndirectObjectSimpleComplexity          int
+	IndirectObjectComplexOptions            int
+	IndirectObjectComplexComplexity         int
+	IndirectObjectPropertySimpleOptions     int
+	IndirectObjectPropertySimpleComplexity  int
+	IndirectObjectPropertyComplexOptions    int
+	IndirectObjectPropertyComplexComplexity int
+
+	ConstitutedEntityOptions                          int
+	ConstitutedEntityComplexity                       int
+	ConstitutedEntityPropertySimpleOptions            int
+	ConstitutedEntityPropertySimpleComplexity         int
+	ConstitutedEntityPropertyComplexOptions           int
+	ConstitutedEntityPropertyComplexComplexity        int
+	ModalOptions                                      int
+	ModalComplexity                                   int
+	ConstitutiveFunctionOptions                       int
+	ConstitutiveFunctionComplexity                    int
+	ConstitutingPropertiesSimpleOptions               int
+	ConstitutingPropertiesSimpleComplexity            int
+	ConstitutingPropertiesComplexOptions              int
+	ConstitutingPropertiesComplexComplexity           int
+	ConstitutingPropertiesPropertiesSimpleOptions     int
+	ConstitutingPropertiesPropertiesSimpleComplexity  int
+	ConstitutingPropertiesPropertiesComplexOptions    int
+	ConstitutingPropertiesPropertiesComplexComplexity int
+
+	ExecutionConstraintSimpleOptions     int
+	ExecutionConstraintSimpleComplexity  int
+	ExecutionConstraintComplexOptions    int
+	ExecutionConstraintComplexComplexity int
+
+	ActivationConditionSimpleOptions     int
+	ActivationConditionSimpleComplexity  int
+	ActivationConditionComplexOptions    int
+	ActivationConditionComplexComplexity int
+
+	OrElseComplexity int
+
+	TotalStateComplexity int
+}
+
+/*
+Produces StateComplexity object as human-readable output.
+*/
+func (c *StateComplexity) String() string {
+	str := strings.Builder{}
+	str.WriteString("=== State Complexity ===\n\n")
+	str.WriteString("Attributes Options: " + strconv.Itoa(c.AttributesOptions) + "\n")
+	str.WriteString("Attributes Complexity: " + strconv.Itoa(c.AttributesComplexity) + "\n\n")
+
+	str.WriteString("Attributes Properties (simple) Options: " + strconv.Itoa(c.AttributesPropertySimpleOptions) + "\n")
+	str.WriteString("Attributes Properties (simple) Complexity: " + strconv.Itoa(c.AttributesPropertySimpleComplexity) + "\n")
+	str.WriteString("Attributes Properties (complex) Options: " + strconv.Itoa(c.AttributesPropertyComplexOptions) + "\n")
+	str.WriteString("Attributes Properties (complex) Complexity: " + strconv.Itoa(c.AttributesPropertyComplexComplexity) + "\n\n")
+
+	str.WriteString("Deontic Options: " + strconv.Itoa(c.DeonticOptions) + "\n")
+	str.WriteString("Deontic Complexity: " + strconv.Itoa(c.DeonticComplexity) + "\n\n")
+
+	str.WriteString("Aim Options: " + strconv.Itoa(c.AimOptions) + "\n")
+	str.WriteString("Aim Complexity: " + strconv.Itoa(c.AimComplexity) + "\n\n")
+
+	str.WriteString("Direct Object (simple) Options: " + strconv.Itoa(c.DirectObjectSimpleOptions) + "\n")
+	str.WriteString("Direct Object (simple) Complexity: " + strconv.Itoa(c.DirectObjectSimpleComplexity) + "\n")
+	str.WriteString("Direct Object (complex) Options: " + strconv.Itoa(c.DirectObjectComplexOptions) + "\n")
+	str.WriteString("Direct Object (complex) Complexity: " + strconv.Itoa(c.DirectObjectComplexComplexity) + "\n\n")
+
+	str.WriteString("Direct Object Property (simple) Options: " + strconv.Itoa(c.DirectObjectPropertySimpleOptions) + "\n")
+	str.WriteString("Direct Object Property (simple) Complexity: " + strconv.Itoa(c.DirectObjectPropertySimpleComplexity) + "\n")
+	str.WriteString("Direct Object Property (complex) Options: " + strconv.Itoa(c.DirectObjectPropertyComplexOptions) + "\n")
+	str.WriteString("Direct Object Property (complex) Complexity: " + strconv.Itoa(c.DirectObjectPropertyComplexComplexity) + "\n\n")
+
+	str.WriteString("Indirect Object (simple) Options: " + strconv.Itoa(c.IndirectObjectSimpleOptions) + "\n")
+	str.WriteString("Indirect Object (simple) Complexity: " + strconv.Itoa(c.IndirectObjectSimpleComplexity) + "\n")
+	str.WriteString("Indirect Object (complex) Options: " + strconv.Itoa(c.IndirectObjectComplexOptions) + "\n")
+	str.WriteString("Indirect Object (complex) Complexity: " + strconv.Itoa(c.IndirectObjectComplexComplexity) + "\n\n")
+
+	str.WriteString("Indirect Object Property (simple) Options: " + strconv.Itoa(c.IndirectObjectPropertySimpleOptions) + "\n")
+	str.WriteString("Indirect Object Property (simple) Complexity: " + strconv.Itoa(c.IndirectObjectPropertySimpleComplexity) + "\n")
+	str.WriteString("Indirect Object Property (complex) Options: " + strconv.Itoa(c.IndirectObjectPropertyComplexOptions) + "\n")
+	str.WriteString("Indirect Object Property (complex) Complexity: " + strconv.Itoa(c.IndirectObjectPropertyComplexComplexity) + "\n\n")
+
+	str.WriteString("Constituted Entity Options: " + strconv.Itoa(c.ConstitutedEntityOptions) + "\n")
+	str.WriteString("Constituted Entity Complexity: " + strconv.Itoa(c.ConstitutedEntityComplexity) + "\n\n")
+
+	str.WriteString("Constituted Entity Property (simple) Options: " + strconv.Itoa(c.ConstitutedEntityPropertySimpleOptions) + "\n")
+	str.WriteString("Constituted Entity Property (simple) Complexity: " + strconv.Itoa(c.ConstitutedEntityPropertySimpleComplexity) + "\n")
+	str.WriteString("Constituted Entity Property (complex) Options: " + strconv.Itoa(c.ConstitutedEntityPropertyComplexOptions) + "\n")
+	str.WriteString("Constituted Entity Property (complex) Complexity: " + strconv.Itoa(c.ConstitutedEntityPropertyComplexComplexity) + "\n\n")
+
+	str.WriteString("Modal Options: " + strconv.Itoa(c.ModalOptions) + "\n")
+	str.WriteString("Modal Complexity: " + strconv.Itoa(c.ModalComplexity) + "\n\n")
+
+	str.WriteString("Constitutive Function Options: " + strconv.Itoa(c.ConstitutiveFunctionOptions) + "\n")
+	str.WriteString("Constitutive Function Complexity: " + strconv.Itoa(c.ConstitutiveFunctionComplexity) + "\n\n")
+
+	str.WriteString("Constituting Properties (simple) Options: " + strconv.Itoa(c.ConstitutingPropertiesSimpleOptions) + "\n")
+	str.WriteString("Constituting Properties (simple) Complexity: " + strconv.Itoa(c.ConstitutingPropertiesSimpleComplexity) + "\n")
+	str.WriteString("Constituting Properties (complex) Options: " + strconv.Itoa(c.ConstitutingPropertiesComplexOptions) + "\n")
+	str.WriteString("Constituting Properties (complex) Complexity: " + strconv.Itoa(c.ConstitutingPropertiesComplexComplexity) + "\n\n")
+
+	str.WriteString("Constituting Properties Properties (simple) Options: " + strconv.Itoa(c.ConstitutingPropertiesPropertiesSimpleOptions) + "\n")
+	str.WriteString("Constituting Properties Properties (simple) Complexity: " + strconv.Itoa(c.ConstitutingPropertiesPropertiesSimpleComplexity) + "\n")
+	str.WriteString("Constituting Properties Properties (complex) Options: " + strconv.Itoa(c.ConstitutingPropertiesPropertiesComplexOptions) + "\n")
+	str.WriteString("Constituting Properties Properties (complex) Complexity: " + strconv.Itoa(c.ConstitutingPropertiesPropertiesComplexComplexity) + "\n\n")
+
+	str.WriteString("Execution Constraints (simple) Options: " + strconv.Itoa(c.ExecutionConstraintSimpleOptions) + "\n")
+	str.WriteString("Execution Constraints (simple) Complexity: " + strconv.Itoa(c.ExecutionConstraintSimpleComplexity) + "\n")
+	str.WriteString("Execution Constraints (complex) Options: " + strconv.Itoa(c.ExecutionConstraintComplexOptions) + "\n")
+	str.WriteString("Execution Constraints (complex) Complexity: " + strconv.Itoa(c.ExecutionConstraintComplexComplexity) + "\n\n")
+
+	str.WriteString("Activation Conditions (simple) Options: " + strconv.Itoa(c.ActivationConditionSimpleOptions) + "\n")
+	str.WriteString("Activation Conditions (simple) Complexity: " + strconv.Itoa(c.ActivationConditionSimpleComplexity) + "\n")
+	str.WriteString("Activation Conditions (complex) Options: " + strconv.Itoa(c.ActivationConditionComplexOptions) + "\n")
+	str.WriteString("Activation Conditions (complex) Complexity: " + strconv.Itoa(c.ActivationConditionComplexComplexity) + "\n\n")
+
+	str.WriteString("Or Else Complexity: " + strconv.Itoa(c.OrElseComplexity) + "\n\n")
+
+	str.WriteString("Total State Complexity: " + strconv.Itoa(c.TotalStateComplexity) + "\n")
+
+	return str.String()
+}
+
+/*
 Collapses repeated occurrences of values in a given array (e.g., [AND] [AND] becomes [AND]).
 However, only applies to immediate repetition, not across the entire input
 */
