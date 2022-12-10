@@ -1,4 +1,4 @@
-FROM golang:1.17 as builder
+FROM golang:1.19 as builder
 
 LABEL maintainer="cf@christopherfrantz.org"
 LABEL stage=builder
