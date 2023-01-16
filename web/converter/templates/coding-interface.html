@@ -4,10 +4,16 @@
     <title>IG Parser</title></br>
     <link rel="shortcut icon" type="image/x-icon" href="/css/favicon.ico">
     <link rel="stylesheet" href="/css/default.css">
+    <!-- ACE Editor -->
+    <script src="/libraries/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 </head>
 
 <body>
 <script>
+
+    /*
+    Copies content of given container to clipboard for downstream use.
+     */
     function CopyToClipboard(containerid) {
         if (document.selection) {
             let range = document.body.createTextRange();
@@ -25,11 +31,13 @@
         }
     }
 
+    /*
+    Auto-adjusts height of target entry field based on content.
+     */
     function check(target) {
         let offset = 0
         target.style.height = 'auto';
         target.style.height = target.scrollHeight + offset + 'px';
-
     }
 </script>
 
@@ -41,8 +49,37 @@
 <p>&nbsp;</p>
 <div class="form">
     <form method="POST">
+        <!-- Original Statement entry field -->
         <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
         <textarea name="rawStmt" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
-
+        <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelp}}" class="tooltip">Encoded Statement:</span>
-        <textarea name="codedStmt" onfocusin="check(this)" onkeyup="check(this)">{{.CodedStmt}}</textarea><br />
+        <!-- ACE Editor; copies any content to hidden textarea -->
+        <div id="editor" name="editor" onChange="copyEditorContentToTextArea()">{{.CodedStmt}}</div>
+        <script>
+            var editor = ace.edit("editor");
+            editor.session.setMode("ace/mode/text");
+            // Option documentation: https://github.com/ajaxorg/ace/wiki/Configuring-Ace
+            editor.setOption("showLineNumbers", true);
+            editor.setOption("wrap", true);
+            editor.setOption("showGutter", true); // panel on the left
+            editor.setOption("showPrintMargin", false); // 80-character margin marker
+            editor.setOption("behavioursEnabled", false);
+            editor.setOption("cursorStyle", "ace");
+            editor.setOption("fontFamily", "monospace"); // has to be monospace for correct operation
+            editor.setOption("fontSize", 16);
+            editor.setOption("minLines", 5); // standard size
+            editor.setOption("maxLines", 30); // number of lines before using scrollbar
+
+            /*
+            Copies content from editor to hidden textarea (which is used for form submission)
+             */
+            function copyEditorContentToTextArea() {
+                var ta = document.getElementById("codedStmt");
+                // Populate textarea with editor content
+                ta.value = editor.getValue();
+            }
+        </script>
+
+        <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
+        <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />

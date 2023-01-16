@@ -22,10 +22,11 @@ const DEFAULT_PORT = "8080"
 const VISUAL_PATH = "visual"
 
 // Embed files in compiled binary
+
 //go:embed css/default.css css/favicon.ico
 var cssFiles embed.FS
 
-//go:embed libraries/d3.v7.min.js
+//go:embed libraries/d3.v7.min.js libraries/ace/ace.js
 var libraryFiles embed.FS
 
 func main() {

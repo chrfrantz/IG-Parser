@@ -2,7 +2,7 @@ html, body {
     min-height: 100%;
 }
 
-body, div, form, input, select, output, textarea, p {
+body, form, input, select, output, textarea, p {
     padding: 0;
     margin: auto;
     outline: none;
@@ -60,6 +60,11 @@ form {
     border-radius: 6px;
     background: #fff;
     box-shadow: 0 0 25px 0 #d6e0f5;
+    font-size: 16px;
+    /* Need to review for actual application */
+    font-family: Roboto, Arial, sans-serif;
+    display: block;
+    margin: auto;
 }
 
 .button1 {
@@ -238,6 +243,27 @@ button:hover {
 .tooltip:hover:before {
     display:block;
 }
+
+/* ACE Editor */
+#editor {
+    position: relative;
+    width: calc(100% - 12px);
+    height: 100px;
+    font-size: 16px;
+    font-family: monospace, monospace;
+    border: 1px solid;
+    border-color: lightgrey;
+}
+
+/*
+Modifications to ace.js:
+
+// Cursor color (to blue)
+.ace_cursor {\n  color: blue;\n}\n
+// Matching bracket color (to red) and size (wider borders)
+.ace_bracket {\n  margin: -1px 0 0 -1px;\n  border: 2px solid rgb(255, 0, 0);\n}\n
+
+ */
 
 /*
 .tooltip {
