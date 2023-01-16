@@ -16,6 +16,9 @@ var tmpl *template.Template
 const TEMPLATE_NAME_PARSER_SHEETS = "ig-parser-sheets.html"
 const TEMPLATE_NAME_PARSER_VISUAL = "ig-parser-visualizer.html"
 
+// Help template
+const TEMPLATE_NAME_HELP = "ig-parser-user-guide.html"
+
 // Embed templates in compiled binary
 //go:embed templates/*
 var files embed.FS

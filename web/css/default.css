@@ -13,6 +13,10 @@ body, form, input, select, output, textarea, p {
     display: block;
 }
 
+/*
+Headers used on main application page
+ */
+
 h1 {
     margin: auto;
     line-height: 42px;
@@ -38,6 +42,23 @@ h2 {
     text-align: center;
 }
 
+/*
+Header used for help page
+ */
+
+h3 {
+    margin: auto;
+    line-height: 42px;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 24px;
+    color: #000;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
 .testbox {
     display: flex;
     justify-content: center;
@@ -52,6 +73,17 @@ form {
     border-radius: 6px;
     background: #fff;
     box-shadow: 0 0 25px 0 #d6e0f5;
+}
+
+/*
+Link styling for 'Encoded Statement' help page
+ */
+a:link {
+    color: #666;
+}
+
+a:hover {
+    color: blue;
 }
 
 .output {
@@ -115,6 +147,15 @@ input[type="checkbox"] {
     margin: 10px; /* space to next item */
     vertical-align: middle;
     position: relative;
+}
+
+/* Table specification for help page */
+th {
+    width: 300px;
+}
+
+td {
+    padding-left: 50px;
 }
 
 /* Reserved for parameter fields */
@@ -211,8 +252,8 @@ button:hover {
 
 /* Source: https://blog.logrocket.com/creating-beautiful-tooltips-with-only-css/ */
 .tooltip {
-    position:relative; /* making the .tooltip span a container for the tooltip text */
-    border-bottom:1px dashed #000; /* little indicater to indicate it's hoverable */
+    position: relative; /* making the .tooltip span a container for the tooltip text */
+    border-bottom: 1px dashed #000; /* little indicater to indicate it's hoverable */
 }
 
 .tooltip:before {

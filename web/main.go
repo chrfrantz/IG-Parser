@@ -19,7 +19,9 @@ const ENV_VAR_LOGGING_PATH = "IG_PARSER_LOGGING_PATH"
 
 const DEFAULT_PORT = "8080"
 
+// API Paths
 const VISUAL_PATH = "visual"
+const HELP_PATH = "help"
 
 // Embed files in compiled binary
 
@@ -28,6 +30,9 @@ var cssFiles embed.FS
 
 //go:embed libraries/d3.v7.min.js libraries/ace/ace.js
 var libraryFiles embed.FS
+
+//go:embed converter/templates/ig-parser-user-guide.html
+var helpFiles embed.FS
 
 func main() {
 
@@ -38,6 +43,8 @@ func main() {
 	http.HandleFunc("/", converter.ConverterHandlerSheets)
 	// Visual tree output handler
 	http.HandleFunc("/"+VISUAL_PATH+"/", converter.ConverterHandlerVisual)
+	// Help handler
+	http.HandleFunc("/"+HELP_PATH+"/", converter.HelpHandler)
 	// D3 (served for visual output)
 	http.Handle("/libraries/", http.FileServer(http.FS(libraryFiles)))
 	// CSS folder mapping (for CSS and favicon)
@@ -71,14 +78,15 @@ func main() {
 	// Manual override for local testing
 	converter.LoggingPath = "./logs"
 
-	// Redirect stdout
+	// Suppress stdout
 	//temp := os.Stdout
 	//os.Stdout = nil
 
 	addr := ":" + port
-	log.Printf("Listening on %s ...\n", addr)
-	log.Println("Logging: " + fmt.Sprint(converter.Logging))
+	log.Println("Launching IG Parser ...")
+	log.Println("Logging enabled: " + fmt.Sprint(converter.Logging))
 	log.Println("Logging path: " + fmt.Sprint(converter.LoggingPath))
+	log.Printf("Open your browser and enter the URL http://localhost%s/ to open IG Parser.\n", addr)
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		log.Fatal("Web service stopped. Error:", err)

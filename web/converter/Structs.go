@@ -1,5 +1,7 @@
 package converter
 
+import "html/template"
+
 /*
 Struct for interacting with template via handler
 */
@@ -46,8 +48,10 @@ type ReturnStruct struct {
 	TransactionId string
 	// Help message for raw statement
 	RawStmtHelp string
-	// Help message for coded statement
-	CodedStmtHelp string
+	// Help text indicating reference to help page
+	CodedStmtHelpRef string
+	// Help message for coded statement - needs to be provided as parseable HTML for templating.
+	CodedStmtHelp template.HTML
 	// Help message for statement ID
 	StmtIdHelp string
 	// Help message for parameters

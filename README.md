@@ -241,11 +241,34 @@ In the following, you will find selected examples that highlight the practical u
 
 ## Deployment
 
-This section is particularly focused on the setup of IG Parser, not the practical use discussed above.
+This section is particularly focused on the setup of IG Parser, not the practical use discussed above. IG Parser can both be run on a local machine, or deployed on a server. The corresponding instructions are provided in the following, alongside links to the prerequisites. 
+
+Note that the server-deployed version is more reliable when considering production use.
+
+### Local executable
+
+The purpose of building a local executable is to run IG Parser on a local machine (primarily for personal use on your own machine).
 
 * Prerequisites:
-  * [Docker](https://docs.docker.com/engine/install/)
-  * [docker-compose](https://docs.docker.com/compose/install/) (optional if environment, volume and port parameterization is done manually)
+  * Install [Go (Programming Language)](https://go.dev/dl/)
+  * Open a console (e.g., Linux terminal, Windows command line (`cmd`) or PowerShell (`powershell`))
+  * Navigate to the repository folder.
+  * Compile IG Parser in the corresponding console
+    * Under Windows, execute `go build -o ig-parser.exe ./web`
+    * Under Linux, execute `go build -o ig-parser ./web`
+  * Run the created executable
+    * Under Windows, run `ig-parser` (or `ig-parser.exe`)
+    * Under Linux (or Windows PowerShell), run `./ig-parser`
+  * Open browser and enter URL http://localhost:8080
+  * Use `Ctrl-C` to terminate the execution.
+
+### Server deployment
+
+The purpose of deploying IG Parser on a server is to provide a deployment that can be made available on a network host to allow remote use on the local network or the internet.
+
+* Prerequisites:
+  * Install [Docker](https://docs.docker.com/engine/install/)
+  * Install [docker-compose](https://docs.docker.com/compose/install/) (optional if environment, volume and port parameterization is done manually)
   * Quick installation of docker under Ubuntu LTS: `sudo apt install docker.io`
 
 * Deployment Guidelines
@@ -254,8 +277,9 @@ This section is particularly focused on the setup of IG Parser, not the practica
   * Run `deploy.sh` with superuser permissions (`sudo deploy.sh`)
     * This script deletes old versions of IG-Parser, before pulling the latest version and deploying it.
     * For manual start, run `sudo docker-compose up -d`. Run `sudo docker-compose down` to stop execution.
+  * Open browser and enter the server address and port 4040 (e.g., http://server-ip:4040).
   
 * Service Configuration
-  * By default, the web service listens on port 4040, and logging is enabled in the subfolder `./logs`. 
+  * By default, the Docker-deployed web service listens on port 4040, and logging is enabled in the subfolder `./logs`.
   * The service automatically restarts if it crashes. 
   * Adjust the docker-compose.yml file to modify any of these characteristics.

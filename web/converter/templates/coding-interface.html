@@ -53,7 +53,7 @@
         <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
         <textarea name="rawStmt" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
         <!-- Encoded Statement entry field -->
-        <span data-text="{{.CodedStmtHelp}}" class="tooltip">Encoded Statement:</span>
+        <span data-text="{{.CodedStmtHelpRef}}" class="tooltip"><a href="/help/" target="_blank">Encoded Statement:</a></span>
         <!-- ACE Editor; copies any content to hidden textarea -->
         <div id="editor" name="editor" onChange="copyEditorContentToTextArea()">{{.CodedStmt}}</div>
         <script>

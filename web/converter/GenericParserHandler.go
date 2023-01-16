@@ -4,9 +4,11 @@ import (
 	"IG-Parser/exporter"
 	"IG-Parser/web/helper"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 /*
@@ -152,7 +154,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		Height:                    HEIGHT,
 		TransactionId:             transactionID,
 		RawStmtHelp:               HELP_RAW_STMT,
-		CodedStmtHelp:             HELP_CODED_STMT,
+		CodedStmtHelpRef:          HELP_REF,
+		CodedStmtHelp:             template.HTML(strings.Replace(HELP_CODED_STMT, "\n", "<br>", -1)),
 		StmtIdHelp:                HELP_STMT_ID,
 		ParametersHelp:            HELP_PARAMETERS,
 		OutputTypeHelp:            HELP_OUTPUT_TYPE,
