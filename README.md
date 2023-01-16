@@ -245,7 +245,7 @@ This section is particularly focused on the setup of IG Parser, not the practica
 
 Note that the server-deployed version is more reliable when considering production use.
 
-### Local executable
+### Local deployment
 
 The purpose of building a local executable is to run IG Parser on a local machine (primarily for personal use on your own machine).
 
@@ -256,10 +256,11 @@ The purpose of building a local executable is to run IG Parser on a local machin
   * Compile IG Parser in the corresponding console
     * Under Windows, execute `go build -o ig-parser.exe ./web`
     * Under Linux, execute `go build -o ig-parser ./web`
+  * This creates the executable `ig-parser`, which is ready for execution.
   * Run the created executable
-    * Under Windows, run `ig-parser` (or `ig-parser.exe`)
+    * Under Windows, run `ig-parser` (or `ig-parser.exe`) either via command line or by doubleclicking
     * Under Linux (or Windows PowerShell), run `./ig-parser`
-  * Open browser and enter URL http://localhost:8080
+  * Once started (observe output in opening console window), open your browser on the local machine and enter URL http://localhost:8080
   * Use `Ctrl-C` to terminate the execution.
 
 ### Server deployment

@@ -54,36 +54,7 @@
         <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip">Original Statement:</span>
         <textarea name="rawStmt" onfocusin="check(this)" onkeyup="check(this)">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea><br />
         
-        <span data-text="This entry field should be used to encode your institutional statement using the IG-Script notation.
-The basic structure of a statement is the component symbol (e.g., &#39;A&#39;), immediately followed by the coded text in parentheses, e.g., &#39;A(certifying agent)&#39;.
-Within the coded component, logical combinations of type [AND], [OR], and [XOR] are supported, e.g., &#39;A(Both (certifying agent [AND] inspector)) ...&#39;. 
-Note the parentheses indicating the combination scope within the component; these need to be explicitly specified for every logical operator (i.e., &#39;A((first [AND] second))&#39;; &#39;A(first [AND] second)&#39; will lead to an error).
-
-In addition, the notion of statement-level nesting is supported (i.e., the substitution of component content with entire statements), e.g., &#39;Cac{A(certifier) I(observes) Bdir(violation)}&#39;, including the combination of nested statements, e.g., &#39;{Cac{A(certifier) I(observes) Bdir(violation)} [AND] Cac{A(certifier) I(sanctions) Bdir(violation)}}&#39; (note the outer braces).
-Nesting is supported on all property types (as detailed below), Activation conditions (Cac{}), Execution constraints (Cex{}),  and the Or else component (O{}).
-Additional features include the use of suffices to indicate private linkages between properties and associated components (e.g., &#39;Bdir,p1(violating) Bdir1(citizens) as well as Bdir,p2(compliant) Bdir2(customers)&#39;).
-The parser further supports the encoding of IG Logico annotations to capture semantic information associated with component values (e.g., &#39;A[type=animate](Officer)&#39;). Such annotations can be combined with suffices indicating private component relationships (e.g., &#39;A,p1[prop=qualitative](personal) A1[type=animate](agent)&#39;).
-
-Supported component symbols include (with indication of optional component-level nesting):
-A() --&gt; Attributes
-A,p() --&gt; Attributes Property*
-D() --&gt; Deontic
-I() --&gt; Aim
-Bdir() --&gt; Direct Object*
-Bdir,p() --&gt; Direct Object Property*
-Bind() --&gt; Indirect Object*
-Bind,p() --&gt; Indirect Object Property*
-Cac() --&gt; Activation Condition*
-Cex() --&gt; Execution Constraint*
-E() --&gt; Constituted Entity
-E,p() --&gt; Constituted Entity Property*
-M() --&gt; Modal
-F() --&gt; Constitutive Function
-P() --&gt; Constituting Properties*
-P,p() --&gt; Constituting Properties Properties*
-O{} --&gt; Or Else**
-* In addition to component annotation, these components support component-level nesting, with braces scoping the nested statements (e.g., Bdir,p{ ... }).
-** The Or else component only allows component-level nesting (i.e., substitution by an entire statement)." class="tooltip">Encoded Statement:</span>
+        <span data-text="Opens a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip"><a href="/help/" target="_blank">Encoded Statement:</a></span>
         
         <div id="editor" name="editor" onChange="copyEditorContentToTextArea()">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate]((were non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</div>
         <script>
