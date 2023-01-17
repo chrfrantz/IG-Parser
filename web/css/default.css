@@ -278,6 +278,9 @@ button:hover {
     color:#fff;
     text-align:left;
 
+    /* foreground positioning */
+    z-index: 2;
+
     display:none; /* hide by default */
 }
 
