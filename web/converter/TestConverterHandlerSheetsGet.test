@@ -45,7 +45,7 @@
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <h1>IG Parser</h1>
-<h2>A Parser for Institutional Statements encoded in the IG Script Notation introduced as part of the Institutional Grammar 2.0</h2>
+<h2>A Parser for Institutional Statements encoded in the <a href="/help/" target="_blank">IG Script Notation</a> of the <a href="https://newinstitutionalgrammar.org" target="_blank">Institutional Grammar 2.0</a></h2>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <div class="form">
@@ -54,7 +54,7 @@
         <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip">Original Statement:</span>
         <textarea name="rawStmt" onfocusin="check(this)" onkeyup="check(this)">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea><br />
         
-        <span data-text="Opens a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip"><a href="/help/" target="_blank">Encoded Statement:</a></span>
+        <span data-text="Click to open a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip"><a href="/help/" target="_blank">Encoded Statement:</a></span>
         
         <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea()" onpaste="copyEditorContentToTextArea()">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate]((were non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</div>
         <script>
