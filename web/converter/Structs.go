@@ -46,6 +46,10 @@ type ReturnStruct struct {
 	Height int
 	// Transaction ID
 	TransactionId string
+	// IG Script help link
+	IGScriptLink string
+	// IG 2.0 website link
+	IGWebsiteLink string
 	// Help message for raw statement
 	RawStmtHelp string
 	// Help text indicating reference to help page

@@ -36,7 +36,7 @@ h2 {
     font-size: 16px;
     color: #8c8787;
     z-index: 2;
-    display: flex;
+    display: block;
     flex-direction: column;
     justify-content: center;
     text-align: center;
@@ -76,9 +76,13 @@ form {
 }
 
 /*
-Link styling for 'Encoded Statement' help page
+Link styling
  */
 a:link {
+    color: #666;
+}
+
+a:visited {
     color: #666;
 }
 
@@ -92,7 +96,7 @@ a:hover {
     border-radius: 6px;
     background: #fff;
     box-shadow: 0 0 25px 0 #d6e0f5;
-    font-size: 16px;
+    font-size: 14px;
     /* Need to review for actual application */
     font-family: Roboto, Arial, sans-serif;
     display: block;
@@ -262,6 +266,8 @@ button:hover {
     content: attr(data-text); /* here's the magic */
     position:absolute;
 
+    font-size: 14px;
+
     /* vertically center */
     top:50%;
     transform:translateY(-40%);
@@ -271,12 +277,12 @@ button:hover {
     margin-left:15px; /* and add a small left margin */
 
     /* basic styles */
-    width:1000px;
+    width:650px;
     padding:10px;
     border-radius:10px;
     background:#000;
     color:#fff;
-    text-align:left;
+    text-align:center;
 
     /* foreground positioning */
     z-index: 2;

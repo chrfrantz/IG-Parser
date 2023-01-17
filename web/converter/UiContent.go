@@ -8,25 +8,31 @@ import (
 Variables (de facto constants) for Web GUI.
 */
 
+// Link in header to IG Script overview
+const HEADER_SCRIPT_LINK = "Opens an overview of of IG Script syntax (opens new tab)"
+
+// Link in header to IG 2.0 website
+const HEADER_IG_LINK = "Opens Institutional Grammar 2.0 website (opens new tab)"
+
 // Default example statement
-var RAW_STATEMENT = "Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation."
+const RAW_STATEMENT = "Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation."
 
 // Encoded example statement, including properties and semantic annotations
-var ANNOTATED_STATEMENT = "A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate]((were non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}."
+const ANNOTATED_STATEMENT = "A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate]((were non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}."
 
 // Default example ID
-var STATEMENT_ID = "123"
+const STATEMENT_ID = "123"
 
 // Default dimensions for visual output
-var HEIGHT = 2000
-var WIDTH = 4000
+const HEIGHT = 2000
+const WIDTH = 4000
 
 // Minimum values
 const MIN_HEIGHT = 100
 const MIN_WIDTH = 100
 
 // Help for raw statement field
-var HELP_RAW_STMT = "This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the 'Encoded Statement' field."
+const HELP_RAW_STMT = "This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the 'Encoded Statement' field."
 
 // Help for coded statement field
 
@@ -38,7 +44,7 @@ const HTML_EM_START = "<b>"
 const HTML_EM_STOP = "</b>"
 
 // UI information for Encoded Statement field, refering to Help page
-const HELP_REF = "Opens a separate help page explaining the IG Script syntax (opens new tab)."
+const HELP_REF = "Click to open a separate help page explaining the IG Script syntax (opens new tab)."
 
 // Content of help page
 var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field is where the actual encoding of the institutional statement in the IG-Script syntax occurs." + LINEBREAK + LINEBREAK +
@@ -73,7 +79,7 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field is where the actua
 	"<tr><td>" + tree.CONSTITUTING_PROPERTIES_PROPERTY + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTING_PROPERTIES_PROPERTY] + "*" + "</td></tr>" +
 	"<tr><td>" + tree.OR_ELSE + "{}</td><td>" + tree.IGComponentSymbolNameMap[tree.OR_ELSE] + "**" + "</td></tr>" +
 	"</table>" + LINEBREAK +
-	"* In addition to component annotation, these components support component-level nesting, with braces scoping the nested statements (e.g., " + HTML_EM_START + "Bdir,p{ ... }" + HTML_EM_STOP + ")." + LINEBREAK +
+	"* In addition to component annotation, these components support component-level nesting, with braces scoping the nested statements (e.g., " + HTML_EM_START + "Bdir{ ... }" + HTML_EM_STOP + ", " + HTML_EM_START + "Bdir,p{ ... }" + HTML_EM_STOP + ", etc.)." + LINEBREAK +
 	"** The Or else component only allows component-level nesting (i.e., substitution by an entire statement)."
 
 // Help for statement ID field

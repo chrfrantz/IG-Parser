@@ -153,6 +153,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		Width:                     WIDTH,
 		Height:                    HEIGHT,
 		TransactionId:             transactionID,
+		IGScriptLink:              HEADER_SCRIPT_LINK,
+		IGWebsiteLink:             HEADER_IG_LINK,
 		RawStmtHelp:               HELP_RAW_STMT,
 		CodedStmtHelpRef:          HELP_REF,
 		CodedStmtHelp:             template.HTML(strings.Replace(HELP_CODED_STMT, "\n", "<br>", -1)),
