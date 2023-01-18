@@ -86,7 +86,8 @@ func main() {
 	log.Println("Launching IG Parser ...")
 	log.Println("Logging enabled: " + fmt.Sprint(converter.Logging))
 	log.Println("Logging path: " + fmt.Sprint(converter.LoggingPath))
-	log.Printf("Open your browser and enter the URL http://localhost%s/ to open IG Parser.\n", addr)
+	log.Printf("Open your browser with the URL http://localhost%s/ to open the CSV output version of IG Parser.\n", addr)
+	log.Printf("Open your browser with the URL http://localhost%s/visual/ to open the visual output version of IG Parser.\n", addr)
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		log.Fatal("Web service stopped. Error:", err)
