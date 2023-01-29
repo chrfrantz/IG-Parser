@@ -19,6 +19,7 @@ fi
 
 
 # Tear down current version 
+echo "Undeploying running IG Parser instance ..."
 docker-compose down
 if [ $? -ne 0 ]; then
   echo "Stopping of service." 
@@ -26,6 +27,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Pull latest version
+echo "Retrieving latest version ..."
 git pull
 if [ $? -ne 0 ]; then
   echo "Error when pulling latest version of repo." 
@@ -33,6 +35,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Create docker network if not already existing
+echo "Checking network setup ..."
 docker network inspect tunnel_network > /dev/null
 if [ $? -ne 0 ]; then
   echo "Network does not exist. Creating it ..."
@@ -44,6 +47,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Deploy
+echo "Deploying latest version of IG Parser ..."
 docker-compose up -d --build
 if [ $? -ne 0 ]; then
   echo "Error during deployment." 
@@ -51,10 +55,11 @@ if [ $? -ne 0 ]; then
 fi
 
 # Remove remaining build containers
-docker image prune --filter label=stage=builder
+echo "Removing all intermediate images created during build process ..."
+docker image prune --filter label=stage=builder -f
 if [ $? -ne 0 ]; then
-  echo "Error when deleting build containers."
+  echo "Error when deleting intermediate images created during build."
   exit 1
 fi
 
-echo "Latest version should be deployed (check output for errors)"
+echo "Latest version should be deployed (check output for potential errors)"
