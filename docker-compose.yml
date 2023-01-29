@@ -1,6 +1,6 @@
-version: '3' 
+version: '3.5' 
 services: 
-  web: 
+  igparser: 
     build: .
     restart: always
     volumes:
@@ -11,5 +11,8 @@ services:
       IG_PARSER_LOGGING_PATH: "/logs"
     ports: 
       - '4040:8080'
-volumes:
-  log_data: {}
+    networks:
+      - tunnel_network
+networks:
+  tunnel_network:
+    external: true
