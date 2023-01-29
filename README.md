@@ -5,6 +5,10 @@ Contact: Christopher Frantz (christopher.frantz@ntnu.no)
 
 Institutional Grammar 2.0 Website: https://newinstitutionalgrammar.org
 
+Deployed IG Parser: 
+* Tabular output: https://ig-parser.newinstitutionalgrammar.org 
+* Visual output: https://ig-parser.newinstitutionalgrammar.org/visual
+
 ## Overview
 
 IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used by direct invocation, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to syntactic principles and essential features of IG Script, followed by a set of examples showcasing all features. As a final aspect, deployment instructions for IG Parser are provided. 
@@ -254,35 +258,39 @@ The purpose of building a local executable is to run IG Parser on a local machin
 * Prerequisites:
   * Install [Go (Programming Language)](https://go.dev/dl/)
   * Open a console (e.g., Linux terminal, Windows command line (`cmd`) or PowerShell (`powershell`))
-  * Navigate to the repository folder.
+  * Clone this repository into a dedicated folder on your local machine
+  * Navigate to the repository folder
   * Compile IG Parser in the corresponding console
     * Under Windows, execute `go build -o ig-parser.exe ./web`
+      * This creates the executable `ig-parser.exe` in the repository folder
     * Under Linux, execute `go build -o ig-parser ./web`
-  * This creates the executable `ig-parser`, which is ready for execution.
+      * This creates the executable `ig-parser` in the repository folder
   * Run the created executable
     * Under Windows, run `ig-parser` (or `ig-parser.exe`) either via command line or by doubleclicking
     * Under Linux (or Windows PowerShell), run `./ig-parser`
-  * Once started (observe output in opening console window), open your browser on the local machine and enter URL http://localhost:8080
-  * Use `Ctrl-C` to terminate the execution.
+  * Once started, use your browser to navigate to one of the URLs listed in the console output. By default, this is the URL http://localhost:8080 (and http://localhost:8080/visual respectively)
+  * Press `Ctrl` + `C` in the console window to terminate the execution
 
 ### Server deployment
 
-The purpose of deploying IG Parser on a server is to provide a deployment that can be made available on a network host to allow remote use on the local network or the internet.
+The purpose of deploying IG Parser on a server is to provide a deployment that allows remote use on the local network or the internet, as well as for production-level deployment (see comments at the bottom).
 
 * Prerequisites:
   * Install [Docker](https://docs.docker.com/engine/install/)
-  * Install [docker-compose](https://docs.docker.com/compose/install/) (optional if environment, volume and port parameterization is done manually)
+  * Install [Docker Compose](https://docs.docker.com/compose/install/) (optional if environment, volume and port parameterization is done manually without using the script below)
   * Quick installation of docker under Ubuntu LTS: `sudo apt install docker.io`
 
 * Deployment Guidelines
-  * Clone this repository
+  * Clone this repository into dedicated local folder
+  * Navigate into local folder
   * Make `deploy.sh` executable (`chmod 740 deploy.sh`)
   * Run `deploy.sh` with superuser permissions (`sudo deploy.sh`)
-    * This script deletes old versions of IG-Parser, before pulling the latest version and deploying it.
-    * For manual start, run `sudo docker-compose up -d`. Run `sudo docker-compose down` to stop execution.
-  * Open browser and enter the server address and port 4040 (e.g., http://server-ip:4040).
+    * This script automatically deploys the latest version of IG Parser by undeploying old versions, before pulling the latest version, building and deploying it.
+    * For manual start, run `sudo docker-compose up -d`. Run `sudo docker-compose down` to stop the execution.
+  * Open browser and enter the server address and port 4040 (e.g., http://server-ip:4040)
   
-* Service Configuration
+* Service Configuration & Additional Considerations
   * By default, the Docker-deployed web service listens on port 4040, and logging is enabled in the subfolder `./logs`.
-  * The service automatically restarts if it crashes. 
+  * The service automatically restarts if it crashes or if the docker daemon restarts. 
   * Adjust the docker-compose.yml file to modify any of these characteristics.
+  * The service is exposed as http service by default. For production-level deployment, consider using an environment that provides additional security features (e.g., SSL, DDoS protection, etc.), as is the case for the deployed version linked at the top of this page.
