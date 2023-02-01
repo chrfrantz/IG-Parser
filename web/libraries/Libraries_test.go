@@ -5,9 +5,10 @@ import (
 	"IG-Parser/web/converter"
 	"embed"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -39,7 +40,7 @@ func TestD3LibraryRead(t *testing.T) {
 	}
 
 	// Should not be used in production code, but kept here for comparison purposes.
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -47,7 +48,7 @@ func TestD3LibraryRead(t *testing.T) {
 	outputString := string(output)
 
 	// Read local reference file
-	content, err5 := ioutil.ReadFile("d3.v7.min.js")
+	content, err5 := os.ReadFile("d3.v7.min.js")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
@@ -89,7 +90,7 @@ func TestACELibraryRead(t *testing.T) {
 	}
 
 	// Should not be used in production code, but kept here for comparison purposes.
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -97,7 +98,7 @@ func TestACELibraryRead(t *testing.T) {
 	outputString := string(output)
 
 	// Read local reference file
-	content, err5 := ioutil.ReadFile("ace/ace.js")
+	content, err5 := os.ReadFile("ace/ace.js")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}

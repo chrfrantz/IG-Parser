@@ -5,9 +5,10 @@ import (
 	"IG-Parser/web/converter"
 	"embed"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -35,19 +36,20 @@ func TestCss(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error when performing HTTP request. Error:", err.Error())
 	}
+	defer client.CloseIdleConnections()
 
 	if res.Status != "200 OK" {
 		t.Fatal("Request returning non-200 status code: " + res.Status)
 	}
 
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
 
 	outputString := string(output)
 	// Read reference file
-	content, err5 := ioutil.ReadFile("default.css")
+	content, err5 := os.ReadFile("default.css")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
@@ -85,19 +87,20 @@ func TestFavicon(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error when performing HTTP request. Error:", err.Error())
 	}
+	defer client.CloseIdleConnections()
 
 	if res.Status != "200 OK" {
 		t.Fatal("Request returning non-200 status code: " + res.Status)
 	}
 
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
 
 	outputString := string(output)
 	// Read reference file
-	content, err5 := ioutil.ReadFile("favicon.ico")
+	content, err5 := os.ReadFile("favicon.ico")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
