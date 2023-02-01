@@ -10,6 +10,7 @@ echo "Initiating (re)deployment of latest version of IG-Parser ..."
 
 # Create logs folder if it does not already exist
 if [ ! -d ./logs ]; then
+  echo "Creating './logs' folder ..."
   mkdir -p ./logs;
   if [ $? -ne 0 ]; then
     echo "Error during folder creation." 
