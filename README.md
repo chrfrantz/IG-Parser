@@ -277,14 +277,16 @@ The purpose of deploying IG Parser on a server is to provide a deployment that a
 
 * Prerequisites:
   * Install [Docker](https://docs.docker.com/engine/install/)
-  * Install [Docker Compose](https://docs.docker.com/compose/install/) (optional if environment, volume and port parameterization is done manually without using the script below)
-  * Quick installation of docker under Ubuntu LTS: `sudo apt install docker.io`
+  * Install [Docker Compose](https://docs.docker.com/compose/install/)
+    * Quick installation of docker under Ubuntu LTS: `sudo apt install docker.io`
+  * Git (optional if IG Parser sources are downloaded)
+    * Quick installation of git under Ubuntu LTS: `sudo apt install git`
 
 * Deployment Guidelines
-  * Clone this repository into dedicated local folder
-  * Navigate into local folder
+  * Clone (or download and unzip) this repository into dedicated local folder
+  * Navigate into cloned (or unzipped) folder
   * Make `deploy.sh` executable (`chmod 740 deploy.sh`)
-  * Run `deploy.sh` with superuser permissions (`sudo deploy.sh`)
+  * Run `deploy.sh` with superuser permissions (`sudo ./deploy.sh`)
     * This script automatically deploys the latest version of IG Parser by undeploying old versions, before pulling the latest version, building and deploying it.
     * For manual start, run `sudo docker-compose up -d`. Run `sudo docker-compose down` to stop the execution.
   * Open browser and enter the server address and port 4040 (e.g., http://server-ip:4040)
