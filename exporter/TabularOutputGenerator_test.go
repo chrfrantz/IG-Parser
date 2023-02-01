@@ -4,7 +4,7 @@ import (
 	"IG-Parser/parser"
 	"IG-Parser/tree"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -202,7 +202,7 @@ func TestSimpleTabularOutput(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleTabularOutput.test")
+	content, err2 := os.ReadFile("TestOutputSimpleTabularOutput.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -289,7 +289,7 @@ func TestSimpleTabularOutputNoHeaders(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleTabularOutputNoHeaders.test")
+	content, err2 := os.ReadFile("TestOutputSimpleTabularOutputNoHeaders.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -379,7 +379,7 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingWithCombinations.test")
+	content, err2 := os.ReadFile("TestOutputSimpleNoNestingWithCombinations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -467,7 +467,7 @@ func TestBasicTabularOutputCombinationsNoHeaders(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingWithCombinationsNoHeaders.test")
+	content, err2 := os.ReadFile("TestOutputSimpleNoNestingWithCombinationsNoHeaders.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -554,7 +554,7 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingImplicitAnd.test")
+	content, err2 := os.ReadFile("TestOutputSimpleNoNestingImplicitAnd.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -642,7 +642,7 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingWithCombinationsImplicitAnd.test")
+	content, err2 := os.ReadFile("TestOutputSimpleNoNestingWithCombinationsImplicitAnd.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -731,7 +731,7 @@ func TestTabularOutputWithSharedLeftElements(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingWithSharedLeftElements.test")
+	content, err2 := os.ReadFile("TestOutputSimpleNoNestingWithSharedLeftElements.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -820,7 +820,7 @@ func TestTabularOutputWithSharedRightElements(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingWithSharedRightElements.test")
+	content, err2 := os.ReadFile("TestOutputSimpleNoNestingWithSharedRightElements.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -909,7 +909,7 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleNoNestingWithSharedLeftAndRightElements.test")
+	content, err2 := os.ReadFile("TestOutputSimpleNoNestingWithSharedLeftAndRightElements.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -999,7 +999,7 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputTwoLevelComplexNesting.test")
+	content, err2 := os.ReadFile("TestOutputTwoLevelComplexNesting.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1092,7 +1092,7 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputSimpleAndTwoLevelComplexNesting.test")
+	content, err2 := os.ReadFile("TestOutputSimpleAndTwoLevelComplexNesting.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1184,7 +1184,7 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputTwoNestedComplexComponents.test")
+	content, err2 := os.ReadFile("TestOutputTwoNestedComplexComponents.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1275,7 +1275,7 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputThreeNestedComplexComponents.test")
+	content, err2 := os.ReadFile("TestOutputThreeNestedComplexComponents.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1368,7 +1368,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputNestedComplexCombinationsImplicitAnd.test")
+	content, err2 := os.ReadFile("TestOutputNestedComplexCombinationsImplicitAnd.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1461,7 +1461,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testin
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputNestedComplexCombinationsImplicitAndIGCore.test")
+	content, err2 := os.ReadFile("TestOutputNestedComplexCombinationsImplicitAndIGCore.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1554,7 +1554,7 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputNestedComplexCombinationsXor.test")
+	content, err2 := os.ReadFile("TestOutputNestedComplexCombinationsXor.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1648,7 +1648,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputNestedStatementCombinationsAndComponentCombinations.test")
+	content, err2 := os.ReadFile("TestOutputNestedStatementCombinationsAndComponentCombinations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1743,7 +1743,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputNestedStatementCombinationsAndComponentCombinationsWithSharedElements.test")
+	content, err2 := os.ReadFile("TestOutputNestedStatementCombinationsAndComponentCombinationsWithSharedElements.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1841,7 +1841,7 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputMultipleNestedStatementsAndSimpleComponentsAcrossDifferentComponents.test")
+	content, err2 := os.ReadFile("TestOutputMultipleNestedStatementsAndSimpleComponentsAcrossDifferentComponents.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1935,7 +1935,7 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaMultiLevelNestingAndComponentLevelCombinations.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaMultiLevelNestingAndComponentLevelCombinations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2022,7 +2022,7 @@ func TestStaticTabularOutputOrElseAnnotations(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticOrElseAnnotations.test")
+	content, err2 := os.ReadFile("TestOutputStaticOrElseAnnotations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2141,7 +2141,7 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaBasicStatement.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaBasicStatement.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2238,7 +2238,7 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedCombinations.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNestedCombinations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2337,7 +2337,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedCombinationsImplicitAnd.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNestedCombinationsImplicitAnd.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2436,7 +2436,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAndIGCore(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedCombinationsImplicitAndIGCore.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNestedCombinationsImplicitAndIGCore.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2536,7 +2536,7 @@ func TestStaticTabularOutputNestedProperties(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedProperties.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNestedProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2629,7 +2629,7 @@ func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaBasicStatementLeftAndRightElements.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaBasicStatementLeftAndRightElements.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2727,7 +2727,7 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaBasicStatementPrivateProperties.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaBasicStatementPrivateProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2816,7 +2816,7 @@ func TestStaticTabularOutputBasicStatementPrivatePropertiesOnly(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestStaticTabularOutputBasicStatementPrivatePropertiesOnly.test")
+	content, err2 := os.ReadFile("TestStaticTabularOutputBasicStatementPrivatePropertiesOnly.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -2905,7 +2905,7 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents(t *
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents.test")
+	content, err2 := os.ReadFile("TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3004,7 +3004,7 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementSharedAndPrivateOnlyProperties.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaStatementSharedAndPrivateOnlyProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3103,7 +3103,7 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementComponentLevelIndexedProperties.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaStatementComponentLevelIndexedProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3202,7 +3202,7 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementComponentLevelIndexedProperties.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaStatementComponentLevelIndexedProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3302,7 +3302,7 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementSharedAndPrivateOnlyProperties.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaStatementSharedAndPrivateOnlyProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3402,7 +3402,7 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementMixedPropertiesAnnotations.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaStatementMixedPropertiesAnnotations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3501,7 +3501,7 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsGoogleSheets(t
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementEscapedQuotationMarksGoogleSheets.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaStatementEscapedQuotationMarksGoogleSheets.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3600,7 +3600,7 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsCSV(t *testing
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaStatementEscapedQuotationMarksCSV.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaStatementEscapedQuotationMarksCSV.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3698,7 +3698,7 @@ func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedStatementsAnnotations.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNestedStatementsAnnotations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3797,7 +3797,7 @@ func TestStaticTabularOutputNestedStatementCombinationAnnotations(t *testing.T) 
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedStatementCombinationsAnnotations.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNestedStatementCombinationsAnnotations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -3900,7 +3900,7 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsGoogleSh
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedStatementsAndCombinationMixAnnotationsGoogleSheets.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNestedStatementsAndCombinationMixAnnotationsGoogleSheets.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4003,7 +4003,7 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsCSV(t *t
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaNestedStatementsAndCombinationMixAnnotationsCSV.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNestedStatementsAndCombinationMixAnnotationsCSV.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4091,7 +4091,7 @@ func TestStaticTabularOutputParsingOfWithinComponentLinkages(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaBasicWithinComponentCombinationLinkages.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaBasicWithinComponentCombinationLinkages.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4168,7 +4168,7 @@ func TestVisualOutputBasic(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputBasic.test")
+	content, err2 := os.ReadFile("TestOutputVisualTreeOutputBasic.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4235,7 +4235,7 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	fmt.Println("Generated output: " + output.String())
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputNestedProperties.test")
+	content, err2 := os.ReadFile("TestOutputVisualTreeOutputNestedProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4301,7 +4301,7 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputAnnotations.test")
+	content, err2 := os.ReadFile("TestOutputVisualTreeOutputAnnotations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4359,7 +4359,7 @@ func TestVisualOutputPropertyNodesFlatPrinting(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualTreeComplexPrivateNodesFlat.test")
+	content, err2 := os.ReadFile("TestOutputVisualTreeComplexPrivateNodesFlat.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4416,7 +4416,7 @@ func TestVisualOutputSharedPropertyNodesFlatPrinting(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputSharedPropertyNodesFlatPrinting.test")
+	content, err2 := os.ReadFile("TestVisualOutputSharedPropertyNodesFlatPrinting.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4473,7 +4473,7 @@ func TestVisualOutputPropertyNodesTreePrinting(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualTreeComplexPrivateNodesTree.test")
+	content, err2 := os.ReadFile("TestOutputVisualTreeComplexPrivateNodesTree.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4538,7 +4538,7 @@ func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputBasicNonBinary.test")
+	content, err2 := os.ReadFile("TestOutputVisualTreeOutputBasicNonBinary.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4598,7 +4598,7 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualTreeOutputComplexNonBinary.test")
+	content, err2 := os.ReadFile("TestOutputVisualTreeOutputComplexNonBinary.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4655,7 +4655,7 @@ func TestMultiLevelEmbeddedCombinations(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualMultiCombinationsPhrase.test")
+	content, err2 := os.ReadFile("TestOutputVisualMultiCombinationsPhrase.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4734,7 +4734,7 @@ func TestTabularOutputDefaultExample(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputTabularDefaultExample.test")
+	content, err2 := os.ReadFile("TestOutputTabularDefaultExample.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4805,7 +4805,7 @@ func TestVisualOutputDefaultExample(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualDefaultExample.test")
+	content, err2 := os.ReadFile("TestOutputVisualDefaultExample.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4864,7 +4864,7 @@ func TestVisualOutputDefaultExampleActivationConditionsFirst(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualDefaultExampleActivationConditionsFirst.test")
+	content, err2 := os.ReadFile("TestOutputVisualDefaultExampleActivationConditionsFirst.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4923,7 +4923,7 @@ func TestVisualOutputEscapingSymbols(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualEscapingSymbols.test")
+	content, err2 := os.ReadFile("TestOutputVisualEscapingSymbols.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -4982,7 +4982,7 @@ func TestVisualOutputSpecialSymbols(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputSpecialSymbols.test")
+	content, err2 := os.ReadFile("TestVisualOutputSpecialSymbols.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5041,7 +5041,7 @@ func TestVisualOutputLinearMultiLevelNesting(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualLinearMultilevelNesting.test")
+	content, err2 := os.ReadFile("TestOutputVisualLinearMultilevelNesting.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5100,7 +5100,7 @@ func TestVisualOutputComplexMultiLevelNesting(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputVisualComplexMultilevelNesting.test")
+	content, err2 := os.ReadFile("TestOutputVisualComplexMultilevelNesting.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5179,7 +5179,7 @@ func TestTabularOutputComplexMultilevelNesting(t *testing.T) {
 	}
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestOutputStaticSchemaComplexMultilevelNesting.test")
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNesting.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5250,7 +5250,7 @@ func TestVisualOutputComponentNestedStatementCombinationsWithProperties(t *testi
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputComponentNestedStatementCombinationsWithProperties.test")
+	content, err2 := os.ReadFile("TestVisualOutputComponentNestedStatementCombinationsWithProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5309,7 +5309,7 @@ func TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesA
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesAndOrElse.test")
+	content, err2 := os.ReadFile("TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesAndOrElse.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5368,7 +5368,7 @@ func TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties(t *testin
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties.test")
+	content, err2 := os.ReadFile("TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5429,7 +5429,7 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultStatement.test")
+	content, err2 := os.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultStatement.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5491,7 +5491,7 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultStatementWithComplexity.test")
+	content, err2 := os.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultStatementWithComplexity.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5551,7 +5551,7 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinations(t *testing.
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinations.test")
+	content, err2 := os.ReadFile("TestVisualOutputHigherOrderStatementNestedComponentCombinations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5612,7 +5612,7 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinations(t *testi
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputComponentLevelNestingInNestedComponentCombinations.test")
+	content, err2 := os.ReadFile("TestVisualOutputComponentLevelNestingInNestedComponentCombinations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -5676,7 +5676,7 @@ func TestVisualOutputExcessiveSymbolsOrMissingWhitespaceInNestedComponentCombina
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := ioutil.ReadFile("TestVisualOutputExcessiveSymbolsInNestedComponentCombinations.test")
+	content, err2 := os.ReadFile("TestVisualOutputExcessiveSymbolsInNestedComponentCombinations.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}

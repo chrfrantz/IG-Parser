@@ -3,9 +3,11 @@ package converter
 import (
 	"IG-Parser/exporter"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 )
@@ -20,7 +22,7 @@ func TestConverterHandlerSheetsGet(t *testing.T) {
 	// Deactivate logging
 	Logging = false
 	// Spin up server
-	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerSheets))
+	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerTabular))
 	// Tear down at the end of the function
 	defer server.Close()
 
@@ -35,7 +37,7 @@ func TestConverterHandlerSheetsGet(t *testing.T) {
 		t.Fatal("Request returning non-200 status code: " + res.Status)
 	}
 
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -46,7 +48,7 @@ func TestConverterHandlerSheetsGet(t *testing.T) {
 	outputString = strings.ReplaceAll(outputString, "\\r\\n", "\\n")
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerSheetsGet.test")
+	content, err5 := os.ReadFile("TestConverterHandlerSheetsGet.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
@@ -91,7 +93,7 @@ func TestConverterHandlerVisualGet(t *testing.T) {
 		t.Fatal("Request returning non-200 status code: " + res.Status)
 	}
 
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -102,7 +104,7 @@ func TestConverterHandlerVisualGet(t *testing.T) {
 	outputString = strings.ReplaceAll(outputString, "\\r\\n", "\\n")
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerVisualGet.test")
+	content, err5 := os.ReadFile("TestConverterHandlerVisualGet.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
@@ -151,7 +153,7 @@ func TestConverterHandlerVisualPost(t *testing.T) {
 	}
 
 	// Extract response body
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -171,7 +173,7 @@ func TestConverterHandlerVisualPost(t *testing.T) {
 	responseHead := outputString[:endIdx]
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerVisualPost.test")
+	content, err5 := os.ReadFile("TestConverterHandlerVisualPost.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
@@ -231,7 +233,7 @@ func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
 	// Deactivate logging
 	Logging = false
 	// Spin up server
-	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerSheets))
+	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerTabular))
 	// Tear down at the end of the function
 	defer server.Close()
 
@@ -250,7 +252,7 @@ func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
 	}
 
 	// Extract response body
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -330,7 +332,7 @@ func TestConverterHandlerCSVPost(t *testing.T) {
 	// Deactivate logging
 	Logging = false
 	// Spin up server
-	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerSheets))
+	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerTabular))
 	// Tear down at the end of the function
 	defer server.Close()
 
@@ -349,7 +351,7 @@ func TestConverterHandlerCSVPost(t *testing.T) {
 	}
 
 	// Extract response body
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -369,7 +371,7 @@ func TestConverterHandlerCSVPost(t *testing.T) {
 	responseHead := outputString[:endIdx]
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerCsvPost.test")
+	content, err5 := os.ReadFile("TestConverterHandlerCsvPost.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
@@ -429,7 +431,7 @@ func TestConverterHandlerCSVPostWithExplicitHeader(t *testing.T) {
 	// Deactivate logging
 	Logging = false
 	// Spin up server
-	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerSheets))
+	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerTabular))
 	// Tear down at the end of the function
 	defer server.Close()
 
@@ -448,7 +450,7 @@ func TestConverterHandlerCSVPostWithExplicitHeader(t *testing.T) {
 	}
 
 	// Extract response body
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -468,7 +470,7 @@ func TestConverterHandlerCSVPostWithExplicitHeader(t *testing.T) {
 	responseHead := outputString[:endIdx]
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerCsvPostExplicitHeaders.test")
+	content, err5 := os.ReadFile("TestConverterHandlerCsvPostExplicitHeaders.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
@@ -528,7 +530,7 @@ func TestConverterHandlerCSVPostWithoutHeaders(t *testing.T) {
 	// Deactivate logging
 	Logging = false
 	// Spin up server
-	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerSheets))
+	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerTabular))
 	// Tear down at the end of the function
 	defer server.Close()
 
@@ -547,7 +549,7 @@ func TestConverterHandlerCSVPostWithoutHeaders(t *testing.T) {
 	}
 
 	// Extract response body
-	output, err2 := ioutil.ReadAll(res.Body)
+	output, err2 := io.ReadAll(res.Body)
 	if err2 != nil {
 		t.Fatal("Error when reading response. Error:", err2.Error())
 	}
@@ -567,7 +569,7 @@ func TestConverterHandlerCSVPostWithoutHeaders(t *testing.T) {
 	responseHead := outputString[:endIdx]
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerCsvPostWithoutHeaders.test")
+	content, err5 := os.ReadFile("TestConverterHandlerCsvPostWithoutHeaders.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}

@@ -13,7 +13,7 @@ Arguments include the IGScript-annotated statement, statement ID based on which 
 the nature of the output type (see TabularOutputGeneratorConfig #OUTPUT_TYPE_CSV, #OUTPUT_TYPE_GOOGLE_SHEETS)
 and a filename for the output. If the filename is empty, no output will be written.
 If printHeaders is set, the output includes the header row.
-Returns Google Sheets output as string, and error (defaults to tree.PARSING_NO_ERROR).
+Returns tabular output as string, and error (defaults to tree.PARSING_NO_ERROR).
 */
 func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType string, filename string, printHeaders bool) (string, tree.ParsingError) {
 
@@ -30,7 +30,7 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 		return "", err
 	}
 
-	Println("Parsed statement:", s.String())
+	log.Println("Parsed statement:", s.String())
 
 	// Run composite generation and return output and error. Will write file if filename != ""
 	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateTabularOutputFromParsedStatement(s, "", stmtId, filename, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders)
@@ -38,12 +38,12 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 		return "", err
 	}
 
-	Println("Results:")
-	Println(statementHeader)
-	Println(statementHeaderNames)
-	Println(statementMap)
+	log.Println("  - Results:")
+	log.Println("  - Header Symbols: ", statementHeader)
+	log.Println("  - Header Names: ", statementHeaderNames)
+	log.Println("  - Data: ", statementMap)
 
-	log.Println("Output generation complete.")
+	log.Println("  - Output generation complete.")
 
 	return output, err
 
@@ -51,7 +51,7 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 
 /*
 Consumes statement as input and produces outfile reflecting visual tree structure consumable by D3.
-Arguments include the IGScript-annotated statement, statement ID based on which substatements are generated,
+Arguments include the IGScript-annotated statement, statement ID (currently not used in visualization),
 and a filename for the output. If the filename is empty, no output will be written.
 Returns Visual tree structure as string, and error (defaults to tree.PARSING_NO_ERROR).
 */
@@ -74,19 +74,19 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 		return "", err
 	}
 
-	Println("Generated visual tree:", output)
+	log.Println("  - Generated visual tree:", output)
 
-	log.Println("Output generation complete.")
+	log.Println("  - Output generation complete.")
 
 	if filename != "" {
-		log.Println("Writing to file ...")
+		log.Println("  - Writing to file ...")
 
 		err2 := exporter.WriteToFile(filename, output.String())
 		if err2 != nil {
-			log.Println("Problems when writing file "+filename+", Error:", err2)
+			log.Println("  - Problems when writing file "+filename+", Error:", err2)
 		}
 
-		log.Println("Writing completed.")
+		log.Println("  - Writing completed.")
 	}
 
 	return output.String(), err

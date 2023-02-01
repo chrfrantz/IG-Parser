@@ -9,7 +9,7 @@ import (
 )
 
 /*
-Helper main function for use during development.
+Helper main function for flexible adaptation during development. Not called in production system.
 */
 func main() {
 

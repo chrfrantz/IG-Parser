@@ -1,4 +1,4 @@
-package converter
+package shared
 
 /*
 Constants for URL parameter keys to pass UI input (e.g., "?rawStmt=Certifiers ...")

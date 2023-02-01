@@ -13,13 +13,14 @@ Template reference
 var tmpl *template.Template
 
 // Frontend templates for user interaction
-const TEMPLATE_NAME_PARSER_SHEETS = "ig-parser-sheets.html"
+const TEMPLATE_NAME_PARSER_TABULAR = "ig-parser-tabular.html"
 const TEMPLATE_NAME_PARSER_VISUAL = "ig-parser-visualizer.html"
 
 // Help template
 const TEMPLATE_NAME_HELP = "ig-parser-user-guide.html"
 
 // Embed templates in compiled binary
+//
 //go:embed templates/*
 var files embed.FS
 
@@ -64,10 +65,10 @@ func Init() {
 }
 
 /*
-Handler for Google Sheets.
+Handler for tabular output.
 */
-func ConverterHandlerSheets(w http.ResponseWriter, r *http.Request) {
-	converterHandler(w, r, TEMPLATE_NAME_PARSER_SHEETS)
+func ConverterHandlerTabular(w http.ResponseWriter, r *http.Request) {
+	converterHandler(w, r, TEMPLATE_NAME_PARSER_TABULAR)
 }
 
 /*

@@ -55,7 +55,7 @@ Creates output redirection for stdout and stderr to file (and console).
 Restores original output association after call of returned function.
 Returned function allows specification of suffix appended to filename.
 */
-func SaveOutput(filename string) (func(string) error, error) {
+func SaveOutputToFile(filename string) (func(string) error, error) {
 
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		folderEnd := strings.LastIndex(filename, "/")

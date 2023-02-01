@@ -4,6 +4,7 @@ import (
 	"IG-Parser/app"
 	"IG-Parser/exporter"
 	"IG-Parser/tree"
+	"IG-Parser/web/converter/shared"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,9 +14,9 @@ import (
 Third-level handler generating tabular output in response to web request.
 Should be invoked by #converterHandler().
 */
-func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, outputType string, printHeaders bool) {
+func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct shared.ReturnStruct, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, outputType string, printHeaders bool) {
 	// Run default configuration
-	SetDefaultConfig()
+	shared.SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
 	// Define whether output is dynamic
 	fmt.Println("Setting dynamic output:", dynamicOutput)
@@ -40,12 +41,12 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 		// Deal with potential errors and prepopulate return message
 		switch err2.ErrorCode {
 		case tree.PARSING_ERROR_EMPTY_LEAF:
-			retStruct.Message = ERROR_INPUT_NO_STATEMENT
+			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
 		default:
 			retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
 		}
 		// Execute template
-		err3 := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_SHEETS, retStruct)
+		err3 := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_TABULAR, retStruct)
 		if err3 != nil {
 			log.Println("Error processing default template:", err3.Error())
 			http.Error(w, "Could not process request.", http.StatusInternalServerError)
@@ -64,7 +65,7 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	retStruct.Success = true
 	retStruct.CodedStmt = codedStmt
 	retStruct.Output = output
-	err := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_SHEETS, retStruct)
+	err := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_TABULAR, retStruct)
 	if err != nil {
 		log.Println("Error processing default template:", err.Error())
 		http.Error(w, "Could not process request.", http.StatusInternalServerError)
@@ -84,9 +85,9 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 Third-level handler generating visual tree output in response to web request.
 Should be invoked by #converterHandler().
 */
-func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct ReturnStruct, flatOutput bool, binaryOutput bool, moveActivationConditionsToTop bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, includeDoV bool) {
+func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct shared.ReturnStruct, flatOutput bool, binaryOutput bool, moveActivationConditionsToTop bool, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, includeDoV bool) {
 	// Run default configuration
-	SetDefaultConfig()
+	shared.SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
 	// Define whether output is dynamic
 	fmt.Println("Setting dynamic output:", dynamicOutput)
@@ -115,7 +116,7 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 		retStruct.CodedStmt = codedStmt
 		switch err2.ErrorCode {
 		case tree.PARSING_ERROR_EMPTY_LEAF:
-			retStruct.Message = ERROR_INPUT_NO_STATEMENT
+			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
 		default:
 			retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
 		}

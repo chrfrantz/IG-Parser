@@ -1,4 +1,4 @@
-package converter
+package shared
 
 import "strconv"
 
