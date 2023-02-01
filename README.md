@@ -279,7 +279,7 @@ The purpose of deploying IG Parser on a server is to provide a deployment that a
   * Install [Docker](https://docs.docker.com/engine/install/)
   * Install [Docker Compose](https://docs.docker.com/compose/install/)
     * Quick installation of docker under Ubuntu LTS: `sudo apt install docker.io`
-  * Git (optional if IG Parser sources are downloaded)
+  * Install [Git](https://git-scm.com/) (optional if IG Parser sources are downloaded as zip file)
     * Quick installation of git under Ubuntu LTS: `sudo apt install git`
 
 * Deployment Guidelines
