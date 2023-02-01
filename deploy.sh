@@ -38,7 +38,7 @@ fi
 echo "Checking network setup ..."
 docker network inspect tunnel_network > /dev/null
 if [ $? -ne 0 ]; then
-  echo "Network does not exist. Creating it ..."
+  echo "Dedicated docker network does not exist. Creating 'tunnel_network' ..."
   docker network create tunnel_network
   if [ $? -ne 0 ];  then
     echo "Network creation failed."
