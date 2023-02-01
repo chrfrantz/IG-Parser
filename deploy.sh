@@ -17,7 +17,6 @@ if [ ! -d ./logs ]; then
   fi
 fi
 
-
 # Tear down current version 
 echo "Undeploying running IG Parser instance ..."
 docker-compose down
