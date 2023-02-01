@@ -1,8 +1,8 @@
 package exporter
 
 import (
-	"IG-Parser/parser"
-	"IG-Parser/tree"
+	"IG-Parser/core/parser"
+	"IG-Parser/core/tree"
 	"fmt"
 	"os"
 	"testing"

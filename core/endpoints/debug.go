@@ -1,7 +1,7 @@
-package exporter
+package endpoints
 
 import (
-	"IG-Parser/config"
+	"IG-Parser/core/config"
 	"fmt"
 )
 
@@ -9,7 +9,7 @@ import (
 Prints output corresponding to debug settings.
 */
 func Println(content ...interface{}) {
-	if config.DEBUG_ALL || config.DEBUG_OUTPUT_GENERATION {
+	if config.DEBUG_ALL || config.DEBUG_FINAL_OUTPUT {
 		fmt.Println(content...)
 	}
 }

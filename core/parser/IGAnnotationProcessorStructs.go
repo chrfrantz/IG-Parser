@@ -1,6 +1,6 @@
 package parser
 
-import "IG-Parser/tree"
+import "IG-Parser/core/tree"
 
 /*
 Delimiter for component suffix entries (e.g., "1,p")

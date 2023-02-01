@@ -1,15 +1,16 @@
 package main
 
 import (
-	"IG-Parser/exporter"
-	"IG-Parser/parser"
-	"IG-Parser/tree"
+	"IG-Parser/core/exporter"
+	"IG-Parser/core/parser"
+	"IG-Parser/core/tree"
 	"fmt"
 	"log"
 )
 
 /*
-Helper main function for flexible adaptation during development. Not called in production system.
+Helper main function for flexible adaptation during development.
+This is purely to support development and not included in the deployment.
 */
 func main() {
 

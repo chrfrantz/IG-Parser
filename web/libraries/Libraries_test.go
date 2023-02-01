@@ -1,7 +1,7 @@
 package libraries
 
 import (
-	"IG-Parser/exporter"
+	"IG-Parser/core/exporter"
 	"IG-Parser/web/converter"
 	"embed"
 	"fmt"

@@ -1,7 +1,7 @@
 package converter
 
 import (
-	"IG-Parser/exporter"
+	"IG-Parser/core/exporter"
 	"fmt"
 	"io"
 	"io/ioutil"

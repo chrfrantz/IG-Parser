@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"IG-Parser/tree"
+	"IG-Parser/core/tree"
 	"fmt"
 	"strconv"
 	"testing"

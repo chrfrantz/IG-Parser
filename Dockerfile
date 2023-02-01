@@ -6,12 +6,7 @@ LABEL stage=builder
 WORKDIR /go/src/IG-Parser/web
 
 # Copy all relevant folders from repository
-COPY ./app /go/src/IG-Parser/app
-COPY ./config /go/src/IG-Parser/config
-COPY ./exporter /go/src/IG-Parser/exporter
-COPY ./parser /go/src/IG-Parser/parser
-COPY ./shared /go/src/IG-Parser/shared
-COPY ./tree /go/src/IG-Parser/tree
+COPY ./core /go/src/IG-Parser/core
 COPY ./web /go/src/IG-Parser/web
 COPY ./go.mod /go/src/IG-Parser/go.mod
 COPY ./go.sum /go/src/IG-Parser/go.sum

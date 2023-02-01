@@ -1,7 +1,7 @@
 package converter
 
 import (
-	"IG-Parser/exporter"
+	"IG-Parser/core/exporter"
 	"IG-Parser/web/converter/shared"
 	"IG-Parser/web/helper"
 	"fmt"

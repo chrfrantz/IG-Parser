@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# This file is part of the IG-Parser project.
+# This file is part of the IG Parser project.
 # Maintainer: Christopher Frantz (cf@christopherfrantz.org)
 
-# Clears current instance of IG-Parser and redeploys after pulling from git repository.
+# Clears current instance of IG Parser and redeploys after pulling from git repository.
 # Ensure to run the script with sudo!
 
-echo "Initiating (re)deployment of latest version of IG-Parser ..."
+echo "Initiating (re)deployment of latest version of the IG Parser ..."
 
 # Create logs folder if it does not already exist
 if [ ! -d ./logs ]; then

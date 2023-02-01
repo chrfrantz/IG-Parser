@@ -1,7 +1,7 @@
 package exporter
 
 import (
-	"IG-Parser/tree"
+	"IG-Parser/core/tree"
 )
 
 /*

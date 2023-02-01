@@ -1,9 +1,9 @@
 package converter
 
 import (
-	"IG-Parser/app"
-	"IG-Parser/exporter"
-	"IG-Parser/tree"
+	"IG-Parser/core/endpoints"
+	"IG-Parser/core/exporter"
+	"IG-Parser/core/tree"
 	"IG-Parser/web/converter/shared"
 	"fmt"
 	"log"
@@ -33,7 +33,7 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	// Output type
 	fmt.Println("Output type:", outputType)
 	// Convert input
-	output, err2 := app.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", exporter.IncludeHeader())
+	output, err2 := endpoints.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", exporter.IncludeHeader())
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {
 		retStruct.Success = false
 		retStruct.Error = true
@@ -109,7 +109,7 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	fmt.Println("Setting activation condition on top in visual output:", moveActivationConditionsToTop)
 	tree.SetMoveActivationConditionsToFront(moveActivationConditionsToTop)
 	// Convert input
-	output, err2 := app.ConvertIGScriptToVisualTree(codedStmt, stmtId, "")
+	output, err2 := endpoints.ConvertIGScriptToVisualTree(codedStmt, stmtId, "")
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {
 		retStruct.Success = false
 		retStruct.Error = true

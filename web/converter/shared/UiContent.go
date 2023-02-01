@@ -1,7 +1,7 @@
 package shared
 
 import (
-	"IG-Parser/tree"
+	"IG-Parser/core/tree"
 )
 
 /*

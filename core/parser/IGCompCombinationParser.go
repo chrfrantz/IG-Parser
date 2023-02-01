@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"IG-Parser/tree"
+	"IG-Parser/core/tree"
 	"fmt"
 	"log"
 	"strconv"
@@ -25,10 +25,10 @@ and returns those as part of the node that holds the logical operator.
 Hint: Call Stringify() on the returned node to reconstruct string
 
 The function returns
-- a node tree of the structure, as well as
-- the potentially modified input string corresponding to the node tree
-  Note: Shared elements are stripped from the modified output string (but
-  included in the node instance
+  - a node tree of the structure, as well as
+  - the potentially modified input string corresponding to the node tree
+    Note: Shared elements are stripped from the modified output string (but
+    included in the node instance
 
 Note:
 - The entire expression must be surrounded with parentheses, else only

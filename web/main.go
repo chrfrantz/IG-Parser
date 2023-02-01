@@ -11,6 +11,11 @@ import (
 )
 
 /*
+This file is the main entry point for the IG Parser as a web application.
+It relies on the IG Parser core package functionality.
+*/
+
+/*
 Environment variables (port, logging activation)
 */
 const ENV_VAR_PORT = "IG_PARSER_PORT"

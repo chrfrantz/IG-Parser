@@ -1,8 +1,8 @@
-package app
+package endpoints
 
 import (
-	"IG-Parser/exporter"
-	"IG-Parser/tree"
+	"IG-Parser/core/exporter"
+	"IG-Parser/core/tree"
 	"testing"
 )
 

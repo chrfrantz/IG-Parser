@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"IG-Parser/shared"
+	"IG-Parser/core/shared"
 	"log"
 	"strconv"
 	"strings"

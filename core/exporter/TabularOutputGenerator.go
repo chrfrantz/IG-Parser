@@ -1,9 +1,9 @@
 package exporter
 
 import (
-	"IG-Parser/parser"
-	"IG-Parser/shared"
-	"IG-Parser/tree"
+	"IG-Parser/core/parser"
+	"IG-Parser/core/shared"
+	"IG-Parser/core/tree"
 	"fmt"
 	"log"
 	"os"
@@ -67,17 +67,18 @@ Generates array of statement maps corresponding to identified elements format. I
 Consider the specification of INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT variable to indicate whether shared elements
 are to be included in output.
 Input:
-- Atomic statements with corresponding node references [statement][node references]
-- Input statement annotations (i.e., of statement, not components)
-- Map with component name as key and corresponding number of columns in input stmts (i.e., same component can have
-  values across multiple columns)
-- References to entries for given nodes as indicated by logical operators, and used to produce corresponding linkages
-  (e.g., AND[row1, row2, etc.])
-- ID to be used as prefix for generation of substatement IDs (e.g., ID 5 produces substatements 5.1, 5.2, etc.)
-- headerSeparator used for generation of header row (e.g., ";")
-- outputType allows for the specification of target output type to introduce necessary preprocessing as part of the matrix generation (e.g., prefixing quotes).
-  Valid output types are defined in TabularOutputGeneratorConfig (e.g., #OUTPUT_TYPE_GOOGLE_SHEETS, etc.)
-- printHeaders indicates whether header row is included in output.
+  - Atomic statements with corresponding node references [statement][node references]
+  - Input statement annotations (i.e., of statement, not components)
+  - Map with component name as key and corresponding number of columns in input stmts (i.e., same component can have
+    values across multiple columns)
+  - References to entries for given nodes as indicated by logical operators, and used to produce corresponding linkages
+    (e.g., AND[row1, row2, etc.])
+  - ID to be used as prefix for generation of substatement IDs (e.g., ID 5 produces substatements 5.1, 5.2, etc.)
+  - headerSeparator used for generation of header row (e.g., ";")
+  - outputType allows for the specification of target output type to introduce necessary preprocessing as part of the matrix generation (e.g., prefixing quotes).
+    Valid output types are defined in TabularOutputGeneratorConfig (e.g., #OUTPUT_TYPE_GOOGLE_SHEETS, etc.)
+  - printHeaders indicates whether header row is included in output.
+
 Output:
 - Array of statement entry maps (i.e., values for each component in given statement, i.e., [statement]map[component]componentValue)
 - Array of header symbols (used for component linkage references)

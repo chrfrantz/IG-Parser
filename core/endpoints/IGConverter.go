@@ -1,11 +1,18 @@
-package app
+package endpoints
 
 import (
-	"IG-Parser/exporter"
-	"IG-Parser/parser"
-	"IG-Parser/tree"
+	"IG-Parser/core/exporter"
+	"IG-Parser/core/parser"
+	"IG-Parser/core/tree"
 	"log"
 )
+
+/*
+This file contains the application endpoints that integrate the core parsing features, as well as file/output
+handling. Both can be invoked with IG Script-encoded institutional statements to produce either tabular or
+visual output for downstream processing, serving as endpoints for the use by specific applications, such as
+web applications, console tools, etc.
+*/
 
 /*
 Consumes statement as input and produces outfile.
@@ -33,7 +40,8 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 	log.Println("Parsed statement:", s.String())
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	output, statementMap, statementHeader, statementHeaderNames, err := exporter.GenerateTabularOutputFromParsedStatement(s, "", stmtId, filename, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders)
+	output, statementMap, statementHeader, statementHeaderNames, err :=
+		exporter.GenerateTabularOutputFromParsedStatement(s, "", stmtId, filename, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", err
 	}
@@ -69,7 +77,8 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 
 	// Prepare visual output
 	log.Println(" Step: Generate visual output structure")
-	output, err := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(), exporter.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	output, err := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(),
+		exporter.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", err
 	}

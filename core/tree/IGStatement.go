@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"IG-Parser/shared"
+	"IG-Parser/core/shared"
 	"fmt"
 	"log"
 	"strings"
@@ -294,7 +294,6 @@ an entry '"ATTRIBUTES": 2', etc.
 
 The parameter aggregateImplicitLinkages specifies whether implicit linkages (based on bAND) are actually aggregated, or
 returned as separate node trees.
-
 */
 func (s *Statement) GenerateLeafArrays(aggregateImplicitLinkages bool) ([][]*Node, map[string]int) {
 	return s.generateLeafArrays(aggregateImplicitLinkages, 0)
@@ -344,7 +343,6 @@ an entry '"ATTRIBUTES": 2', etc.
 The parameter aggregateImplicitLinkages indicates whether implicitly linked trees of nodes should be returned as a single
 tree, or as separate trees.
 The parameter level indicates whether all nodes should be returned, or only ones that contain suffix information.
-
 */
 func (s *Statement) generateLeafArrays(aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
 
@@ -428,15 +426,15 @@ Generates a leaf array for a given component under consideration of node as bein
 Appends to existing structure if provided (i.e., not nil) to allow for iterative invocation.
 For returning only leaves that contain suffix information consider #getComponentLeafArrayWithSuffix.
 Input:
-- maps of nodes potentially including existing nodes for other components. Will be created internally if nil
-  (to allow iterative invocation).
-- reference map that indexes the number of nodes associated with a specific component (to retain association).
-  Will be created internally if nil (to allow iterative invocation).
-- Reference to component node for which leaf elements are to be extracted
-- Component symbol associated with component
-- Indicator whether element embedded in node is complex (i.e., nested statement)
-- Indicator whether all leaf nodes should be returned, or only one satisfying particular conditions
-  (0 --> all nodes, 1 --> only ones with non-empty suffix).
+  - maps of nodes potentially including existing nodes for other components. Will be created internally if nil
+    (to allow iterative invocation).
+  - reference map that indexes the number of nodes associated with a specific component (to retain association).
+    Will be created internally if nil (to allow iterative invocation).
+  - Reference to component node for which leaf elements are to be extracted
+  - Component symbol associated with component
+  - Indicator whether element embedded in node is complex (i.e., nested statement)
+  - Indicator whether all leaf nodes should be returned, or only one satisfying particular conditions
+    (0 --> all nodes, 1 --> only ones with non-empty suffix).
 
 Returns:
 - Node map of nodes associated with components

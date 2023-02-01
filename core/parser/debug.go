@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"IG-Parser/config"
+	"IG-Parser/core/config"
 	"fmt"
 )
 

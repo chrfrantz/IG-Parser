@@ -1,6 +1,8 @@
 package shared
 
-import "IG-Parser/exporter"
+import (
+	"IG-Parser/core/exporter"
+)
 
 /*
 Contains the default configuration for tabular output.
