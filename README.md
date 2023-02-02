@@ -83,15 +83,15 @@ Combinations*. As indicated above, separate components of the same type are inte
 AND-combined. To explicitly specify the nature of the logical relationship (e.g., conjunction, 
 inclusive/exclusive disjunction), combinations need to be explicitly specified in the following format:
 
-`componentSymbol(componentValue1 [logicalOperator] componentValue2)`
+`componentSymbol((componentValue1 [logicalOperator] componentValue2))`
 
 Example: 
 * `A((actor [XOR] owner))`
-* `I((report [XOR] I(review))`
+* `I((report [XOR] review))`
 
 Component combinations can be nested arbitrarily deep, i.e., any component can be a combination itself, for example:
 
-`componentSymbol(componentValue1 [logicalOperator] (componentValue2 [logicalOperator] componentValue3))`
+`componentSymbol((componentValue1 [logicalOperator] (componentValue2 [logicalOperator] componentValue3)))`
 
 Example:
 * `A((certifier [AND] (owner [XOR] inspector)))` 
@@ -173,7 +173,7 @@ Unlike the first example, the following one will result in an error due to missi
 
 Nesting can be of multi levels, i.e., similar to component combinations, braces can be used to signal precedence when linking multiple component-level nested statements.
 
-Example: `{ Cac{ A(), I(), Cex() } [AND] { Cac{ A(), I(), Cex() } [XOR] Cac{ A(), I(), Cex() } } }
+Example: `{ Cac{ A(), I(), Cex() } [AND] { Cac{ A(), I(), Cex() } [XOR] Cac{ A(), I(), Cex() } } }`
 
 Note that non-nested and nested components can be used in the same statement 
 (e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ), and are implicitly AND-combined.
