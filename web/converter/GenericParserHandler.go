@@ -54,7 +54,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Annotations in output
 	includeAnnotations := false
-	fmt.Println("Form field (both) - Annotations: ", formValueIncludeAnnotations)
+	fmt.Println("Form field (both)    - Annotations: ", formValueIncludeAnnotations)
 	if formValueIncludeAnnotations == shared.CHECKBOX_ON {
 		formValueIncludeAnnotations = shared.CHECKBOX_CHECKED
 		includeAnnotations = true
@@ -65,7 +65,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// DoV in output
 	includeDoV := false
-	fmt.Println("Form field (visual) - DoV: ", formValueIncludeDoV)
+	fmt.Println("Form field (visual)  - DoV: ", formValueIncludeDoV)
 	if formValueIncludeDoV == shared.CHECKBOX_ON {
 		formValueIncludeDoV = shared.CHECKBOX_CHECKED
 		includeDoV = true
@@ -102,7 +102,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Private property printing in output
 	printFlatProperties := false
-	fmt.Println("Form field (visual) - Private property tree printing: ", formValuePropertyTree)
+	fmt.Println("Form field (visual)  - Private property tree printing: ", formValuePropertyTree)
 	if formValuePropertyTree == shared.CHECKBOX_ON {
 		formValuePropertyTree = shared.CHECKBOX_CHECKED
 		printFlatProperties = false
@@ -113,7 +113,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Binary tree printing in output
 	printBinaryTree := false
-	fmt.Println("Form field (visual) - Binary tree printing: ", formValueBinaryTree)
+	fmt.Println("Form field (visual)  - Binary tree printing: ", formValueBinaryTree)
 	if formValueBinaryTree == shared.CHECKBOX_ON {
 		formValueBinaryTree = shared.CHECKBOX_CHECKED
 		printBinaryTree = true
@@ -124,7 +124,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Activation condition on top in output
 	printActivationConditionsOnTop := false
-	fmt.Println("Form field (visual) - Activation conditions on top: ", formValueMoveActivationConditionsToTop)
+	fmt.Println("Form field (visual)  - Activation conditions on top: ", formValueMoveActivationConditionsToTop)
 	if formValueMoveActivationConditionsToTop == shared.CHECKBOX_ON {
 		formValueMoveActivationConditionsToTop = shared.CHECKBOX_CHECKED
 		printActivationConditionsOnTop = true
