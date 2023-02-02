@@ -15,9 +15,7 @@ This file is the main entry point for the IG Parser as a web application.
 It relies on the IG Parser core package functionality.
 */
 
-/*
-Environment variables (port, logging activation)
-*/
+// Environment variables (port, logging activation)
 const ENV_VAR_PORT = "IG_PARSER_PORT"
 const ENV_VAR_LOGGING = "IG_PARSER_LOGGING"
 const ENV_VAR_LOGGING_PATH = "IG_PARSER_LOGGING_PATH"
@@ -25,6 +23,9 @@ const ENV_VAR_LOGGING_PATH = "IG_PARSER_LOGGING_PATH"
 // Default values
 const DEFAULT_LOGGING_PATH = "./logs"
 const DEFAULT_PORT = "8080"
+
+// IG Parser Version
+const IG_PARSER_VERSION = "0.1"
 
 // Control whether stdout console output should be suppressed (only works if logging is deactivated)
 const SUPPRESS_CONSOLE_OUTPUT = false
@@ -87,8 +88,8 @@ func main() {
 	if converter.Logging == true {
 		logPath := os.Getenv(ENV_VAR_LOGGING_PATH)
 		if logPath != "" {
+			// Path from environment
 			converter.LoggingPath = logPath
-			log.Println("Found logging path: " + logPath)
 		} else {
 			// Choose default path if not specified (but logging activated)
 			converter.LoggingPath = DEFAULT_LOGGING_PATH
@@ -105,8 +106,10 @@ func main() {
 
 	// Launch server
 	log.Println("Launching IG Parser ...")
-	log.Println("Logging enabled: " + fmt.Sprint(converter.Logging))
-	log.Println("Logging path: " + fmt.Sprint(converter.LoggingPath))
+	log.Println(" - Version: " + IG_PARSER_VERSION)
+	log.Println(" - Website: https://newinstitutionalgrammar.org/ig-parser")
+	log.Println(" - Logging enabled: " + fmt.Sprint(converter.Logging))
+	log.Println(" - Logging path: " + fmt.Sprint(converter.LoggingPath))
 	log.Printf("Navigate to the URL http://localhost%s/"+TABULAR_PATH+" in your browser to open the tabular output version of IG Parser.\n", portSuffix)
 	log.Printf("Navigate to the URL http://localhost%s/"+VISUAL_PATH+" in your browser to open the visual output version of IG Parser.\n", portSuffix)
 	err := http.ListenAndServe(portSuffix, nil)
