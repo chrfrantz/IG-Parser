@@ -48,7 +48,7 @@ func TestConverterHandlerSheetsGet(t *testing.T) {
 	outputString = strings.ReplaceAll(outputString, "\\r\\n", "\\n")
 
 	// Read reference file
-	content, err5 := os.ReadFile("TestConverterHandlerSheetsGet.test")
+	content, err5 := os.ReadFile("TestConverterHandlerGoogleSheetsGet.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}

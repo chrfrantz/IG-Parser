@@ -444,9 +444,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	}
 
 	fmt.Println("Input values:\n" +
-		"Raw statement: " + retStruct.RawStmt + "\n" +
-		"Annotated statement: " + retStruct.CodedStmt + "\n" +
-		"Full input value struct: " + fmt.Sprint(retStruct))
+		"RAW STATEMENT: " + retStruct.RawStmt + "\n" +
+		"ANNOTATED STATEMENT: " + retStruct.CodedStmt + "\n")
 
 	// Check for empty input statement first
 	if retStruct.CodedStmt == "" {

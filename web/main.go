@@ -35,7 +35,7 @@ const TABULAR_PATH = "" // empty per default
 const VISUAL_PATH = "visual/"
 const HELP_PATH = "help/"
 
-// Embed external files in compiled binary
+// Embed external files in compiled binary filesystem
 
 //go:embed css/default.css css/favicon.ico
 var cssFiles embed.FS
@@ -54,14 +54,14 @@ func main() {
 	// Initializes templating and determines correct relative path for templates and CSS
 	converter.Init()
 
-	// Register static resources (occurs first; prevents repeated invocation of function handlers when browser requests static resources)
+	// Register static resources
 
 	// D3 & ACE libraries
 	http.Handle("/libraries/", http.FileServer(http.FS(libraryFiles)))
 	// CSS folder mapping (for CSS and favicon)
 	http.Handle("/css/", http.FileServer(http.FS(cssFiles)))
 
-	//  Register handlers
+	// Register handlers
 
 	// Conventional tabular output handler (path per default empty)
 	http.HandleFunc("/"+TABULAR_PATH, converter.ConverterHandlerTabular)

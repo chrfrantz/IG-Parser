@@ -2,6 +2,7 @@ package converter
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -68,12 +69,14 @@ func Init() {
 Handler for tabular output.
 */
 func ConverterHandlerTabular(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Invoked TABULAR output handler")
 	converterHandler(w, r, TEMPLATE_NAME_PARSER_TABULAR)
 }
 
 /*
-Handler for visualization.
+Handler for visual output.
 */
 func ConverterHandlerVisual(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Invoked VISUAL output handler")
 	converterHandler(w, r, TEMPLATE_NAME_PARSER_VISUAL)
 }
