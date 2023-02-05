@@ -3,6 +3,7 @@ package parser
 import (
 	"IG-Parser/core/config"
 	"fmt"
+	"log"
 )
 
 /*
@@ -10,7 +11,7 @@ Prints output corresponding to debug settings.
 */
 func Print(content ...interface{}) {
 	if config.DEBUG_ALL || config.DEBUG_STATEMENT_PARSING {
-		fmt.Print(content...)
+		log.Print(content...)
 	}
 }
 

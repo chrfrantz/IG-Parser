@@ -712,13 +712,13 @@ If filename is provided, the result is printed to the corresponding file.
 If printHeaders is true, the header row will be included in output.
 */
 func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotations interface{}, stmtId string, filename string, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool) (string, []map[string]string, []string, []string, tree.ParsingError) {
-	log.Println(" Step: Extracting leaf arrays")
+	Println(" Step: Extracting leaf arrays")
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := statement.GenerateLeafArrays(aggregateImplicitLinkages)
 
 	Println(" Generated leaf arrays: ", leafArrays, " component: ", componentRefs)
 
-	log.Println(" Step: Generate permutations of leaf arrays (atomic statements)")
+	Println(" Step: Generate permutations of leaf arrays (atomic statements)")
 	// Generate all permutations of logically-linked components to produce statements
 	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -727,13 +727,13 @@ func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotati
 
 	Println(" Generated permutations: ", res)
 
-	log.Println(" Step: Generate logical operators for atomic statements")
+	Println(" Step: Generate logical operators for atomic statements")
 	// Extract logical operator links
 	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
 
 	Println(" Links:", links)
 
-	log.Println(" Step: Generate tabular output")
+	Println(" Step: Generate tabular output")
 
 	// Prepare export to tabular output
 	statementMap, statementHeaders, statementHeaderNames, err := generateStatementMatrix(res, annotations, componentRefs, links, stmtId, separator, outputFormat, printHeaders)

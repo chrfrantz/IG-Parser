@@ -2,7 +2,6 @@ package converter
 
 import (
 	"embed"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -33,12 +32,12 @@ var terminateOutput = func(string) error {
 }
 
 /*
-Indicates whether logging occurs
+Indicates whether logging occurs. The extent of logging is controlled by the debug switches in core/config/debugConfig.go.
 */
 var Logging = true
 
 /*
-Indicates folder to log to
+Indicates folder to save log files in
 */
 var LoggingPath = ""
 
@@ -53,7 +52,7 @@ Error suffix
 const ERROR_SUFFIX = ".error"
 
 /*
-Init needs to be called from main to instantiate templates.
+Init needs to be called from main to instantiate Go web templates.
 */
 func Init() {
 	// Load all templates in folder, and address specific ones during processing by name (see TEMPLATE_NAME_ constants).
@@ -69,7 +68,7 @@ func Init() {
 Handler for tabular output.
 */
 func ConverterHandlerTabular(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Invoked TABULAR output handler")
+	Println("Invoked TABULAR output handler")
 	converterHandler(w, r, TEMPLATE_NAME_PARSER_TABULAR)
 }
 
@@ -77,6 +76,6 @@ func ConverterHandlerTabular(w http.ResponseWriter, r *http.Request) {
 Handler for visual output.
 */
 func ConverterHandlerVisual(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Invoked VISUAL output handler")
+	Println("Invoked VISUAL output handler")
 	converterHandler(w, r, TEMPLATE_NAME_PARSER_VISUAL)
 }

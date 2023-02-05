@@ -19,19 +19,19 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	shared.SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
 	// Define whether output is dynamic
-	fmt.Println("Setting dynamic output:", dynamicOutput)
+	Println("Setting dynamic output:", dynamicOutput)
 	exporter.SetDynamicOutput(dynamicOutput)
 	// Define whether output is IG Extended (component-level nesting)
-	fmt.Println("Setting IG Extended output:", produceIGExtendedOutput)
+	Println("Setting IG Extended output:", produceIGExtendedOutput)
 	exporter.SetProduceIGExtendedOutput(produceIGExtendedOutput)
 	// Define whether annotations are included
-	fmt.Println("Setting annotations:", includeAnnotations)
+	Println("Setting annotations:", includeAnnotations)
 	exporter.SetIncludeAnnotations(includeAnnotations)
 	// Define whether header row is included
-	fmt.Println("Setting header row:", printHeaders)
+	Println("Setting header row:", printHeaders)
 	exporter.SetIncludeHeaders(printHeaders)
 	// Output type
-	fmt.Println("Output type:", outputType)
+	Println("Output type:", outputType)
 	// Convert input
 	output, err2 := endpoints.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", exporter.IncludeHeader())
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {
@@ -53,7 +53,7 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 		}
 
 		// Final comment in log
-		fmt.Println("Error: " + fmt.Sprint(err2))
+		Println("Error: " + fmt.Sprint(err2))
 		// Ensure logging is terminated
 		err := terminateOutput(ERROR_SUFFIX)
 		if err != nil {
@@ -72,7 +72,7 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	}
 
 	// Final comment in log
-	fmt.Println("Success")
+	Println("Success")
 	// Ensure logging is terminated
 	err3 := terminateOutput(SUCCESS_SUFFIX)
 	if err3 != nil {
@@ -90,23 +90,23 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	shared.SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
 	// Define whether output is dynamic
-	fmt.Println("Setting dynamic output:", dynamicOutput)
+	Println("Setting dynamic output:", dynamicOutput)
 	exporter.SetDynamicOutput(dynamicOutput)
 	// Define whether output is IG Extended (component-level nesting)
-	fmt.Println("Setting IG Extended output:", produceIGExtendedOutput)
+	Println("Setting IG Extended output:", produceIGExtendedOutput)
 	exporter.SetProduceIGExtendedOutput(produceIGExtendedOutput)
 	// Define whether annotations are included
-	fmt.Println("Setting annotations:", includeAnnotations)
+	Println("Setting annotations:", includeAnnotations)
 	exporter.SetIncludeAnnotations(includeAnnotations)
 	// Define whether Degree of Variability is included
-	fmt.Println("Setting Degree of Variability (DoV):", includeDoV)
+	Println("Setting Degree of Variability (DoV):", includeDoV)
 	exporter.SetIncludeDegreeOfVariability(includeDoV)
 	// Setting flat printing
-	fmt.Println("Setting flat printing of properties:", flatOutput)
+	Println("Setting flat printing of properties:", flatOutput)
 	tree.SetFlatPrinting(flatOutput)
-	fmt.Println("Setting binary tree printing:", binaryOutput)
+	Println("Setting binary tree printing:", binaryOutput)
 	tree.SetBinaryPrinting(binaryOutput)
-	fmt.Println("Setting activation condition on top in visual output:", moveActivationConditionsToTop)
+	Println("Setting activation condition on top in visual output:", moveActivationConditionsToTop)
 	tree.SetMoveActivationConditionsToFront(moveActivationConditionsToTop)
 	// Convert input
 	output, err2 := endpoints.ConvertIGScriptToVisualTree(codedStmt, stmtId, "")
@@ -127,7 +127,7 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 		}
 
 		// Final comment in log
-		fmt.Println("Error: " + fmt.Sprint(err2))
+		Println("Error: " + fmt.Sprint(err2))
 		// Ensure logging is terminated
 		err := terminateOutput(ERROR_SUFFIX)
 		if err != nil {
@@ -146,7 +146,7 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	}
 
 	// Final comment in log
-	fmt.Println("Success")
+	Println("Success")
 	// Ensure logging is terminated
 	err3 := terminateOutput(SUCCESS_SUFFIX)
 	if err3 != nil {

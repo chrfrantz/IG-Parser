@@ -43,7 +43,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Dynamic output
 	dynamicOutput := false
-	fmt.Println("Form field (tabular) - Dynamic: ", formValueDynamicOutput)
+	Println("Form field (tabular) - Dynamic: ", formValueDynamicOutput)
 	if formValueDynamicOutput == shared.CHECKBOX_ON {
 		formValueDynamicOutput = shared.CHECKBOX_CHECKED
 		dynamicOutput = true
@@ -54,7 +54,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Annotations in output
 	includeAnnotations := false
-	fmt.Println("Form field (both)    - Annotations: ", formValueIncludeAnnotations)
+	Println("Form field (both)    - Annotations: ", formValueIncludeAnnotations)
 	if formValueIncludeAnnotations == shared.CHECKBOX_ON {
 		formValueIncludeAnnotations = shared.CHECKBOX_CHECKED
 		includeAnnotations = true
@@ -65,7 +65,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// DoV in output
 	includeDoV := false
-	fmt.Println("Form field (visual)  - DoV: ", formValueIncludeDoV)
+	Println("Form field (visual)  - DoV: ", formValueIncludeDoV)
 	if formValueIncludeDoV == shared.CHECKBOX_ON {
 		formValueIncludeDoV = shared.CHECKBOX_CHECKED
 		includeDoV = true
@@ -76,7 +76,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Component-level nesting in output
 	produceIGExtendedOutput := false
-	fmt.Println("Form field (tabular) - IG Extended output: ", formValueIgExtendedOutput)
+	Println("Form field (tabular) - IG Extended output: ", formValueIgExtendedOutput)
 	if formValueIgExtendedOutput == shared.CHECKBOX_ON {
 		formValueIgExtendedOutput = shared.CHECKBOX_CHECKED
 		produceIGExtendedOutput = true
@@ -91,7 +91,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	if formValueIncludeHeaders == "" && r.Method != http.MethodPost {
 		formValueIncludeHeaders = shared.CHECKBOX_ON
 	}
-	fmt.Println("Form field (tabular) - Include headers in output: ", formValueIncludeHeaders)
+	Println("Form field (tabular) - Include headers in output: ", formValueIncludeHeaders)
 	if formValueIncludeHeaders == shared.CHECKBOX_ON {
 		formValueIncludeHeaders = shared.CHECKBOX_CHECKED
 		printHeaders = true
@@ -102,7 +102,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Private property printing in output
 	printFlatProperties := false
-	fmt.Println("Form field (visual)  - Private property tree printing: ", formValuePropertyTree)
+	Println("Form field (visual)  - Private property tree printing: ", formValuePropertyTree)
 	if formValuePropertyTree == shared.CHECKBOX_ON {
 		formValuePropertyTree = shared.CHECKBOX_CHECKED
 		printFlatProperties = false
@@ -113,7 +113,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Binary tree printing in output
 	printBinaryTree := false
-	fmt.Println("Form field (visual)  - Binary tree printing: ", formValueBinaryTree)
+	Println("Form field (visual)  - Binary tree printing: ", formValueBinaryTree)
 	if formValueBinaryTree == shared.CHECKBOX_ON {
 		formValueBinaryTree = shared.CHECKBOX_CHECKED
 		printBinaryTree = true
@@ -124,7 +124,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Activation condition on top in output
 	printActivationConditionsOnTop := false
-	fmt.Println("Form field (visual)  - Activation conditions on top: ", formValueMoveActivationConditionsToTop)
+	Println("Form field (visual)  - Activation conditions on top: ", formValueMoveActivationConditionsToTop)
 	if formValueMoveActivationConditionsToTop == shared.CHECKBOX_ON {
 		formValueMoveActivationConditionsToTop = shared.CHECKBOX_CHECKED
 		printActivationConditionsOnTop = true
@@ -413,7 +413,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 				log.Println("Error processing default template:", err.Error())
 				http.Error(w, "Could not process request.", http.StatusInternalServerError)
 			}
-			fmt.Println("Provided repopulated form")
+			Println("Provided repopulated form")
 			// Just repopulate template, but do not go beyond
 			return
 		}
@@ -459,7 +459,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		}
 
 		// Final comment in log
-		fmt.Println("Error: No input to parse.")
+		Println("Error: No input to parse.")
 		// Ensure logging is terminated
 		err2 := terminateOutput(ERROR_SUFFIX)
 		if err2 != nil {
@@ -469,10 +469,10 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	} else {
 		// Delegate to specific output handlers ...
 		if templateName == TEMPLATE_NAME_PARSER_TABULAR {
-			fmt.Println("Tabular output requested")
+			Println("Tabular output requested")
 			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType, printHeaders)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
-			fmt.Println("Visual output requested")
+			Println("Visual output requested")
 			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionsOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations, includeDoV)
 		} else {
 			log.Fatal("Output variant " + templateName + " not found.")

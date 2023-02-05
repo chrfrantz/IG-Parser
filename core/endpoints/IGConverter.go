@@ -4,7 +4,6 @@ import (
 	"IG-Parser/core/exporter"
 	"IG-Parser/core/parser"
 	"IG-Parser/core/tree"
-	"log"
 )
 
 /*
@@ -27,7 +26,7 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 	// Use separator specified by default
 	separator := exporter.CellSeparator
 
-	log.Println(" Step: Parse input statement")
+	Println(" Step: Parse input statement")
 	// Explicitly activate printing of shared elements
 	//exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -37,7 +36,7 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 		return "", err
 	}
 
-	log.Println("Parsed statement:", s.String())
+	Println("Parsed statement:", s.String())
 
 	// Run composite generation and return output and error. Will write file if filename != ""
 	output, statementMap, statementHeader, statementHeaderNames, err :=
@@ -46,12 +45,12 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 		return "", err
 	}
 
-	log.Println("  - Results:")
-	log.Println("  - Header Symbols: ", statementHeader)
-	log.Println("  - Header Names: ", statementHeaderNames)
-	log.Println("  - Data: ", statementMap)
+	Println("  - Results:")
+	Println("  - Header Symbols: ", statementHeader)
+	Println("  - Header Names: ", statementHeaderNames)
+	Println("  - Data: ", statementMap)
 
-	log.Println("  - Output generation complete.")
+	Println("  - Output generation complete.")
 
 	return output, err
 
@@ -65,7 +64,7 @@ Returns Visual tree structure as string, and error (defaults to tree.PARSING_NO_
 */
 func ConvertIGScriptToVisualTree(statement string, stmtId string, filename string) (string, tree.ParsingError) {
 
-	log.Println(" Step: Parse input statement")
+	Println(" Step: Parse input statement")
 	// Explicitly activate printing of shared elements
 	//exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
@@ -76,28 +75,27 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 	}
 
 	// Prepare visual output
-	log.Println(" Step: Generate visual output structure")
+	Println(" Step: Generate visual output structure")
 	output, err := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(),
 		exporter.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", err
 	}
 
-	log.Println("  - Generated visual tree:", output)
+	Println("  - Generated visual tree:", output)
 
-	log.Println("  - Output generation complete.")
+	Println("  - Output generation complete.")
 
 	if filename != "" {
-		log.Println("  - Writing to file ...")
+		Println("  - Writing to file ...")
 
 		err2 := exporter.WriteToFile(filename, output.String())
 		if err2 != nil {
-			log.Println("  - Problems when writing file "+filename+", Error:", err2)
+			Println("  - Problems when writing file "+filename+", Error:", err2)
 		}
 
-		log.Println("  - Writing completed.")
+		Println("  - Writing completed.")
 	}
 
 	return output.String(), err
-
 }
