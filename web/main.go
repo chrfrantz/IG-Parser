@@ -2,6 +2,7 @@ package main
 
 import (
 	"IG-Parser/web/converter"
+	"IG-Parser/web/helper"
 	"embed"
 	"fmt"
 	"log"
@@ -104,7 +105,7 @@ func main() {
 	// Compose port suffix
 	portSuffix := ":" + port
 
-	// Launch server
+	// Print configuration in console
 	log.Println("Launching IG Parser ...")
 	log.Println(" - Version: " + IG_PARSER_VERSION)
 	log.Println(" - Website: https://newinstitutionalgrammar.org/ig-parser")
@@ -112,6 +113,12 @@ func main() {
 	log.Println(" - Logging path: " + fmt.Sprint(converter.LoggingPath))
 	log.Printf("Navigate to the URL http://localhost%s/"+TABULAR_PATH+" in your browser to open the tabular output version of IG Parser.\n", portSuffix)
 	log.Printf("Navigate to the URL http://localhost%s/"+VISUAL_PATH+" in your browser to open the visual output version of IG Parser.\n", portSuffix)
+	// Attempt launch of URL in browser
+	err0 := helper.OpenBrowser("http://localhost" + portSuffix + "/" + VISUAL_PATH)
+	if err0 != nil {
+		log.Println("Browser launch failed (Error: " + err0.Error() + "). Please launch browser manually using URLs above.")
+	}
+	// Launch web server
 	err := http.ListenAndServe(portSuffix, nil)
 	if err != nil {
 		log.Fatal("Web service stopped. Error:", err)
