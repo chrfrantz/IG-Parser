@@ -268,8 +268,8 @@ The purpose of building a local executable is to run IG Parser on a local machin
   * Run the created executable
     * Under Windows, run `ig-parser` (or `ig-parser.exe`) either via command line or by doubleclicking
     * Under Linux (or Windows PowerShell), run `./ig-parser`
-  * Once started, use your browser to navigate to one of the URLs listed in the console output. By default, this is the URL http://localhost:8080 (and http://localhost:8080/visual respectively)
-  * Press `Ctrl` + `C` in the console window to terminate the execution
+  * Once started, it should automatically open your browser and navigate to http://localhost:8080/visual. Alternatively, use your browser to manually navigate to one of the URLs listed in the console output. By default, this is the URL http://localhost:8080 (and http://localhost:8080/visual respectively)
+  * Press `Ctrl` + `C` in the console window to terminate the execution (or simply close the console window)
 
 ### Server deployment
 
