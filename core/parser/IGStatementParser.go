@@ -15,163 +15,66 @@ Parses statement tree from input string. Returns statement tree, and error.
 If parsing is successful, error code tree.PARSING_NO_ERROR is returned, else
 other context-specific codes are returned.
 */
-func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
+func ParseStatement(text string) ([]tree.Node, tree.ParsingError) {
 
 	// Remove line breaks
 	text = CleanInput(text)
 
 	s := tree.Statement{}
 
+	Println("INITIATING STATEMENT PARSING ...\nProcessing input statement: ", text)
+
 	// Validate input string first with respect to parentheses ...
 	err := validateInput(text, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return tree.Statement{}, err
+		return []tree.Node{}, err
 	}
 	// ... and braces
 	err = validateInput(text, LEFT_BRACE, RIGHT_BRACE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return tree.Statement{}, err
+		return []tree.Node{}, err
 	}
 
-	// Now retrieve component-only and nested statements
-	compAndNestedStmts, err := SeparateComponentsAndNestedStatements(text)
+	// Now extract component-only expressions, nested statements, statement combinations, as well as component pair combinations (Note: only processed at the end of function)
+	compAndNestedStmts, err := SeparateComponentsNestedStatementsCombinationsAndComponentPairs(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return tree.Statement{}, err
+		return []tree.Node{}, err
 	}
-	Println("Returned separated components and nested statements: " + fmt.Sprint(compAndNestedStmts))
-	// Extract component-only statement and override input
+	Println("Returned separated components including component combinations (element [0]), \nnested statements/components (element [1]), \nnested component combinations (element [2]) and \ncomponent pair combinations (element [3]): " + fmt.Sprint(compAndNestedStmts))
+	// Extract component-only statement and override input (e.g., A(content))
 	text = compAndNestedStmts[0][0]
-	// Extract potential nested statements
+	// Extract potential nested statements (e.g., Cac{ content }
 	nestedStmts := compAndNestedStmts[1]
 	if len(nestedStmts) == 0 {
 		Println("No nested statements found.")
 		//log.Println("No nested statements found.")
 	}
+	// Extract potential statement combinations (e.g., { Cac{ content } [XOR] Cac{ content } })
 	nestedCombos := compAndNestedStmts[2]
 	if len(nestedCombos) == 0 {
 		Println("No nested statement combination candidates found.")
 		//log.Println("No nested statement combination candidates found.")
 	}
 
-	Println("Text to be parsed: " + text)
-	// Now parsing on component level
+	Println("Statement before parsing: " + s.String())
 
-	result, err := parseAttributes(text)
-	outErr := handleParsingError(tree.ATTRIBUTES, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
+	Println("Parsing basic statement ...")
+	if text != "" {
+		Println("Text to be parsed: " + text)
+
+		// Now parsing on component level
+		_, outErr := parseBasicStatement(text, &s)
+		if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+			// Populate return structure
+			ret := []tree.Node{tree.Node{Entry: s}}
+			return ret, outErr
+		}
+
+		// Reorganize tree by shifting private nodes into PrivateNode fields of components and removing them from statement tree
+		ProcessPrivateComponentLinkages(&s)
+
+		Println("Basic statement: " + s.String())
 	}
-	s.Attributes = result
-
-	result, err = parseAttributesProperty(text)
-	outErr = handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.AttributesPropertySimple = result
-
-	result, err = parseDeontic(text)
-	outErr = handleParsingError(tree.DEONTIC, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.Deontic = result
-
-	result, err = parseAim(text)
-	outErr = handleParsingError(tree.AIM, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.Aim = result
-
-	result, err = parseDirectObject(text)
-	outErr = handleParsingError(tree.DIRECT_OBJECT, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.DirectObject = result
-
-	result, err = parseDirectObjectProperty(text)
-	outErr = handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.DirectObjectPropertySimple = result
-
-	result, err = parseIndirectObject(text)
-	outErr = handleParsingError(tree.INDIRECT_OBJECT, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.IndirectObject = result
-
-	result, err = parseIndirectObjectProperty(text)
-	outErr = handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.IndirectObjectPropertySimple = result
-
-	result, err = parseActivationCondition(text)
-	outErr = handleParsingError(tree.ACTIVATION_CONDITION, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.ActivationConditionSimple = result
-
-	result, err = parseExecutionConstraint(text)
-	outErr = handleParsingError(tree.EXECUTION_CONSTRAINT, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.ExecutionConstraintSimple = result
-
-	result, err = parseConstitutedEntity(text)
-	outErr = handleParsingError(tree.CONSTITUTED_ENTITY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.ConstitutedEntity = result
-
-	result, err = parseConstitutedEntityProperty(text)
-	outErr = handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.ConstitutedEntityPropertySimple = result
-
-	result, err = parseModal(text)
-	outErr = handleParsingError(tree.MODAL, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.Modal = result
-
-	result, err = parseConstitutingFunction(text)
-	outErr = handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.ConstitutiveFunction = result
-
-	result, err = parseConstitutingProperties(text)
-	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.ConstitutingProperties = result
-
-	result, err = parseConstitutingPropertiesProperty(text)
-	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		return s, outErr
-	}
-	s.ConstitutingPropertiesPropertySimple = result
-
-	// Reorganize tree by shifting private nodes into PrivateNode fields of components and removing them from statement tree
-	ProcessPrivateComponentLinkages(&s)
-
-	//Println(s.String())
 
 	Println("Testing for nested statement combinations in " + fmt.Sprint(nestedCombos))
 
@@ -184,28 +87,200 @@ func ParseStatement(text string) (tree.Statement, tree.ParsingError) {
 			nestedStmts = append(nestedStmts, nestedCombos...)
 			Println("Reclassifying statement as nested statement (as opposed to nested combination) ...")
 		} else if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return s, err
+			// Populate return structure
+			ret := []tree.Node{tree.Node{Entry: s}}
+			return ret, err
 		}
 	}
 
-	Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
+	fmt.Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
+	fmt.Println("Countx: ", len(nestedStmts))
 
 	// Process nested statements
 	if len(nestedStmts) > 0 {
-		Println("Found nested statements ...")
+		fmt.Println("Found nested statements ... (Nested statements: ", nestedStmts, ")")
 		err = parseNestedStatements(&s, nestedStmts)
 		// Check whether nested statements have been ignored entirely
 		if err.ErrorCode == tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
-			return s, err
+			// Populate return structure
+			ret := []tree.Node{tree.Node{Entry: s}}
+			return ret, err
 		}
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return s, err
+			// Populate return structure
+			ret := []tree.Node{tree.Node{Entry: s}}
+			return ret, err
 		}
 	}
 
-	Println("Statement (after assigning sub elements):\n" + s.String())
+	Println("Statement (after assigning nested elements, before expanding statement with paired components):\n" + s.String())
 
-	return s, outErr
+	// Process component pair combinations and extrapolate into multiple statements
+	if len(compAndNestedStmts[3]) > 0 {
+		extrapolatedStmts, err := extrapolateStatementWithPairedComponents(&s, compAndNestedStmts[3])
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return extrapolatedStmts, err
+		}
+		Println("Final statements (with extrapolation): " + tree.PrintNodes(extrapolatedStmts))
+
+		return extrapolatedStmts, err
+	} else {
+		Println("No expansion of statement necessary (no component pair combinations in input)")
+	}
+
+	// Else return wrapped statement
+	return []tree.Node{tree.Node{Entry: s}}, err
+}
+
+func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.ParsingError) {
+
+	result, err := parseAttributes(text)
+	outErr := handleParsingError(tree.ATTRIBUTES, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.Attributes = result
+
+	result, err = parseAttributesProperty(text)
+	outErr = handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.AttributesPropertySimple = result
+
+	result, err = parseDeontic(text)
+	outErr = handleParsingError(tree.DEONTIC, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.Deontic = result
+
+	result, err = parseAim(text)
+	outErr = handleParsingError(tree.AIM, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.Aim = result
+
+	result, err = parseDirectObject(text)
+	outErr = handleParsingError(tree.DIRECT_OBJECT, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.DirectObject = result
+
+	result, err = parseDirectObjectProperty(text)
+	outErr = handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.DirectObjectPropertySimple = result
+
+	result, err = parseIndirectObject(text)
+	outErr = handleParsingError(tree.INDIRECT_OBJECT, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.IndirectObject = result
+
+	result, err = parseIndirectObjectProperty(text)
+	outErr = handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.IndirectObjectPropertySimple = result
+
+	result, err = parseActivationCondition(text)
+	outErr = handleParsingError(tree.ACTIVATION_CONDITION, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.ActivationConditionSimple = result
+
+	result, err = parseExecutionConstraint(text)
+	outErr = handleParsingError(tree.EXECUTION_CONSTRAINT, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.ExecutionConstraintSimple = result
+
+	result, err = parseConstitutedEntity(text)
+	outErr = handleParsingError(tree.CONSTITUTED_ENTITY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.ConstitutedEntity = result
+
+	result, err = parseConstitutedEntityProperty(text)
+	outErr = handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.ConstitutedEntityPropertySimple = result
+
+	result, err = parseModal(text)
+	outErr = handleParsingError(tree.MODAL, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.Modal = result
+
+	result, err = parseConstitutingFunction(text)
+	outErr = handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.ConstitutiveFunction = result
+
+	result, err = parseConstitutingProperties(text)
+	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.ConstitutingProperties = result
+
+	result, err = parseConstitutingPropertiesProperty(text)
+	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
+	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
+		// Populate return structure
+		ret := []tree.Node{tree.Node{Entry: s}}
+		return ret, outErr
+	}
+	s.ConstitutingPropertiesPropertySimple = result
+
+	Println("Basic statement: " + s.String())
+
+	return []tree.Node{tree.Node{Entry: s}}, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
@@ -295,16 +370,20 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		Println("Nested Stmt Component Identifier:", component)
 		Println("Nested Stmt Suffix:", suffix)
 		Println("Nested Stmt Annotation:", annotation)
-		//Println("Nested Stmt Content:", content)
 
+		// Parse actual content wrapped in nested component (e.g., content inside Cac{ ... })
 		stmt, errStmt := ParseStatement(v[strings.Index(v, LEFT_BRACE)+1 : strings.LastIndex(v, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
 			fmt.Println("Error when parsing nested statements: ", errStmt.Error())
 			return errStmt
 		}
+		if len(stmt) > 1 {
+			fmt.Println("Unhandled case: Multiple decomposed statements in nested component ...", stmt)
+			return errStmt
+		}
 
-		// Wrap statement into node (since individual statement)
-		stmtNode := tree.Node{Entry: stmt}
+		// Return first statement (wrapped into node) - (since individual statement)
+		stmtNode := stmt[0]
 		// Assign component name to parsed node
 		stmtNode.ComponentType = component
 
@@ -490,9 +569,9 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 
 			stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1 : strings.LastIndex(oldValue, RIGHT_BRACE)])
 			if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
-				return stmt, errStmt
+				return stmt[0].Entry.(tree.Statement), errStmt
 			}
-			return stmt, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return stmt[0].Entry.(tree.Statement), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 		})
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return err
@@ -626,12 +705,29 @@ Separates nested statement expressions (including component prefix)
 from individual components (including combinations of components).
 Returns multi-dim array, with element [0][0] containing component-only statement (no nested structure),
 and element [1] containing nested statements (potentially multiple),
-and element [2] containing potential statement combinations.
+and element [2] containing potential component-level statement combinations,
+and element [3] containing component pairs (that need to be extrapolated into entire separate statements).
 */
-func SeparateComponentsAndNestedStatements(statement string) ([][]string, tree.ParsingError) {
+func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement string) ([][]string, tree.ParsingError) {
 
 	// Prepare return structure
-	ret := make([][]string, 3)
+	ret := make([][]string, 4)
+
+	// Identify all component pair combinations (e.g., {I(something) Bdir(something) [XOR] I(something else) Bdir(something else)})
+	pairCombos, err := identifyComponentPairCombinations(statement)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return nil, err
+	}
+
+	// Assign identified component combination pairs to return structure
+	ret[3] = pairCombos
+
+	// Incrementally remove identified component pairs combinations from input statement
+	for _, v := range pairCombos {
+		statement = strings.ReplaceAll(statement, v, "")
+	}
+
+	/// COMPONENT PAIR IDENTIFICATION COMPLETED, NOW NESTED STATEMENTS AND COMBINATIONS
 
 	// Identify all nested statements
 	nestedStmts, err := identifyNestedStatements(statement)
@@ -684,13 +780,85 @@ func SeparateComponentsAndNestedStatements(statement string) ([][]string, tree.P
 		Println("No nested statement found in input: " + statement)
 	}
 
-	// Assign component-only string
+	// Assign (remaining) component-only string
 	ret[0] = []string{statement}
 
 	Println("Array to be returned: " + fmt.Sprint(ret))
 
 	// Return combined structure
 	return ret, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+}
+
+/*
+Identifies component pair combinations in input text (e.g., '{I(monitor) Bdir(one thing) [XOR] I(enforce) Bdir(the other)}').
+Returns identified component pair combinations as string array.
+*/
+func identifyComponentPairCombinations(statement string) ([]string, tree.ParsingError) {
+
+	r, err := regexp.Compile(NESTED_COMBINATIONS)
+	if err != nil {
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
+		//log.Fatal("Error", err.Error())
+	}
+
+	// Extract all matches as string array
+	pairs := r.FindAllString(statement, -1)
+
+	Println("Found ", len(pairs), " component pair combination fragments: ", pairs)
+
+	return pairs, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+}
+
+/*
+Process pair combinations and extrapolate individual statements and populate with content from atomic input statement.
+*/
+func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string) ([]tree.Node, tree.ParsingError) {
+
+	// Parse all elements of tree structure
+	extrapolatedPairStmts := []tree.Node{}
+	for k, v := range pairs {
+		Println("Iteration ", k)
+
+		// Convert individual pair into node structure
+		idvStmt, _, err := ParseIntoNodeTree(v, true, LEFT_BRACE, RIGHT_BRACE)
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return nil, err
+		}
+
+		// Extract leaves for conversion
+		leaves := idvStmt.GetLeafNodes(true)
+		if len(leaves) > 1 {
+			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_TOO_MANY_NODES, ErrorMessage: "Too many nodes generated for atomic statement."}
+		}
+
+		// Parse leaves into statement structure individually (i.e., atomic statements, i.e., {I(enforce] [XOR] I(monitor)} --> one for enforce, one for monitor),
+		// complete with original atomic structure components (the ones that were atomic in the first place (e.g., A(enforcer)) and reattach to extrapolated statement
+		for _, v2 := range leaves[0] {
+
+			// Parse content of tree
+			tpNode, err := ParseStatement(v2.Entry.(string))
+			if err.ErrorCode != tree.PARSING_NO_ERROR {
+				Println("Error when parsing statement: ", err)
+				return nil, err
+			}
+
+			if len(tpNode) > 1 {
+				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_TOO_MANY_NODES, ErrorMessage: "Expecting single node/statement, as opposed to multiple. Aborting extrapolation of statements"}
+			}
+
+			// Complete decomposed partial statement with parsed linear statement (can only be one statement in decomposed pair combinations)
+			tpNode[0].Entry = tree.CopyComponentsFromStatement(tpNode[0].Entry.(tree.Statement), s)
+
+			// Replace Entry content
+			v2.Entry = tpNode
+		}
+		// Store parsed statement to return structure
+		extrapolatedPairStmts = append(extrapolatedPairStmts, *idvStmt)
+	}
+
+	Println("Number of elements: ", len(extrapolatedPairStmts))
+
+	return extrapolatedPairStmts, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*

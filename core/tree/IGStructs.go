@@ -411,7 +411,7 @@ var IGLogicalOperators = []string{
 	NOT,
 }
 
-/**
+/*
 Signals boundary values for detected combinations
 */
 type Boundaries struct {
@@ -507,6 +507,9 @@ const PARSING_ERROR_EMBEDDED_NODE_ERROR = "EMBEDDED_NODE_ERROR"
 
 // Indicates invalid output type (should be one of TabularOutputGeneratorConfig #OUTPUT_TYPE_CSV or #OUTPUT_TYPE_GOOGLE_SHEETS or #OUTPUT_TYPE_NONE)
 const PARSING_ERROR_INVALID_OUTPUT_TYPE = "INVALID_OUTPUT_TYPE"
+
+// Indicates unexpected number of nodes in array
+const PARSING_ERROR_TOO_MANY_NODES = "TOO_MANY_NODES"
 
 /*
 Error type signaling errors during statement parsing

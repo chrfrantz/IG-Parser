@@ -104,9 +104,9 @@ COMPONENT_HEADER_SYNTAX +
 const PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS =
 // Start of alternatives
 "(" +
-	// combination with parentheses, e.g., ( some words Cac{ ... } [AND] Cac{ ... } [AND] Cac{ ... } ...), or variably containing Cac ( ... ) for each element
+	// combination with surrounding parentheses, e.g., '( some words Cac{ ... } [AND] Cac{ ... } [AND] Cac{ ... } ... )', or variably containing Cac ( ... ) for each element
 	"\\" + LEFT_PARENTHESIS +
-	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS + ")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS + OPTIONAL_WORDS_WITH_PARENTHESES + ")+" +
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
 	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
@@ -117,7 +117,7 @@ const PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS =
 	"\\" + RIGHT_PARENTHESIS +
 	// OR
 	"|" +
-	// combinations without parentheses, e.g., some words Cac{ ... } [AND] Cac{ ... } ... (arbitrary length, but no closing parentheses)
+	// combinations without surrounding parentheses, e.g., some words 'Cac{ ... } [AND] Cac{ ... } ...' (arbitrary length, but no closing parentheses)
 	OPTIONAL_WORDS_WITH_PARENTHESES + "(" + FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS + ")+" +
 	"(" +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
@@ -223,14 +223,14 @@ const BRACED_6TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
 	"\\" + RIGHT_BRACE + ")"
 
 // Combinations of combinations for multi-combined component-level nesting, under consideration of termination for atomic matching
-// Used in PRODUCTION
+// Used in detection of component pairs (e.g., 'Bdir((left [XOR] right))') and nested statement combinations (e.g., '{ Cac{ A( ... ) } [XOR] Cac{ A( ... ) } }')
 const NESTED_COMBINATIONS_TERMINATED = COMPONENT_ANNOTATION_SYNTAX +
 	"^" + // Ensure the tested statement only contains combinations, but no leading individual component (i.e., combination embedded in nested statement)
 	BRACED_6TH_ORDER_COMBINATIONS +
 	"$" // Ensure immediate termination of combination with additional trailing components (which would imply nested statement with embedded combination)
 
 // Combination of combinations to represent multi-level nesting (does not require termination, i.e., could be embedded)
-// Used in TESTING
+// Used for detection of component-pair combinations (e.g., '{ I(leftact) Bdir(object1) [XOR] I(rightact) Bdir(object2)}'), and for testing purposes
 const NESTED_COMBINATIONS = COMPONENT_ANNOTATION_SYNTAX +
 	BRACED_6TH_ORDER_COMBINATIONS
 

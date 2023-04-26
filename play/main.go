@@ -14,7 +14,13 @@ This is purely to support development and not included in the deployment.
 */
 func main() {
 
-	text := "Bdir{A(actor2) I(aim2) (((Cac{A(actor3) I(aim3) Bdir(something)} [OR] Cac{A(actor4) I(aim4) Bdir(something else)}) [AND] Cac{A(actor5)}))}"
+	text := "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" +
+		"{I(maintain) Bdir((order [AND] control))  Cac{A(precond)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}} " +
+		"nadndasa {A(another1) Bdir(object1) [OR] A(another2) Bdir(object2)}"
+
+	//text = "{ Cac{A(precond)} Bdir(leftbdir) I(leftact) [XOR] Bdir(rightbdir) I(rightact)}"
+	//text := "D(dlkgjslkj) I(dskgjslkgj) Cac{A(dlksgjs)} Bdir((LFT [XOR] RHT))"
+	//text := "{A(sdkjls) Bdir((LFT [XOR] RHT)) [OR] A(sdkjfs)}"
 
 	exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	exporter.SetDynamicOutput(false)
@@ -24,11 +30,11 @@ func main() {
 
 	tree.SetFlatPrinting(true)
 
-	output, err := parser.ParseStatement(text)
+	_, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Println(output.String())
+	//fmt.Println(output)
 
 }
