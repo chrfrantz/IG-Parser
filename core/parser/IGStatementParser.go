@@ -59,6 +59,8 @@ func ParseStatement(text string) ([]tree.Node, tree.ParsingError) {
 	Println("Statement before parsing: " + s.String())
 
 	Println("Parsing basic statement ...")
+
+	// Process basic components and component combinations
 	if text != "" {
 		Println("Text to be parsed: " + text)
 
