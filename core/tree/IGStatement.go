@@ -114,7 +114,7 @@ func (s *Statement) printComponent(inputString string, indentationLevel int, nod
 	indentString := ""
 	i := 0
 	for i < indentationLevel {
-		indentString += "===="
+		indentString += MinimumIndentPrefix
 		i++
 	}
 
@@ -155,7 +155,8 @@ func (s *Statement) printComponent(inputString string, indentationLevel int, nod
 			// Complex (i.e., nested) node output
 
 			complexPrefix := "{\n"
-			complexSuffix := "\n}"
+			// Indent closing brace at deeper level due to indentation of content
+			complexSuffix := "\n" + indentString + MinimumIndentPrefix + "}"
 			complexSuffixBuilder := strings.Builder{}
 			complexSuffixBuilder.WriteString(complexSuffix)
 
@@ -183,8 +184,12 @@ func (s *Statement) printComponent(inputString string, indentationLevel int, nod
 				complexSuffixBuilder.WriteString(")")
 			}
 
+			// Write out pre-generated information ...
+			// Write prefix
 			b.WriteString(complexPrefix)
-			b.WriteString(node.string(indentationLevel))
+			// Write node component content (may include nested structure)
+			b.WriteString(node.string(indentationLevel + 1))
+			// Write complex node suffix
 			b.WriteString(complexSuffixBuilder.String())
 		} else {
 			// Simple output

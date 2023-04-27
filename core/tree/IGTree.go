@@ -326,7 +326,8 @@ func (n *Node) String() string {
 	return n.string(0)
 }
 
-const minimumPrefix = "===="
+// Indentation unit for statement tree printing
+const MinimumIndentPrefix = "===="
 
 /*
 Variant of String() to produce human-readable output, but allows
@@ -355,7 +356,7 @@ func (n *Node) string(level int) string {
 			if n.Parent != nil {
 				i := 0
 				for i < level {
-					retVal += minimumPrefix
+					retVal += MinimumIndentPrefix
 					i++
 				}
 			}
@@ -396,7 +397,7 @@ func (n *Node) string(level int) string {
 			} else {
 				// Assume entry is statement
 				val := n.Entry.(Statement)
-				retVal = retVal + val.string(level)
+				retVal = retVal + val.string(level+1)
 			}
 		}
 		return retVal
@@ -408,9 +409,8 @@ func (n *Node) string(level int) string {
 		level += 1
 
 		i := 0
-		//prefix := ""
 		for i < level {
-			prefix += minimumPrefix
+			prefix += MinimumIndentPrefix
 			i++
 		}
 
@@ -431,6 +431,7 @@ func (n *Node) string(level int) string {
 			out += prefix + "Shared (right): " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]") + "\n"
 		}
 
+		// Higher-level nesting of combinations - indentation from current level
 		retPrep := "\n" + prefix + "(\n" + //out +
 			prefix + "Left: \n" + n.Left.string(level+1) + "\n" +
 			prefix + "Operator: " + n.LogicalOperator + "\n" +
