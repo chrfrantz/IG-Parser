@@ -618,14 +618,20 @@ func CopyComponentsFromStatement(stmtToCopyTo Statement, stmtToCopyFrom *Stateme
 
 /*
 Overwrites the component value of the statement on which the function is called with the given
-component value. Only copies if target component is nil.
+component value. Combines input with target component if it is populated.
 */
 func copyComponentValue(targetComponent *Node, sourceComponent *Node) *Node {
 	if sourceComponent != nil {
+		// If target component is empty, simply substitute ...
 		if targetComponent == nil {
 			targetComponent = sourceComponent
 		} else {
-			Println("Component copying: Component ", targetComponent, " is not nil.")
+			// ... else combine with existing value (using synthetic AND (bAND))
+			combinedComponent, err := Combine(targetComponent, sourceComponent, SAND_BETWEEN_COMPONENTS)
+			if err.ErrorCode != TREE_NO_ERROR {
+				Println("Component copying failed. Error: ", err)
+			}
+			targetComponent = combinedComponent
 		}
 	}
 	return targetComponent

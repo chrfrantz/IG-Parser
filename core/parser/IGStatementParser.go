@@ -15,7 +15,7 @@ Parses statement tree from input string. Returns statement tree, and error.
 If parsing is successful, error code tree.PARSING_NO_ERROR is returned, else
 other context-specific codes are returned.
 */
-func ParseStatement(text string) ([]tree.Node, tree.ParsingError) {
+func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
 	// Remove line breaks
 	text = CleanInput(text)
@@ -27,18 +27,18 @@ func ParseStatement(text string) ([]tree.Node, tree.ParsingError) {
 	// Validate input string first with respect to parentheses ...
 	err := validateInput(text, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return []tree.Node{}, err
+		return []*tree.Node{}, err
 	}
 	// ... and braces
 	err = validateInput(text, LEFT_BRACE, RIGHT_BRACE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return []tree.Node{}, err
+		return []*tree.Node{}, err
 	}
 
 	// Now extract component-only expressions, nested statements, statement combinations, as well as component pair combinations (Note: only processed at the end of function)
 	compAndNestedStmts, err := SeparateComponentsNestedStatementsCombinationsAndComponentPairs(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return []tree.Node{}, err
+		return []*tree.Node{}, err
 	}
 	Println("Returned separated components including component combinations (element [0]), \nnested statements/components (element [1]), \nnested component combinations (element [2]) and \ncomponent pair combinations (element [3]): " + fmt.Sprint(compAndNestedStmts))
 	// Extract component-only statement and override input (e.g., A(content))
@@ -68,7 +68,7 @@ func ParseStatement(text string) ([]tree.Node, tree.ParsingError) {
 		_, outErr := parseBasicStatement(text, &s)
 		if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 			// Populate return structure
-			ret := []tree.Node{tree.Node{Entry: s}}
+			ret := []*tree.Node{&tree.Node{Entry: s}}
 			return ret, outErr
 		}
 
@@ -90,7 +90,7 @@ func ParseStatement(text string) ([]tree.Node, tree.ParsingError) {
 			Println("Reclassifying statement as nested statement (as opposed to nested combination) ...")
 		} else if err.ErrorCode != tree.PARSING_NO_ERROR {
 			// Populate return structure
-			ret := []tree.Node{tree.Node{Entry: s}}
+			ret := []*tree.Node{&tree.Node{Entry: s}}
 			return ret, err
 		}
 	}
@@ -105,12 +105,12 @@ func ParseStatement(text string) ([]tree.Node, tree.ParsingError) {
 		// Check whether nested statements have been ignored entirely
 		if err.ErrorCode == tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
 			// Populate return structure
-			ret := []tree.Node{tree.Node{Entry: s}}
+			ret := []*tree.Node{&tree.Node{Entry: s}}
 			return ret, err
 		}
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			// Populate return structure
-			ret := []tree.Node{tree.Node{Entry: s}}
+			ret := []*tree.Node{&tree.Node{Entry: s}}
 			return ret, err
 		}
 	}
@@ -131,7 +131,7 @@ func ParseStatement(text string) ([]tree.Node, tree.ParsingError) {
 	}
 
 	// Else return wrapped statement
-	return []tree.Node{tree.Node{Entry: s}}, err
+	return []*tree.Node{&tree.Node{Entry: s}}, err
 }
 
 func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.ParsingError) {
@@ -408,47 +408,47 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		case tree.ATTRIBUTES_PROPERTY:
 			Println("Attaching nested attributes property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.AttributesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, &stmtNode)
+			stmtToAttachTo.AttributesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, stmtNode)
 		case tree.DIRECT_OBJECT_PROPERTY:
 			Println("Attaching nested direct object property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.DirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, &stmtNode)
+			stmtToAttachTo.DirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, stmtNode)
 		case tree.DIRECT_OBJECT:
 			Println("Attaching nested direct object to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.DirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, &stmtNode)
+			stmtToAttachTo.DirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, stmtNode)
 		case tree.INDIRECT_OBJECT_PROPERTY:
 			Println("Attaching nested indirect object property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.IndirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, &stmtNode)
+			stmtToAttachTo.IndirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, stmtNode)
 		case tree.INDIRECT_OBJECT:
 			Println("Attaching nested indirect object to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.IndirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, &stmtNode)
+			stmtToAttachTo.IndirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, stmtNode)
 		case tree.ACTIVATION_CONDITION:
 			Println("Attaching nested activation condition to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ActivationConditionComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, &stmtNode)
+			stmtToAttachTo.ActivationConditionComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, stmtNode)
 		case tree.EXECUTION_CONSTRAINT:
 			Println("Attaching nested execution constraint to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ExecutionConstraintComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, &stmtNode)
+			stmtToAttachTo.ExecutionConstraintComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, stmtNode)
 		case tree.CONSTITUTED_ENTITY_PROPERTY:
 			Println("Attaching nested constituted entity property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutedEntityPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, &stmtNode)
+			stmtToAttachTo.ConstitutedEntityPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, stmtNode)
 		case tree.CONSTITUTING_PROPERTIES_PROPERTY:
 			Println("Attaching nested constituting properties property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutingPropertiesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, &stmtNode)
+			stmtToAttachTo.ConstitutingPropertiesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, stmtNode)
 		case tree.CONSTITUTING_PROPERTIES:
 			Println("Attaching nested constituting properties to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutingPropertiesComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, &stmtNode)
+			stmtToAttachTo.ConstitutingPropertiesComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, stmtNode)
 		case tree.OR_ELSE:
 			Println("Attaching nested or else to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.OrElse, nodeCombinationError = attachComplexComponent(stmtToAttachTo.OrElse, &stmtNode)
+			stmtToAttachTo.OrElse, nodeCombinationError = attachComplexComponent(stmtToAttachTo.OrElse, stmtNode)
 		}
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -747,7 +747,7 @@ func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 
 		// Iterate through identified nested statements (if any) and remove those from statement
 		for _, v := range nestedStmts {
-			// Extract statements of structure { LEFT [AND] RIGHT }
+			// Extract statements of structure (e.g., Cac{ LEFT [AND] RIGHT }) - note: component prefix is necessary for combinations and single nested statements
 			r2, err2 := regexp.Compile(NESTED_COMBINATIONS_TERMINATED)
 			if err2 != nil {
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
@@ -766,7 +766,7 @@ func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 			} else {
 				// Identified single nested statement
 
-				// Append extracted nested statements including component prefix
+				// Append extracted nested statements including component prefix (e.g., Cac{ A(stuff) ... })
 				completeNestedStmts = append(completeNestedStmts, v)
 				Println("Added candidate for single nested statement:", v)
 
@@ -799,8 +799,8 @@ func identifyComponentPairCombinations(statement string) ([]string, tree.Parsing
 
 	r, err := regexp.Compile(NESTED_COMBINATIONS)
 	if err != nil {
+		Println("Error in regex compilation", err.Error())
 		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
-		//log.Fatal("Error", err.Error())
 	}
 
 	// Extract all matches as string array
@@ -814,10 +814,10 @@ func identifyComponentPairCombinations(statement string) ([]string, tree.Parsing
 /*
 Process pair combinations and extrapolate individual statements and populate with content from atomic input statement.
 */
-func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string) ([]tree.Node, tree.ParsingError) {
+func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string) ([]*tree.Node, tree.ParsingError) {
 
 	// Parse all elements of tree structure
-	extrapolatedPairStmts := []tree.Node{}
+	extrapolatedPairStmts := []*tree.Node{}
 	for k, v := range pairs {
 		Println("Iteration ", k)
 
@@ -848,14 +848,20 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_TOO_MANY_NODES, ErrorMessage: "Expecting single node/statement, as opposed to multiple. Aborting extrapolation of statements"}
 			}
 
+			// Assign node embedding statement to higher-level node containing statement collection
+			tpNode[0].Parent = v2
+
 			// Complete decomposed partial statement with parsed linear statement (can only be one statement in decomposed pair combinations)
 			tpNode[0].Entry = tree.CopyComponentsFromStatement(tpNode[0].Entry.(tree.Statement), s)
+
+			// Assign statement to statement tree (top-level extrapolated structure)
+			v2.Parent = idvStmt
 
 			// Replace Entry content
 			v2.Entry = tpNode
 		}
 		// Store parsed statement to return structure
-		extrapolatedPairStmts = append(extrapolatedPairStmts, *idvStmt)
+		extrapolatedPairStmts = append(extrapolatedPairStmts, idvStmt)
 	}
 
 	Println("Number of elements: ", len(extrapolatedPairStmts))

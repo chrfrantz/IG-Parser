@@ -378,10 +378,10 @@ func (n *Node) string(level int) string {
 		} else {
 
 			// Check whether it returns embedded node structure - points to incorrect implementation of parsing based on node-embedded return structures
-			if reflect.TypeOf([]Node{}) == reflect.TypeOf(n.Entry) {
+			if reflect.TypeOf([]*Node{}) == reflect.TypeOf(n.Entry) {
 
 				// Iterate through nodes and parse depending on whether statement or simple node
-				entries := n.Entry.([]Node)
+				entries := n.Entry.([]*Node)
 				entriesPrint := ""
 				for _, v := range entries {
 					if reflect.TypeOf(Statement{}) == reflect.TypeOf(v.Entry) {
@@ -697,8 +697,11 @@ func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []
 
 	// If not successful, recurse upwards, and attempt again, with reference to the explore parent as last node (to prevent repeated exploration)
 	if !response {
-		// Explicit include logical operator if moving upward
-		opsPath = append(opsPath, lastNode.Parent.LogicalOperator)
+
+		// Explicitly include logical operator if moving upward (if populated)
+		if lastNode.Parent.LogicalOperator != "" {
+			opsPath = append(opsPath, lastNode.Parent.LogicalOperator)
+		}
 		//Println("Search one level higher above ", lastNode.Parent)
 		response, ops, err = searchUpward(originNode, lastNode.Parent, targetNode, opsPath)
 	}
@@ -722,9 +725,9 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		return true, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 
-	// if leaf and does not match, return false
-	if startNode.IsLeafNode() {
-		//Println("Search node ", startNode, " is leaf, but does not corresponding to the target node. Node: ", targetNode)
+	// if leaf and does not match && if entry does not contain Node[] collection (in which case there are embedded statements), return false
+	if startNode.IsLeafNode() && (startNode == nil || startNode.Entry == nil || reflect.TypeOf(startNode.Entry) != reflect.TypeOf([]*Node{})) {
+		Println("Search node ", startNode, " is leaf, but does not corresponding to the target node. Node: ", targetNode)
 		return false, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 
@@ -736,11 +739,30 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 	}
 
 	// Append start node operator
-	ops = append(ops, startNode.LogicalOperator)
-	//Println("Added logical operator ", startNode.LogicalOperator)
+	if startNode.LogicalOperator != "" {
+		ops = append(ops, startNode.LogicalOperator)
+		//Println("Added logical operator ", startNode.LogicalOperator)
+	}
 
 	// Predefine response values
-	err := NodeError{ErrorCode: TREE_NO_ERROR}
+	errSuccess := NodeError{ErrorCode: TREE_NO_ERROR}
+
+	// If left and right are empty, check for []Node in entry (extrapolated statement) - should only hold if no branch (i.e., left and right) is populated
+	// NOTE: Avoid upward search following downward search into []Node, since that may lead to infinite loop
+	if startNode.Left == nil && startNode.Right == nil && reflect.TypeOf(startNode.Entry) == reflect.TypeOf([]*Node{}) {
+		for _, v := range startNode.Entry.([]*Node) {
+			response, ops4, err := searchDownward(originNode, startNode, v, targetNode, ops)
+			// return lacking success if appearing
+			if err.ErrorCode != TREE_NO_ERROR {
+				return false, ops4, err
+			}
+			// If positive outcome
+			if response {
+				Println("Found target in nested statement collection (extrapolated structure)")
+				return true, ops4, errSuccess
+			}
+		}
+	}
 
 	// Test left first - it must not be nil, and not be the last explored node (i.e., a left child of the currently explored one)
 	if startNode.Left != nil && startNode.Left != lastNode {
@@ -753,7 +775,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on left side")
-			return true, ops2, err
+			return true, ops2, errSuccess
 		}
 		// Delegate downwards
 		//Println("- Test left left")
@@ -765,7 +787,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on left left side")
-			return true, ops3, err
+			return true, ops3, errSuccess
 		}
 		//Println("- Test left right")
 		response, ops3, err = searchDownward(originNode, startNode.Left.Right, startNode.Left.Right, targetNode, ops2)
@@ -776,7 +798,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on left right side")
-			return true, ops3, err
+			return true, ops3, errSuccess
 		}
 	}
 	// Test right (will only be done if left was not successful)
@@ -791,7 +813,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on right side")
-			return true, ops2, err
+			return true, ops2, errSuccess
 		}
 		// Delegate downwards
 		//Println("- Test right left")
@@ -803,7 +825,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on right left side")
-			return true, ops3, err
+			return true, ops3, errSuccess
 		}
 		//Println("- Test right right")
 		response, ops3, err = searchDownward(originNode, startNode.Right.Right, startNode.Right.Right, targetNode, ops2)
@@ -814,11 +836,12 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			Println("Found target on right right side")
-			return true, ops3, err
+			return true, ops3, errSuccess
 		}
 	}
+
 	//Println("Final result: false")
-	return false, ops, err
+	return false, ops, errSuccess
 }
 
 /*
@@ -1206,6 +1229,64 @@ func (n *Node) GetLeafNodesWithoutGivenNode(aggregateImplicitLinkages bool, node
 }
 
 /*
+Returns top-level nodes containing statements. If none is found, returns nil.
+*/
+func (n *Node) GetTopLevelStatementNodes() []*Node {
+
+	// Move to root first and work downwards
+	root := n.GetRootNode()
+
+	// Check that root is not empty
+	if root.IsEmptyOrNilNode() {
+		return nil
+	}
+
+	// Navigate downwards
+	return findTopLevelStatementBelowNode(root, []*Node{})
+}
+
+/*
+Retrieves top-level statements in nodes on or below given node.
+
+Takes starting node as input as well as initialized collection for returned statements.
+*/
+func findTopLevelStatementBelowNode(node *Node, stmts []*Node) []*Node {
+
+	// Test whether node itself is single and has statement embedded
+	if node.Entry != nil && reflect.TypeOf(node.Entry) == reflect.TypeOf(Statement{}) {
+		// If root has statement in Entry, then return this as top-level statement
+		return append(stmts, node)
+	}
+
+	// Iterate through nodes array (if present)
+	if node.Entry != nil && reflect.TypeOf(node.Entry) == reflect.TypeOf([]*Node{}) {
+		for _, v := range node.Entry.([]*Node) {
+			stmts = findTopLevelStatementBelowNode(v, stmts)
+		}
+	}
+
+	// test left side downwards
+	if node.IsCombination() && !node.Left.IsEmptyOrNilNode() {
+		if node.Left.IsCombination() || reflect.TypeOf(node.Left.Entry) != reflect.TypeOf([]Statement{}) {
+			stmts = findTopLevelStatementBelowNode(node.Left, stmts)
+		} else if reflect.TypeOf(node.Left.Entry) == reflect.TypeOf(Statement{}) {
+			stmts = append(stmts, node.Left)
+		}
+	}
+
+	// test right side downwards
+	if node.IsCombination() && !node.Right.IsEmptyOrNilNode() {
+		if node.Right.IsCombination() || reflect.TypeOf(node.Right.Entry) != reflect.TypeOf([]Statement{}) {
+			stmts = findTopLevelStatementBelowNode(node.Right, stmts)
+		} else if reflect.TypeOf(node.Right.Entry) == reflect.TypeOf(Statement{}) {
+			stmts = append(stmts, node.Right)
+		}
+	}
+
+	return stmts
+}
+
+/*
 Enables different forms of node aggregation, where aggregationType 0 indicates flat combination of nodes in array ([ ..., one, two, ...]),
 and aggregationType 1 indicates returning node arrays within node array ([ ..., [one, two], ...])
 Takes populated leaf arrays as input and prepared return structure for output.
@@ -1422,7 +1503,7 @@ func (n *Node) GetAnnotations() interface{} {
 /*
 Helper function to pretty-print node arrays
 */
-func PrintNodes(nodes []Node) string {
+func PrintNodes(nodes []*Node) string {
 	outString := "\n"
 	for i, v := range nodes {
 		outString += "Node " + strconv.Itoa(i) + ": \n"
