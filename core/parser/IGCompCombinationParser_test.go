@@ -576,11 +576,11 @@ func TestSharedElementsAndAndCombinationWithoutInheritance(t *testing.T) {
 		t.Fatal("Parsed right shared value is not correct. Output: " + fmt.Sprint(node.GetSharedRight()))
 	}
 
-	if len(node.Left.GetSharedLeft()) > 1 || node.Left.GetSharedLeft()[0] != "" {
+	if node.Left.GetSharedLeft() != nil {
 		t.Fatal("Left-nested left node should not inherit shared value. Node value: " + fmt.Sprint(node.Left.GetSharedLeft()) + ". Expected output: ")
 	}
 
-	if len(node.Left.GetSharedRight()) > 1 || node.Left.GetSharedRight()[0] != "" {
+	if node.Left.GetSharedRight() != nil {
 		t.Fatal("Left-nested right node should not inherit shared value. Node value: " + fmt.Sprint(node.Left.GetSharedRight()) + ". Expected output: ")
 	}
 

@@ -797,6 +797,11 @@ func inheritSharedElements(node *tree.Node) {
 */
 
 /*
+Symbols to be ignored when determining strings shared across combinations (e.g., 'shared' in 'Bdir(shared (left [AND] right))') - commonly parentheses and braces
+*/
+const ignoredSymbolsInSharedFields = "(){}"
+
+/*
 Extracts left and right shared elements of a combination (e.g., (left shared (left [AND] right) right shared))
 Input: full string, all boundaries and reference to combination for which shared entries are sought
 Return: string arrays for left and right side shared components
@@ -838,32 +843,38 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 			}
 
 			// Get rid of parentheses first
-			val = strings.Trim(val, "()")
+			val = strings.Trim(val, ignoredSymbolsInSharedFields)
 			// Then get rid of spaces
 			val = strings.TrimSpace(val)
 			Println("Identified left shared value:", val)
-			sharedLeft = append(sharedLeft, val)
+			if val != "" {
+				sharedLeft = append(sharedLeft, val)
+			}
 		} else {
 			// If element is left (e.g., wAND combined on same level), only consider string to boundary as shared
 			val := input[boundaries[level][index-1].Right:boundaries[level][index].Left]
 			// Get rid of parentheses first
-			val = strings.Trim(val, "()")
+			val = strings.Trim(val, ignoredSymbolsInSharedFields)
 			// Then get rid of spaces
 			val = strings.TrimSpace(val)
 			Println("Identified left shared value in multi-value component:", val)
-			sharedLeft = append(sharedLeft, val)
+			if val != "" {
+				sharedLeft = append(sharedLeft, val)
+			}
 		}
 
 		// RIGHT SIDE
 		// Check if other combination (i.e., higher index) exists, and only consider elements to that boundary as shared right
-		if val, ok := boundaries[level][index+1]; ok {
-			val := input[boundaries[level][index].Right:val.Left]
+		if value, ok := boundaries[level][index+1]; ok {
+			val := input[boundaries[level][index].Right:value.Left]
 			// Get rid of parentheses first
-			val = strings.Trim(val, "()")
+			val = strings.Trim(val, ignoredSymbolsInSharedFields)
 			// Then get rid of spaces
 			val = strings.TrimSpace(val)
 			Println("Identified right shared value in multi-value component:", val)
-			sharedRight = append(sharedRight, val)
+			if val != "" {
+				sharedRight = append(sharedRight, val)
+			}
 		} else {
 			// Else take the entire remaining string on the right, unless ...
 			val := input[boundaries[level][index].Right:]
@@ -885,12 +896,18 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 				val = input[boundaries[level][index].Right:boundaries[level-1][outerBoundary].Right]
 			}
 			// Get rid of parentheses first
-			val = strings.Trim(val, "()")
+			val = strings.Trim(val, ignoredSymbolsInSharedFields)
 			// Then get rid of spaces
 			val = strings.TrimSpace(val)
 			Println("Identified right shared value:", val)
-			sharedRight = append(sharedRight, val)
+			if val != "" {
+				sharedRight = append(sharedRight, val)
+			}
 		}
+	}
+	// Return nil if nothing found
+	if len(sharedLeft) == 0 && len(sharedRight) == 0 {
+		return nil, nil
 	}
 	return sharedLeft, sharedRight
 }
