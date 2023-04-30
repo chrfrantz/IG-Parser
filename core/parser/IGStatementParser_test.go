@@ -2342,12 +2342,6 @@ func TestComponentPairCombinationTreeParsingWithAtomicComponents(t *testing.T) {
 		t.Fatal("Component has not been correctly parsed. Value: ", val)
 	}
 
-	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
-
-	if val != "peace" {
-		t.Fatal("Component has not been correctly parsed. Value: ", val)
-	}
-
 	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).IndirectObject.Entry
 
 	if val != "indirectobject" {
@@ -2407,6 +2401,347 @@ func TestComponentPairCombinationTreeParsingWithAtomicComponents(t *testing.T) {
 	// injected atomic nested condition
 
 	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "atomicnestedcondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+}
+
+/*
+Tests complex component pair example with atomic components and component combinations (combines all statement classes).
+Implicitly tests CopyComponent function which needs to reconcile populated component fields.
+*/
+func TestComponentPairCombinationTreeParsingWithAtomicComponentsAndComponentCombinations(t *testing.T) {
+
+	text := "D(deontic) Cac(atomicCondition) (lkjsdkljs) Bind(indirectobject) Cac{A(atomicnestedcondition)} " +
+		"{I(maintain) Bdir((order [AND] control))  Cac{A(sharednestedcondition)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}} " +
+		" Cac{Cac{ A(leftcombo) I(leftaim) } [XOR] Cac{ Cac{ A(rightleftcombo) I(rightleftaim) } [AND] Cac{ A(rightrightcombo) I(rightrightaim) }}}"
+
+	s, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing returned error:", err)
+	}
+
+	if len(s) > 1 {
+		t.Fatal("Found more than one node:", len(s))
+	}
+
+	res := s[0]
+
+	// Logical operator
+
+	val1 := res.LogicalOperator
+
+	if val1 != "XOR" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val1)
+	}
+
+	// Test left side
+
+	val := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Deontic.Entry
+
+	if val != "deontic" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
+
+	if val != "maintain" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Nested combination
+
+	val2 := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.LogicalOperator
+
+	if val2 != "AND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val2)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != nil {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Left.Entry
+
+	if val != "order" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Right.Entry
+
+	if val != "control" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Indirect object
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).IndirectObject.Entry
+
+	if val != "indirectobject" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Activation condition
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionSimple.Entry
+
+	if val != "atomicCondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Nested shared condition (combined with individual nested condition) - tests aggregation into node
+
+	val5 := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.LogicalOperator
+
+	if val5 != "bAND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val5)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "sharednestedcondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Left.Left.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "leftcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Left.Left.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "leftaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Nested activation condition right, left, right branch
+
+	val6 := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Left.Right.LogicalOperator
+
+	if val6 != "AND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val6)
+	}
+
+	// left subbranch
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Left.Right.Left.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "rightleftcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Left.Right.Left.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "rightleftaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// right subbranch
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Left.Right.Right.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "rightrightcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Left.Right.Right.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "rightrightaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Right side
+
+	// nested logical operator
+
+	val4 := res.Right.LogicalOperator
+
+	if val4 != "OR" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val4)
+	}
+
+	// Right left nested
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Deontic.Entry
+
+	if val != "deontic" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
+
+	if val != "sustain" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "peace" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).IndirectObject.Entry
+
+	if val != "indirectobject" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// injected atomic condition
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionSimple.Entry
+
+	if val != "atomicCondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// combined activation condition on right left left side
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Left.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "leftcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Left.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "leftaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// ... right left right side
+
+	val7 := res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.LogicalOperator
+
+	if val7 != "AND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val7)
+	}
+
+	// left subbranch
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.Left.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "rightleftcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.Left.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "rightleftaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// right subbranch
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.Right.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "rightrightcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.Right.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "rightrightaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Right right nested
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Deontic.Entry
+
+	if val != "deontic" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
+
+	if val != "prevent" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "war" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).IndirectObject.Entry
+
+	if val != "indirectobject" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// injected atomic condition
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionSimple.Entry
+
+	if val != "atomicCondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// inject component combination
+
+	val8 := res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.LogicalOperator
+
+	if val8 != "AND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val8)
+	}
+
+	val9 := res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.LogicalOperator
+
+	if val9 != "XOR" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val9)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Left.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "leftcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Left.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "leftaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val10 := res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.LogicalOperator
+
+	if val10 != "AND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val10)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.Left.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "rightleftcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.Left.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "rightleftaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.Right.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "rightrightcombo" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Right.Right.Entry.(*tree.Statement).Aim.Entry
+
+	if val != "rightrightaim" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// individual condition on right side
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Entry.(*tree.Statement).Attributes.Entry
 
 	if val != "atomicnestedcondition" {
 		t.Fatal("Component has not been correctly parsed. Value: ", val)
