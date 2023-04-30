@@ -233,8 +233,9 @@ const BRACED_6TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
 // Combinations of combinations for multi-combined component-level nesting, under consideration of termination for atomic matching
 const NESTED_COMBINATIONS_TERMINATED =
 // Component combinations need to lead with component identifier (and potential suffix and annotation)
-COMPONENT_HEADER_SYNTAX +
-	"^" + // Ensure the tested statement only contains combinations, but no leading individual component (i.e., combination embedded in nested statement)
+"^" +
+	COMPONENT_HEADER_SYNTAX +
+	// Ensure the tested statement only contains combinations, but no leading individual component (i.e., combination embedded in nested statement)
 	BRACED_6TH_ORDER_COMBINATIONS +
 	"$" // Ensure immediate termination of combination with additional trailing components (which would imply nested statement with embedded combination)
 

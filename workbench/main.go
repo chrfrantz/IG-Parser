@@ -20,30 +20,37 @@ func main() {
 
 	//text = "nadndasa {A(another1) Bdir(object1) Cac{A(dklj)} [OR] A(another2) Bdir(object2)}"
 
-	// Component pair combos
-	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " { Cac{Cac{A(precond2)} [XOR] Cac{A(precond3)}} [AND] Cac{A(another2)}}"
+	// Component pair combos with atomic components
+	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " Cac{Cac{Cac{A(precond2)} [XOR] Cac{A(precond3)}} [AND] Cac{A(another2)}}"
 
-	// Component combination
-	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " Cac{Cac{A(precond2)} [AND] {Cac{A(another2) I(dgjlskdjg)} [XOR] Cac{A(thirdone)}}}"
+	// Component combination with atomic components
+	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " { Cac{A(precond2)} [AND] {Cac{A(another2) I(dgjlskdjg)} [XOR] Cac{A(thirdone)}}}"
 
-	// Nested component
+	// Nested component with atomic components
 	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " Cac{A(precond2)}"
 
 	// Component combination in component pair combination
 	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " { Cac{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}} [AND] Cac{A(another2)} }"
 
-	// Basic pattern
+	// Basic pattern with within-component nested components
 	//text = "A(dskgjsl) Bdir((left [XOR] right)) Cac(aldgjslk)"
 
+	// Component combination with gibberish
 	//text = "dssgs Cac{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}} sdsdg "
+
+	// Pure component pair
 	//text = "{ Cac{A(precond)} Bdir(leftbdir) I(leftact) [XOR] Bdir(rightbdir) I(rightact)}"
 
+	// Combination of nested component and within-component nesting
 	//text = "D(dlkgjslkj) I(dskgjslkgj) Cac{A(dlksgjs)} Bdir((LFT [XOR] RHT))"
+
+	// Single component-level nesting
 	//text = "D(dlkgjslkj) I(dskgjslkgj) Cac{A(dlksgjs)} Bdir(object)"
 
+	// Component pair combination for distinction with component combinations
 	//text = "{Cac{A(sdlkgjsdlk) Bdir{A(aljdgs) I(kdsjglkj) Bdir(dkslgj)}} [XOR] Cac{A(skdfjcs) Bdir{A(dlksgjie) I(dsklgjiv) Bdir(lkdsjgei)}}}"
 
-	// private property
+	// Private property parsing
 	//text = "{A,p(first) A(farmer) [OR] A(citizen)}"
 
 	//text = "Bdir{A1,p(first) (A1(farmer) [OR] A2(citizen))}"
