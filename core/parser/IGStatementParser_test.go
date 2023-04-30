@@ -18,7 +18,9 @@ func TestStatementParsingIncludingSyntheticANDs(t *testing.T) {
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
-	s, err := ParseStatement(text)
+	stmt, err := ParseStatement(text)
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
@@ -103,7 +105,7 @@ func TestLeafArrayGenerationWithoutAggregationOfImplicitlyLinkedComponents(t *te
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
 
-	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+	nodeArray, componentIdx := s[0].Entry.(*tree.Statement).GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil {
 		t.Fatal("Generated array should not be empty.")
@@ -212,7 +214,7 @@ func TestLeafArrayGenerationWithAggregationOfImplicitlyLinkedComponents(t *testi
 		t.Fatal("Unexpected error during parsing: ", err.Error())
 	}
 
-	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+	nodeArray, componentIdx := s[0].Entry.(*tree.Statement).GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	if nodeArray == nil {
 		t.Fatal("Generated array should not be empty.")
@@ -294,7 +296,7 @@ func TestSyntheticRootRetrieval(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	nodeArray, componentIdx := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+	nodeArray, componentIdx := s[0].Entry.(*tree.Statement).GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 
 	fmt.Println(nodeArray)
 	fmt.Println(componentIdx)
@@ -383,7 +385,9 @@ func TestComponentTwoLevelNestedStatement(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
 		"Cac{A(Programme Manager) I(suspects) Bdir(violations) Cac{A(NOP Manager) I(orders) Bdir(review)}}"
 
-	s, err := ParseStatement(text)
+	stmt, err := ParseStatement(text)
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	fmt.Println(s.String())
 
@@ -456,51 +460,51 @@ func TestComponentTwoLevelNestedStatement(t *testing.T) {
 		t.Fatal("Did detect activation condition as primitive entry")
 	}
 
-	if !element[0].Entry.(tree.Statement).Attributes.HasPrimitiveEntry() {
+	if !element[0].Entry.(*tree.Statement).Attributes.HasPrimitiveEntry() {
 		t.Fatal("Did not detect attribute as primitive entry")
 	}
 
-	if element[0].Entry.(tree.Statement).Attributes.Entry == nil {
+	if element[0].Entry.(*tree.Statement).Attributes.Entry == nil {
 		t.Fatal("Did detect attribute entry as nil")
 	}
 
-	if element[0].Entry.(tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
+	if element[0].Entry.(*tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
 		t.Fatal("Incorrectly detected attribute in nested activation condition")
 	}
 
-	if element[0].Entry.(tree.Statement).Aim.Entry.(string) != "suspects" {
+	if element[0].Entry.(*tree.Statement).Aim.Entry.(string) != "suspects" {
 		t.Fatal("Incorrectly detected attribute in nested activation condition")
 	}
 
 	// Test for nested elements
-	nestedStmt := element[0].Entry.(tree.Statement)
+	nestedStmt := element[0].Entry.(*tree.Statement)
 	leaves, _ := nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 4 {
 		t.Fatal("Did not leaf elements of first-order nested statement correctly")
 	}
 
-	if !element[0].Entry.(tree.Statement).ActivationConditionSimple.IsNil() {
+	if !element[0].Entry.(*tree.Statement).ActivationConditionSimple.IsNil() {
 		t.Fatal("Simple activation condition field of nested statement should be nil")
 	}
 
 	// Test for second-order nested statements
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.IsNil() {
+	if element[0].Entry.(*tree.Statement).ActivationConditionComplex.IsNil() {
 		t.Fatal("Complex activation condition field of nested statement should not be nil")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "NOP Manager" {
+	if element[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Attributes.Entry != "NOP Manager" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "orders" {
+	if element[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Aim.Entry != "orders" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).DirectObject.Entry != "review" {
+	if element[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).DirectObject.Entry != "review" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	nestedStmt = element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
+	nestedStmt = element[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement)
 	leaves, _ = nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 3 {
 		t.Fatal("Did not leaf elements of second-order nested statement correctly")
@@ -548,7 +552,9 @@ func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 		"Cac{A(Programme Manager) I(suspects) Bdir(violations) Cac{A(NOP Manager) I(orders) Bdir(review)}}" +
 		"Cac((regular precondition [AND] another precondition))"
 
-	s, err := ParseStatement(text)
+	stmt, err := ParseStatement(text)
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	fmt.Println(s.String())
 
@@ -651,51 +657,51 @@ func TestComponentTwoLevelNestedStatementAndSimpleCombination(t *testing.T) {
 	// complex activation condition
 	element = nodeArray[6]
 
-	if !element[0].Entry.(tree.Statement).Attributes.HasPrimitiveEntry() {
+	if !element[0].Entry.(*tree.Statement).Attributes.HasPrimitiveEntry() {
 		t.Fatal("Did not detect attribute as primitive entry")
 	}
 
-	if element[0].Entry.(tree.Statement).Attributes.Entry == nil {
+	if element[0].Entry.(*tree.Statement).Attributes.Entry == nil {
 		t.Fatal("Did detect attribute entry as nil")
 	}
 
-	if element[0].Entry.(tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
+	if element[0].Entry.(*tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
 		t.Fatal("Incorrectly detected attribute in nested activation condition")
 	}
 
-	if element[0].Entry.(tree.Statement).Aim.Entry.(string) != "suspects" {
+	if element[0].Entry.(*tree.Statement).Aim.Entry.(string) != "suspects" {
 		t.Fatal("Incorrectly detected attribute in nested activation condition")
 	}
 
 	// Test for nested elements
-	nestedStmt := element[0].Entry.(tree.Statement)
+	nestedStmt := element[0].Entry.(*tree.Statement)
 	leaves, _ := nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 4 {
 		t.Fatal("Did not leaf elements of first-order nested statement correctly")
 	}
 
-	if !element[0].Entry.(tree.Statement).ActivationConditionSimple.IsNil() {
+	if !element[0].Entry.(*tree.Statement).ActivationConditionSimple.IsNil() {
 		t.Fatal("Simple activation condition field of nested statement should be nil")
 	}
 
 	// Test for second-order nested statements
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.IsNil() {
+	if element[0].Entry.(*tree.Statement).ActivationConditionComplex.IsNil() {
 		t.Fatal("Complex activation condition field of nested statement should not be nil")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "NOP Manager" {
+	if element[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Attributes.Entry != "NOP Manager" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "orders" {
+	if element[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Aim.Entry != "orders" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	if element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).DirectObject.Entry != "review" {
+	if element[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).DirectObject.Entry != "review" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	nestedStmt = element[0].Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
+	nestedStmt = element[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement)
 	leaves, _ = nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 3 {
 		t.Fatal("Did not leaf elements of second-order nested statement correctly")
@@ -746,7 +752,9 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 		"Cac{A(Programme Manager) I(suspects) Bdir(violations) Cac{A(NOP Manager) I(orders) Bdir(review)}}" +
 		"Cac{E(Program Manager) F(is) P(qualified)}"
 
-	s, err := ParseStatement(text)
+	stmt, err := ParseStatement(text)
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	fmt.Println(s.String())
 
@@ -821,51 +829,51 @@ func TestComponentMultipleHorizontallyNestedStatement(t *testing.T) {
 		t.Fatal("Did detect activation condition as primitive entry")
 	}
 
-	if !element[0].Left.Entry.(tree.Statement).Attributes.HasPrimitiveEntry() {
+	if !element[0].Left.Entry.(*tree.Statement).Attributes.HasPrimitiveEntry() {
 		t.Fatal("Did not detect attribute as primitive entry (Entry:", element[0].Entry, ")")
 	}
 
-	if element[0].Left.Entry.(tree.Statement).Attributes.Entry == nil {
+	if element[0].Left.Entry.(*tree.Statement).Attributes.Entry == nil {
 		t.Fatal("Did detect attribute entry as nil")
 	}
 
-	if element[0].Left.Entry.(tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
+	if element[0].Left.Entry.(*tree.Statement).Attributes.Entry.(string) != "Programme Manager" {
 		t.Fatal("Incorrectly detected attribute in nested activation condition")
 	}
 
-	if element[0].Left.Entry.(tree.Statement).Aim.Entry.(string) != "suspects" {
+	if element[0].Left.Entry.(*tree.Statement).Aim.Entry.(string) != "suspects" {
 		t.Fatal("Incorrectly detected attribute in nested activation condition")
 	}
 
 	// Test for nested elements
-	nestedStmt := element[0].Left.Entry.(tree.Statement)
+	nestedStmt := element[0].Left.Entry.(*tree.Statement)
 	leaves, _ := nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 4 {
 		t.Fatal("Did not leaf elements of first-order nested statement correctly")
 	}
 
-	if !element[0].Left.Entry.(tree.Statement).ActivationConditionSimple.IsNil() {
+	if !element[0].Left.Entry.(*tree.Statement).ActivationConditionSimple.IsNil() {
 		t.Fatal("Simple activation condition field of nested statement should be nil")
 	}
 
 	// Test for second-order nested statements
-	if element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.IsNil() {
+	if element[0].Left.Entry.(*tree.Statement).ActivationConditionComplex.IsNil() {
 		t.Fatal("Complex activation condition field of nested statement should not be nil")
 	}
 
-	if element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "NOP Manager" {
+	if element[0].Left.Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Attributes.Entry != "NOP Manager" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	if element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "orders" {
+	if element[0].Left.Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Aim.Entry != "orders" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	if element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement).DirectObject.Entry != "review" {
+	if element[0].Left.Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).DirectObject.Entry != "review" {
 		t.Fatal("Did not correctly detect second-order nested activation condition element")
 	}
 
-	nestedStmt = element[0].Left.Entry.(tree.Statement).ActivationConditionComplex.Entry.(tree.Statement)
+	nestedStmt = element[0].Left.Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement)
 	leaves, _ = nestedStmt.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
 	if len(leaves) != 3 {
 		t.Fatal("Did not leaf elements of second-order nested statement correctly")
@@ -944,12 +952,12 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 	}
 
 	// Parse all entries in tree from string to statement
-	err := combo.ParseAllEntries(func(oldValue string) (tree.Statement, tree.ParsingError) {
+	err := combo.ParseAllEntries(func(oldValue string) (*tree.Statement, tree.ParsingError) {
 		stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1 : strings.LastIndex(oldValue, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
-			return stmt, errStmt
+			return stmt[0].Entry.(*tree.Statement), errStmt
 		}
-		return stmt, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+		return stmt[0].Entry.(*tree.Statement), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 	})
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Conversion of string entries to parsed statements failed:", err.Error())
@@ -961,17 +969,17 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 
 	fmt.Println(combo.String())
 
-	if combo.Left.Entry.(tree.Statement).ConstitutedEntity.Entry != "Program Manager" ||
-		combo.Left.Entry.(tree.Statement).ConstitutingProperties.Entry != "qualified" ||
-		combo.Left.Entry.(tree.Statement).ConstitutiveFunction.Entry != "is" ||
+	if combo.Left.Entry.(*tree.Statement).ConstitutedEntity.Entry != "Program Manager" ||
+		combo.Left.Entry.(*tree.Statement).ConstitutingProperties.Entry != "qualified" ||
+		combo.Left.Entry.(*tree.Statement).ConstitutiveFunction.Entry != "is" ||
 		combo.LogicalOperator != "AND" ||
 		combo.Right.LogicalOperator != "XOR" ||
-		combo.Right.Left.Entry.(tree.Statement).ConstitutedEntity.Entry != "Program Participant2" ||
-		combo.Right.Left.Entry.(tree.Statement).ConstitutiveFunction.Entry != "is2" ||
-		combo.Right.Left.Entry.(tree.Statement).ConstitutingProperties.Entry != "employed2" ||
-		combo.Right.Right.Entry.(tree.Statement).ConstitutedEntity.Entry != "Program Participant" ||
-		combo.Right.Right.Entry.(tree.Statement).ConstitutiveFunction.Entry != "is" ||
-		combo.Right.Right.Entry.(tree.Statement).ConstitutingProperties.Entry != "employed" {
+		combo.Right.Left.Entry.(*tree.Statement).ConstitutedEntity.Entry != "Program Participant2" ||
+		combo.Right.Left.Entry.(*tree.Statement).ConstitutiveFunction.Entry != "is2" ||
+		combo.Right.Left.Entry.(*tree.Statement).ConstitutingProperties.Entry != "employed2" ||
+		combo.Right.Right.Entry.(*tree.Statement).ConstitutedEntity.Entry != "Program Participant" ||
+		combo.Right.Right.Entry.(*tree.Statement).ConstitutiveFunction.Entry != "is" ||
+		combo.Right.Right.Entry.(*tree.Statement).ConstitutingProperties.Entry != "employed" {
 
 		t.Fatal("Parsing into statements failed.")
 	}
@@ -985,7 +993,9 @@ func TestSpecialCharacters(t *testing.T) {
 
 	input := "A(A&dsisgj=) I(=#) Bdir((l$.ef% [AND] Ri@,g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg£jd*s)) Cac{A(/sd<-g$s%d) D(s%k£g=>js) I(s§d€k+l/g#j!ds)}"
 
-	s, err := ParseStatement(input)
+	stmt, err := ParseStatement(input)
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	fmt.Println(s.String())
 
@@ -1020,15 +1030,15 @@ func TestSpecialCharacters(t *testing.T) {
 		t.Fatal("Failed to detect Indirect object right")
 	}
 
-	if s.ActivationConditionComplex.Entry.(tree.Statement).Attributes.Entry != "/sd<-g$s%d" {
+	if s.ActivationConditionComplex.Entry.(*tree.Statement).Attributes.Entry != "/sd<-g$s%d" {
 		t.Fatal("Failed to detect nested Attribute")
 	}
 
-	if s.ActivationConditionComplex.Entry.(tree.Statement).Deontic.Entry != "s%k£g=>js" {
+	if s.ActivationConditionComplex.Entry.(*tree.Statement).Deontic.Entry != "s%k£g=>js" {
 		t.Fatal("Failed to detect nested Deontic")
 	}
 
-	if s.ActivationConditionComplex.Entry.(tree.Statement).Aim.Entry != "s§d€k+l/g#j!ds" {
+	if s.ActivationConditionComplex.Entry.(*tree.Statement).Aim.Entry != "s§d€k+l/g#j!ds" {
 		t.Fatal("Failed to detect nested Aim")
 	}
 
@@ -1041,7 +1051,9 @@ func TestUnambiguousExtractionOfComponentAndRelatedProperties(t *testing.T) {
 
 	input := "A,p(property) A,p1(another prop) A(value)"
 
-	s, err := ParseStatement(input)
+	stmt, err := ParseStatement(input)
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	fmt.Println(s.String())
 
@@ -1273,10 +1285,12 @@ func TestNodeParsingOfSuffixAndAnnotationsAtomicStatement(t *testing.T) {
 
 	text := "A1[annotation1](content1) A2[annotation2](content2) A3(content3) I4[annotation=(left,right)](aim1)"
 
-	stmt, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
+
+	stmt := s[0].Entry.(*tree.Statement)
 
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
@@ -1326,10 +1340,12 @@ func TestNodeParsingOfIndexedSuffixAndAnnotationsAtomicStatement(t *testing.T) {
 
 	text := "A1[annotation1](content1) A1,p[annotation2](content2) A1,p2(content3) I4[annotation=(left,right)](aim1)"
 
-	stmt, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
+
+	stmt := s[0].Entry.(*tree.Statement)
 
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
@@ -1374,10 +1390,12 @@ func TestNodeParsingOfSuffixAndAnnotationsNestedStatement(t *testing.T) {
 
 	text := "Cac1[leftAnno]{A1[annotation=(left,right)](content) A2[annot](content2) I[regfunc=initiate](action)} Cac2[rightAnno]{A5[|exampleAnnotation](actor)}"
 
-	stmt, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
+
+	stmt := s[0].Entry.(*tree.Statement)
 
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
@@ -1401,39 +1419,39 @@ func TestNodeParsingOfSuffixAndAnnotationsNestedStatement(t *testing.T) {
 	}
 
 	// First attribute in left activation condition
-	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Left.Suffix.(string) != "1" {
-		t.Fatal("Suffix should be 1, but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Left.Suffix.(string))
+	if stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Left.Suffix.(string) != "1" {
+		t.Fatal("Suffix should be 1, but is:", stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Left.Suffix.(string))
 	}
 
-	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Left.Annotations.(string) != "[annotation=(left,right)]" {
-		t.Fatal("Annotation should be [annotation=(left,right)], but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Left.Annotations.(string))
+	if stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Left.Annotations.(string) != "[annotation=(left,right)]" {
+		t.Fatal("Annotation should be [annotation=(left,right)], but is:", stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Left.Annotations.(string))
 	}
 
 	// Second attribute in left activation condition
-	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Right.Suffix.(string) != "2" {
-		t.Fatal("Suffix should be 2, but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Right.Suffix.(string))
+	if stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Right.Suffix.(string) != "2" {
+		t.Fatal("Suffix should be 2, but is:", stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Right.Suffix.(string))
 	}
 
-	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Right.Annotations.(string) != "[annot]" {
-		t.Fatal("Annotation should be [annot], but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Attributes.Right.Annotations.(string))
+	if stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Right.Annotations.(string) != "[annot]" {
+		t.Fatal("Annotation should be [annot], but is:", stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Right.Annotations.(string))
 	}
 
 	// Aim
-	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Aim.Suffix != nil {
-		t.Fatal("Suffix should be nil, but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Aim.Suffix)
+	if stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Aim.Suffix != nil {
+		t.Fatal("Suffix should be nil, but is:", stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Aim.Suffix)
 	}
 
-	if stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Aim.Annotations.(string) != "[regfunc=initiate]" {
-		t.Fatal("Annotation should be [regfunc=initiate], but is:", stmt.ActivationConditionComplex.Left.Entry.(tree.Statement).Aim.Annotations)
+	if stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Aim.Annotations.(string) != "[regfunc=initiate]" {
+		t.Fatal("Annotation should be [regfunc=initiate], but is:", stmt.ActivationConditionComplex.Left.Entry.(*tree.Statement).Aim.Annotations)
 	}
 
 	// Attributes in right activation condition
-	if stmt.ActivationConditionComplex.Right.Entry.(tree.Statement).Attributes.Suffix.(string) != "5" {
-		t.Fatal("Suffix should be 5, but is:", stmt.ActivationConditionComplex.Right.Entry.(tree.Statement).Attributes.Suffix.(string))
+	if stmt.ActivationConditionComplex.Right.Entry.(*tree.Statement).Attributes.Suffix.(string) != "5" {
+		t.Fatal("Suffix should be 5, but is:", stmt.ActivationConditionComplex.Right.Entry.(*tree.Statement).Attributes.Suffix.(string))
 	}
 
-	if stmt.ActivationConditionComplex.Right.Entry.(tree.Statement).Attributes.Annotations.(string) != "[|exampleAnnotation]" {
-		t.Fatal("Annotation should be [|exampleAnnotation], but is:", stmt.ActivationConditionComplex.Right.Entry.(tree.Statement).Attributes.Annotations.(string))
+	if stmt.ActivationConditionComplex.Right.Entry.(*tree.Statement).Attributes.Annotations.(string) != "[|exampleAnnotation]" {
+		t.Fatal("Annotation should be [|exampleAnnotation], but is:", stmt.ActivationConditionComplex.Right.Entry.(*tree.Statement).Attributes.Annotations.(string))
 	}
 
 }
@@ -1448,10 +1466,12 @@ func TestComponentNameIdentification(t *testing.T) {
 	// Indicates whether implicitly linked components (e.g., I(one) I(two)) are aggregated into a single component
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
-	stmt, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing error for statement", text)
 	}
+
+	stmt := s[0].Entry.(*tree.Statement)
 
 	if stmt.Attributes.GetComponentName() != tree.ATTRIBUTES {
 		t.Fatal("Incorrect identification of component name for single element")
@@ -1477,15 +1497,15 @@ func TestComponentNameIdentification(t *testing.T) {
 		t.Fatal("Incorrect identification of component name for nested component node")
 	}
 
-	if stmt.ActivationConditionComplex.Entry.(tree.Statement).Attributes.GetComponentName() != tree.ATTRIBUTES {
+	if stmt.ActivationConditionComplex.Entry.(*tree.Statement).Attributes.GetComponentName() != tree.ATTRIBUTES {
 		t.Fatal("Incorrect identification of component name for nested statement's attribute")
 	}
 
-	if stmt.ActivationConditionComplex.Entry.(tree.Statement).Aim.GetComponentName() != tree.AIM {
+	if stmt.ActivationConditionComplex.Entry.(*tree.Statement).Aim.GetComponentName() != tree.AIM {
 		t.Fatal("Incorrect identification of component name for nested statement's aim")
 	}
 
-	if stmt.ActivationConditionComplex.Entry.(tree.Statement).DirectObject.GetComponentName() != tree.DIRECT_OBJECT {
+	if stmt.ActivationConditionComplex.Entry.(*tree.Statement).DirectObject.GetComponentName() != tree.DIRECT_OBJECT {
 		t.Fatal("Incorrect identification of component name for nested statement's direct object")
 	}
 
@@ -1497,10 +1517,12 @@ Tests whether annotated statements (with suffix) are properly decomposed. Case m
 func TestCorrectNodeRemovalWithSharedAndPrivateProperties(t *testing.T) {
 	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir,p(proper) Bdir1,p1(organic farming) Bdir1(provisions) and Bdir2,p2(improper) Bdir2(rulesS)"
 
-	stmt, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
+
+	stmt := s[0].Entry.(*tree.Statement)
 
 	if stmt.DirectObjectPropertySimple.Entry != "proper" {
 		t.Fatal("Shared property was not correctly detected.")
@@ -1522,10 +1544,12 @@ Tests whether annotated statements (with suffix) are properly decomposed. Case c
 func TestCorrectNodeRemovalWithPrivatePropertiesOnly(t *testing.T) {
 	text := "A(Operations) I(were (non-compliant [OR] violated)) Bdir1,p(organic farming) Bdir1(provisions) and Bdir2,p(improper) Bdir2(rules)"
 
-	stmt, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Extraction should not have failed.")
 	}
+
+	stmt := s[0].Entry.(*tree.Statement)
 
 	if stmt.DirectObjectPropertySimple != nil {
 		t.Fatal("Shared property present, but should be absent. Value:", stmt.DirectObjectPropertySimple)
@@ -1690,10 +1714,12 @@ func TestSuffixAndAnnotationParsingOnSimpleNestedStatement(t *testing.T) {
 
 	input := "A(Actor) D(must) I(review) Bdir(subjects) CacA[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)}"
 
-	s, err := ParseStatement(input)
+	stmt, err := ParseStatement(input)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing:", err)
 	}
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	if s.ActivationConditionComplex == nil {
 		t.Fatal("Complex nested activation condition was not correctly parsed.")
@@ -1715,13 +1741,15 @@ Tests proper parsing of component specifications when parsing nested combination
 func TestSuffixAndAnnotationParsingOnNestedStatementCombination(t *testing.T) {
 
 	input := "A(Actor) D(must) I(review) Bdir(subjects) " +
-		"{CacB[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)} [XOR] " +
+		"Cac{CacB[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)} [XOR] " +
 		"Cac1[annotA]{A(other actor) I(does) Bdir(something)}}"
 
-	s, err := ParseStatement(input)
+	stmt, err := ParseStatement(input)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing:", err)
 	}
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	if s.ActivationConditionComplex == nil {
 		t.Fatal("Complex nested activation condition was not correctly parsed.")
@@ -1756,7 +1784,7 @@ func TestMultipleComponentSpecificationWhenParsingOnNestedStatementCombination(t
 
 	// Parsing of this statement should fail, because CacA specification contains multiple component symbols
 	input := "A(Actor) D(must) I(review) Bdir(subjects) " +
-		"{CacA[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)} [XOR] " +
+		"Cac{CacA[ctx=state]{A(Supervisor) I(appoints) Bdir(actor)} [XOR] " +
 		"Cac1[annotA]{A(other actor) I(does) Bdir(something)}}"
 
 	_, err := ParseStatement(input)
@@ -1770,14 +1798,14 @@ Tests correct handling of invalid combination of nested statements.
 */
 func TestInvalidNestedCombination(t *testing.T) {
 
-	text := "{Cac{A(actor) I(action)} [XOR] Cac(simple content)}"
+	text := "Cac{Cac{A(actor) I(action)} [XOR] Cac(simple content)}"
 
 	_, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_INVALID_COMBINATION {
 		t.Fatal("Parsing did not pick up on erroneous combination.")
 	}
 
-	text = "{Cac(simple content) [OR] Cac{A(actor) I(action)} [OR] Cac{A(actor2) I(action2)}}"
+	text = "Cac{Cac(simple content) [OR] Cac{A(actor) I(action)} [OR] Cac{A(actor2) I(action2)}}"
 
 	_, err = ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_INVALID_COMBINATION {
@@ -1793,10 +1821,12 @@ func TestHasWithinLinkage(t *testing.T) {
 
 	text := "Cex(for compliance with (left [AND] right) as well as (left1 [XOR] right1) shared) Cex(outlier)"
 
-	res, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing:", err)
 	}
+
+	res := s[0].Entry.(*tree.Statement)
 
 	nodes := res.ExecutionConstraintSimple.GetLeafNodes(true)
 
@@ -1831,10 +1861,12 @@ func TestGetSyntheticRootNode(t *testing.T) {
 
 	text := "Cex(for compliance with (left [AND] right) as well as (left1 [XOR] right1) shared) Cex(outlier)"
 
-	res, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing:", err)
 	}
+
+	res := s[0].Entry.(*tree.Statement)
 
 	nodes := res.ExecutionConstraintSimple.GetLeafNodes(true)
 
@@ -1877,10 +1909,12 @@ func TestComponentPropertyRelationshipResolution(t *testing.T) {
 		// Provide multiple properties - mix of primitive and complex ones
 		"P,p(this) and P,p(that) P,p{E(something) F(is established) Cex(before)} P(definiens)"
 
-	res, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing:", err)
 	}
+
+	res := s[0].Entry.(*tree.Statement)
 
 	if len(res.GetPropertyComponent(res.Attributes, false)) != 1 {
 		t.Fatal("Wrong properties count for given component: ", len(res.GetPropertyComponent(res.Attributes, false)))
@@ -1952,10 +1986,12 @@ func TestNestedStatementParsingError(t *testing.T) {
 	text := "{Cac{{when the A(Program Manager) I(believes) that Bdir{a A,p(certified) A(operation) I((has violated [OR] is not in compliance))" +
 		" Bdir(with (the Act [OR] regulations in this part))}}}, [OR] Cac{when a A((certifying agent [OR] State organic program’s governing State official)) I(fails to enforce) Bdir((the Act [OR] regulations in this part)).}}"
 
-	res, err := ParseStatement(text)
+	s, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
 		t.Fatal("Parsing should have caused error "+tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+", but returned error:", err)
 	}
+
+	res := s[0].Entry.(*tree.Statement)
 
 	if err.ErrorIgnoredElements == nil || len(err.ErrorIgnoredElements) == 0 ||
 		strings.Join(err.ErrorIgnoredElements[:], ",") != "{when the A(Program Manager) I(believes) that Bdir{a A,p(certified) A(operation) I((has violated [OR] is not in compliance)) Bdir(with (the Act [OR] regulations in this part))}}" {
@@ -1974,10 +2010,12 @@ func TestStatement_CalculateComplexity(t *testing.T) {
 
 	testStmt := "A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate]((were non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}."
 
-	stmt, err := ParseStatement(testStmt)
+	s, err := ParseStatement(testStmt)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing of statement should not have failed. Error:", err)
 	}
+
+	stmt := s[0].Entry.(*tree.Statement)
 
 	// Calculate actual complexity
 	complexity := stmt.CalculateComplexity()

@@ -76,7 +76,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		_, outErr := parseBasicStatement(text, &s)
 		if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 			// Populate return structure
-			ret := []*tree.Node{&tree.Node{Entry: s}}
+			ret := []*tree.Node{&tree.Node{Entry: &s}}
 			return ret, outErr
 		}
 
@@ -98,12 +98,12 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 			Println("Reclassifying statement as nested statement (as opposed to nested combination) ...")
 		} else if err.ErrorCode != tree.PARSING_NO_ERROR {
 			// Populate return structure
-			ret := []*tree.Node{&tree.Node{Entry: s}}
+			ret := []*tree.Node{&tree.Node{Entry: &s}}
 			return ret, err
 		}
 	}
 
-	fmt.Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
+	Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
 
 	// Process nested statements
 	if len(nestedStmts) > 0 {
@@ -112,12 +112,12 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		// Check whether nested statements have been ignored entirely
 		if err.ErrorCode == tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
 			// Populate return structure
-			ret := []*tree.Node{&tree.Node{Entry: s}}
+			ret := []*tree.Node{&tree.Node{Entry: &s}}
 			return ret, err
 		}
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			// Populate return structure
-			ret := []*tree.Node{&tree.Node{Entry: s}}
+			ret := []*tree.Node{&tree.Node{Entry: &s}}
 			return ret, err
 		}
 	}
@@ -138,7 +138,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 	}
 
 	// Else return wrapped statement
-	return []*tree.Node{&tree.Node{Entry: s}}, err
+	return []*tree.Node{&tree.Node{Entry: &s}}, err
 }
 
 func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.ParsingError) {
@@ -147,7 +147,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr := handleParsingError(tree.ATTRIBUTES, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.Attributes = result
@@ -156,7 +156,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.AttributesPropertySimple = result
@@ -165,7 +165,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.DEONTIC, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.Deontic = result
@@ -174,7 +174,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.AIM, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.Aim = result
@@ -183,7 +183,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.DIRECT_OBJECT, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.DirectObject = result
@@ -192,7 +192,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.DirectObjectPropertySimple = result
@@ -201,7 +201,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.INDIRECT_OBJECT, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.IndirectObject = result
@@ -210,7 +210,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.IndirectObjectPropertySimple = result
@@ -219,7 +219,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.ACTIVATION_CONDITION, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.ActivationConditionSimple = result
@@ -228,7 +228,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.EXECUTION_CONSTRAINT, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.ExecutionConstraintSimple = result
@@ -237,7 +237,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.CONSTITUTED_ENTITY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.ConstitutedEntity = result
@@ -246,7 +246,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.ConstitutedEntityPropertySimple = result
@@ -255,7 +255,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.MODAL, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.Modal = result
@@ -264,7 +264,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.ConstitutiveFunction = result
@@ -273,7 +273,7 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.ConstitutingProperties = result
@@ -282,14 +282,14 @@ func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.Pars
 	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: s}}
+		ret := []tree.Node{tree.Node{Entry: &s}}
 		return ret, outErr
 	}
 	s.ConstitutingPropertiesPropertySimple = result
 
 	Println("Basic statement: " + s.String())
 
-	return []tree.Node{tree.Node{Entry: s}}, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	return []tree.Node{tree.Node{Entry: &s}}, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
@@ -551,7 +551,7 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 		}
 
 		// Parse all entries in tree from string to statement (walks through entire tree linked to node)
-		err := combo.ParseAllEntries(func(oldValue string) (tree.Statement, tree.ParsingError) {
+		err := combo.ParseAllEntries(func(oldValue string) (*tree.Statement, tree.ParsingError) {
 
 			// Check whether the combination element contains a nested structure ...
 			tempComponentType := oldValue
@@ -563,13 +563,13 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 			// Extract component type (after stripping potential nested statements)
 			compType, prop, err := extractComponentType(tempComponentType)
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
-				return tree.Statement{}, err
+				return &tree.Statement{}, err
 			}
 			// Extracting suffices and annotations
 			suffix, annotation, content, err := extractSuffixAndAnnotations(compType, prop, oldValue, LEFT_BRACE, RIGHT_BRACE)
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
 				fmt.Println("Error during extraction of suffices and annotations of component '" + compType + "': " + err.ErrorCode)
-				return tree.Statement{}, err
+				return &tree.Statement{}, err
 			}
 
 			Println("Nested Combo Stmt Suffix:", suffix)
@@ -578,9 +578,9 @@ func parseNestedStatementCombinations(stmtToAttachTo *tree.Statement, nestedComb
 
 			stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1 : strings.LastIndex(oldValue, RIGHT_BRACE)])
 			if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
-				return stmt[0].Entry.(tree.Statement), errStmt
+				return stmt[0].Entry.(*tree.Statement), errStmt
 			}
-			return stmt[0].Entry.(tree.Statement), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return stmt[0].Entry.(*tree.Statement), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 		})
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return err
@@ -938,7 +938,7 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 			tpNode[0].Parent = v2
 
 			// Complete decomposed partial statement with parsed linear statement (can only be one statement in decomposed pair combinations)
-			tpNode[0].Entry = tree.CopyComponentsFromStatement(tpNode[0].Entry.(tree.Statement), s)
+			tpNode[0].Entry = tree.CopyComponentsFromStatement(tpNode[0].Entry.(*tree.Statement), s)
 
 			// Assign statement to statement tree (top-level extrapolated structure)
 			v2.Parent = idvStmt

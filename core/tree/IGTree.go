@@ -395,9 +395,15 @@ func (n *Node) string(level int) string {
 				}
 				retVal = retVal + entriesPrint //"empty Node - CHECK for unmanaged output case"
 			} else {
-				// Assume entry is statement
-				val := n.Entry.(Statement)
-				retVal = retVal + val.string(level+1)
+				if reflect.TypeOf(n.Entry) == reflect.TypeOf(Statement{}) {
+					// Assume entry is statement
+					val := n.Entry.(Statement)
+					retVal = retVal + val.string(level+1)
+				} else {
+					// Assume entry is statement reference
+					val := n.Entry.(*Statement)
+					retVal = retVal + val.string(level+1)
+				}
 			}
 		}
 		return retVal
@@ -1051,7 +1057,7 @@ func (n *Node) CalculateStateComplexity() (int, NodeError) {
 	}
 	if n.Left == nil && n.Right == nil && !n.HasPrimitiveEntry() {
 		// Must be nested statement, so delegate execution to statement
-		stmt := n.Entry.(Statement)
+		stmt := n.Entry.(*Statement)
 		return stmt.CalculateComplexity().TotalStateComplexity, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 	// Check if nested elements contain complexity
@@ -1253,7 +1259,7 @@ Takes starting node as input as well as initialized collection for returned stat
 func findTopLevelStatementBelowNode(node *Node, stmts []*Node) []*Node {
 
 	// Test whether node itself is single and has statement embedded
-	if node.Entry != nil && reflect.TypeOf(node.Entry) == reflect.TypeOf(Statement{}) {
+	if node.Entry != nil && reflect.TypeOf(node.Entry) == reflect.TypeOf(&Statement{}) {
 		// If root has statement in Entry, then return this as top-level statement
 		return append(stmts, node)
 	}
@@ -1267,18 +1273,18 @@ func findTopLevelStatementBelowNode(node *Node, stmts []*Node) []*Node {
 
 	// test left side downwards
 	if node.IsCombination() && !node.Left.IsEmptyOrNilNode() {
-		if node.Left.IsCombination() || reflect.TypeOf(node.Left.Entry) != reflect.TypeOf([]Statement{}) {
+		if node.Left.IsCombination() || reflect.TypeOf(node.Left.Entry) != reflect.TypeOf([]*Statement{}) {
 			stmts = findTopLevelStatementBelowNode(node.Left, stmts)
-		} else if reflect.TypeOf(node.Left.Entry) == reflect.TypeOf(Statement{}) {
+		} else if reflect.TypeOf(node.Left.Entry) == reflect.TypeOf(&Statement{}) {
 			stmts = append(stmts, node.Left)
 		}
 	}
 
 	// test right side downwards
 	if node.IsCombination() && !node.Right.IsEmptyOrNilNode() {
-		if node.Right.IsCombination() || reflect.TypeOf(node.Right.Entry) != reflect.TypeOf([]Statement{}) {
+		if node.Right.IsCombination() || reflect.TypeOf(node.Right.Entry) != reflect.TypeOf([]*Statement{}) {
 			stmts = findTopLevelStatementBelowNode(node.Right, stmts)
-		} else if reflect.TypeOf(node.Right.Entry) == reflect.TypeOf(Statement{}) {
+		} else if reflect.TypeOf(node.Right.Entry) == reflect.TypeOf(&Statement{}) {
 			stmts = append(stmts, node.Right)
 		}
 	}
@@ -1402,7 +1408,7 @@ func (n *Node) IsNil() bool {
 /*
 Applies statement parsing function to all entries below a given node.
 */
-func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) ParsingError {
+func (n *Node) ParseAllEntries(function func(string) (*Statement, ParsingError)) ParsingError {
 	if n.IsNil() {
 		return ParsingError{ErrorCode: PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Attempted to parse nil element."}
 	}

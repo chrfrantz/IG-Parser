@@ -577,7 +577,7 @@ func (s *Statement) GetPropertyComponent(n *Node, complex bool) []*Node {
 Copies components from a given statement into statement on which the function is called. Checks whether target
 component is empty before copying.
 */
-func CopyComponentsFromStatement(stmtToCopyTo Statement, stmtToCopyFrom *Statement) Statement {
+func CopyComponentsFromStatement(stmtToCopyTo *Statement, stmtToCopyFrom *Statement) *Statement {
 
 	// Regulative
 	stmtToCopyTo.Attributes = copyComponentValue(stmtToCopyTo.Attributes, stmtToCopyFrom.Attributes)

@@ -512,7 +512,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 
 		Println("Nested Statement to parse, ID:", val.ID, ", Annotations:", val.NestedStmt.Annotations, ", Stmt:", val.NestedStmt)
 
-		log.Println("Parsing nested statement ...")
+		Println("Parsing nested statement ...")
 		// Parse individual nested statements on component level in order to attach those to main output
 		nestedTabularResult := GenerateTabularOutputFromParsedStatement(val.NestedStmt, nil, val.NestedStmt.Annotations, val.ID, "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders)
 		if nestedTabularResult.Error.ErrorCode != tree.PARSING_NO_ERROR {
@@ -875,7 +875,7 @@ func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.
 
 	Println(" Step: Extracting leaf arrays")
 	// Extract statement from node
-	stmt := node.Entry.(tree.Statement)
+	stmt := node.Entry.(*tree.Statement)
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := stmt.GenerateLeafArrays(aggregateImplicitLinkages)
 
