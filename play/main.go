@@ -13,7 +13,7 @@ This is purely to support development and not included in the deployment.
 */
 func main() {
 
-	// working baseline statement
+	// working baseline statement containing all patterns
 	text := "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + "Cac{A(precond2)}" +
 		"{I(maintain) Bdir((order [AND] control))  Cac{A(precond)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}} " //+
 
@@ -23,14 +23,17 @@ func main() {
 	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " { Cac{Cac{A(precond2)} [XOR] Cac{A(precond3)}} [AND] Cac{A(another2)}}" //+
 	//"{I(maintain) Bdir((order [AND] control))  Cac{A(precond)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}} " //+
 
-	// Component combination (currently broken)
-	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " Cac{Cac{A(precond2)} [AND] Cac{A(another2)}}"
+	// Component combination
+	text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " {Cac{A(precond2)} [AND] {Cac{A(another2) I(dgjlskdjg)} [XOR] Cac{A(thirdone)}}}"
 
 	// Nested component
-	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " Cac{A(precond2)}"
+	text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " Cac{A(precond2)}"
 
 	// Component combination in component pair combination (does not work)
-	//text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " { Cac{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}} [AND] Cac{A(another2)} }"
+	text = "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + " { Cac{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}} [AND] Cac{A(another2)} }"
+
+	// Basic pattern
+	text = "A(dskgjsl) Bdir((left [XOR] right)) Cac(aldgjslk)"
 
 	//text = "dssgs Cac{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}} sdsdg "
 	//text = "{ Cac{A(precond)} Bdir(leftbdir) I(leftact) [XOR] Bdir(rightbdir) I(rightact)}"

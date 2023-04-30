@@ -40,20 +40,28 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return []*tree.Node{}, err
 	}
-	Println("Returned separated components including component combinations (element [0]), \nnested statements/components (element [1]), \nnested component combinations (element [2]) and \ncomponent pair combinations (element [3]): " + fmt.Sprint(compAndNestedStmts))
+	Println("Identified statement element patterns prior to parsing:\n" +
+		" - individual atomic components (e.g., 'A(actor)') including component combinations (e.g., 'Bdir((left [AND] right))') ( --> element [0]): \n" +
+		" ==> " + fmt.Sprint(compAndNestedStmts[0]) + "\n" +
+		" - nested statements/components (e.g., 'Bdir{ A(nestedA) I(nestedI) }') ( --> element [1]): \n" +
+		" ==> " + fmt.Sprint(compAndNestedStmts[1]) + "\n" +
+		" - nested component combinations (e.g., 'Cac{ Cac{A(leftNestedA) I(leftNestedI)} [XOR] Cac{A(rightNestedA) I(rightNestedI)} }') ( --> element [2]): \n" +
+		" ==> " + fmt.Sprint(compAndNestedStmts[2]) + "\n" +
+		" - component pair combinations (e.g., '{ Cac{A(leftNestedA) I(leftNestedI)} [XOR] Cac{A(rightNestedA) I(rightNestedI)} }') ( --> element [3]): \n" +
+		" ==> " + fmt.Sprint(compAndNestedStmts[3]))
+	Println("Complete return structure: " + fmt.Sprint(compAndNestedStmts))
+
 	// Extract component-only statement and override input (e.g., A(content))
 	text = compAndNestedStmts[0][0]
 	// Extract potential nested statements (e.g., Cac{ content }
 	nestedStmts := compAndNestedStmts[1]
 	if len(nestedStmts) == 0 {
 		Println("No nested statements found.")
-		//log.Println("No nested statements found.")
 	}
-	// Extract potential statement combinations (e.g., { Cac{ content } [XOR] Cac{ content } })
+	// Extract potential statement combinations (e.g., Cac{ Cac{ content } [XOR] Cac{ content } })
 	nestedCombos := compAndNestedStmts[2]
 	if len(nestedCombos) == 0 {
 		Println("No nested statement combination candidates found.")
-		//log.Println("No nested statement combination candidates found.")
 	}
 
 	Println("Statement before parsing: " + s.String())
@@ -96,11 +104,10 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 	}
 
 	fmt.Println("Testing for nested statements in " + fmt.Sprint(nestedStmts))
-	fmt.Println("Countx: ", len(nestedStmts))
 
 	// Process nested statements
 	if len(nestedStmts) > 0 {
-		fmt.Println("Found nested statements ... (Nested statements: ", nestedStmts, ")")
+		Println("Found nested statements ... (Nested statements: ", nestedStmts, ")")
 		err = parseNestedStatements(&s, nestedStmts)
 		// Check whether nested statements have been ignored entirely
 		if err.ErrorCode == tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
@@ -721,17 +728,9 @@ func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 		return nil, err
 	}
 
-	// Assign identified component combination pairs to return structure
-	ret[3] = pairCombos
-
-	// Incrementally remove identified component pairs combinations from input statement
-	for _, v := range pairCombos {
-		statement = strings.ReplaceAll(statement, v, "")
-	}
-
-	/// COMPONENT PAIR IDENTIFICATION COMPLETED, NOW NESTED STATEMENTS AND COMBINATIONS
-
-	// Identify all nested statements
+	// Identify all nested statements (this may overlap with already identified component pairs due to overlapping syntax
+	// Component combination syntax: Cac{ Cac{A(leftNestedA) I(leftNestedI)} [XOR] Cac{A(rightNestedA) I(rightNestedI)} }
+	// Component pair combination syntax: { Cac{A(leftNestedA) I(leftNestedI)} [XOR] Cac{A(rightNestedA) I(rightNestedI)} }
 	nestedStmts, err := identifyNestedStatements(statement)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return nil, err
@@ -743,28 +742,85 @@ func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 	// Holds candidates for nested combinations
 	nestedCombos := []string{}
 
+	// keeps track of filtered pair candidates
+	skippedPairs := []string{}
+	acceptedPairs := []string{}
+
 	if len(nestedStmts) > 0 {
 
 		// Iterate through identified nested statements (if any) and remove those from statement
+	OUTER:
 		for _, v := range nestedStmts {
-			// Extract statements of structure (e.g., Cac{ LEFT [AND] RIGHT }) - note: component prefix is necessary for combinations and single nested statements
-			r2, err2 := regexp.Compile(NESTED_COMBINATIONS_TERMINATED)
+			// Extract statements of structure (e.g., Cac{ LEFT [AND] RIGHT }) -
+			// Note: component prefix is necessary for combinations and single nested statements; not allowed in component pair combinations
+			r2, err2 := regexp.Compile(NESTED_COMBINATIONS)
 			if err2 != nil {
-				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
-					ErrorMessage: "Error during pattern extraction in nested statement."}
+				Println("Error in regex compilation: ", err2.Error())
+				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation. Error: " + err2.Error()}
 			}
-			result2 := r2.FindAllString(v, -1)
-			if len(result2) > 0 {
-				// Identified combination of component-level nested statements
+			nestedCombinationCandidates := r2.FindAllString(v, -1)
+			if len(nestedCombinationCandidates) > 0 {
 
-				// Save for parsing as combination
-				nestedCombos = append(nestedCombos, v)
-				Println("Added candidate for statement combination:", v)
+				if len(pairCombos) > 0 {
+				INNER:
+					for _, pair := range pairCombos {
 
-				// Remove nested statement combination from overall statement
+						// Check whether pair to be checked has already been discarded
+						for _, skippedPair := range skippedPairs {
+							if skippedPair == pair {
+								continue INNER
+							}
+						}
+
+						// If identified pair candidate is longer than nested combo ...
+						if len(pair) > len(v) {
+							// ... then test whether combo is substring ...
+							if strings.Contains(pair, v) {
+								// ... and if this is the case take candidate pair (i.e., remove from statement) ...
+								statement = strings.ReplaceAll(statement, pair, "")
+								Println("Confirmed candidate for component pair combination:", pair)
+								// ... and skip combo
+								continue OUTER
+							}
+						} else {
+							// ... else if combo is equal or longer
+
+							// ... then test whether pair is substring ...
+							if strings.Contains(v, pair) {
+								// ... and if this is the case take combo (i.e., remove from statement) ...
+								statement = strings.ReplaceAll(statement, v, "")
+								// ... save combination for parsing ...
+								nestedCombos = append(nestedCombos, v)
+								Println("Confirmed candidate for statement combination:", v)
+								// ... and skip pair
+								skippedPairs = append(skippedPairs, pair)
+								// ... and continue with next combo candidate
+								continue OUTER
+							}
+						}
+
+					}
+				} else {
+					// no pairs found - only consider combinations
+
+					// Identified combination of component-level nested statements
+					// Save for parsing as combination
+					nestedCombos = append(nestedCombos, v)
+					Println("Added candidate for statement combination:", v)
+
+					// Remove nested statement combination from overall statement
+					statement = strings.ReplaceAll(statement, v, "")
+				}
+			} else if len(pairCombos) > 0 {
+
+				// ... If no component combination candidates, but component pair combinations found ...
+
+				// Remove component pair combination from overall statement (if present)
 				statement = strings.ReplaceAll(statement, v, "")
+				// saving for downstream processing is done below (every string present in originally detected collection is deemed found if not filtered) ...
+
 			} else {
-				// Identified single nested statement
+				// ... else deem it single nested statement
 
 				// Append extracted nested statements including component prefix (e.g., Cac{ A(stuff) ... })
 				completeNestedStmts = append(completeNestedStmts, v)
@@ -777,15 +833,45 @@ func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 		// Assign nested statements if found
 		ret[1] = completeNestedStmts
 		ret[2] = nestedCombos
+
+		// Handling of component pair combinations
+
+		// Filter pairs from pairCombos
+		for _, originalPair := range pairCombos {
+			found := false
+			for _, removedPair := range skippedPairs {
+				if removedPair == originalPair {
+					found = true
+				}
+			}
+			if !found {
+				acceptedPairs = append(acceptedPairs, originalPair)
+			}
+		}
+
+		// Save remaining pair combinations
+		ret[3] = acceptedPairs
+		// Doublecheck that all identified component pair combinations are removed from input statement
+		for _, v := range acceptedPairs {
+			statement = strings.ReplaceAll(statement, v, "")
+		}
 		Println("Remaining non-nested input statement (without nested elements): " + statement)
 	} else {
 		Println("No nested statement found in input: " + statement)
+
+		// Assign potential pair combinations in case no other nested statements were found
+		ret[3] = pairCombos
+		// Remove from input statement
+		for _, v := range pairCombos {
+			statement = strings.ReplaceAll(statement, v, "")
+		}
+		if len(pairCombos) > 0 {
+			Println("Remaining input statement (after removal of pair combinations): " + statement)
+		}
 	}
 
-	// Assign (remaining) component-only string
+	// Assign (remaining) component-only string to first element of returned array
 	ret[0] = []string{statement}
-
-	Println("Array to be returned: " + fmt.Sprint(ret))
 
 	// Return combined structure
 	return ret, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
@@ -797,16 +883,16 @@ Returns identified component pair combinations as string array.
 */
 func identifyComponentPairCombinations(statement string) ([]string, tree.ParsingError) {
 
-	r, err := regexp.Compile(NESTED_COMBINATIONS)
+	r, err := regexp.Compile(COMPONENT_PAIR_COMBINATIONS)
 	if err != nil {
-		Println("Error in regex compilation", err.Error())
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
+		Println("Error in regex compilation: ", err.Error())
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation. Error: " + err.Error()}
 	}
 
 	// Extract all matches as string array
 	pairs := r.FindAllString(statement, -1)
 
-	Println("Found ", len(pairs), " component pair combination fragments: ", pairs)
+	Println("Found", len(pairs), "component pair combination/s: ", pairs)
 
 	return pairs, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
@@ -819,7 +905,7 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 	// Parse all elements of tree structure
 	extrapolatedPairStmts := []*tree.Node{}
 	for k, v := range pairs {
-		Println("Iteration ", k)
+		Println("Extrapolation Iteration ", k)
 
 		// Convert individual pair into node structure
 		idvStmt, _, err := ParseIntoNodeTree(v, true, LEFT_BRACE, RIGHT_BRACE)
@@ -881,7 +967,7 @@ func identifyNestedStatements(statement string) ([]string, tree.ParsingError) {
 		return nil, err
 	}
 
-	Println("Nested statements: " + fmt.Sprint(nestedStatements))
+	Println("Found nested statements: " + fmt.Sprint(nestedStatements))
 
 	return nestedStatements, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
@@ -1033,22 +1119,17 @@ func ExtractComponentContent(component string, propertyComponent bool, input str
 	// Start position
 	startPos := -1
 
-	// Search number of entries
-	//r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "?\\" + leftPar)
-	// + escapeSymbolsForRegex(input)
-	//Println("Regex:", component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
-
 	// General component syntax (inclusive of ,p)
 	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 	if err != nil {
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
-		//log.Fatal("Error", err.Error())
+		Println("Error in regex compilation: ", err.Error())
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation. Error: " + err.Error()}
 	}
 	// Component syntax to test for suffix-embedded property syntax (e.g., A1,p)
 	rProp, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + tree.PROPERTY_SYNTAX_SUFFIX + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 	if err != nil {
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
-		//log.Fatal("Error", err.Error())
+		Println("Error in regex compilation: ", err.Error())
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation. Error: " + err.Error()}
 	}
 
 	if propertyComponent {
@@ -1070,24 +1151,11 @@ func ExtractComponentContent(component string, propertyComponent bool, input str
 
 	for { // infinite loop - needs to break out
 
-		//// OLD STRING-BASED PARSING OF COMPONENTS
-		// Find first occurrence of signature in processedString (incrementally iterated by letter)
-		/*startPos := strings.Index(processedString, component + leftPar)
-
-		if startPos == -1 {
-			// Returns component strings once opening parenthesis symbol is no longer found
-			return componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-		}*/
-
-		//// NEW REGEX-BASED PARSING (TO CONSIDER ANNOTATIONS AND SUFFICES)
-		//Println("String to be searched for component:", processedString)
 		// Return index of found element
 		result := r.FindAllStringIndex(processedString, 1)
 		// Return content of found element
 		resultContent := r.FindString(processedString)
 
-		//Println("Index:", result)
-		//Println("Component prefix:", resultContent)
 		if nestedStatement && len(resultContent) > 0 {
 			component = resultContent[:len(resultContent)-1]
 			Println("Identified nested component", component)
@@ -1134,10 +1202,6 @@ func ExtractComponentContent(component string, propertyComponent bool, input str
 						Println("Added string " + candidateString)
 					}
 					// String to be processed in next round is beyond identified component
-					// This includes starting position of parentheses, but moves back to include component identifier,
-					// suffix, annotation, parenthesis, extracted content string, closing parenthesis
-					//processedString = processedString[startPos-len(resultContent)-len(leftPar)+len(candidateString):]
-					//processedString = processedString[startPos-len(component)-len(resultContent)-len(leftPar)+len(candidateString)+len(rightPar):]
 					idx := strings.Index(processedString, candidateString)
 					if idx == -1 {
 						return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR,

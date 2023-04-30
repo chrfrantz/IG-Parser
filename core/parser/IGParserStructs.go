@@ -223,15 +223,25 @@ const BRACED_6TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
 	"\\" + RIGHT_BRACE + ")"
 
 // Combinations of combinations for multi-combined component-level nesting, under consideration of termination for atomic matching
-// Used in detection of component pairs (e.g., 'Bdir((left [XOR] right))') and nested statement combinations (e.g., '{ Cac{ A( ... ) } [XOR] Cac{ A( ... ) } }')
-const NESTED_COMBINATIONS_TERMINATED = COMPONENT_ANNOTATION_SYNTAX +
+const NESTED_COMBINATIONS_TERMINATED =
+// Component combinations need to lead with component identifier (and potential suffix and annotation)
+COMPONENT_HEADER_SYNTAX +
 	"^" + // Ensure the tested statement only contains combinations, but no leading individual component (i.e., combination embedded in nested statement)
 	BRACED_6TH_ORDER_COMBINATIONS +
 	"$" // Ensure immediate termination of combination with additional trailing components (which would imply nested statement with embedded combination)
 
 // Combination of combinations to represent multi-level nesting (does not require termination, i.e., could be embedded)
-// Used for detection of component-pair combinations (e.g., '{ I(leftact) Bdir(object1) [XOR] I(rightact) Bdir(object2)}'), and for testing purposes
-const NESTED_COMBINATIONS = COMPONENT_ANNOTATION_SYNTAX +
+// Example: 'Cac{ Cac{ I(leftact) Bdir(object1) } [XOR] Cac{ I(rightact) Bdir(object2) }}')
+const NESTED_COMBINATIONS =
+// Component combinations need to lead with component identifier (and potential suffix and annotation)
+COMPONENT_HEADER_SYNTAX +
+	BRACED_6TH_ORDER_COMBINATIONS
+
+// Component combination pairs to be extrapolated into separate statements complemented with basic components (may contain leading annotation)
+// Example: '{ Cac{ I(leftact) Bdir(object1) } [XOR] Cac{ I(rightact) Bdir(object2) }}')
+const COMPONENT_PAIR_COMBINATIONS =
+// Component pairs can contain statement-level annotations (e.g., [boundaryStmt]{ ... }), but not component identifier (which would make it component combination)
+COMPONENT_ANNOTATION_SYNTAX +
 	BRACED_6TH_ORDER_COMBINATIONS
 
 /*
