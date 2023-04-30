@@ -811,23 +811,43 @@ func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 					// Remove nested statement combination from overall statement
 					statement = strings.ReplaceAll(statement, v, "")
 				}
-			} else if len(pairCombos) > 0 {
-
-				// ... If no component combination candidates, but component pair combinations found ...
-
-				// Remove component pair combination from overall statement (if present)
-				statement = strings.ReplaceAll(statement, v, "")
-				// saving for downstream processing is done below (every string present in originally detected collection is deemed found if not filtered) ...
-
 			} else {
-				// ... else deem it single nested statement
+				// Check for pairs combo
 
-				// Append extracted nested statements including component prefix (e.g., Cac{ A(stuff) ... })
-				completeNestedStmts = append(completeNestedStmts, v)
-				Println("Added candidate for single nested statement:", v)
+				found := false
 
-				// Remove nested statement from overall statement
-				statement = strings.ReplaceAll(statement, v, "")
+				if len(pairCombos) > 0 {
+
+					// ... If no component combination candidates, but component pair combinations found ...
+				PAIRSONLY:
+					for _, pair := range pairCombos {
+
+						found = false
+						// Check if currently processed nested candidate matches pair
+						if pair == v {
+							found = true
+						}
+						if found {
+							// Remove component pair combination from overall statement (if present)
+							statement = strings.ReplaceAll(statement, v, "")
+							// saving for downstream processing is done below (every string present in originally detected collection is deemed found if not filtered) ...
+							break PAIRSONLY
+						}
+
+					}
+				}
+
+				// Check for simple nesting
+				if !found {
+					// ... else deem it single nested statement
+
+					// Append extracted nested statements including component prefix (e.g., Cac{ A(stuff) ... })
+					completeNestedStmts = append(completeNestedStmts, v)
+					Println("Added candidate for single nested statement:", v)
+
+					// Remove nested statement from overall statement
+					statement = strings.ReplaceAll(statement, v, "")
+				}
 			}
 		}
 		// Assign nested statements if found

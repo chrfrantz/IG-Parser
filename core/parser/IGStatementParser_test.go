@@ -2097,6 +2097,324 @@ func TestStatement_CalculateComplexity(t *testing.T) {
 }
 
 /*
+Tests the parsing of component pair combinations into tree structure.
+*/
+func TestComponentPairCombinationTreeParsing(t *testing.T) {
+	// Moderately complex statement with nested component on left
+	text := "{ Cac{A(precond)} Bdir(leftbdir) I(leftact) [XOR] Bdir(rightbdir) I(rightact)}"
+
+	s, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing returned error:", err)
+	}
+
+	if len(s) > 1 {
+		t.Fatal("Found more than one node:", len(s))
+	}
+
+	res := s[0]
+
+	// Logical operator
+
+	val1 := res.LogicalOperator
+
+	if val1 != "XOR" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val1)
+	}
+
+	// Test left side
+
+	val := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
+
+	if val != "leftact" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "leftbdir" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "precond" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Right side
+
+	val = res.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
+
+	if val != "rightact" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "rightbdir" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+}
+
+/*
+Tests component pair combinations with private properties
+*/
+func TestComponentPairCombinationTreeParsingPrivateComponents(t *testing.T) {
+	// Statement with left private property
+	text := "{ Bdir,p(privateleft) Bdir(leftbdir) [AND] Bdir(rightbdir)}"
+
+	s, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing returned error:", err)
+	}
+
+	if len(s) > 1 {
+		t.Fatal("Found more than one node:", len(s))
+	}
+
+	res := s[0]
+
+	// Logical operator
+
+	val1 := res.LogicalOperator
+
+	if val1 != "AND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val1)
+	}
+
+	// Test left side
+
+	val := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObjectPropertySimple.Entry
+
+	if val != "privateleft" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "leftbdir" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Right side
+
+	val = res.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "rightbdir" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+}
+
+/*
+Tests complex component pair example with atomic components.
+Implicitly tests CopyComponent function which needs to reconcile populated component fields.
+*/
+func TestComponentPairCombinationTreeParsingWithAtomicComponents(t *testing.T) {
+
+	text := "D(deontic) Cac(atomicCondition) (lkjsdkljs) Bind(indirectobject) Cac{A(atomicnestedcondition)} " +
+		"{I(maintain) Bdir((order [AND] control))  Cac{A(sharednestedcondition)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}} "
+
+	s, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing returned error:", err)
+	}
+
+	if len(s) > 1 {
+		t.Fatal("Found more than one node:", len(s))
+	}
+
+	res := s[0]
+
+	// Logical operator
+
+	val1 := res.LogicalOperator
+
+	if val1 != "XOR" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val1)
+	}
+
+	// Test left side
+
+	val := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Deontic.Entry
+
+	if val != "deontic" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
+
+	if val != "maintain" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Nested combination
+
+	val2 := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.LogicalOperator
+
+	if val2 != "AND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val2)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != nil {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Left.Entry
+
+	if val != "order" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Right.Entry
+
+	if val != "control" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Indirect object
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).IndirectObject.Entry
+
+	if val != "indirectobject" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Activation condition
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionSimple.Entry
+
+	if val != "atomicCondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Nested shared condition (combined with individual nested condition) - tests aggregation into node
+
+	val5 := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.LogicalOperator
+
+	if val5 != "bAND" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val5)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Left.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "sharednestedcondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Right.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "atomicnestedcondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Right side
+
+	// nested logical operator
+
+	val4 := res.Right.LogicalOperator
+
+	if val4 != "OR" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val4)
+	}
+
+	// Right left nested
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Deontic.Entry
+
+	if val != "deontic" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
+
+	if val != "sustain" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "peace" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "peace" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).IndirectObject.Entry
+
+	if val != "indirectobject" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// injected atomic condition
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionSimple.Entry
+
+	if val != "atomicCondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// injected atomic nested condition
+
+	val = res.Right.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "atomicnestedcondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// Right right nested
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Deontic.Entry
+
+	if val != "deontic" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
+
+	if val != "prevent" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).DirectObject.Entry
+
+	if val != "war" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).IndirectObject.Entry
+
+	if val != "indirectobject" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// injected atomic condition
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionSimple.Entry
+
+	if val != "atomicCondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+	// injected atomic nested condition
+
+	val = res.Right.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Entry.(*tree.Statement).Attributes.Entry
+
+	if val != "atomicnestedcondition" {
+		t.Fatal("Component has not been correctly parsed. Value: ", val)
+	}
+
+}
+
+/*
 Tests ExtractComponentContent() function.
 */
 /*func TestExtractComponentContent(t *testing.T) {

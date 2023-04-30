@@ -14,8 +14,8 @@ This is purely to support development and not included in the deployment.
 func main() {
 
 	// working baseline statement containing all patterns
-	text := "D(dsgjslkj) Cac(sdjglksj) (lkjsdkljs) Bind(kdlsls)" + "Cac{A(precond2)}" +
-		"{I(maintain) Bdir((order [AND] control))  Cac{A(precond)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}} " //+
+	text := "D(deontic) Cac(atomicCondition) (lkjsdkljs) Bind(indirectobject) Cac{A(atomicnestedcondition)} " +
+		"{I(maintain) Bdir((order [AND] control))  Cac{A(sharednestedcondition)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}} "
 
 	//text = "nadndasa {A(another1) Bdir(object1) Cac{A(dklj)} [OR] A(another2) Bdir(object2)}"
 
@@ -39,9 +39,9 @@ func main() {
 	//text = "{ Cac{A(precond)} Bdir(leftbdir) I(leftact) [XOR] Bdir(rightbdir) I(rightact)}"
 
 	//text = "D(dlkgjslkj) I(dskgjslkgj) Cac{A(dlksgjs)} Bdir((LFT [XOR] RHT))"
-	text = "D(dlkgjslkj) I(dskgjslkgj) Cac{A(dlksgjs)} Bdir(object)"
+	//text = "D(dlkgjslkj) I(dskgjslkgj) Cac{A(dlksgjs)} Bdir(object)"
 
-	text = "{Cac{A(sdlkgjsdlk) Bdir{A(aljdgs) I(kdsjglkj) Bdir(dkslgj)}} [XOR] Cac{A(skdfjcs) Bdir{A(dlksgjie) I(dsklgjiv) Bdir(lkdsjgei)}}}"
+	//text = "{Cac{A(sdlkgjsdlk) Bdir{A(aljdgs) I(kdsjglkj) Bdir(dkslgj)}} [XOR] Cac{A(skdfjcs) Bdir{A(dlksgjie) I(dsklgjiv) Bdir(lkdsjgei)}}}"
 
 	// private property
 	//text = "{A,p(first) A(farmer) [OR] A(citizen)}"
