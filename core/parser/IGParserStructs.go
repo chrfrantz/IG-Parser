@@ -53,8 +53,8 @@ const COMPONENT_ANNOTATION_SYNTAX = "(\\[(" + COMPONENT_ANNOTATION_MAIN + COMPON
 // Regex for component suffix (e.g., "1" in "A1")
 const COMPONENT_SUFFIX_SYNTAX = "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "]*"
 
-// Full component header syntax including suffix and annotations (e.g., A1[semanticAnnotation])
-const COMPONENT_HEADER_SYNTAX = "(" +
+// Regex for component identifier
+const COMPONENT_IDENTIFIER = "(" +
 	tree.ATTRIBUTES + "|" +
 	tree.ATTRIBUTES_PROPERTY + "|" +
 	tree.DEONTIC + "|" +
@@ -72,14 +72,22 @@ const COMPONENT_HEADER_SYNTAX = "(" +
 	tree.CONSTITUTING_PROPERTIES + "|" +
 	tree.CONSTITUTING_PROPERTIES_PROPERTY + "|" +
 	tree.OR_ELSE +
-	")" +
-	COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX
+	")"
+
+// Full component header syntax including suffix and annotations (e.g., A1[semanticAnnotation])
+const COMPONENT_HEADER_SYNTAX =
+// Component identifier, ...
+COMPONENT_IDENTIFIER +
+	// ... followed by suffix ...
+	COMPONENT_SUFFIX_SYNTAX +
+	// ... followed by annotation
+	COMPONENT_ANNOTATION_SYNTAX
 
 // Full syntax of components, including identifier, suffix, annotation and potentially nested or atomic content (but without consideration of embedded component-level nesting)
 const FULL_COMPONENT_SYNTAX =
 // Component identifier, with suffix and annotations
 COMPONENT_HEADER_SYNTAX +
-	// Component-level nesting (e.g., { ... })
+	// component-level nesting (e.g., { ... })
 	"(\\" + LEFT_BRACE + "\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\" + RIGHT_BRACE + "|" +
 	// atomic component content (e.g., ( ... ))
 	"\\" + LEFT_PARENTHESIS + "\\s*" + WORDS_WITH_PARENTHESES + "\\s*\\" + RIGHT_PARENTHESIS + ")"
@@ -88,7 +96,7 @@ COMPONENT_HEADER_SYNTAX +
 const FULL_COMPONENT_SYNTAX_WITH_NESTED_COMPONENTS =
 // Component identifier, with suffix and annotations
 COMPONENT_HEADER_SYNTAX +
-	// Component-level nesting (e.g., { ... }), including potentially embedded second-order nesting on component(s)
+	// component-level nesting (e.g., { ... }), including potentially embedded second-order nesting on component(s)
 	"(\\" + LEFT_BRACE + "\\s*" + "(" + WORDS_WITH_PARENTHESES + "|" + WORDS_WITH_PARENTHESES + FULL_COMPONENT_SYNTAX + ")" + "\\s*\\" + RIGHT_BRACE + "|" +
 	// atomic component content (e.g., ( ... )), including potentially embedded second-order nesting on component(s)
 	"\\" + LEFT_PARENTHESIS + "\\s*" + "(" + WORDS_WITH_PARENTHESES + "|" + WORDS_WITH_PARENTHESES + FULL_COMPONENT_SYNTAX + ")" + "\\s*\\" + RIGHT_PARENTHESIS + ")"
@@ -97,7 +105,7 @@ COMPONENT_HEADER_SYNTAX +
 const FULL_COMPONENT_SYNTAX_NESTED =
 // Component identifier, with suffix and annotations
 COMPONENT_HEADER_SYNTAX +
-	// Component-level nesting (e.g., { ... })
+	// component-level nesting (e.g., { ... })
 	"\\" + LEFT_BRACE + "\\s\\*" + WORDS_WITH_PARENTHESES + "\\s\\*\\" + RIGHT_BRACE
 
 // Basic combination of an arbitrary number of components, variably with or without parentheses (e.g., indication of precedence)
@@ -233,14 +241,14 @@ COMPONENT_HEADER_SYNTAX +
 // Combination of combinations to represent multi-level nesting (does not require termination, i.e., could be embedded)
 // Example: 'Cac{ Cac{ I(leftact) Bdir(object1) } [XOR] Cac{ I(rightact) Bdir(object2) }}')
 const NESTED_COMBINATIONS =
-// Component combinations need to lead with component identifier (and potential suffix and annotation)
+// Component combinations need to lead with component identifier (and potential suffix and annotation), e.g., 'Cac1[annotation]{ ... }')
 COMPONENT_HEADER_SYNTAX +
 	BRACED_6TH_ORDER_COMBINATIONS
 
 // Component combination pairs to be extrapolated into separate statements complemented with basic components (may contain leading annotation)
 // Example: '{ Cac{ I(leftact) Bdir(object1) } [XOR] Cac{ I(rightact) Bdir(object2) }}')
 const COMPONENT_PAIR_COMBINATIONS =
-// Component pairs can contain statement-level annotations (e.g., [boundaryStmt]{ ... }), but not component identifier (which would make it component combination)
+// Component pairs can contain statement-level annotations (e.g., '[boundaryStmt]{ ... }'), but not component identifier (which would make it component combination)
 COMPONENT_ANNOTATION_SYNTAX +
 	BRACED_6TH_ORDER_COMBINATIONS
 
