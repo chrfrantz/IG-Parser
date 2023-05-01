@@ -51,7 +51,7 @@ func (n *Node) getParentsLeftSharedElements() []string {
 		}
 	}
 	// Return empty structure
-	return []string{}
+	return nil
 }
 
 /*
@@ -70,7 +70,7 @@ func (n *Node) getParentsRightSharedElements() []string {
 		}
 	}
 	// Return empty structure
-	return []string{}
+	return nil
 }
 
 /*
@@ -82,7 +82,7 @@ func (n *Node) GetSharedLeft() []string {
 		// Overwrite child with parent shared element values
 		shared := n.getParentsLeftSharedElements()
 		// If no shared components from parents ...
-		if len(shared) == 0 {
+		if shared == nil || len(shared) == 0 || shared[0] == "" {
 			// ... return own shared components
 			return n.SharedLeft
 		}
@@ -90,7 +90,7 @@ func (n *Node) GetSharedLeft() []string {
 		return n.getParentsLeftSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedLeft := n.getParentsLeftSharedElements()
-		if len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
+		if n.SharedLeft != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedLeft, n.SharedLeft...)
 		} else if len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" {
@@ -116,7 +116,7 @@ func (n *Node) GetSharedLeft() []string {
 		// Simply return own elements
 		return n.SharedLeft
 	}
-	return []string{}
+	return nil
 }
 
 /*
@@ -128,7 +128,7 @@ func (n *Node) GetSharedRight() []string {
 		// Overwrite child with parent shared element values
 		shared := n.getParentsRightSharedElements()
 		// If no shared components from parents ...
-		if len(shared) == 0 {
+		if shared == nil || len(shared) == 0 || shared[0] == "" {
 			// ... return own shared components
 			return n.SharedRight
 		}
@@ -136,7 +136,7 @@ func (n *Node) GetSharedRight() []string {
 		return n.getParentsRightSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedRight := n.getParentsRightSharedElements()
-		if len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
+		if n.SharedRight != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedRight, n.SharedRight...)
 		} else if len(n.SharedRight) != 0 && n.SharedRight[0] != "" {
@@ -162,7 +162,7 @@ func (n *Node) GetSharedRight() []string {
 		// Simply return own elements
 		return n.SharedRight
 	}
-	return []string{}
+	return nil
 }
 
 /*
@@ -247,9 +247,21 @@ func (n *Node) Stringify() string {
 	}
 	// Walk the tree
 	out := ""
+
+	printSharedParentheses := false
+	// Check whether left or right shared elements exist (to ensure correct syntax (parentheses))
+	if n.GetSharedLeft() != nil || n.GetSharedRight() != nil {
+		printSharedParentheses = true
+	}
+
+	// Print potentially needed opening parentheses (to balance right parentheses)
+	if printSharedParentheses {
+		// print left parenthesis
+		out += "("
+	}
 	// Potential left shared elements; note: explicitly checks for empty elements (e.g., "")
 	if n.GetSharedLeft() != nil && len(n.GetSharedLeft()) != 0 && n.GetSharedLeft()[0] != "" {
-		out += "(" + strings.Trim(fmt.Sprint(n.GetSharedLeft()), "[]") + " "
+		out += strings.Trim(fmt.Sprint(n.GetSharedLeft()), "[]") + " "
 	}
 	// Inner combination
 	out += "("
@@ -266,7 +278,12 @@ func (n *Node) Stringify() string {
 	out += ")"
 	// Potential right shared elements; note: explicitly checks for empty elements (e.g., "")
 	if n.GetSharedRight() != nil && len(n.GetSharedRight()) != 0 && n.GetSharedRight()[0] != "" {
-		out += " " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]") + ")"
+		out += " " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]")
+	}
+	// Print potentially needed closing parentheses (to balance left parentheses)
+	if printSharedParentheses {
+		// print right parenthesis
+		out += ")"
 	}
 	return out
 }

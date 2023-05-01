@@ -2122,7 +2122,29 @@ func TestComponentPairCombinationTreeParsing(t *testing.T) {
 		t.Fatal("Component has not been correctly parsed. Value: ", val1)
 	}
 
+	// Shared elements
+
+	if res.GetSharedLeft() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.GetSharedLeft())
+	}
+
+	if res.GetSharedRight() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.GetSharedRight())
+	}
+
 	// Test left side
+
+	// Shared elements
+
+	if res.Left.GetSharedLeft() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.Left.GetSharedLeft())
+	}
+
+	if res.Left.GetSharedRight() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.Left.GetSharedRight())
+	}
+
+	// Components
 
 	val := res.Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
 
@@ -2143,6 +2165,18 @@ func TestComponentPairCombinationTreeParsing(t *testing.T) {
 	}
 
 	// Right side
+
+	// Shared elements
+
+	if res.Right.GetSharedLeft() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.Right.GetSharedLeft())
+	}
+
+	if res.Right.GetSharedRight() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.Right.GetSharedRight())
+	}
+
+	// Components
 
 	val = res.Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).Aim.Entry
 
@@ -2182,6 +2216,16 @@ func TestComponentPairCombinationTreeParsingPrivateComponents(t *testing.T) {
 
 	if val1 != "AND" {
 		t.Fatal("Component has not been correctly parsed. Value: ", val1)
+	}
+
+	// Shared elements
+
+	if res.GetSharedLeft() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.GetSharedLeft())
+	}
+
+	if res.GetSharedRight() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.GetSharedRight())
 	}
 
 	// Test left side
@@ -2234,6 +2278,16 @@ func TestComponentPairCombinationTreeParsingWithAtomicComponents(t *testing.T) {
 
 	if val1 != "XOR" {
 		t.Fatal("Component has not been correctly parsed. Value: ", val1)
+	}
+
+	// Shared elements
+
+	if res.GetSharedLeft() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.GetSharedLeft())
+	}
+
+	if res.GetSharedRight() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.GetSharedRight())
 	}
 
 	// Test left side
@@ -2435,6 +2489,16 @@ func TestComponentPairCombinationTreeParsingWithAtomicComponentsAndComponentComb
 
 	if val1 != "XOR" {
 		t.Fatal("Component has not been correctly parsed. Value: ", val1)
+	}
+
+	// Shared elements
+
+	if res.GetSharedLeft() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.GetSharedLeft())
+	}
+
+	if res.GetSharedRight() != nil {
+		t.Fatal("Shared elements should be nil, but are", res.GetSharedRight())
 	}
 
 	// Test left side

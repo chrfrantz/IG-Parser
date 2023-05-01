@@ -909,5 +909,11 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 	if len(sharedLeft) == 0 && len(sharedRight) == 0 {
 		return nil, nil
 	}
+	if len(sharedLeft) == 0 && len(sharedRight) != 0 {
+		return nil, sharedRight
+	}
+	if len(sharedLeft) != 0 && len(sharedRight) == 0 {
+		return sharedLeft, nil
+	}
 	return sharedLeft, sharedRight
 }
