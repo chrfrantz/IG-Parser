@@ -4,6 +4,8 @@ import (
 	"IG-Parser/core/exporter"
 	"IG-Parser/core/parser"
 	"IG-Parser/core/tree"
+	"reflect"
+	"strings"
 )
 
 /*
@@ -46,9 +48,6 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 	}
 
 	Println("  - Results: ", results)
-	/*Println("  - Header Symbols: ", results)
-	Println("  - Header Names: ", statementHeaderNames)
-	Println("  - Data: ", statementMap)*/
 
 	Println("  - Output generation complete.")
 
@@ -62,7 +61,6 @@ Arguments include the IGScript-annotated statement, statement ID (currently not 
 and a filename for the output. If the filename is empty, no output will be written.
 Returns Visual tree structure as string, and error (defaults to tree.PARSING_NO_ERROR).
 */
-/*
 func ConvertIGScriptToVisualTree(statement string, stmtId string, filename string) (string, tree.ParsingError) {
 
 	Println(" Step: Parse input statement")
@@ -70,17 +68,35 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 	//exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 
 	// Parse IGScript statement into tree
-	s, err := parser.ParseStatement(statement)
+	stmts, err := parser.ParseStatement(statement)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return "", err
 	}
 
-	// Prepare visual output
-	Println(" Step: Generate visual output structure")
-	output, err := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(),
-		exporter.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return "", err
+	output := strings.Builder{}
+
+	if reflect.TypeOf(stmts[0]) == reflect.TypeOf(&tree.Node{}) {
+		// Prepare visual output for nodes
+		Println(" Step: Generate visual output structure (combined statements)")
+		output, err = tree.PrintNode(stmts[0], tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(),
+			exporter.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			return "", err
+		}
+	} else {
+		if reflect.TypeOf(stmts[0].Entry) == reflect.TypeOf(&tree.Statement{}) {
+			// Prepare visual output for statements
+			s := stmts[0].Entry.(*tree.Statement)
+			Println(" Step: Generate visual output structure (individual statements)")
+			output, err = s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(),
+				exporter.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+			if err.ErrorCode != tree.PARSING_NO_ERROR {
+				return "", err
+			}
+		} else {
+			// ... else unknown type
+			return "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_TYPE_VISUAL_OUTPUT, ErrorMessage: "Error: Visual parsing failed for unknown type " + reflect.TypeOf(stmts[0]).String()}
+		}
 	}
 
 	Println("  - Generated visual tree:", output)
@@ -90,7 +106,7 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 	if filename != "" {
 		Println("  - Writing to file ...")
 
-		err2 := exporter.WriteToFile(filename, output.String())
+		err2 := exporter.WriteToFile(filename, output.String(), true)
 		if err2 != nil {
 			Println("  - Problems when writing file "+filename+", Error:", err2)
 		}
@@ -99,4 +115,4 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 	}
 
 	return output.String(), err
-}*/
+}

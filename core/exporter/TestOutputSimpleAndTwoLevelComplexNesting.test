@@ -19,4 +19,4 @@
 =SPLIT("'650.18;National Organic Program's Program Manager;may;inspect and;drink; ;accredited certifying agents;Upon approval;{650}.1;on behalf of the Secretary;regulations in this part; ; ; ; ;[AND].I_2.[650.1-6];[AND].I_2.[650.7-12];[AND].Bdir.[650.1-2,650.7-8,650.13-14];[AND].Bdir.[650.3-4,650.9-10,650.15-16];[XOR].Cex_2.[650.1,650.3,650.5,650.7,650.9,650.11,650.13,650.15,650.17];"; ";")
 =SPLIT("'{650}.1.1; ; ; ; ; ; ; ;{{650}.1}.1; ; ;Program Manager;is;approved; ;[AND].P.[{650}.1.2];"; ";")
 =SPLIT("'{650}.1.2; ; ; ; ; ; ; ;{{650}.1}.1; ; ;Program Manager;is;committed; ;[AND].P.[{650}.1.1];"; ";")
-=SPLIT("'{{650}.1}.1.1;NOP Official; ; ; ;recognizes;Program Manager; ; ; ; ; ; ; ; ; ;"; ";")
+=SPLIT("'{{650}.1}.1;NOP Official; ; ; ;recognizes;Program Manager; ; ; ; ; ; ; ; ; ;"; ";")

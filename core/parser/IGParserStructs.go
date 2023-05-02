@@ -250,6 +250,7 @@ COMPONENT_HEADER_SYNTAX +
 // Example: '{ Cac{ I(leftact) Bdir(object1) } [XOR] Cac{ I(rightact) Bdir(object2) }}')
 const COMPONENT_PAIR_COMBINATIONS =
 // Component pairs can contain statement-level annotations (e.g., '[boundaryStmt]{ ... }'), but not component identifier (which would make it component combination)
+//"[^" + COMPONENT_IDENTIFIER + "]" +
 COMPONENT_ANNOTATION_SYNTAX +
 	BRACED_6TH_ORDER_COMBINATIONS
 

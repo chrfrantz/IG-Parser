@@ -26,7 +26,7 @@ const DEFAULT_LOGGING_PATH = "./logs"
 const DEFAULT_PORT = "8080"
 
 // IG Parser Version
-const IG_PARSER_VERSION = "0.1"
+const IG_PARSER_VERSION = "0.2"
 
 // Control whether stdout console output should be suppressed (only works if logging is deactivated)
 const SUPPRESS_CONSOLE_OUTPUT = false

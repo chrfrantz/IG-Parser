@@ -57,6 +57,11 @@ func main() {
 	//text = "Bdir{A2,p(first) A1(farmer) [OR] A2(citizen)}"
 	//text = "{A(sdkjls) Bdir((LFT [XOR] RHT)) [OR] A(ertyu) I(dgsdkjg)}"
 
+	// Multi-level nesting
+	text = "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}} dfghj" +
+		" Cac{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}} " +
+		"{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}}"
+
 	exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	exporter.SetDynamicOutput(false)
 

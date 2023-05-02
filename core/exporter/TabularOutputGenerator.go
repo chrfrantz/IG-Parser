@@ -825,10 +825,6 @@ func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations i
 				Println("Error during output generation for single statement. Statement ignored from output (Statement node: " + stmtNode.String() + ")")
 				storeResult = false
 			}
-			// Collect results
-			results = append(results, res)
-
-			//res := GenerateTabularOutputFromParsedStatement(stmt., annotations, stmtId, filename, aggregateImplicitLinkages, separator, outputFormat, printHeaders)
 			if storeResult {
 				results = append(results, res)
 			}
@@ -1157,7 +1153,7 @@ func generateStatementIDint(mainID string, subStmtIndex int) string {
 }
 
 /*
-Writes data to given file - appends to file if existing
+Writes data to given file - overwrites or appends to file as specified.
 */
 func WriteToFile(filename string, content string, overwrite bool) error {
 

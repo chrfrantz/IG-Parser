@@ -316,9 +316,18 @@ func (n *Node) StringFlat() string {
 		// else simply return empty string
 		return ""
 	} else {
-		// Complex entry
-		stmt := n.Entry.(Statement)
-		return stmt.StringFlat(false)
+		// Complex entry by value
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf(Statement{}) {
+			stmt := n.Entry.(Statement)
+			return stmt.StringFlat(false)
+		}
+		// Complex entry by reference
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf(&Statement{}) {
+			stmt := n.Entry.(*Statement)
+			return stmt.StringFlat(false)
+		}
+		log.Fatal("Error when generating string output. Unknown type:", reflect.TypeOf(n.Entry))
+		return ""
 	}
 }
 

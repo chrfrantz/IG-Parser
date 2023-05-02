@@ -126,13 +126,13 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
 	// Process component pair combinations and extrapolate into multiple statements
 	if len(compAndNestedStmts[3]) > 0 {
-		extrapolatedStmts, err := extrapolateStatementWithPairedComponents(&s, compAndNestedStmts[3])
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
+		extrapolatedStmts, err2 := extrapolateStatementWithPairedComponents(&s, compAndNestedStmts[3])
+		if err2.ErrorCode != tree.PARSING_NO_ERROR {
 			return extrapolatedStmts, err
 		}
 		Println("Final statements (with extrapolation): " + tree.PrintNodes(extrapolatedStmts))
 
-		return extrapolatedStmts, err
+		return extrapolatedStmts, err2
 	} else {
 		Println("No expansion of statement necessary (no component pair combinations in input)")
 	}
@@ -712,7 +712,7 @@ func handleParsingError(component string, err tree.ParsingError) tree.ParsingErr
 /*
 Separates nested statement expressions (including component prefix)
 from individual components (including combinations of components).
-Returns multi-dim array, with element [0][0] containing component-only statement (no nested structure),
+Returns multi-dim array, with element [0] containing component-only statement (no nested structure),
 and element [1] containing nested statements (potentially multiple),
 and element [2] containing potential component-level statement combinations,
 and element [3] containing component pairs (that need to be extrapolated into entire separate statements).
@@ -753,7 +753,7 @@ func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 		for _, v := range nestedStmts {
 			// Extract statements of structure (e.g., Cac{ LEFT [AND] RIGHT }) -
 			// Note: component prefix is necessary for combinations and single nested statements; not allowed in component pair combinations
-			r2, err2 := regexp.Compile(NESTED_COMBINATIONS)
+			r2, err2 := regexp.Compile(NESTED_COMBINATIONS_TERMINATED)
 			if err2 != nil {
 				Println("Error in regex compilation: ", err2.Error())
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation. Error: " + err2.Error()}
@@ -847,6 +847,15 @@ func SeparateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 
 					// Remove nested statement from overall statement
 					statement = strings.ReplaceAll(statement, v, "")
+
+					// Remove pairs that are contained in fragments added as individual nested components
+					for _, v2 := range pairCombos {
+						if strings.Contains(v, v2) {
+							// Annotate as skipped pairs
+							skippedPairs = append(skippedPairs, v2)
+						}
+					}
+
 				}
 			}
 		}

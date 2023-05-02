@@ -511,6 +511,9 @@ const PARSING_ERROR_INVALID_OUTPUT_TYPE = "INVALID_OUTPUT_TYPE"
 // Indicates unexpected number of nodes in array
 const PARSING_ERROR_TOO_MANY_NODES = "TOO_MANY_NODES"
 
+// Indicates invalid type (i.e., no node or statement) during visual output generation
+const PARSING_ERROR_INVALID_TYPE_VISUAL_OUTPUT = "INVALID TYPE FOR VISUAL OUTPUT"
+
 /*
 Error type signaling errors during statement parsing
 */
