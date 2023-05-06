@@ -1,0 +1,26 @@
+{"name": "XOR",
+"children": [{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "actor1", "comp": "A", "level": 1},
+{"name": "aim1", "comp": "I", "level": 1}
+]
+},
+{"name": "AND",
+"children": [{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 1},
+{"name": "aim2", "comp": "I", "level": 1}
+]
+},
+{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "actor3", "comp": "A", "level": 1},
+{"name": "aim3", "comp": "I", "level": 1}
+]
+}], "comp": "", "level": 0}], "comp": "", "level": 0}

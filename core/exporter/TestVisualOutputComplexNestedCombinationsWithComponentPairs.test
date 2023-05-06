@@ -1,0 +1,107 @@
+{"name": "OR",
+"children": [{"name": "AND",
+"children": [{
+"name": "",
+"level": 1, 
+"children": [
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor1", "comp": "A", "level": 2},
+{"name": "aim1", "comp": "I", "level": 2},
+{"name": "object1", "comp": "Bdir", "level": 2}
+]
+}
+]
+}, {
+"name": "",
+"level": 1, 
+"children": [
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 2},
+{"name": "aim2", "comp": "I", "level": 2},
+{"name": "object2", "comp": "Bdir", "level": 2}
+]
+}
+]
+},
+{
+"name": "",
+"level": 1, 
+"children": [
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor4", "comp": "A", "level": 2},
+{"name": "aim4", "comp": "I", "level": 2}
+]
+}
+]
+}], "comp": "", "level": 0},
+{"name": "XOR",
+"children": [{
+"name": "",
+"level": 1, 
+"children": [
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor3", "comp": "A", "level": 2},
+{"name": "aim3", "comp": "I", "level": 2},
+{"name": "object3", "comp": "Bdir", "level": 2}
+]
+}
+]
+},
+{"name": "AND",
+"children": [{
+"name": "",
+"level": 1, 
+"children": [
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor6", "comp": "A", "level": 2},
+{"name": "aim6", "comp": "I", "level": 2},
+{"name": "object6", "comp": "Bdir", "level": 2}
+]
+}
+]
+},
+{"name": "XOR",
+"children": [{
+"name": "",
+"level": 1, 
+"children": [
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor7", "comp": "A", "level": 2},
+{"name": "aim7", "comp": "I", "level": 2},
+{"name": "object7", "comp": "Bdir", "level": 2}
+]
+}
+]
+},
+{
+"name": "",
+"level": 1, 
+"children": [
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor8", "comp": "A", "level": 2},
+{"name": "aim8", "comp": "I", "level": 2}
+]
+}
+]
+}], "comp": "", "level": 0}], "comp": "", "level": 0}], "comp": "", "level": 0}], "comp": "", "level": 0}

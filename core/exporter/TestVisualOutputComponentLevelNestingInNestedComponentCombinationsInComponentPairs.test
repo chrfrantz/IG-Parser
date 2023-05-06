@@ -1,0 +1,50 @@
+{"name": "OR",
+"children": [{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 1},
+{"name": "may", "comp": "D", "level": 1},
+{"name": "administer", "comp": "I", "level": 1},
+{"name": "sanctions", "comp": "Bdir", "level": 1},
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 2},
+{"name": "suspects", "comp": "I", "level": 2},
+{
+"name": "Bdir",
+"level": 3, 
+"children": [
+{"name": "farmer", "comp": "A", "level": 3},
+{"name": "OR",
+"children": [{"name": "violates", "comp": "I", "level": 3},
+{"name": "does not comply", "comp": "I", "level": 3}], "comp": "I", "level": 3},
+{"name": "regulations", "comp": "Bdir", "level": 3}
+]
+}
+]
+}
+]
+},
+{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 1},
+{"name": "may", "comp": "D", "level": 1},
+{"name": "administer", "comp": "I", "level": 1},
+{"name": "sanctions", "comp": "Bdir", "level": 1},
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "Program Manager", "comp": "A", "level": 2},
+{"name": "has witnessed", "comp": "I", "level": 2},
+{"name": "non-compliance", "comp": "Bdir", "level": 2, "pos": "b", "children": [{"name": "farmer's", "comp": "Bdir,p", "level": 2}]},
+{"name": "in the past", "comp": "Cex", "level": 2}
+]
+}
+]
+}], "comp": "", "level": 0}

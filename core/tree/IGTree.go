@@ -697,7 +697,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node) (bool, []string, Nod
 	if err.ErrorCode != TREE_NO_ERROR {
 		return false, ops, err
 	}
-	// If found in downwards search, return
+	// If found in upwards search, return
 	if foundUpwards {
 		return true, ops, err
 	}

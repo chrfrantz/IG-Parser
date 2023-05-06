@@ -3,6 +3,7 @@ package tree
 import (
 	"IG-Parser/core/shared"
 	"log"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -35,6 +36,7 @@ const TREE_PRINTER_COLLECTION_CLOSE = "]"
 
 /*
 Prints JSON output format compatible with tree visualization in D3.
+Takes parent node as input for label generation (component name).
 Allows indication for flat printing (nested property tree structure vs. flat listing of properties).
 Allows indication for printing of binary trees, as opposed to tree aggregated by logical operators for given component.
 Allows indication whether annotations should be included in output (as labels).
@@ -43,7 +45,7 @@ Allows indication as to whether activation conditions should be moved to the beg
 Requires specification of nesting level the nodes exists on (Default: 0).
 This function is tested in TabularOutputGenerator_test.go, i.e., tests with focus on visual tree output.
 */
-func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, includeAnnotations bool, includeDegreeOfVariability bool, moveActivationConditionsToFront bool, nestingLevel int) (strings.Builder, ParsingError) {
+func (s *Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, includeAnnotations bool, includeDegreeOfVariability bool, moveActivationConditionsToFront bool, nestingLevel int) (strings.Builder, NodeError) {
 
 	// Default name if statement does not have root node
 	rootName := ""
@@ -157,8 +159,9 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 			// Generate actual entry
 			componentString, err := v.PrintNodeTree(s, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel)
 			if err.ErrorCode != TREE_NO_ERROR {
+				Println("Error when parsing component", v, "-- Error:", err)
 				// Special case of NodeError being embedded in ParsingError
-				return strings.Builder{}, ParsingError{ErrorCode: PARSING_ERROR_EMBEDDED_NODE_ERROR, ErrorMessage: err.ErrorMessage}
+				return out, err
 			}
 
 			Println("Output for " + v.GetComponentName() + ": " + componentString)
@@ -184,7 +187,7 @@ func (s Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, inc
 	out.WriteString(TREE_PRINTER_LINEBREAK)
 	out.WriteString(TREE_PRINTER_CLOSE_BRACE)
 
-	return out, ParsingError{ErrorCode: PARSING_NO_ERROR}
+	return out, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
 /*
@@ -196,7 +199,7 @@ Allows indication of Degree of Variability in output (as labels).
 Allows indication as to whether activation conditions should be moved to the beginning of the visual tree output
 Requires specification of nesting level for node exists on (Default: 0).
 */
-func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool, includeDegreeOfVariability bool, moveActivationConditionsToFront bool, nestingLevel int) (string, NodeError) {
+func (n *Node) PrintNodeTree(stmt *Statement, printFlat bool, printBinary bool, includeAnnotations bool, includeDegreeOfVariability bool, moveActivationConditionsToFront bool, nestingLevel int) (string, NodeError) {
 	out := strings.Builder{}
 
 	if !n.IsNil() && !n.IsEmptyOrNilNode() {
@@ -234,7 +237,7 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 						// Print left side
 						outTmpL, err := n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel)
 						if err.ErrorCode != TREE_NO_ERROR {
-							return "", err
+							return out.String(), err
 						}
 						// Append if successful parsing
 						out.WriteString(outTmpL)
@@ -245,7 +248,7 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 						// Print right side
 						outTmpR, err := n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel)
 						if err.ErrorCode != TREE_NO_ERROR {
-							return "", err
+							return out.String(), err
 						}
 						// Append if successful parsing
 						out.WriteString(outTmpR)
@@ -277,7 +280,7 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 					// Left child
 					outTmpL, err := n.Left.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel)
 					if err.ErrorCode != TREE_NO_ERROR {
-						return "", err
+						return out.String(), err
 					}
 					// Append if successful parsing
 					out.WriteString(outTmpL)
@@ -288,7 +291,7 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 					// Right child
 					outTmpR, err := n.Right.PrintNodeTree(stmt, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel)
 					if err.ErrorCode != TREE_NO_ERROR {
-						return "", err
+						return out.String(), err
 					}
 					// Append if successful parsing
 					out.WriteString(outTmpR)
@@ -318,7 +321,7 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 				// Print private properties
 				outTmp, err := n.appendPropertyNodes("", stmt, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel)
 				if err.ErrorCode != TREE_NO_ERROR {
-					return "", err
+					return out.String(), err
 				}
 
 				// Append annotations (if existing)
@@ -337,13 +340,28 @@ func (n *Node) PrintNodeTree(stmt Statement, printFlat bool, printBinary bool, i
 				out.WriteString(TREE_PRINTER_CLOSE_BRACE)
 			}
 		} else {
-			// Produce output for nested statement
-			outTmp, err := n.Entry.(Statement).PrintTree(n, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel+1)
-			if err.ErrorCode != PARSING_NO_ERROR { // Important check on return value - different from all others in the function
-				// Special case of NodeError embedding a ParsingError produced in nested invocation.
-				return "", NodeError{ErrorCode: TREE_ERROR_EMBEDDED_PARSING_ERROR, ErrorMessage: err.ErrorMessage}
+			// Produce output for nested nodes/statement
+
+			// ... prints nested statements (e.g., in nested components and component combinations)
+			if reflect.TypeOf(n.Entry) == reflect.TypeOf(&Statement{}) {
+				outTmp, err := n.Entry.(*Statement).PrintTree(n, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel+1)
+				if err.ErrorCode != TREE_NO_ERROR { // Important check on return value - different from all others in the function
+					// Special case of NodeError embedding a ParsingError produced in nested invocation.
+					return out.String(), NodeError{ErrorCode: TREE_ERROR_EMBEDDED_PARSING_ERROR, ErrorMessage: err.ErrorMessage}
+				}
+				out.WriteString(outTmp.String())
+
+				// ... prints nested nodes (relevant for statement combinations)
+			} else if reflect.TypeOf(n.Entry) == reflect.TypeOf([]*Node{}) {
+				outTmp, err := n.Entry.([]*Node)[0].Entry.(*Statement).PrintTree(n, printFlat, printBinary, includeAnnotations, includeDegreeOfVariability, moveActivationConditionsToFront, nestingLevel+1)
+				if err.ErrorCode != TREE_NO_ERROR { // Important check on return value - different from all others in the function
+					// Special case of NodeError embedding a ParsingError produced in nested invocation.
+					return out.String(), NodeError{ErrorCode: TREE_ERROR_EMBEDDED_PARSING_ERROR, ErrorMessage: err.ErrorMessage}
+				}
+				out.WriteString(outTmp.String())
+			} else {
+				return out.String(), NodeError{ErrorCode: PARSING_ERROR_INVALID_TYPE_VISUAL_OUTPUT, ErrorMessage: "Could not generate visual output for entry type " + reflect.TypeOf(n.Entry).String()}
 			}
-			out.WriteString(outTmp.String())
 		}
 	}
 	return out.String(), NodeError{ErrorCode: TREE_NO_ERROR}
@@ -360,7 +378,7 @@ Includes indication whether Degree of Variability is to be included in output.
 Allows indication as to whether activation conditions should be moved to the beginning of the visual tree output
 Requires specification of nesting level the property node lies on (Lowest level: 0)
 */
-func (n *Node) appendPropertyNodes(stringToPrepend string, stmt Statement, printFlat bool, printBinary bool, includeAnnotations bool, includeDegreeOfVariability bool, moveActivationConditionsToFront bool, nestingLevel int) (string, NodeError) {
+func (n *Node) appendPropertyNodes(stringToPrepend string, stmt *Statement, printFlat bool, printBinary bool, includeAnnotations bool, includeDegreeOfVariability bool, moveActivationConditionsToFront bool, nestingLevel int) (string, NodeError) {
 
 	stringToAppendTo := strings.Builder{}
 	stringToAppendTo.WriteString(stringToPrepend)
@@ -391,7 +409,9 @@ func (n *Node) appendPropertyNodes(stringToPrepend string, stmt Statement, print
 					err := NodeError{}
 					mergedNodes, err = Combine(mergedNodes, v, SAND_BETWEEN_COMPONENTS)
 					if err.ErrorCode != TREE_NO_ERROR {
-						log.Println("Invalid merge of private nodes when combining private nodes (this should never happen). Nodes to be merged:", mergedNodes, "and", v)
+						errMsg := "Invalid merge of private nodes when combining private nodes (this should never happen). Nodes to be merged: " + mergedNodes.String() + " and " + v.String()
+						log.Println(errMsg)
+						err.ErrorMessage = errMsg
 						return "", err
 					}
 				}
@@ -470,7 +490,7 @@ func (n *Node) appendPropertyNodes(stringToPrepend string, stmt Statement, print
 						}
 					} else if !privateNode.HasPrimitiveEntry() {
 						// Embedded statement (is printed as flat string, e.g., A: actor I: action, Cac: context)
-						stringToAppendTo.WriteString(privateNode.Entry.(Statement).StringFlatStatement(true))
+						stringToAppendTo.WriteString(privateNode.Entry.(*Statement).StringFlatStatement(true))
 					} else {
 						// Primitive properties
 						stringToAppendTo.WriteString(shared.EscapeSymbolsForExport(privateNode.Entry.(string)))

@@ -487,6 +487,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 			if errorVal.ErrorCode != tree.PARSING_NO_ERROR {
 				return nil, nil, nil, errorVal
 			}
+			Println("Logical expressions for atomic statement:", logicalValue)
 		}
 
 		Println("Entries (complete row - before adding logical operators and nested statements):", entryMap)
@@ -526,10 +527,36 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, nil, nil, errorVal
 		}
+		Println("Logical links to other statements: ", stmtLinksString)
 
-		// Add identified linkages to nestedMap (i.e., for all atomic statements)
-		for i := range nestedTabularResult.StatementMap {
-			nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] = stmtLinksString
+		// Add identified linkages to nestedMap (i.e., for all atomic statements on *same level* (don't overwrite lower levels!)
+		if stmtLinksString != "" {
+			// Check for nesting prefix first (to prevent overriding statements with higher-level nesting
+			// (e.g., Bdir{ A(actor) Cac{ A(actor2) ...}; here only atomic statements with the same nesting level
+			// (i.e., Bdir{ A(actor) } should be appended
+			// This is identified based on the uniform prefix for such statements that will all conclude with "}." followed by unique ID
+			// Example: Top level 123.1 --> no nesting, but same level; {123.1}.1 --> first nesting level; {{123.1}.1}.1 --> second nesting level
+			nestedIdPrefix := ""
+			if strings.Contains(val.ID, "}.") {
+				nestedIdPrefix = val.ID[:strings.LastIndex(val.ID, "}.")]
+			}
+			for i := range nestedTabularResult.StatementMap {
+				// If prefix exists and the prefix applies also to the atomic statement of concern ...
+				if nestedIdPrefix != "" && strings.HasPrefix(nestedTabularResult.StatementMap[i][stmtIdColHeader], nestedIdPrefix) {
+					// ... then append ...
+					if nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] != "" {
+						nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] =
+							nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] + componentStmtRefSeparator + stmtLinksString
+					} else {
+						// ... or assign outright
+						nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] = stmtLinksString
+					}
+					// else do not assign at all (since statements are likely on lower nesting level
+				} else if nestedIdPrefix == "" {
+					// ... else if no prefix exists (i.e., no nesting), simply assign to all statements (must be on same level)
+					nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] = stmtLinksString
+				}
+			}
 		}
 
 		// Add Logical linkage header if not already existing

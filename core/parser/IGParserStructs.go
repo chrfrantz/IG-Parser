@@ -74,13 +74,13 @@ const COMPONENT_IDENTIFIER = "(" +
 	tree.OR_ELSE +
 	")"
 
-// Full component header syntax including suffix and annotations (e.g., A1[semanticAnnotation])
+// Full component header syntax including identifier, suffix and annotations (e.g., A1[semanticAnnotation]), where suffix and annotation are optional
 const COMPONENT_HEADER_SYNTAX =
 // Component identifier, ...
 COMPONENT_IDENTIFIER +
-	// ... followed by suffix ...
+	// ... followed by optional suffix ...
 	COMPONENT_SUFFIX_SYNTAX +
-	// ... followed by annotation
+	// ... followed by optional annotation
 	COMPONENT_ANNOTATION_SYNTAX
 
 // Full syntax of components, including identifier, suffix, annotation and potentially nested or atomic content (but without consideration of embedded component-level nesting)
@@ -142,7 +142,11 @@ const PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS =
 // (Inner part of nested combinations, including single combination or multiple combination pairs on either side
 // (e.g., { {Cac{ ... } [AND] Cac{ ... } } [XOR] { {Cac{ ... } [AND] Cac{ ... } }}),
 // but without leading component syntax and/or termination for flexible composition)
-const BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "\\" + LEFT_BRACE +
+const BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS =
+// Optional leading component identifier
+COMPONENT_IDENTIFIER + "?" +
+	// Leading brace
+	"\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "\\s*)+" + // tolerate presence or absence of separating spaces
 	"(" +
@@ -155,7 +159,10 @@ const BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "\\" + LEFT_
 	"\\" + RIGHT_BRACE
 
 // 3rd order combinations of parenthesized or braced combinations, including combinations of combinations as components
-const BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS = "(\\" + LEFT_BRACE +
+const BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS =
+// Optional leading component identifier
+COMPONENT_IDENTIFIER + "?" +
+	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
@@ -174,7 +181,10 @@ const BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENT
 	"\\" + RIGHT_BRACE + ")"
 
 // 4th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
-const BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS = "(\\" + LEFT_BRACE +
+const BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS =
+// Optional leading component identifier
+COMPONENT_IDENTIFIER + "?" +
+	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS +
@@ -193,7 +203,10 @@ const BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATI
 	"\\" + RIGHT_BRACE + ")"
 
 // 5th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
-const BRACED_5TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
+const BRACED_5TH_ORDER_COMBINATIONS =
+// Optional leading component identifier
+COMPONENT_IDENTIFIER + "?" +
+	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS +
@@ -212,7 +225,10 @@ const BRACED_5TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
 	"\\" + RIGHT_BRACE + ")"
 
 // 6th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
-const BRACED_6TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
+const BRACED_6TH_ORDER_COMBINATIONS =
+// Optional leading component identifier
+COMPONENT_IDENTIFIER + "?" +
+	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_5TH_ORDER_COMBINATIONS +
@@ -230,29 +246,77 @@ const BRACED_6TH_ORDER_COMBINATIONS = "(\\" + LEFT_BRACE +
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
 	"\\" + RIGHT_BRACE + ")"
 
-// Combinations of combinations for multi-combined component-level nesting, under consideration of termination for atomic matching
+// 7th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
+const BRACED_7TH_ORDER_COMBINATIONS =
+// Optional leading component identifier
+COMPONENT_IDENTIFIER + "?" +
+	"(\\" + LEFT_BRACE +
+	// Testing of potential excessive words preceding component specification is captured in left component matching
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_6TH_ORDER_COMBINATIONS +
+	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
+	"\\s*)+" + // tolerate presence or absence of separating spaces
+	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_6TH_ORDER_COMBINATIONS +
+	")" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
+	")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
+	"\\" + RIGHT_BRACE + ")"
+
+// 8th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
+const BRACED_8TH_ORDER_COMBINATIONS =
+// Optional leading component identifier
+//COMPONENT_IDENTIFIER + "?" +
+"(\\" + LEFT_BRACE +
+	// Testing of potential excessive words preceding component specification is captured in left component matching
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_7TH_ORDER_COMBINATIONS +
+	")" + OPTIONAL_WORDS_WITH_PARENTHESES + // random words following combination element and logical operator
+	"\\s*)+" + // tolerate presence or absence of separating spaces
+	"(" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\" + LEFT_BRACKET + LOGICAL_OPERATORS + "\\" + RIGHT_BRACKET +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before/after logical operator
+	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
+	BRACED_7TH_ORDER_COMBINATIONS +
+	")" +
+	"\\s*)+" + // tolerate presence or absence of separating spaces
+	")+" +
+	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
+	"\\" + RIGHT_BRACE + ")"
+
+// Expression to filter combinations of combinations to distinguish from component-level component-level nesting
+// Termination prevents partial matches (which leads to unintended omission of parts)
+// (e.g., embedded combinations such as 'Cac{Cac{A(dlsjg) I(lkdjsg)} ...' in nested statements such as
+// 'Bdir{A(dlsjg) I(klsdjg) Cac{Cac{A(dlsjg) I(lkdjsg)} [AND] Cac{A(dslgkj) I(jdlskgj)}}')
 const NESTED_COMBINATIONS_TERMINATED =
 // Component combinations need to lead with component identifier (and potential suffix and annotation)
 "^" +
 	COMPONENT_HEADER_SYNTAX +
 	// Ensure the tested statement only contains combinations, but no leading individual component (i.e., combination embedded in nested statement)
-	BRACED_6TH_ORDER_COMBINATIONS +
+	BRACED_8TH_ORDER_COMBINATIONS +
 	"$" // Ensure immediate termination of combination with additional trailing components (which would imply nested statement with embedded combination)
 
 // Combination of combinations to represent multi-level nesting (does not require termination, i.e., could be embedded)
 // Example: 'Cac{ Cac{ I(leftact) Bdir(object1) } [XOR] Cac{ I(rightact) Bdir(object2) }}')
+// Not to be used if filtering against component-level nesting (since combinations may be contained as subset)
 const NESTED_COMBINATIONS =
 // Component combinations need to lead with component identifier (and potential suffix and annotation), e.g., 'Cac1[annotation]{ ... }')
 COMPONENT_HEADER_SYNTAX +
-	BRACED_6TH_ORDER_COMBINATIONS
+	BRACED_8TH_ORDER_COMBINATIONS
 
-// Component combination pairs to be extrapolated into separate statements complemented with basic components (may contain leading annotation)
+// Component combination pairs to be extrapolated into separate statements complemented with basic components (may contain leading annotation,
+// but no leading component identifier)
 // Example: '{ Cac{ I(leftact) Bdir(object1) } [XOR] Cac{ I(rightact) Bdir(object2) }}')
 const COMPONENT_PAIR_COMBINATIONS =
 // Component pairs can contain statement-level annotations (e.g., '[boundaryStmt]{ ... }'), but not component identifier (which would make it component combination)
-//"[^" + COMPONENT_IDENTIFIER + "]" +
 COMPONENT_ANNOTATION_SYNTAX +
-	BRACED_6TH_ORDER_COMBINATIONS
+	BRACED_8TH_ORDER_COMBINATIONS
 
 /*
 Escapes all special symbols to prepare those for input into regex expression
