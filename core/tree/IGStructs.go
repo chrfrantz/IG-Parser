@@ -706,8 +706,9 @@ func (c *StateComplexity) String() string {
 }
 
 /*
-Collapses repeated occurrences of values in a given array (e.g., [AND] [AND] becomes [AND]).
-However, only applies to immediate repetition, not across the entire input
+Collapses repeated occurrences of values in a given array (e.g., [AND] [AND] becomes [AND]) including
+operators deemed equivalent as specified by passing as parameter valuesToCollapse (e.g., wAND, AND).
+However, only applies to immediate repetition (i.e., operator immediately preceding), not across the entire input.
 */
 func CollapseAdjacentOperators(inputArray []string, valuesToCollapse []string) []string {
 
@@ -721,9 +722,11 @@ func CollapseAdjacentOperators(inputArray []string, valuesToCollapse []string) [
 			outSlice = append(outSlice, v)
 			continue
 		}
-		// If last value is the same as this one
-		res, _ := StringInSlice(v, valuesToCollapse)
-		if res {
+		// Check whether value of concern is in array of values to consider the same
+		thisValueInCollapsableValueSlice, _ := StringInSlice(v, valuesToCollapse)
+		// Check whether last item in input array is in collapsable array
+		lastValueInCollapsableValueSlice, _ := StringInSlice(outSlice[len(outSlice)-1], valuesToCollapse)
+		if thisValueInCollapsableValueSlice && lastValueInCollapsableValueSlice {
 			// do nothing
 		} else {
 			// else append

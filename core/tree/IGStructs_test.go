@@ -136,9 +136,86 @@ func TestCollapseAdjacentOperators(t *testing.T) {
 
 	input := []string{"AND", "AND", "AND", "sAND", "XOR"}
 	collapseValues := []string{AND, SAND_WITHIN_COMPONENTS, SAND_BETWEEN_COMPONENTS}
+	// Note: sAND is not in collapseValues
+	output := []string{"AND", "sAND", "XOR"}
 
 	result := CollapseAdjacentOperators(input, collapseValues)
+	for i, v := range result {
+		if output[i] != v {
+			t.Fatal("Found invalid result in filtered array. Value: ", v, ", Array:", result)
+		}
+	}
 	if len(result) != 3 {
+		t.Fatal("Did not identify correct number of operators. Found ", len(result), "in", result)
+	}
+
+	input = []string{"AND", "OR", "XOR"}
+	collapseValues = []string{AND, SAND_WITHIN_COMPONENTS, SAND_BETWEEN_COMPONENTS}
+	output = []string{"AND", "OR", "XOR"}
+
+	result = CollapseAdjacentOperators(input, collapseValues)
+	for i, v := range result {
+		if output[i] != v {
+			t.Fatal("Found invalid result in filtered array. Value: ", v, ", Array:", result)
+		}
+	}
+	if len(result) != 3 {
+		t.Fatal("Did not identify correct number of operators. Found ", len(result), "in", result)
+	}
+
+	input = []string{"XOR", "OR", "AND"}
+	collapseValues = []string{AND, SAND_WITHIN_COMPONENTS, SAND_BETWEEN_COMPONENTS}
+	output = []string{"XOR", "OR", "AND"}
+
+	result = CollapseAdjacentOperators(input, collapseValues)
+	for i, v := range result {
+		if output[i] != v {
+			t.Fatal("Found invalid result in filtered array. Value: ", v, ", Array:", result)
+		}
+	}
+	if len(result) != 3 {
+		t.Fatal("Did not identify correct number of operators. Found ", len(result), "in", result)
+	}
+
+	input = []string{"AND", "AND", "XOR", "AND", "OR", "AND"}
+	collapseValues = []string{AND, SAND_WITHIN_COMPONENTS, SAND_BETWEEN_COMPONENTS}
+	output = []string{"AND", "XOR", "AND", "OR", "AND"}
+
+	result = CollapseAdjacentOperators(input, collapseValues)
+	for i, v := range result {
+		if output[i] != v {
+			t.Fatal("Found invalid result in filtered array. Value: ", v, ", Array:", result)
+		}
+	}
+	if len(result) != 5 {
+		t.Fatal("Did not identify correct number of operators. Found ", len(result), "in", result)
+	}
+
+	input = []string{"AND", "wAND", "XOR", "wAND", "OR", "bAND", "AND"}
+	collapseValues = []string{AND, SAND_WITHIN_COMPONENTS, SAND_BETWEEN_COMPONENTS}
+	output = []string{"AND", "XOR", "wAND", "OR", "bAND"}
+
+	result = CollapseAdjacentOperators(input, collapseValues)
+	for i, v := range result {
+		if output[i] != v {
+			t.Fatal("Found invalid result in filtered array. Value: ", v, ", Array:", result)
+		}
+	}
+	if len(result) != 5 {
+		t.Fatal("Did not identify correct number of operators. Found ", len(result), "in", result)
+	}
+
+	input = []string{"AND", "wAND", "XOR", "wAND", "bAND", "AND", "OR", "AND", "wAND"}
+	collapseValues = []string{AND, SAND_WITHIN_COMPONENTS, SAND_BETWEEN_COMPONENTS}
+	output = []string{"AND", "XOR", "wAND", "OR", "AND"}
+
+	result = CollapseAdjacentOperators(input, collapseValues)
+	for i, v := range result {
+		if output[i] != v {
+			t.Fatal("Found invalid result in filtered array. Value: ", v, ", Array:", result)
+		}
+	}
+	if len(result) != 5 {
 		t.Fatal("Did not identify correct number of operators. Found ", len(result), "in", result)
 	}
 

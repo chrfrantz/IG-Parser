@@ -1046,8 +1046,8 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_TOO_MANY_NODES, ErrorMessage: "Expecting single node/statement, as opposed to multiple. Aborting extrapolation of statements"}
 			}
 
-			// Assign node embedding statement to higher-level node containing statement collection
-			tpNode[0].Parent = v2
+			// Assign node embedding statement to higher-level node containing statement collection (the one with logical operator)
+			tpNode[0].Parent = v2.Parent
 
 			// Complete decomposed partial statement with parsed linear statement (can only be one statement in decomposed pair combinations)
 			tpNode[0].Entry = tree.CopyComponentsFromStatement(tpNode[0].Entry.(*tree.Statement), s)
