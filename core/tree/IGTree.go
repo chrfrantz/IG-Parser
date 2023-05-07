@@ -290,8 +290,10 @@ func (n *Node) Stringify() string {
 
 /*
 Provide the flattest possible representation of contents without structure or linebreaks.
+Cautious: Can produce log.Fatal in case of novel unknown type. Developer consideration.
 */
 func (n *Node) StringFlat() string {
+
 	if n.HasPrimitiveEntry() {
 		// Simple entry
 		return n.Entry.(string)
@@ -326,7 +328,12 @@ func (n *Node) StringFlat() string {
 			stmt := n.Entry.(*Statement)
 			return stmt.StringFlat(false)
 		}
-		log.Fatal("Error when generating string output. Unknown type:", reflect.TypeOf(n.Entry))
+		// Component-level nested pair combination
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf([]*Node{}) {
+			stmt := n.Entry.([]*Node)[0].Entry.(*Statement)
+			return stmt.StringFlat(false)
+		}
+		log.Fatal("Error when generating string output. Unknown type (developer concern):", reflect.TypeOf(n.Entry))
 		return ""
 	}
 }
