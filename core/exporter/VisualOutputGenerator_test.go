@@ -1602,9 +1602,9 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinationsInCompone
 	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err3 := WriteToFile("errorOutput.error", outputString, true)
-		if err3 != nil {
-			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		err4 := WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
 		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
@@ -1665,9 +1665,9 @@ func TestVisualOutputNestedCombinationsComponentLevelNestingAndComponentPairs(t 
 	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err3 := WriteToFile("errorOutput.error", outputString, true)
-		if err3 != nil {
-			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		err4 := WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
 		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
@@ -1730,9 +1730,9 @@ func TestVisualOutputMultiLevelComponentPair(t *testing.T) {
 	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err3 := WriteToFile("errorOutput.error", outputString, true)
-		if err3 != nil {
-			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		err4 := WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
 		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}
@@ -1793,9 +1793,72 @@ func TestVisualOutputComplexNestedCombinationsWithComponentPairs(t *testing.T) {
 	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err3 := WriteToFile("errorOutput.error", outputString, true)
-		if err3 != nil {
-			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		err4 := WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests visual output for component pairs in nested components.
+*/
+func TestVisualOutputComponentPairsInNestedComponents(t *testing.T) {
+
+	// Statement with multi-level nesting, combinations as well as component pairs
+	text := "A(Individuals) D(must) { I(monitor) Bdir(compliance) [AND] I(report) Bdir(violation) } Cac(in the case of (repeated offense [OR] other reasons)) O{ A(actor2) D(must) {I(enforce) Bdir(compliance) [OR] I(delegate) Bdir(enforcement)}}"
+
+	// Deactivate annotations
+	SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), IncludeAnnotations(),
+		IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err2.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating node tree:", err2)
+	}
+
+	outputString := output
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err3 := os.ReadFile("TestVisualOutputComponentPairsInNestedComponents.test")
+	if err3 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err4 := WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
 		}
 		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
 	}

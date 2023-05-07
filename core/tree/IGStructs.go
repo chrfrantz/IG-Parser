@@ -484,7 +484,7 @@ const PARSING_ERROR_INVALID_PARENTHESES_COMBINATION = "INVALID_PARENTHESES_COMBI
 const PARSING_ERROR_PATTERN_EXTRACTION = "PATTERN_EXTRACTION_ERROR"
 
 // Detecting combinations of nested statements with varying component references
-// (e.g., {Cac{stmt1} [AND] Cex{stmt2}}, but should be{Cac{stmt1} [AND] Cac{stmt2}})
+// (e.g., Cac{Cac{stmt1} [AND] Cex{stmt2}}, but should be Cac{Cac{stmt1} [AND] Cac{stmt2}})
 const PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION = "INVALID_TYPE_COMBINATIONS_IN_NESTED_STATEMENT_COMBINATIONS"
 
 // Indicates that operations was imposed on nil element
@@ -512,7 +512,10 @@ const PARSING_ERROR_INVALID_OUTPUT_TYPE = "INVALID_OUTPUT_TYPE"
 const PARSING_ERROR_TOO_MANY_NODES = "TOO_MANY_NODES"
 
 // Indicates invalid type (i.e., no node or statement) during visual output generation
-const PARSING_ERROR_INVALID_TYPE_VISUAL_OUTPUT = "INVALID TYPE FOR VISUAL OUTPUT"
+const PARSING_ERROR_INVALID_TYPE_VISUAL_OUTPUT = "INVALID_TYPE_FOR_VISUAL_OUTPUT"
+
+// Indicates unknown input type for parsing (i.e., not *Statement and not *Node)
+const PARSING_ERROR_UNKNOWN_INPUT_TYPE = "UNKNOWN_INPUT_TYPE"
 
 /*
 Error type signaling errors during statement parsing

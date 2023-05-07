@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -517,7 +518,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 		// Parse individual nested statements on component level in order to attach those to main output
 		nestedTabularResult := GenerateTabularOutputFromParsedStatement(val.NestedStmt, nil, val.NestedStmt.Annotations, val.ID, "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders)
 		if nestedTabularResult.Error.ErrorCode != tree.PARSING_NO_ERROR {
-			return nil, nil, nil, errorVal
+			return nil, nil, nil, nestedTabularResult.Error
 		}
 
 		// Add linkages between statements (statement-level combinations)
@@ -525,7 +526,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 		// Determine linkages to fellow nested statements
 		stmtLinksString, err := generateLogicalLinksExpressionForStatements(val.NestedStmt, componentNestedStmts)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return nil, nil, nil, errorVal
+			return nil, nil, nil, err
 		}
 		Println("Logical links to other statements: ", stmtLinksString)
 
@@ -832,7 +833,6 @@ func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations i
 
 		// Prepare return structure
 		var res TabularOutputResult
-		storeResult := true
 
 		overwriteFile := overwrite
 		printHeadersInFile := printHeaders
@@ -850,11 +850,9 @@ func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations i
 			res = GenerateTabularOutputFromParsedStatement(topLevelStmt, topLevelStmts, annotations, stmtId, filename, overwriteFile, aggregateImplicitLinkages, separator, outputFormat, printHeadersInFile)
 			if res.Error.ErrorCode != tree.PARSING_NO_ERROR {
 				Println("Error during output generation for single statement. Statement ignored from output (Statement node: " + stmtNode.String() + ")")
-				storeResult = false
+
 			}
-			if storeResult {
-				results = append(results, res)
-			}
+			results = append(results, res)
 		}
 	}
 
@@ -896,9 +894,23 @@ func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.
 		logicalLinkageStmts += linkString
 	}
 
+	var stmt *tree.Statement
+
 	Println(" Step: Extracting leaf arrays")
-	// Extract statement from node
-	stmt := node.Entry.(*tree.Statement)
+	// Extract statement from node - varies whether it is ...
+	switch reflect.TypeOf(node.Entry) {
+	case reflect.TypeOf(&tree.Statement{}):
+		// first-order statement component
+		stmt = node.Entry.(*tree.Statement)
+	case reflect.TypeOf([]*tree.Node{}):
+		// component-level nested pair combination
+		stmt = node.Entry.([]*tree.Node)[0].Entry.(*tree.Statement)
+	default:
+		result := TabularOutputResult{}
+		result.Error = tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNKNOWN_INPUT_TYPE, ErrorMessage: "Parsing failed for unknown input type " + reflect.TypeOf(node.Entry).String() +
+			". Please report this error (alongside Request ID and input statement) to the developer for further investigation."}
+		return result
+	}
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
 	leafArrays, componentRefs := stmt.GenerateLeafArrays(aggregateImplicitLinkages)
 
@@ -925,7 +937,7 @@ func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.
 
 	Println(" Step: Generate tabular output")
 
-	// Prepare export to tabular output (including pregenerated annotations and logical linkage to other statements)
+	// Prepare export to tabular output (including pre-generated annotations and logical linkage to other statements)
 	result.StatementMap, result.HeaderSymbols, result.HeaderNames, result.Error = generateStatementMatrix(res, annotations, logicalLinkageStmts, componentRefs, links, derivedIDs[node], separator, outputFormat, printHeaders)
 	if result.Error.ErrorCode != tree.PARSING_NO_ERROR {
 		return result
