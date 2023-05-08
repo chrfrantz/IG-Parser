@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"IG-Parser/core/config"
 	"IG-Parser/core/exporter"
 	"IG-Parser/web/converter/shared"
 	"IG-Parser/web/helper"
@@ -164,7 +165,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		StmtIdHelp:                shared.HELP_STMT_ID,
 		ParametersHelp:            shared.HELP_PARAMETERS,
 		OutputTypeHelp:            shared.HELP_OUTPUT_TYPE,
-		ReportHelp:                shared.HELP_REPORT}
+		ReportHelp:                shared.HELP_REPORT,
+		Version:                   config.IG_PARSER_VERSION}
 
 	// Parse UI canvas information (visual parser)
 

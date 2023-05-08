@@ -64,4 +64,6 @@ type ReturnStruct struct {
 	OutputTypeHelp string
 	// Help message for report tooltip
 	ReportHelp string
+	// Version ID output in frontend
+	Version string
 }

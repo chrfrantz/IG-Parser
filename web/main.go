@@ -1,6 +1,7 @@
 package main
 
 import (
+	"IG-Parser/core/config"
 	"IG-Parser/web/converter"
 	"IG-Parser/web/helper"
 	"embed"
@@ -24,9 +25,6 @@ const ENV_VAR_LOGGING_PATH = "IG_PARSER_LOGGING_PATH"
 // Default values
 const DEFAULT_LOGGING_PATH = "./logs"
 const DEFAULT_PORT = "8080"
-
-// IG Parser Version
-const IG_PARSER_VERSION = "0.2"
 
 // Control whether stdout console output should be suppressed (only works if logging is deactivated)
 const SUPPRESS_CONSOLE_OUTPUT = false
@@ -107,7 +105,7 @@ func main() {
 
 	// Print configuration in console
 	log.Println("Launching IG Parser ...")
-	log.Println(" - Version: " + IG_PARSER_VERSION)
+	log.Println(" - Version: " + config.IG_PARSER_VERSION)
 	log.Println(" - Website: https://newinstitutionalgrammar.org/ig-parser")
 	log.Println(" - Logging enabled: " + fmt.Sprint(converter.Logging))
 	log.Println(" - Logging path: " + fmt.Sprint(converter.LoggingPath))
