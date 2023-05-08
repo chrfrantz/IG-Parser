@@ -318,11 +318,6 @@ func (n *Node) StringFlat() string {
 		// else simply return empty string
 		return ""
 	} else {
-		// Complex entry by value
-		if reflect.TypeOf(n.Entry) == reflect.TypeOf(Statement{}) {
-			stmt := n.Entry.(Statement)
-			return stmt.StringFlat(false)
-		}
 		// Complex entry by reference
 		if reflect.TypeOf(n.Entry) == reflect.TypeOf(&Statement{}) {
 			stmt := n.Entry.(*Statement)
@@ -331,6 +326,11 @@ func (n *Node) StringFlat() string {
 		// Component-level nested pair combination
 		if reflect.TypeOf(n.Entry) == reflect.TypeOf([]*Node{}) {
 			stmt := n.Entry.([]*Node)[0].Entry.(*Statement)
+			return stmt.StringFlat(false)
+		}
+		// Complex entry by value (rarest occurrence, hence last)
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf(Statement{}) {
+			stmt := n.Entry.(Statement)
 			return stmt.StringFlat(false)
 		}
 		log.Fatal("Error when generating string output. Unknown type (developer concern):", reflect.TypeOf(n.Entry))
