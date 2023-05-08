@@ -47,18 +47,62 @@ const HTML_EM_STOP = "</b>"
 const HELP_REF = "Click to open a separate help page explaining the IG Script syntax (opens new tab)."
 
 // Content of help page
-var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser UI is where the actual encoding of the institutional statement in the IG Script syntax occurs." + LINEBREAK + LINEBREAK +
-	"The basic structure of a statement is the component symbol (e.g., " + HTML_EM_START + "A" + HTML_EM_STOP + "), immediately followed by the coded text in parentheses, e.g., " + HTML_EM_START + "A(certifying agent)" + HTML_EM_STOP + "." + LINEBREAK +
-	"Within the coded component, logical combinations of type " + HTML_EM_START + "[AND]" + HTML_EM_STOP + ", " + HTML_EM_START + "[OR]" + HTML_EM_STOP + ", and " + HTML_EM_START + "[XOR]" + HTML_EM_STOP + " are supported, e.g., " + HTML_EM_START + "A(Both (certifying agent [AND] inspector)) ..." + HTML_EM_STOP + ". " + LINEBREAK +
-	"Note the parentheses that indicate the combination scope within the component. These need to be explicitly specified for every logical operator (i.e., " + HTML_EM_START + "A((first [AND] second))" + HTML_EM_STOP + "; " + HTML_EM_START + "A(first [AND] second)" + HTML_EM_STOP + " will lead to an error)." + LINEBREAK + LINEBREAK +
-	"In addition, the notion of statement-level nesting is supported (i.e., the substitution of component content with entire statements), " +
-	"e.g., " + HTML_EM_START + "Cac{A(certifier) I(observes) Bdir(violation)}" + HTML_EM_STOP + ", including the combination of nested statements, e.g., " + HTML_EM_START + "{Cac{A(certifier) I(observes) Bdir(violation)} [AND] Cac{A(certifier) I(sanctions) Bdir(violation)}}" + HTML_EM_STOP + " (note the outer braces)." + LINEBREAK +
-	"Nesting is supported on all property types (as detailed below), Activation conditions (" + HTML_EM_START + tree.ACTIVATION_CONDITION + "{}" + HTML_EM_STOP + "), Execution constraints (" + HTML_EM_START + tree.EXECUTION_CONSTRAINT + "{}" + HTML_EM_STOP + "), " +
-	" and the Or else component (" + HTML_EM_START + tree.OR_ELSE + "{}" + HTML_EM_STOP + ")." + LINEBREAK + LINEBREAK +
-	"Additional features include the use of suffices to indicate exclusive linkages between properties and associated components (e.g., " + HTML_EM_START + "Bdir1,p(violating) Bdir1(citizens)" + HTML_EM_STOP + " as well as " + HTML_EM_START + "Bdir2,p(compliant) Bdir2(customers)" + HTML_EM_STOP + " indicating that the properties are exclusively associated with the given corresponding object, i.e., as \"violating citizens\" and \"compliant customers\", respectively). This principle applies to most component types and is described in the comprehensive syntax overview (linked at the top of the page). The ability to use suffices on properties is further supported, and likewise described in the comprehensive overview." + LINEBREAK + LINEBREAK +
-	"The parser further supports the encoding of IG Logico annotations to capture semantic information associated with component values (e.g., " + HTML_EM_START + "A[type=animate](Officer)" + HTML_EM_STOP + "). " +
-	"Such annotations can be combined with suffices indicating private component relationships (e.g., " + HTML_EM_START + "A1,p[prop=qualitative](personal) A1[type=animate](agent)" + HTML_EM_STOP + ")." + LINEBREAK + LINEBREAK +
-	"Supported component symbols include (with indication of optional component-level nesting):" + LINEBREAK + LINEBREAK +
+var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser UI is where the actual encoding of the institutional statement in the IG Script syntax occurs." +
+	LINEBREAK + LINEBREAK +
+	"The IG Script syntax knows four distinct cases to facilitate the encoding:" +
+	LINEBREAK + LINEBREAK +
+	HTML_EM_START + "1.) Simple components (including combination of values): " + HTML_EM_STOP + LINEBREAK +
+	"The basic structure of a statement is the component symbol (e.g., " + HTML_EM_START + "A" + HTML_EM_STOP + " -- see the list of all component symbols supported by the IG Parser at the bottom), immediately followed by the coded text in parentheses, e.g., " + HTML_EM_START + "A(certifying agent)" + HTML_EM_STOP + "." +
+	LINEBREAK +
+	"Within the coded component, logical combinations of type " + HTML_EM_START + "[AND]" + HTML_EM_STOP + ", " + HTML_EM_START + "[OR]" + HTML_EM_STOP + ", and " + HTML_EM_START + "[XOR]" + HTML_EM_STOP + " are supported, e.g., " + HTML_EM_START + "A(Both (certifying agent [AND] inspector)) ..." + HTML_EM_STOP + ". " +
+	LINEBREAK +
+	"Note the parentheses that indicate the combination scope within the component. These need to be explicitly specified for every logical operator (i.e., " + HTML_EM_START + "A((first [AND] second))" + HTML_EM_STOP + "; " + HTML_EM_START + "A(first [AND] second)" + HTML_EM_STOP + " will lead to an error)." +
+	LINEBREAK + LINEBREAK +
+	"Example: " + HTML_EM_START + "A(Concert visitors) D(must) I(present) Bdir(tickets) to Bind(agent) at Cex(venue)." + HTML_EM_STOP + LINEBREAK +
+	" Note: Text outside the parentheses (here: 'to' and 'at the') is ignored during parsing." +
+	LINEBREAK + LINEBREAK +
+	HTML_EM_START + "2.) Nested components (\"component-level nesting\" in IG): " + HTML_EM_STOP + LINEBREAK +
+	"Component-level nesting (i.e., the substitution of component content with entire statements) applies when a single component is further decomposed into individual elements, " +
+	"e.g., an activation condition that captures a distinctive event such as " + HTML_EM_START + "Cac{A(certifier) I(observes) Bdir(violation)}" + HTML_EM_STOP + " (read: \"if certifier observes violation, ...\"), " +
+	"including the combination of components as in the previous case (e.g., " + HTML_EM_START + "Cac{A(certifier) I((observes [AND] reports)) Bdir(violation)}" + HTML_EM_STOP + ")" +
+	LINEBREAK + LINEBREAK +
+	"Example: " + HTML_EM_START + "A(Agent) D(must) I(reject) Bdir(admission) Cac{A(concert visitor) I(refuses to present) Bdir(ticket)}." + HTML_EM_STOP + LINEBREAK + " Note: Nesting is supported on all property types (as detailed below), Activation conditions (" + HTML_EM_START + tree.ACTIVATION_CONDITION + "{}" + HTML_EM_STOP + "), Execution constraints (" + HTML_EM_START + tree.EXECUTION_CONSTRAINT + "{}" + HTML_EM_STOP + "), " +
+	" and the Or else component (" + HTML_EM_START + tree.OR_ELSE + "{}" + HTML_EM_STOP + ")." +
+	LINEBREAK + LINEBREAK +
+	HTML_EM_START + "3.) Nested statement combinations: " + HTML_EM_STOP + LINEBREAK +
+	"Nested statement combinations occur if multiple distinct nested components are logically linked. For instance, if two functionally distinct activation conditions apply, " +
+	"such as \"certifier observes violation\" OR \"certified agent requests revocation\". Using braces (i.e., { and }), such combinations can be encoded as follows " +
+	HTML_EM_START + "Cac{Cac{A(certifier) I(observes) Bdir(violation)} [OR] Cac{A,p(certified) A(agent) I(revokes) Bdir(revocation)}}" + HTML_EM_STOP +
+	". Central aspect here is to indicate the distinctive component type preceding the braces (activation conditions should only be combined with activation conditions, for instance)." +
+	LINEBREAK + LINEBREAK +
+	"Example: " + HTML_EM_START + "A(Agent) D(must) I(reject) Bdir(admission) Cac{Cac{A(visitor) I(refuses to present) Bdir(ticket)} [OR] Cac{A(organizer) I(cancels) Bdir(event)}}." + HTML_EM_STOP + LINEBREAK +
+	"Note: This applies to all components that support component-level nesting." +
+	LINEBREAK + LINEBREAK +
+	HTML_EM_START + "4.) Component pair combinations: " + HTML_EM_STOP + LINEBREAK +
+	"Component pair combinations are similar to the previous case, but instead of applying to completely distinctive expressoins, they apply in cases where some but not all parts " +
+	"of the statement (pairs of components, hence \"component pairs\") are different, such as \"certifiers must review certification procedure and monitor compliance\". " +
+	"This would be encoded as " + HTML_EM_START + "A(Certifiers) D(must) {I(review) Bdir(certification procedures) [AND] I(monitor) Bdir(compliance)}" + HTML_EM_STOP + ". " +
+	"Note the use of braces to signal the component pairs that are distinct (here \"review certification procedures\" and \"monitor compliance\", both of which consist of an aim and an object)." +
+	LINEBREAK + LINEBREAK +
+	"Example: " + HTML_EM_START + "A(Agent) D(must) {I(reject) Bdir(admission) [AND] I(report) Bdir(occurrence)}" + HTML_EM_STOP + LINEBREAK +
+	"Note: Component pair coding also applies in nested components " +
+	"(e.g., in an activation condition, such as " + HTML_EM_START + "Cac{A(actor) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)}}" + HTML_EM_STOP + ")." +
+	LINEBREAK + LINEBREAK +
+	HTML_EM_START + "Additional features (Suffices, Semantic Annotations)" + HTML_EM_STOP + LINEBREAK +
+	"IG Script supports additional features specifically aimed at handling property associations and facilitating semantic annotations: " +
+	LINEBREAK + LINEBREAK +
+	"This includes the use of " + HTML_EM_START + "suffices" + HTML_EM_STOP + " to indicate exclusive linkages between properties and associated components (e.g., " + HTML_EM_START + "Bdir1,p(violating) Bdir1(citizens)" + HTML_EM_STOP +
+	" as well as " + HTML_EM_START + "Bdir2,p(compliant) Bdir2(customers)" + HTML_EM_STOP + " indicating that the properties are exclusively associated with the given corresponding object, " +
+	"i.e., as \"violating citizens\" and \"compliant customers\", respectively). This principle applies to most component types and is described in the comprehensive syntax overview (linked at the top of the page). " +
+	"The ability to use suffices on properties as briefly highlighted here is further described in the comprehensive overview." +
+	LINEBREAK + LINEBREAK +
+	"The parser further supports the encoding of " + HTML_EM_START + "semantic annotations" + HTML_EM_STOP + ", reflecting IG Logico's focus on capturing semantic information associated " +
+	"with component values (e.g., " + HTML_EM_START + "A[type=animate](Officer)" + HTML_EM_STOP + "). " +
+	"Such annotations apply to any component and can be combined with suffices indicating private component relationships (e.g., " + HTML_EM_START + "A1,p[prop=qualitative](personal) A1[type=animate](agent)" + HTML_EM_STOP + ")." +
+	"They can further be used to annotate nested components (e.g., " + HTML_EM_START + "Cac[event=violation]{ A(actor) I(violates) ... }" + HTML_EM_STOP + ")." +
+	LINEBREAK + LINEBREAK +
+	"Supported " + HTML_EM_START + "component symbols" + HTML_EM_STOP + " include (with indication of support for component-level nesting):" +
+	LINEBREAK + LINEBREAK +
 	"<table>" +
 	"<tr><th>IG Script Symbol</th><th>Corresponding IG 2.0 Component</th></tr>" +
 	"<tr><td>" + tree.ATTRIBUTES + "()" + "</td><td>" + tree.IGComponentSymbolNameMap[tree.ATTRIBUTES] + "</td></tr>" +
