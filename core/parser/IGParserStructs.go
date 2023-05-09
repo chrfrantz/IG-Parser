@@ -227,8 +227,8 @@ COMPONENT_IDENTIFIER + "?" +
 // 6th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_6TH_ORDER_COMBINATIONS =
 // Optional leading component identifier
-COMPONENT_IDENTIFIER + "?" +
-	"(\\" + LEFT_BRACE +
+//COMPONENT_IDENTIFIER + "?" +
+"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_5TH_ORDER_COMBINATIONS +
@@ -299,7 +299,7 @@ const NESTED_COMBINATIONS_TERMINATED =
 "^" +
 	COMPONENT_HEADER_SYNTAX +
 	// Ensure the tested statement only contains combinations, but no leading individual component (i.e., combination embedded in nested statement)
-	BRACED_8TH_ORDER_COMBINATIONS +
+	BRACED_6TH_ORDER_COMBINATIONS +
 	"$" // Ensure immediate termination of combination with additional trailing components (which would imply nested statement with embedded combination)
 
 // Combination of combinations to represent multi-level nesting (does not require termination, i.e., could be embedded)
@@ -308,7 +308,7 @@ const NESTED_COMBINATIONS_TERMINATED =
 const NESTED_COMBINATIONS =
 // Component combinations need to lead with component identifier (and potential suffix and annotation), e.g., 'Cac1[annotation]{ ... }')
 COMPONENT_HEADER_SYNTAX +
-	BRACED_8TH_ORDER_COMBINATIONS
+	BRACED_6TH_ORDER_COMBINATIONS
 
 // Component combination pairs to be extrapolated into separate statements complemented with basic components (may contain leading annotation,
 // but no leading component identifier)
@@ -316,7 +316,7 @@ COMPONENT_HEADER_SYNTAX +
 const COMPONENT_PAIR_COMBINATIONS =
 // Component pairs can contain statement-level annotations (e.g., '[boundaryStmt]{ ... }'), but not component identifier (which would make it component combination)
 COMPONENT_ANNOTATION_SYNTAX +
-	BRACED_8TH_ORDER_COMBINATIONS
+	BRACED_6TH_ORDER_COMBINATIONS
 
 /*
 Escapes all special symbols to prepare those for input into regex expression
