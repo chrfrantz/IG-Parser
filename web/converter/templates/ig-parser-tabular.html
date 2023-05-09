@@ -3,7 +3,7 @@
 
 <!-- additional entry field -->
 <span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
-<input name="stmtId" type="text" value="{{.StmtId}}"><br />
+<input id="stmtId" name="stmtId" onkeyup="saveFormContent()" type="text" value="{{.StmtId}}"><br />
 
 <!-- Parameters -->
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>

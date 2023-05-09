@@ -14,10 +14,16 @@ type ReturnStruct struct {
 	Message string
 	// Original unparsed statement
 	RawStmt string
-	// IG-Script annotated statement
+	// Default raw statement (to support form reset)
+	DefaultRawStmt string
+	// IG-Script coded statement
 	CodedStmt string
+	// Default IG-Script coded (to support form reset)
+	DefaultCodedStmt string
 	// Statement ID
 	StmtId string
+	// Default Statement ID (to support form reset)
+	DefaultStmtId string
 	// Dynamic output indicator
 	DynamicOutput string
 	// IG Extended output indicator

@@ -52,11 +52,11 @@
     <form method="POST">
         <!-- Original Statement entry field -->
         <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
-        <textarea name="rawStmt" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()">{{.RawStmt}}</textarea><br />
         <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip"><a href="/help/" target="_blank">Encoded Statement:</a></span>
         <!-- ACE Editor; copies any content to hidden textarea -->
-        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea()" onpaste="copyEditorContentToTextArea()">{{.CodedStmt}}</div>
+        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea()">{{.CodedStmt}}</div>
         <script>
             var editor = ace.edit("editor");
             editor.session.setMode("ace/mode/text");
@@ -80,7 +80,90 @@
                 // Populate textarea with editor content
                 ta.value = editor.getValue();
             }
+
+            // Local storage
+
+            /*
+            Stores the editor content in browser local storage.
+             */
+            function saveFormContent() {
+                let content = editor.getValue();
+                localStorage.setItem("codedStmt", content);
+                console.log("Storing content " + content)
+
+                content = document.getElementById("rawStmt").value;
+                if(content != null) {
+                    localStorage.setItem("rawStmt", content);
+                    console.log("Storing content " + content)
+                }
+
+                // Check for element first, since only available in tabular output version
+                let tmpId = document.getElementById("stmtId");
+                if(tmpId != null) {
+                    localStorage.setItem("stmtId", tmpId.value);
+                    console.log("Storing content " + tmpId.value)
+                }
+            }
+
+            /*
+            Loads the content stored in local storage into editor
+             */
+            function loadFormContent() {
+                // Load encoded statement
+                // If value is stored ...
+                if(localStorage.getItem("codedStmt") != null) {
+                    // ... populate editor content ...
+                    let content = localStorage.getItem("codedStmt");
+                    editor.setValue(content);
+                    // ... and update underlying text area
+                    copyEditorContentToTextArea();
+                    console.log("Loading content " + content)
+                }
+                // Load raw statement
+                if(localStorage.getItem("rawStmt") != null && document.getElementById("rawStmt") != null) {
+                    let content = localStorage.getItem("rawStmt");
+                    document.getElementById("rawStmt").value = content;
+                    console.log("Loading content " + content)
+                }
+                // Load statement ID
+                if(localStorage.getItem("stmtId") != null && document.getElementById("stmtId") != null) {
+                    // ... populate editor content ...
+                    let content = localStorage.getItem("stmtId");
+                    document.getElementById("stmtId").value = content;
+                    console.log("Loading content " + content)
+                }
+            }
+
+            /*
+            Resets fields to original default content
+             */
+            function resetContent() {
+                // Reset coded statement
+                editor.setValue({{.DefaultCodedStmt}})
+                // and copy back to hidden text area
+                copyEditorContentToTextArea();
+
+                // Reset raw statement
+                document.getElementById("rawStmt").value = {{.DefaultRawStmt}};
+
+                // Reset statement ID (if existing)
+                if(document.getElementById("stmtId") != null) {
+                    document.getElementById("stmtId").value = {{.DefaultStmtId}};
+                }
+
+                // Save Statement ID explicitly, since it may not display in visual mode and otherwise not be saved
+                localStorage.setItem("stmtId", {{.StmtId}});
+                // Save reset values in local storage
+                saveFormContent();
+            }
+
+            // Loads form contents from local storage upon window load
+            window.onload = (event) => {
+                loadFormContent();
+            };
         </script>
 
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />
+        <input onclick="resetContent()" value="Reset to default statements (overwrites own coding)" type="button">
+
