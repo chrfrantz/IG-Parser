@@ -290,6 +290,16 @@ const BRACED_8TH_ORDER_COMBINATIONS =
 	OPTIONAL_WORDS_WITH_PARENTHESES + // random words before closing brace
 	"\\" + RIGHT_BRACE + ")"
 
+/*
+General note on regular expressions for nested combinations/component pairs:
+Currently, the nesting level is limited for performance reasons. If higher
+nesting levels are required, adjust the BRACED_6TH_ORDER_COMBINATIONS
+reference to higher order (e.g., BRACED_8TH_ORDER_COMBINATIONS).
+If adjusting the nesting level, ensure that the used level suppresses
+the need for a component identifier (COMPONENT_IDENTIFIER) - as shown for
+BRACED_6TH_ORDER_COMBINATIONS.
+*/
+
 // Expression to filter combinations of combinations to distinguish from component-level component-level nesting
 // Termination prevents partial matches (which leads to unintended omission of parts)
 // (e.g., embedded combinations such as 'Cac{Cac{A(dlsjg) I(lkdjsg)} ...' in nested statements such as
