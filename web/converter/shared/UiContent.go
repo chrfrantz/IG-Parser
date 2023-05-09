@@ -82,10 +82,12 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"Component pair combinations are similar to the previous case, but instead of applying to completely distinctive expressoins, they apply in cases where some but not all parts " +
 	"of the statement (pairs of components, hence \"component pairs\") are different, such as \"certifiers must review certification procedure and monitor compliance\". " +
 	"This would be encoded as " + HTML_EM_START + "A(Certifiers) D(must) {I(review) Bdir(certification procedures) [AND] I(monitor) Bdir(compliance)}" + HTML_EM_STOP + ". " +
-	"Note the use of braces to signal the component pairs that are distinct (here \"review certification procedures\" and \"monitor compliance\", both of which consist of an aim and an object)." +
+	"Note the use of braces to signal the component pairs that are distinct (here \"review certification procedures\" and \"monitor compliance\", both of which consist of a distinct aim and direct object), " +
+	"but are, in this instance, executed by the same actor (here: \"certifiers\")." +
 	LINEBREAK + LINEBREAK +
 	"Example: " + HTML_EM_START + "A(Agent) D(must) {I(reject) Bdir(admission) [AND] I(report) Bdir(occurrence)}" + HTML_EM_STOP + LINEBREAK +
-	"Note: Component pair coding also applies in nested components " +
+	"Note: Component pairs can consist of any type and number of components (e.g., " +
+	HTML_EM_START + "{A(actor1) D(must) I(perform action 1) [XOR] A(actor2) D(may) I(perform action2)} Cac(Under any circumstance)" + HTML_EM_STOP + "), and also applies to nested components " +
 	"(e.g., in an activation condition, such as " + HTML_EM_START + "Cac{A(actor) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)}}" + HTML_EM_STOP + ")." +
 	LINEBREAK + LINEBREAK +
 	HTML_EM_START + "Additional features (Suffixes, Semantic Annotations)" + HTML_EM_STOP + LINEBREAK +
@@ -93,8 +95,7 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	LINEBREAK + LINEBREAK +
 	"This includes the use of " + HTML_EM_START + "suffixes" + HTML_EM_STOP + " to indicate exclusive linkages between properties and associated components (e.g., " + HTML_EM_START + "Bdir1,p(violating) Bdir1(citizens)" + HTML_EM_STOP +
 	" as well as " + HTML_EM_START + "Bdir2,p(compliant) Bdir2(customers)" + HTML_EM_STOP + " indicating that the properties are exclusively associated with the given corresponding object, " +
-	"i.e., as \"violating citizens\" and \"compliant customers\", respectively). This principle applies to most component types and is described in the comprehensive syntax overview (linked at the top of the page). " +
-	"The ability to use suffices on properties as briefly highlighted here is further described in the comprehensive overview." +
+	"i.e., as \"violating citizens\" and \"compliant customers\", respectively). This principle applies to most component types and is described at greater detail in the comprehensive syntax overview (linked at the top of the page). " +
 	LINEBREAK + LINEBREAK +
 	"The parser further supports the encoding of " + HTML_EM_START + "semantic annotations" + HTML_EM_STOP + ", reflecting IG Logico's focus on capturing semantic information associated " +
 	"with component values (e.g., " + HTML_EM_START + "A[type=animate](Officer)" + HTML_EM_STOP + "). " +
