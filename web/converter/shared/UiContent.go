@@ -88,10 +88,10 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"Note: Component pair coding also applies in nested components " +
 	"(e.g., in an activation condition, such as " + HTML_EM_START + "Cac{A(actor) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)}}" + HTML_EM_STOP + ")." +
 	LINEBREAK + LINEBREAK +
-	HTML_EM_START + "Additional features (Suffices, Semantic Annotations)" + HTML_EM_STOP + LINEBREAK +
+	HTML_EM_START + "Additional features (Suffixes, Semantic Annotations)" + HTML_EM_STOP + LINEBREAK +
 	"IG Script supports additional features specifically aimed at handling property associations and facilitating semantic annotations: " +
 	LINEBREAK + LINEBREAK +
-	"This includes the use of " + HTML_EM_START + "suffices" + HTML_EM_STOP + " to indicate exclusive linkages between properties and associated components (e.g., " + HTML_EM_START + "Bdir1,p(violating) Bdir1(citizens)" + HTML_EM_STOP +
+	"This includes the use of " + HTML_EM_START + "suffixes" + HTML_EM_STOP + " to indicate exclusive linkages between properties and associated components (e.g., " + HTML_EM_START + "Bdir1,p(violating) Bdir1(citizens)" + HTML_EM_STOP +
 	" as well as " + HTML_EM_START + "Bdir2,p(compliant) Bdir2(customers)" + HTML_EM_STOP + " indicating that the properties are exclusively associated with the given corresponding object, " +
 	"i.e., as \"violating citizens\" and \"compliant customers\", respectively). This principle applies to most component types and is described in the comprehensive syntax overview (linked at the top of the page). " +
 	"The ability to use suffices on properties as briefly highlighted here is further described in the comprehensive overview." +
