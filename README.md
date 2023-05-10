@@ -201,11 +201,11 @@ An example is `Bdir,p(shared) Bdir1,p(private) Bdir1(object1) Bdir(object2)`, wh
 
 In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix (i.e., `1` to signal direct linkage between `Bdir1,p` and `Bdir1` in the above example).
 
-The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`suffix`) is the identifier of the private linkage between particular instances of the related components (i.e, the suffix `1` identifies the relationship between `Bdir1,p` and `Bdir1`). The syntax further supports suffix information on properties (e.g., `Bdir1,p1(content)`, `Bdir1,p2(content2)`) to reflect dependency structures embedded within given components or their properties (here: `content` as the first property, and `content2` as the second property of `Bdir1` -- where of analytical relevance).
+The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`Suffix`) is the identifier of the private linkage between particular instances of the related components (i.e, the suffix `1` identifies the relationship between `Bdir1,p` and `Bdir1`). The syntax further supports suffix information on properties (e.g., `Bdir1,p1(content)`, `Bdir1,p2(content2)`) to reflect dependency structures embedded within given components or their properties (here: `content` as the first property, and `content2` as the second property of `Bdir1` -- where of analytical relevance).
 
 The coding of component-property relationships ensures that the specific intra-statement relationships are correctly captured and accessible to downstream analysis.
 
-Suffices can be attached to any component type, but private property linkages (i.e., linkages between particular types of components/properties) are currently supported for the following component-property pairs:
+Suffixes can be attached to any component type, but private property linkages (i.e., linkages between particular types of components/properties) are currently supported for the following component-property pairs:
 
 * `A` and `A,p`
 * `Bdir` and `Bdir,p`
