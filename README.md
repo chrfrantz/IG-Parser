@@ -149,12 +149,10 @@ Components for which nested statements are supported:
 
 #### Nested Statement Combinations
 
-Nested statements can, analogous to components, be combined to an 
-arbitrary depth and using the same logical operators as for component
-combinations. Two constraints are to be considered: 
+Nested statements can, analogous to components, be combined to an arbitrary depth and using the same logical operators as for component combinations. Two constraints are to be considered: 
 
 * Combinations of statements need to be surrounded by braces (i.e., `{` and `}`).
-* Only components of the same kind can be combined.
+* *Only components of the same kind* can be combined, with the component being indicated left to the surrounding braces (e.g., `Cac{ ... }`).
 
 The following example correctly reflects the combination of two nested AND-combined 
 activation conditions:
@@ -172,20 +170,24 @@ Unlike the first example, the following one will result in an error due to missi
 
 `Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() }`
 
-Nesting can be of multi levels, i.e., similar to component combinations, braces can be used to signal precedence when linking multiple component-level nested statements.
+Nesting can be of multi levels, i.e., similar to component combinations, braces can be used to signal precedence when linking multiple component-level nested statements. 
 
 Example: `Cac{ Cac{ A(), I(), Cex() } [AND] { Cac{ A(), I(), Cex() } [XOR] Cac{ A(), I(), Cex() } } }`
 
-Note that non-nested and nested components can be used in the same statement 
-(e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ), and are implicitly AND-combined.
+Note: the inner brace indicating precedence (the expression `... { Cac{ A(), I(), Cex() } [XOR] Cac{ A(), I(), Cex() } }` in the previous example) does not require the leading component symbol.
+
+Non-nested and nested components can be used in the same statement (e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ). Those are implicitly AND-combined.
 
 #### Component Pair Combinations
 
-Where more than one component in a given statement varies, IG Script supports the ability to indicate such combinations. 
+Where a range of components together form an alternative in a given statement (require linkage to another range of components by logical operators), IG Script supports the ability to indicate such so-called *component pair combinations*. 
 
-The statement `A(actor) D(must) {I(perform) Bdir(action1) Cex(in a particular way) [XOR] I(prevent) Bdir(action2) Cex(by some specific means)}` hence draws on the same actor, but -- in contrast to combinations of nested statements -- we see combinations of different components in a given statement, effective rendering those as two distinct statements. Braces (without indication of the component symbol as done for nested statement combinations) is used to indicate the scope of a given component pair (here `I(perform) Bdir(action1) Cex(in a particular way)` as first component pair, and `I(prevent) Bdir(action2) Cex(by some specific means)` as the second one, both of which are combined by `[XOR]`). 
+For instance the statement `A(actor) D(must) {I(perform action) on Bdir(object1) Cex(in a particular way) [XOR] I(prevent action) on Bdir(object2) by Cex(some specific means)}` draws on the same actor, but -- in contrast to combinations of nested statements -- we see *combinations of pairs of different components* in this statement, effective rendering those as two distinct statements. Braces (without indication of the component symbol as done for nested statement combinations) are used to indicate the scope of a given component pair (here `I(perform action) on Bdir(object1) Cex(in a particular way)` as first component pair, and `I(prevent action) on Bdir(object2) by Cex(some specific means)` as the second one, both of which are combined by `[XOR]`; but both statements have the same attribute `actor` and deontic `must`). Operationally, the parser expands this into two distinct (but logically linked) statements: 
+* `A(actor) D(must) I(perform action) on Bdir(object1) Cex(in a particular way)`
+* `[XOR]`
+* `A(actor) D(must) I(prevent action) on Bdir(object2) by Cex(some specific means)`
 
-The use of component pairs can occur on any level of nesting, including top-level statements (as shown in the leading example), within nested statements, statement combinations, and embed basic component combinations (e.g., `A(actor) D(must) {I(perform) Bdir((actionA [AND] actionB)) Cex(in a particular way) [XOR] I(prevent) Bdir(action2) Cex(by some specific means)}`). 
+The use of component pairs can occur on any level of nesting, including top-level statements (as shown in the first example), within nested statements, statement combinations, and embed basic component combinations (e.g., `A(actor) D(must) {I(perform action) on Bdir((objectA [AND] objectB)) Cex(in a particular way) [XOR] I(prevent action) on Bdir(objectC) by Cex(some specific means)}`). 
 
 Furthermore, an arbitrary number of component pairs can be combined by means of using the syntax (similar to nested statement combinations) to indicate precedence amongst multiple component pairs.
 
@@ -259,9 +261,11 @@ In the following, you will find selected examples that highlight the practical u
     * This example works: `A1(actor1) A1,p(approved)`
     * This one does not: `A1(actor1) A,p1(approved)` -- here the suffix 1 would not be linked to the Attributes (A1), but qualify the property as the first property (as opposed to second (i.e., A,p2), etc.
   * In nested statement combinations, only components of the same kind can be logically linked (e.g., `Cac{Cac{ ... } [AND] Cac{ ... }}` will parse; `Cac{Cac{ ... } [AND] Bdir{ ... }}` will not parse).
-  * Component pairs have a similar syntax as nested statement combinations (e.g., `{I() Bdir() [AND ] I() Bdir()}` - i.e., no presence of leading component symbol due to the diverse of components), but unlike nested statement combinations allow for the combination of pairs of different components (e.g., action-object pairs), not just single components of the same kind (see `Cac{ ... }` in the previous point). This encoding leads to distinctively different outcomes in the statement structure (observable in tabular and visual output): For nested statement combinations the individual nested components generate individual nested statements linked to the same main statement (i.e., everything is still retained as a single statement), component pair combination encoding leads to the generation (extrapolation) of entirely separate but logically-linked statements in which the shared parts of the encoding are replicated across those additional statements. Use the following statements to observe the different generated output structure (best done using the visual version of the parser):
-    * Nested statement combination: `A(actor1) I(action1) Bdir{Bdir{A(actor2) I(action2)} [XOR] Bdir{A(actor2) I(action2)}} Cac(condition1)`
-    * Component pair combination: `A(actor1) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)} Cac(condition1)`
+  * Component pairs have a similar syntax as nested statement combinations (e.g., `{I() Bdir() [AND ] I() Bdir()}`), but *no presence of leading component symbol* since they, unlike nested statement combinations, allow for the *combination of pairs of different components* (e.g., action-object pairs), not just single components of the same kind (see `Cac{ ... }` syntax in the previous comment on nested statement combinations). This encoding leads to distinctively different outcomes in the statement structure (observable in tabular and visual output): For nested statement combinations the individual nested components generate individual nested statements linked to the same main statement (i.e., everything is still retained as a single statement), component pair combination encoding leads to the generation (extrapolation) of entirely separate but logically-linked statements in which the shared parts of the encoding are replicated across those additional statements. The following statements may be useful to observe the difference in the generated output structure (best done using the visual version of the parser):
+  * Nested statement combination -- Combinations of a specific nested component type
+    * `A(actor1) I(action1) Bdir{Bdir{A(actor2) I(action2)} [XOR] Bdir{A(actor2) I(action2)}} Cac(condition1)`   
+  * Component pair combination -- Combination of multiple different component types (nested or non-nested)
+    * `A(actor1) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)} Cac(condition1)` 
 
 ## Deployment
 
