@@ -100,7 +100,8 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"The parser further supports the encoding of " + HTML_EM_START + "semantic annotations" + HTML_EM_STOP + ", reflecting IG Logico's focus on capturing semantic information associated " +
 	"with component values (e.g., " + HTML_EM_START + "A[type=animate](Officer)" + HTML_EM_STOP + "). " +
 	"Such annotations apply to any component and can be combined with suffixes indicating private component relationships (e.g., " + HTML_EM_START + "A1,p[prop=qualitative](personal) A1[type=animate](agent)" + HTML_EM_STOP + ")." +
-	"They can further be used to annotate nested components (e.g., " + HTML_EM_START + "Cac[event=violation]{ A(actor) I(violates) ... }" + HTML_EM_STOP + ")." +
+	"They can further be used to annotate nested components (e.g., " + HTML_EM_START + "Cac[event=violation]{ A(actor) I(violates) ... }" + HTML_EM_STOP + "), as well as combinations thereof " +
+	"(e.g., " + HTML_EM_START + "Cac[state=condition]{Cac[event=violation]{ A(actor) I(violates) ... } [OR] Cac[event=non-compliance]{ A(actor) I(does not comply) ... }}" + HTML_EM_STOP + ")." +
 	LINEBREAK + LINEBREAK +
 	"Supported " + HTML_EM_START + "component symbols" + HTML_EM_STOP + " include (with indication of support for component-level nesting):" +
 	LINEBREAK + LINEBREAK +
