@@ -51,7 +51,7 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	LINEBREAK + LINEBREAK +
 	"The IG Script syntax knows four distinct cases to facilitate the encoding:" +
 	LINEBREAK + LINEBREAK +
-	HTML_EM_START + "1.) Simple components (including combination of values): " + HTML_EM_STOP + LINEBREAK +
+	HTML_EM_START + "1.) Basic component coding as well as component combinations: " + HTML_EM_STOP + LINEBREAK +
 	"The basic structure of a statement is the component symbol (e.g., " + HTML_EM_START + "A" + HTML_EM_STOP + " -- see the list of all component symbols supported by the IG Parser at the bottom), immediately followed by the coded text in parentheses, e.g., " + HTML_EM_START + "A(certifying agent)" + HTML_EM_STOP + "." +
 	LINEBREAK +
 	"Within the coded component, logical combinations of type " + HTML_EM_START + "[AND]" + HTML_EM_STOP + ", " + HTML_EM_START + "[OR]" + HTML_EM_STOP + ", and " + HTML_EM_START + "[XOR]" + HTML_EM_STOP + " are supported, e.g., " + HTML_EM_START + "A(Both (certifying agent [AND] inspector)) ..." + HTML_EM_STOP + ". " +
@@ -76,7 +76,7 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	". Central aspect here is to indicate the distinctive component type preceding the braces (activation conditions should only be combined with activation conditions, for instance)." +
 	LINEBREAK + LINEBREAK +
 	"Example: " + HTML_EM_START + "A(Agent) D(must) I(reject) Bdir(admission) Cac{Cac{A(visitor) I(refuses to present) Bdir(ticket)} [OR] Cac{A(organizer) I(cancels) Bdir(event)}}." + HTML_EM_STOP + LINEBREAK +
-	"Note: This applies to all components that support component-level nesting." +
+	"Note: This applies to all components that support component-level nesting (see table at the bottom). Nested statement combinations can, similar to nested components, contain component combinations." +
 	LINEBREAK + LINEBREAK +
 	HTML_EM_START + "4.) Component pair combinations: " + HTML_EM_STOP + LINEBREAK +
 	"Component pair combinations are similar to the previous case, but instead of applying to completely distinctive expressions, they apply in cases where some but not all parts " +
@@ -88,7 +88,8 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"Example: " + HTML_EM_START + "A(Agent) D(must) {I(reject) Bdir(admission) [AND] I(report) Bdir(occurrence)}" + HTML_EM_STOP + LINEBREAK +
 	"Note: Component pairs can consist of any type and number of components (e.g., " +
 	HTML_EM_START + "{A(actor1) D(must) I(perform action 1) [XOR] A(actor2) D(may) I(perform action2)} Cac(Under any circumstance)" + HTML_EM_STOP + "), and also applies to nested components " +
-	"(e.g., in an activation condition, such as " + HTML_EM_START + "Cac{A(actor) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)}}" + HTML_EM_STOP + ")." +
+	"(e.g., in an activation condition, such as " + HTML_EM_START + "Cac{A(actor) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)}}" + HTML_EM_STOP + "). " +
+	"Component pairs can further embed any form of the syntactic cases introduced above (component combinations, nested statements and nested statement combinations)." +
 	LINEBREAK + LINEBREAK +
 	HTML_EM_START + "Additional features (Suffixes, Semantic Annotations)" + HTML_EM_STOP + LINEBREAK +
 	"IG Script supports additional features specifically aimed at handling property associations and facilitating semantic annotations: " +
