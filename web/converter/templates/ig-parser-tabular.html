@@ -1,6 +1,9 @@
 {{template "top.html" . }}
 {{template "coding-interface.html" . }}
 
+<!-- link to switch between parser versions -->
+<span data-text=""><a href="/visual/">Switch to visual version of IG Parser</a></span><br /><br />
+
 <!-- additional entry field -->
 <span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
 <input id="stmtId" name="stmtId" onkeyup="saveFormContent()" type="text" value="{{.StmtId}}"><br />

@@ -32,6 +32,9 @@
 
 {{template "coding-interface.html" . }}
 
+<!-- link to switch between parser versions -->
+<span data-text=""><a href="/">Switch to tabular version of IG Parser</a></span><br /><br />
+
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
 
 <input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
