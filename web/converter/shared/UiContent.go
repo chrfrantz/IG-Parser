@@ -79,7 +79,7 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"Note: This applies to all components that support component-level nesting." +
 	LINEBREAK + LINEBREAK +
 	HTML_EM_START + "4.) Component pair combinations: " + HTML_EM_STOP + LINEBREAK +
-	"Component pair combinations are similar to the previous case, but instead of applying to completely distinctive expressoins, they apply in cases where some but not all parts " +
+	"Component pair combinations are similar to the previous case, but instead of applying to completely distinctive expressions, they apply in cases where some but not all parts " +
 	"of the statement (pairs of components, hence \"component pairs\") are different, such as \"certifiers must review certification procedure and monitor compliance\". " +
 	"This would be encoded as " + HTML_EM_START + "A(Certifiers) D(must) {I(review) Bdir(certification procedures) [AND] I(monitor) Bdir(compliance)}" + HTML_EM_STOP + ". " +
 	"Note the use of braces to signal the component pairs that are distinct (here \"review certification procedures\" and \"monitor compliance\", both of which consist of a distinct aim and direct object), " +
@@ -99,7 +99,7 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	LINEBREAK + LINEBREAK +
 	"The parser further supports the encoding of " + HTML_EM_START + "semantic annotations" + HTML_EM_STOP + ", reflecting IG Logico's focus on capturing semantic information associated " +
 	"with component values (e.g., " + HTML_EM_START + "A[type=animate](Officer)" + HTML_EM_STOP + "). " +
-	"Such annotations apply to any component and can be combined with suffices indicating private component relationships (e.g., " + HTML_EM_START + "A1,p[prop=qualitative](personal) A1[type=animate](agent)" + HTML_EM_STOP + ")." +
+	"Such annotations apply to any component and can be combined with suffixes indicating private component relationships (e.g., " + HTML_EM_START + "A1,p[prop=qualitative](personal) A1[type=animate](agent)" + HTML_EM_STOP + ")." +
 	"They can further be used to annotate nested components (e.g., " + HTML_EM_START + "Cac[event=violation]{ A(actor) I(violates) ... }" + HTML_EM_STOP + ")." +
 	LINEBREAK + LINEBREAK +
 	"Supported " + HTML_EM_START + "component symbols" + HTML_EM_STOP + " include (with indication of support for component-level nesting):" +
