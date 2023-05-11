@@ -55,11 +55,17 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"The basic structure of a statement is the component symbol (e.g., " + HTML_EM_START + "A" + HTML_EM_STOP + " -- see the list of all component symbols supported by the IG Parser at the bottom), immediately followed by the coded text in parentheses, e.g., " + HTML_EM_START + "A(certifying agent)" + HTML_EM_STOP + "." +
 	LINEBREAK +
 	"Within the coded component, logical combinations of type " + HTML_EM_START + "[AND]" + HTML_EM_STOP + ", " + HTML_EM_START + "[OR]" + HTML_EM_STOP + ", and " + HTML_EM_START + "[XOR]" + HTML_EM_STOP + " are supported, e.g., " + HTML_EM_START + "A(Both (certifying agent [AND] inspector)) ..." + HTML_EM_STOP + ". " +
+	"(In this example, only 'certifying agent' and 'inspector' are part of the combination; 'Both' is not part of it.)" +
 	LINEBREAK +
-	"Note the parentheses that indicate the combination scope within the component. These need to be explicitly specified for every logical operator (i.e., " + HTML_EM_START + "A((first [AND] second))" + HTML_EM_STOP + "; " + HTML_EM_START + "A(first [AND] second)" + HTML_EM_STOP + " will lead to an error)." +
+	"Note the use of parentheses to indicate scope within the component text. As indicated above, parentheses are relevant if the scope of combinations lies within the component (e.g., " + HTML_EM_START + "A(Both (certifying agent [AND] inspector)) ... " + HTML_EM_STOP + ") " +
+	"but also for the indication of precedence in the case of nested combinations of multiple values linked by different logical operators (e.g., " + HTML_EM_START + "A(farmer [XOR] (certifying agent [AND] inspector)) ... " + HTML_EM_STOP + "). " +
+	"In all other cases the parser assumes that all component content is part of the combination (i.e., if a logical operator is present), " +
+	"(i.e., " + HTML_EM_START + "A(first [AND] second)" + HTML_EM_STOP + " is the same as " + HTML_EM_START + "A((first [AND] second))" + HTML_EM_STOP + ")." +
 	LINEBREAK + LINEBREAK +
-	"Example: " + HTML_EM_START + "A(Concert visitors) D(must) I(present) Bdir(tickets) to Bind(agent) at Cex(venue)." + HTML_EM_STOP + LINEBREAK +
-	" Note: Text outside the parentheses (here: 'to' and 'at the') is ignored during parsing." +
+	"Example 1: " + HTML_EM_START + "A(Concert visitors) D(must) I(present) Bdir(tickets) to Bind(agent) at Cex(venue)." + HTML_EM_STOP + LINEBREAK +
+	" Note: Text outside the parentheses (here: 'to' and 'at the') is ignored during parsing." + LINEBREAK +
+	"Example 2: " + HTML_EM_START + "A(Both (concert visitors [AND] reporters)) D(must) I(present) Bdir,p(corresponding) Bdir(tickets) to Bind(agent [XOR] security personnel) at Cex(venue)." + HTML_EM_STOP + LINEBREAK +
+	" Note: This example displays variably scoped component combinations as well as the coding of properties (in this case for the direct object; see supported property symbols for other components (e.g., A,p) in the table at the bottom)." +
 	LINEBREAK + LINEBREAK +
 	HTML_EM_START + "2.) Nested components (\"component-level nesting\" in IG): " + HTML_EM_STOP + LINEBREAK +
 	"Component-level nesting (i.e., the substitution of component content with entire statements) applies when a single component is further decomposed into individual elements, " +
@@ -85,11 +91,15 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"Note the use of braces to signal the component pairs that are distinct (here \"review certification procedures\" and \"monitor compliance\", both of which consist of a distinct aim and direct object), " +
 	"but are, in this instance, executed by the same actor (here: \"certifiers\")." +
 	LINEBREAK + LINEBREAK +
-	"Example: " + HTML_EM_START + "A(Agent) D(must) {I(reject) Bdir(admission) [AND] I(report) Bdir(occurrence)}" + HTML_EM_STOP + LINEBREAK +
+	"Example 1: " + HTML_EM_START + "A(Agent) D(must) {I(reject) Bdir(admission) [AND] I(report) Bdir(occurrence)}" + HTML_EM_STOP + LINEBREAK +
 	"Note: Component pairs can consist of any type and number of components (e.g., " +
 	HTML_EM_START + "{A(actor1) D(must) I(perform action 1) [XOR] A(actor2) D(may) I(perform action2)} Cac(Under any circumstance)" + HTML_EM_STOP + "), and also applies to nested components " +
 	"(e.g., in an activation condition, such as " + HTML_EM_START + "Cac{A(actor) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)}}" + HTML_EM_STOP + "). " +
-	"Component pairs can further embed any form of the syntactic cases introduced above (component combinations, nested statements and nested statement combinations)." +
+	"Component pairs can further embed any form of the syntactic cases introduced above (component combinations, nested statements and nested statement combinations)." + LINEBREAK +
+	"Example 2: " + HTML_EM_START + "A(Agent) D(must) {I(reject) Bdir(admission) [AND] {I(report) Bdir(occurrence) [OR] I(consult) Bdir(supervisor)}}" + HTML_EM_STOP + LINEBREAK +
+	"Note: This example shows the combination of multiple component pairs with explicit linkage via logical operators. On a given nesting level (e.g., on top-level statement, within nested component), " +
+	"only one component pair expression (including nested linkages as shown above) is necessary to capture any number of component pair alternatives. The parser will offer a corresponding indication if multiple " +
+	"separate component pairs are identified in the coded statement." +
 	LINEBREAK + LINEBREAK +
 	HTML_EM_START + "Additional features (Suffixes, Semantic Annotations)" + HTML_EM_STOP + LINEBREAK +
 	"IG Script supports additional features specifically aimed at handling property associations and facilitating semantic annotations: " +
@@ -108,23 +118,23 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	LINEBREAK + LINEBREAK +
 	"<table>" +
 	"<tr><th>IG Script Symbol</th><th>Corresponding IG 2.0 Component</th></tr>" +
-	"<tr><td>" + tree.ATTRIBUTES + "()" + "</td><td>" + tree.IGComponentSymbolNameMap[tree.ATTRIBUTES] + "</td></tr>" +
-	"<tr><td>" + tree.ATTRIBUTES_PROPERTY + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.ATTRIBUTES_PROPERTY] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.DEONTIC + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.DEONTIC] + "</td></tr>" +
-	"<tr><td>" + tree.AIM + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.AIM] + "</td></tr>" +
-	"<tr><td>" + tree.DIRECT_OBJECT + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.DIRECT_OBJECT] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.DIRECT_OBJECT_PROPERTY + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.DIRECT_OBJECT_PROPERTY] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.INDIRECT_OBJECT + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.INDIRECT_OBJECT] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.INDIRECT_OBJECT_PROPERTY + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.INDIRECT_OBJECT_PROPERTY] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.ACTIVATION_CONDITION + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.ACTIVATION_CONDITION] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.EXECUTION_CONSTRAINT + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.EXECUTION_CONSTRAINT] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.CONSTITUTED_ENTITY + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTED_ENTITY] + "</td></tr>" +
-	"<tr><td>" + tree.CONSTITUTED_ENTITY_PROPERTY + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTED_ENTITY_PROPERTY] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.MODAL + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.MODAL] + "</td></tr>" +
-	"<tr><td>" + tree.CONSTITUTIVE_FUNCTION + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTIVE_FUNCTION] + "</td></tr>" +
-	"<tr><td>" + tree.CONSTITUTING_PROPERTIES + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTING_PROPERTIES] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.CONSTITUTING_PROPERTIES_PROPERTY + "()</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTING_PROPERTIES_PROPERTY] + "*" + "</td></tr>" +
-	"<tr><td>" + tree.OR_ELSE + "{}</td><td>" + tree.IGComponentSymbolNameMap[tree.OR_ELSE] + "**" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.ATTRIBUTES + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.ATTRIBUTES] + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.ATTRIBUTES_PROPERTY + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.ATTRIBUTES_PROPERTY] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.DEONTIC + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.DEONTIC] + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.AIM + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.AIM] + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.DIRECT_OBJECT + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.DIRECT_OBJECT] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.DIRECT_OBJECT_PROPERTY + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.DIRECT_OBJECT_PROPERTY] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.INDIRECT_OBJECT + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.INDIRECT_OBJECT] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.INDIRECT_OBJECT_PROPERTY + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.INDIRECT_OBJECT_PROPERTY] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.ACTIVATION_CONDITION + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.ACTIVATION_CONDITION] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.EXECUTION_CONSTRAINT + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.EXECUTION_CONSTRAINT] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.CONSTITUTED_ENTITY + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTED_ENTITY] + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.CONSTITUTED_ENTITY_PROPERTY + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTED_ENTITY_PROPERTY] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.MODAL + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.MODAL] + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.CONSTITUTIVE_FUNCTION + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTIVE_FUNCTION] + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.CONSTITUTING_PROPERTIES + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTING_PROPERTIES] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.CONSTITUTING_PROPERTIES_PROPERTY + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.CONSTITUTING_PROPERTIES_PROPERTY] + "*" + "</td></tr>" +
+	"<tr><td>" + HTML_EM_START + tree.OR_ELSE + HTML_EM_STOP + "</td><td>" + tree.IGComponentSymbolNameMap[tree.OR_ELSE] + "**" + "</td></tr>" +
 	"</table>" + LINEBREAK +
 	"* In addition to component annotation, these components support component-level nesting, with braces scoping the nested statements (e.g., " + HTML_EM_START + "Bdir{ ... }" + HTML_EM_STOP + ", " + HTML_EM_START + "Bdir,p{ ... }" + HTML_EM_STOP + ", etc.)." + LINEBREAK +
 	"** The Or else component only allows component-level nesting (i.e., substitution by an entire statement)."
