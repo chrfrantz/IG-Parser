@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"IG-Parser/core/config"
 	"IG-Parser/core/exporter"
 	"IG-Parser/web/converter/shared"
 	"IG-Parser/web/helper"
@@ -141,8 +142,11 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		Error:                     false,
 		Message:                   message,
 		RawStmt:                   formValueRawStmt,
+		DefaultRawStmt:            shared.RAW_STATEMENT,
 		CodedStmt:                 formValueCodedStmt,
+		DefaultCodedStmt:          shared.ANNOTATED_STATEMENT,
 		StmtId:                    formValueStmtId,
+		DefaultStmtId:             shared.STATEMENT_ID,
 		DynamicOutput:             formValueDynamicOutput,
 		IGExtendedOutput:          formValueIgExtendedOutput,
 		IncludeAnnotations:        formValueIncludeAnnotations,
@@ -164,7 +168,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		StmtIdHelp:                shared.HELP_STMT_ID,
 		ParametersHelp:            shared.HELP_PARAMETERS,
 		OutputTypeHelp:            shared.HELP_OUTPUT_TYPE,
-		ReportHelp:                shared.HELP_REPORT}
+		ReportHelp:                shared.HELP_REPORT,
+		Version:                   config.IG_PARSER_VERSION}
 
 	// Parse UI canvas information (visual parser)
 
@@ -175,9 +180,9 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			retStruct.Success = false
 			retStruct.Error = true
 			retStruct.Message = shared.ERROR_INPUT_WIDTH
-			err := tmpl.ExecuteTemplate(w, templateName, retStruct)
-			if err != nil {
-				log.Println("Error generating error response for template processing:", err.Error())
+			err2 := tmpl.ExecuteTemplate(w, templateName, retStruct)
+			if err2 != nil {
+				log.Println("Error generating error response for template processing:", err2.Error())
 				http.Error(w, "Could not process request.", http.StatusInternalServerError)
 			}
 			// Stop execution and return to UI
@@ -194,9 +199,9 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			retStruct.Success = false
 			retStruct.Error = true
 			retStruct.Message = shared.ERROR_INPUT_HEIGHT
-			err := tmpl.ExecuteTemplate(w, templateName, retStruct)
-			if err != nil {
-				log.Println("Error generating error response for template processing:", err.Error())
+			err2 := tmpl.ExecuteTemplate(w, templateName, retStruct)
+			if err2 != nil {
+				log.Println("Error generating error response for template processing:", err2.Error())
 				http.Error(w, "Could not process request.", http.StatusInternalServerError)
 			}
 			// Stop execution and return to UI
@@ -380,22 +385,22 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Parameter: Canvas width
 		val, suc = extractUrlParameters(r, shared.PARAM_WIDTH)
 		if suc {
-			w, err := strconv.Atoi(val)
+			width, err := strconv.Atoi(val)
 			if err != nil {
 				log.Println("Error when interpreting URL parameter '"+shared.PARAM_WIDTH+"':", err)
 			} else {
-				retStruct.Width = w
+				retStruct.Width = width
 			}
 		}
 
 		// Parameter: Canvas height
 		val, suc = extractUrlParameters(r, shared.PARAM_HEIGHT)
 		if suc {
-			h, err := strconv.Atoi(val)
+			height, err := strconv.Atoi(val)
 			if err != nil {
 				log.Println("Error when interpreting URL parameter '"+shared.PARAM_HEIGHT+"':", err)
 			} else {
-				retStruct.Height = h
+				retStruct.Height = height
 			}
 		}
 
@@ -413,8 +418,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 				log.Println("Error processing default template:", err.Error())
 				http.Error(w, "Could not process request.", http.StatusInternalServerError)
 			}
-			Println("Provided repopulated form")
-			// Just repopulate template, but do not go beyond
+			Println("Provided p/repopulated form")
+			// Just p/repopulate template, but do not go beyond
 			return
 		}
 	}

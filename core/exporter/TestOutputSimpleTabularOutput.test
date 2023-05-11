@@ -1,2 +1,2 @@
 =SPLIT("Statement ID;Attributes;Deontic;Aim;Direct Object;Execution Constraint;Logical Linkage (Statements);Logical Linkage (Components);"; ";")
-=SPLIT("'650.1;National Organic Program's Program Manager;may;inspect;certified production facilities;on behalf of the Secretary; ; ;"; ";")
+=SPLIT("'650;National Organic Program's Program Manager;may;inspect;certified production facilities;on behalf of the Secretary; ; ;"; ";")

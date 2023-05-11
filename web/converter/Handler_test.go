@@ -15,7 +15,10 @@ import (
 // Default file name for error output
 const errorFile = "errorOutput.error"
 
-func TestConverterHandlerSheetsGet(t *testing.T) {
+/*
+Tests standard GET request on tabular output version.
+*/
+func TestConverterHandlerGoogleSheetsGet(t *testing.T) {
 
 	// Initialize templates
 	Init()
@@ -59,7 +62,7 @@ func TestConverterHandlerSheetsGet(t *testing.T) {
 	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -115,7 +118,7 @@ func TestConverterHandlerVisualGet(t *testing.T) {
 	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -189,7 +192,7 @@ func TestConverterHandlerVisualPost(t *testing.T) {
 	if responseHead != expectedHead {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -214,7 +217,7 @@ func TestConverterHandlerVisualPost(t *testing.T) {
 	if responseTail != expectedTail {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -288,7 +291,7 @@ func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
 	if responseHead != expectedHead {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -313,7 +316,7 @@ func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
 	if responseTail != expectedTail {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -387,7 +390,7 @@ func TestConverterHandlerCSVPost(t *testing.T) {
 	if responseHead != expectedHead {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -412,7 +415,7 @@ func TestConverterHandlerCSVPost(t *testing.T) {
 	if responseTail != expectedTail {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -486,7 +489,7 @@ func TestConverterHandlerCSVPostWithExplicitHeader(t *testing.T) {
 	if responseHead != expectedHead {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -511,7 +514,7 @@ func TestConverterHandlerCSVPostWithExplicitHeader(t *testing.T) {
 	if responseTail != expectedTail {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -585,7 +588,7 @@ func TestConverterHandlerCSVPostWithoutHeaders(t *testing.T) {
 	if responseHead != expectedHead {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -610,7 +613,7 @@ func TestConverterHandlerCSVPostWithoutHeaders(t *testing.T) {
 	if responseTail != expectedTail {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}

@@ -11,28 +11,29 @@ Deployed IG Parser:
 
 ## Overview
 
-IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used by direct invocation, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to syntactic principles and essential features of IG Script, followed by a set of examples showcasing all features. As a final aspect, deployment instructions for IG Parser are provided. 
+IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used locally, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to syntactic principles and essential features of IG Script, followed by a set of examples showcasing all features. As a final aspect, deployment instructions for IG Parser are provided. 
 
 The conceptual background of the Institutional Grammar 2.0 is provided in the corresponding [article](https://doi.org/10.1111/padm.12719) and [book](https://newinstitutionalgrammar.org), augmented with supplementary operational [coding guidelines](https://arxiv.org/abs/2008.08937).
 
 ## IG Script
 
-IG Script is a notation introduced in the context of the [Institutional Grammar 2.0](https://newinstitutionalgrammar.org) (IG 2.0) that aims at a deep structural representation of legal statements alongside selected levels of expressiveness. While IG 2.0 highlights the conceptual background, the objective of IG Script is to provide an accessible, but formal approach to provide a format-independent representation of institutional statements of any type (e.g., regulative, constitutive, hybrid). While the parser currently only supports export in tabular format, future refinements will include other formats (e.g.,  XML, JSON, YAML). While this introduction focuses on the operational use, syntactic and semantic foundations are provided [elsewhere](https://github.com/InstitutionalGrammar/IG-2.0-Resources).
+IG Script is a notation introduced in the context of the [Institutional Grammar 2.0](https://newinstitutionalgrammar.org) (IG 2.0) that aims at a deep structural representation of legal statements alongside selected levels of expressiveness. While IG 2.0 highlights the conceptual background, the objective of IG Script is to provide an accessible, but formal approach to provide a format-independent representation of institutional statements of any type (e.g., regulative, constitutive, hybrid). While the parser currently supports exemplary export formats (e.g., tabular format and visual output), the tool is open to be extended to support other output formats (e.g.,  XML, JSON, YAML). The introduction below focuses on the operational coding. Syntactic and semantic foundations are provided [elsewhere](https://github.com/InstitutionalGrammar/IG-2.0-Resources).
 
 ### Principles of IG Script Syntax
 
 IG Script centers around a set of fundamental primitives that can be combined to parse statements comprehensively, including:
 
-* Component annotations
+* Basic component coding
 * Component combinations
 * Nested statements
 * Nested statement combinations
+* Component pair combinations
 * Object-Property relationships
 * Semantic Annotations
 
-#### Component Annotations
+#### Component Coding
 
-*Component Annotations* provide the basic building block for any statement annotation. A component is represented as 
+*Component Coding* provides the basic building block for any statement encoding. A component is represented as 
 
 * `componentSymbol(naturalLanguageText)`
   
@@ -148,35 +149,51 @@ Components for which nested statements are supported:
 
 #### Nested Statement Combinations
 
-Nested statements can, analogous to components, be combined to an 
-arbitrary depth and using the same logical operators as for component
-combinations. Two constraints are to be considered: 
+Nested statements can, analogous to components, be combined to an arbitrary depth and using the same logical operators as for component combinations. Two constraints are to be considered: 
 
 * Combinations of statements need to be surrounded by braces (i.e., `{` and `}`).
-* Only components of the same kind can be combined.
+* *Only components of the same kind* can be combined, with the component being indicated left to the surrounding braces (e.g., `Cac{ ... }`).
 
 The following example correctly reflects the combination of two nested AND-combined 
 activation conditions:
 
-`{ Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() } }`
+`Cac{ Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() } }`
 
 This example, in contrast, will fail (note the differing component types `Cac` and `Cex`): 
 
-`{ Cac{ A(), I(), Cex() } [AND] Cex{ A(), I(), Cex() } }`
+`Cac{ Cac{ A(), I(), Cex() } [AND] Cex{ A(), I(), Cex() } }`
 
 Another important aspect are the outer braces surrounding the nested statement 
-combination, i.e., form a `{ ... [AND] ... }` pattern (where logical operators can vary, of course).
+combination, i.e., form a `componentSymbol{ ... [AND] ... }` pattern (where logical operators can vary, of course).
 
 Unlike the first example, the following one will result in an error due to missing outer braces:
 
 `Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() }`
 
-Nesting can be of multi levels, i.e., similar to component combinations, braces can be used to signal precedence when linking multiple component-level nested statements.
+Nesting can be of multi levels, i.e., similar to component combinations, braces can be used to signal precedence when linking multiple component-level nested statements. 
 
-Example: `{ Cac{ A(), I(), Cex() } [AND] { Cac{ A(), I(), Cex() } [XOR] Cac{ A(), I(), Cex() } } }`
+Example: `Cac{ Cac{ A(), I(), Cex() } [AND] { Cac{ A(), I(), Cex() } [XOR] Cac{ A(), I(), Cex() } } }`
 
-Note that non-nested and nested components can be used in the same statement 
-(e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ), and are implicitly AND-combined.
+Note: the inner brace indicating precedence (the expression `... { Cac{ A(), I(), Cex() } [XOR] Cac{ A(), I(), Cex() } }` in the previous example) does not require the leading component symbol.
+
+Non-nested and nested components can be used in the same statement (e.g., `... Cac( text ), Cac{ A(text) I(text) Cac(text) } ...` ). Those are implicitly AND-combined.
+
+#### Component Pair Combinations
+
+Where a range of components together form an alternative in a given statement (require linkage to another range of components by logical operators), IG Script supports the ability to indicate such so-called *component pair combinations*. 
+
+For instance the statement `A(actor) D(must) {I(perform action) on Bdir(object1) Cex(in a particular way) [XOR] I(prevent action) on Bdir(object2) by Cex(some specific means)}` draws on the same actor, but -- in contrast to combinations of nested statements -- we see *combinations of pairs of different components* in this statement, effective rendering those as two distinct statements. Braces (without indication of the component symbol as done for nested statement combinations) are used to indicate the scope of a given component pair (here `I(perform action) on Bdir(object1) Cex(in a particular way)` as first component pair, and `I(prevent action) on Bdir(object2) by Cex(some specific means)` as the second one, both of which are combined by `[XOR]`; but both statements have the same attribute `actor` and deontic `must`). Operationally, the parser expands this into two distinct (but logically linked) statements: 
+* `A(actor) D(must) I(perform action) on Bdir(object1) Cex(in a particular way)`
+* `[XOR]`
+* `A(actor) D(must) I(prevent action) on Bdir(object2) by Cex(some specific means)`
+
+The use of component pairs can occur on any level of nesting, including top-level statements (as shown in the first example), within nested statements, statement combinations, and embed basic component combinations (e.g., `A(actor) D(must) {I(perform action) on Bdir((objectA [AND] objectB)) Cex(in a particular way) [XOR] I(prevent action) on Bdir(objectC) by Cex(some specific means)}`). 
+
+Furthermore, an arbitrary number of component pairs can be combined by means of using the syntax (similar to nested statement combinations) to indicate precedence amongst multiple component pairs.
+
+Example: `A(actor1) {I(action1) Bdir(directobject1) Bind(indirectobject1) [XOR] {I(action2) Bdir(directobject2) Bind(indirectobject2) [AND] I(action3) Bdir(directobject3) Bind(indirectobject3)}} Cac(condition1)`
+
+In this example the center part reflects the combination of component pairs using the following logical pattern `{ ... [XOR] { ... [AND] ... }}`, all of which share the same attribute (`actor1`) and activation condition (`condition1`). 
 
 #### Object-Property Relationships
 
@@ -186,11 +203,11 @@ An example is `Bdir,p(shared) Bdir1,p(private) Bdir1(object1) Bdir(object2)`, wh
 
 In IG Script this is reflected based on suffices associated with the privately related components, where both need to carry the same suffix (i.e., `1` to signal direct linkage between `Bdir1,p` and `Bdir1` in the above example).
 
-The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`suffix`) is the identifier of the private linkage between particular instances of the related components (i.e, the suffix `1` identifies the relationship between `Bdir1,p` and `Bdir1`). The syntax further supports suffix information on properties (e.g., `Bdir1,p1(content)`, `Bdir1,p2(content2)`) to reflect dependency structures embedded within given components or their properties (here: `content` as the first property, and `content2` as the second property of `Bdir1` -- where of analytical relevance).
+The basic syntax (without annotations -- see below) is `componentSymbolSuffix(component content)`, where the component symbol (`componentSymbol`) reflects the entity or property of concern, and the suffix (`Suffix`) is the identifier of the private linkage between particular instances of the related components (i.e, the suffix `1` identifies the relationship between `Bdir1,p` and `Bdir1`). The syntax further supports suffix information on properties (e.g., `Bdir1,p1(content)`, `Bdir1,p2(content2)`) to reflect dependency structures embedded within given components or their properties (here: `content` as the first property, and `content2` as the second property of `Bdir1` -- where of analytical relevance).
 
 The coding of component-property relationships ensures that the specific intra-statement relationships are correctly captured and accessible to downstream analysis.
 
-Suffices can be attached to any component type, but private property linkages (i.e., linkages between particular types of components/properties) are currently supported for the following component-property pairs:
+Suffixes can be attached to any component type, but private property linkages (i.e., linkages between particular types of components/properties) are currently supported for the following component-property pairs:
 
 * `A` and `A,p`
 * `Bdir` and `Bdir,p`
@@ -222,7 +239,7 @@ In the following, you will find selected examples that highlight the practical u
 * Component-level nesting on various components (e.g., Bdir and Cac) embedded in combinations of nested statements (Cac): 
   * `A(Program Manager) D(may) I(administer) Bdir(sanctions) {Cac{A(Program Manager) I(suspects) Bdir{A(farmer) I((violates [OR] does not comply)) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}`
 * Complex statement; showcasing combined use of various features (e.g., component-level combinations, nested statement combinations (activation conditions, Or else)): 
-  * `A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), D(must) I(inspect), I((review [AND] (revise [AND] resubmit))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) if {Cac{A(Program Manager) I((suspects [OR] establishes)) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}, or else {O{A,p(Manager's) A(supervisor) D(may) I((suspend [XOR] revoke)) Bdir,p(Program Manager's) Bdir(authority)} [XOR] O{A(regional board) D(may) I((warn [OR] fine)) Bdir,p(violating) Bdir(Program Manager)}}`
+  * `A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), D(must) I(inspect), I((review [AND] (revise [AND] resubmit))) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) if Cac{Cac{A(Program Manager) I((suspects [OR] establishes)) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}, or else {O{A,p(Manager's) A(supervisor) D(may) I((suspend [XOR] revoke)) Bdir,p(Program Manager's) Bdir(authority)} [XOR] O{A(regional board) D(may) I((warn [OR] fine)) Bdir,p(violating) Bdir(Program Manager)}}`
 * Object-Property Relationships; showcasing linkage of private nodes with specific component instances (especially where implicit component-level combinations occur), alongside a shared property that apply to both objects (note that for this example, the AND-linkage between the different direct objects is implicit):
   * `A,p(Certified) A(agent) D(must) I(request) Bdir,p(independently) Bdir1,p(authorized) Bdir1(report) and Bdir2,p(audited) Bdir2(financial documents).`
 * Semantic annotations; showcasing the basic use of annotations on arbitrary components:
@@ -243,7 +260,12 @@ In the following, you will find selected examples that highlight the practical u
   * Suffices to indicate object-property relationships need to be specified immediately following the component identifier, not following the property indicator.
     * This example works: `A1(actor1) A1,p(approved)`
     * This one does not: `A1(actor1) A,p1(approved)` -- here the suffix 1 would not be linked to the Attributes (A1), but qualify the property as the first property (as opposed to second (i.e., A,p2), etc.
-  * In nested statements, only components of the same kind can be logically linked (e.g., `{Cac{ ... } [AND] Cac{ ... }}` will parse; `{Cac{ ... } [AND] Bdir{ ... }}` will not parse).
+  * In nested statement combinations, only components of the same kind can be logically linked (e.g., `Cac{Cac{ ... } [AND] Cac{ ... }}` will parse; `Cac{Cac{ ... } [AND] Bdir{ ... }}` will not parse).
+  * Component pairs have a similar syntax as nested statement combinations (e.g., `{I() Bdir() [AND ] I() Bdir()}`), but *no presence of leading component symbol* since they, unlike nested statement combinations, allow for the *combination of pairs of different components* (e.g., action-object pairs), not just single components of the same kind (see `Cac{ ... }` syntax in the previous comment on nested statement combinations). This encoding leads to distinctively different outcomes in the statement structure (observable in tabular and visual output): For nested statement combinations the individual nested components generate individual nested statements linked to the same main statement (i.e., everything is still retained as a single statement), component pair combination encoding leads to the generation (extrapolation) of entirely separate but logically-linked statements in which the shared parts of the encoding are replicated across those additional statements. The following statements may be useful to observe the difference in the generated output structure (best done using the visual version of the parser):
+  * Nested statement combination -- Combinations of a specific nested component type
+    * `A(actor1) I(action1) Bdir{Bdir{A(actor2) I(action2)} [XOR] Bdir{A(actor2) I(action2)}} Cac(condition1)`   
+  * Component pair combination -- Combination of multiple different component types (nested or non-nested)
+    * `A(actor1) {I(action1) Bdir(object1) [XOR] I(action2) Bdir(object2)} Cac(condition1)` 
 
 ## Deployment
 

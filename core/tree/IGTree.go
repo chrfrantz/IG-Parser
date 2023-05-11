@@ -17,7 +17,7 @@ type Node struct {
 	Right *Node
 	// Indicates component type (i.e., name of component) - Note: Access via GetComponentName(); not directly
 	ComponentType string
-	// Substantive content of a leaf node
+	// Substantive content of a leaf node (can be nested node, string or nested statement)
 	Entry interface{}
 	// Text shared across children to the left of a combination (e.g., (shared info (left val [AND] right val)))
 	SharedLeft []string
@@ -51,7 +51,7 @@ func (n *Node) getParentsLeftSharedElements() []string {
 		}
 	}
 	// Return empty structure
-	return []string{}
+	return nil
 }
 
 /*
@@ -70,7 +70,7 @@ func (n *Node) getParentsRightSharedElements() []string {
 		}
 	}
 	// Return empty structure
-	return []string{}
+	return nil
 }
 
 /*
@@ -82,7 +82,7 @@ func (n *Node) GetSharedLeft() []string {
 		// Overwrite child with parent shared element values
 		shared := n.getParentsLeftSharedElements()
 		// If no shared components from parents ...
-		if len(shared) == 0 {
+		if shared == nil || len(shared) == 0 || shared[0] == "" {
 			// ... return own shared components
 			return n.SharedLeft
 		}
@@ -90,7 +90,7 @@ func (n *Node) GetSharedLeft() []string {
 		return n.getParentsLeftSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedLeft := n.getParentsLeftSharedElements()
-		if len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
+		if n.SharedLeft != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedLeft, n.SharedLeft...)
 		} else if len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" {
@@ -116,7 +116,7 @@ func (n *Node) GetSharedLeft() []string {
 		// Simply return own elements
 		return n.SharedLeft
 	}
-	return []string{}
+	return nil
 }
 
 /*
@@ -128,7 +128,7 @@ func (n *Node) GetSharedRight() []string {
 		// Overwrite child with parent shared element values
 		shared := n.getParentsRightSharedElements()
 		// If no shared components from parents ...
-		if len(shared) == 0 {
+		if shared == nil || len(shared) == 0 || shared[0] == "" {
 			// ... return own shared components
 			return n.SharedRight
 		}
@@ -136,7 +136,7 @@ func (n *Node) GetSharedRight() []string {
 		return n.getParentsRightSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedRight := n.getParentsRightSharedElements()
-		if len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
+		if n.SharedRight != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedRight, n.SharedRight...)
 		} else if len(n.SharedRight) != 0 && n.SharedRight[0] != "" {
@@ -162,7 +162,7 @@ func (n *Node) GetSharedRight() []string {
 		// Simply return own elements
 		return n.SharedRight
 	}
-	return []string{}
+	return nil
 }
 
 /*
@@ -247,9 +247,21 @@ func (n *Node) Stringify() string {
 	}
 	// Walk the tree
 	out := ""
+
+	printSharedParentheses := false
+	// Check whether left or right shared elements exist (to ensure correct syntax (parentheses))
+	if n.GetSharedLeft() != nil || n.GetSharedRight() != nil {
+		printSharedParentheses = true
+	}
+
+	// Print potentially needed opening parentheses (to balance right parentheses)
+	if printSharedParentheses {
+		// print left parenthesis
+		out += "("
+	}
 	// Potential left shared elements; note: explicitly checks for empty elements (e.g., "")
 	if n.GetSharedLeft() != nil && len(n.GetSharedLeft()) != 0 && n.GetSharedLeft()[0] != "" {
-		out += "(" + strings.Trim(fmt.Sprint(n.GetSharedLeft()), "[]") + " "
+		out += strings.Trim(fmt.Sprint(n.GetSharedLeft()), "[]") + " "
 	}
 	// Inner combination
 	out += "("
@@ -266,15 +278,22 @@ func (n *Node) Stringify() string {
 	out += ")"
 	// Potential right shared elements; note: explicitly checks for empty elements (e.g., "")
 	if n.GetSharedRight() != nil && len(n.GetSharedRight()) != 0 && n.GetSharedRight()[0] != "" {
-		out += " " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]") + ")"
+		out += " " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]")
+	}
+	// Print potentially needed closing parentheses (to balance left parentheses)
+	if printSharedParentheses {
+		// print right parenthesis
+		out += ")"
 	}
 	return out
 }
 
 /*
 Provide the flattest possible representation of contents without structure or linebreaks.
+Cautious: Can produce log.Fatal in case of novel unknown type. Developer consideration.
 */
 func (n *Node) StringFlat() string {
+
 	if n.HasPrimitiveEntry() {
 		// Simple entry
 		return n.Entry.(string)
@@ -299,16 +318,30 @@ func (n *Node) StringFlat() string {
 		// else simply return empty string
 		return ""
 	} else {
-		// Complex entry
-		stmt := n.Entry.(Statement)
-		return stmt.StringFlat(false)
+		// Complex entry by reference
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf(&Statement{}) {
+			stmt := n.Entry.(*Statement)
+			return stmt.StringFlat(false)
+		}
+		// Component-level nested pair combination
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf([]*Node{}) {
+			stmt := n.Entry.([]*Node)[0].Entry.(*Statement)
+			return stmt.StringFlat(false)
+		}
+		// Complex entry by value (rarest occurrence, hence last)
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf(Statement{}) {
+			stmt := n.Entry.(Statement)
+			return stmt.StringFlat(false)
+		}
+		log.Fatal("Error when generating string output. Unknown type (developer concern):", reflect.TypeOf(n.Entry))
+		return ""
 	}
 }
 
 var PrintValueOrder = false
 
 /*
- Returns node state.
+Returns node state.
 */
 func (n *Node) GetNodeState() string {
 	if n == nil {
@@ -319,16 +352,30 @@ func (n *Node) GetNodeState() string {
 }
 
 /*
-   Prints node content in human-readable form (for printing on console).
-   For parseable version, look at Stringify().
+Prints node content in human-readable form (for printing on console).
+For parseable version, look at Stringify().
 */
 func (n *Node) String() string {
+	return n.string(0)
+}
+
+// Indentation unit for statement tree printing
+const MinimumIndentPrefix = "===="
+
+/*
+Variant of String() to produce human-readable output, but allows
+for parameterization of level of indentation for recursive calls
+*/
+func (n *Node) string(level int) string {
+
+	// Indent any output depending on level of nesting
+	prefix := ""
 
 	if n == nil {
 		return "Node is not initialized."
 	} else if n.IsLeafNode() {
-		retVal := "Leaf entry: "
-		// TODO: Check for correct printing
+		retVal := ""
+
 		if n.Entry == nil {
 			retVal = retVal + "nil (detected in String())"
 			if n.LogicalOperator != "" {
@@ -336,6 +383,16 @@ func (n *Node) String() string {
 			}
 		} else if n.HasPrimitiveEntry() {
 			// Primitive component
+
+			// Indent only for entries that are part of an elementary combination (have logical operator as parent).
+			// If parent is statement (i.e., primitive component in statement), the parent is nil
+			if n.Parent != nil {
+				i := 0
+				for i < level {
+					retVal += MinimumIndentPrefix
+					i++
+				}
+			}
 
 			retVal = retVal + n.Entry.(string)
 			// Assumes that suffix and annotations are in string form
@@ -352,22 +409,47 @@ func (n *Node) String() string {
 				retVal = retVal + " (Component name: " + fmt.Sprint(n.GetComponentName()) + ")"
 			}
 		} else {
-			// Full nested statement
 
-			// Assume entry is statement
-			val := n.Entry.(Statement)
-			retVal = retVal + val.String()
+			// Check whether it returns embedded node structure - points to incorrect implementation of parsing based on node-embedded return structures
+			if reflect.TypeOf([]*Node{}) == reflect.TypeOf(n.Entry) {
 
+				// Iterate through nodes and parse depending on whether statement or simple node
+				entries := n.Entry.([]*Node)
+				entriesPrint := ""
+				for _, v := range entries {
+					if reflect.TypeOf(Statement{}) == reflect.TypeOf(v.Entry) {
+						// Check whether statement is embedded ...
+						stmt := v.Entry.(Statement)
+						entriesPrint += stmt.string(level)
+					} else {
+						// ... else print node entry as string
+						entriesPrint += v.string(level)
+					}
+				}
+				retVal = retVal + entriesPrint //"empty Node - CHECK for unmanaged output case"
+			} else {
+				if reflect.TypeOf(n.Entry) == reflect.TypeOf(Statement{}) {
+					// Assume entry is statement
+					val := n.Entry.(Statement)
+					retVal = retVal + val.string(level+1)
+				} else {
+					// Assume entry is statement reference
+					val := n.Entry.(*Statement)
+					retVal = retVal + val.string(level+1)
+				}
+			}
 		}
 		return retVal
 	} else {
-		// Nested component combinations (e.g., AND-combined components)
+		// Nodes: Combinations (e.g., AND-combined components)
 		out := ""
 
+		// Increase level, since nested element
+		level += 1
+
 		i := 0
-		prefix := ""
-		for i < n.CountParents() {
-			prefix += "===="
+		for i < level {
+			prefix += MinimumIndentPrefix
 			i++
 		}
 
@@ -388,10 +470,11 @@ func (n *Node) String() string {
 			out += prefix + "Shared (right): " + strings.Trim(fmt.Sprint(n.GetSharedRight()), "[]") + "\n"
 		}
 
-		retPrep := "(\n" + out +
-			prefix + "Left: " + n.Left.String() + "\n" +
+		// Higher-level nesting of combinations - indentation from current level
+		retPrep := "\n" + prefix + "(\n" + //out +
+			prefix + "Left: \n" + n.Left.string(level+1) + "\n" +
 			prefix + "Operator: " + n.LogicalOperator + "\n" +
-			prefix + "Right: " + n.Right.String() + "\n" +
+			prefix + "Right: \n" + n.Right.string(level+1) + "\n" +
 			prefix + ")"
 
 		// Assumes that suffix and annotations are in string format for nodes that have nested statements
@@ -414,9 +497,9 @@ func (n *Node) String() string {
 }
 
 /*
-   Makes the given node parent of the current (calling node).
-   Should only be internally used, since it does not deal with child assignment on parent node.
-   Use InsertLeftNode() or InsertRightNode() instead.
+Makes the given node parent of the current (calling node).
+Should only be internally used, since it does not deal with child assignment on parent node.
+Use InsertLeftNode() or InsertRightNode() instead.
 */
 func (n *Node) assignParent(node *Node) (bool, NodeError) {
 	if n == node {
@@ -429,7 +512,7 @@ func (n *Node) assignParent(node *Node) (bool, NodeError) {
 }
 
 /*
-   Insert left subnode to node
+Insert left subnode to node
 */
 func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
 	if !n.Left.IsEmptyOrNilNode() {
@@ -453,7 +536,7 @@ func (n *Node) InsertLeftNode(entry *Node) (bool, NodeError) {
 }
 
 /*
-   Insert right subnode to node
+Insert right subnode to node
 */
 func (n *Node) InsertRightNode(entry *Node) (bool, NodeError) {
 	if !n.Right.IsEmptyOrNilNode() {
@@ -477,7 +560,7 @@ func (n *Node) InsertRightNode(entry *Node) (bool, NodeError) {
 }
 
 /*
-   Insert left leaf to node based on string entry
+Insert left leaf to node based on string entry
 */
 func (n *Node) InsertLeftLeaf(entry string) (bool, NodeError) {
 	if n.Left != nil {
@@ -498,7 +581,7 @@ func (n *Node) InsertLeftLeaf(entry string) (bool, NodeError) {
 }
 
 /*
-   Insert right leaf to node based on string entry
+Insert right leaf to node based on string entry
 */
 func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 	if n.Right != nil {
@@ -519,10 +602,10 @@ func (n *Node) InsertRightLeaf(entry string) (bool, NodeError) {
 }
 
 /*
-   Removes the given node from the tree structure it is embedded in, i.e.,
-   it does not have a parent and the parent is no longer aware of this child.
+Removes the given node from the tree structure it is embedded in, i.e.,
+it does not have a parent and the parent is no longer aware of this child.
 
-   Returns boolean indicating success and potential error (in success case TREE_NO_ERROR).
+Returns boolean indicating success and potential error (in success case TREE_NO_ERROR).
 */
 func RemoveNodeFromTree(node *Node) (bool, NodeError) {
 
@@ -599,10 +682,10 @@ func RemoveNodeFromTree(node *Node) (bool, NodeError) {
 }
 
 /*
-   Finds logical linkages between a source and target node in the tree they are embedded in.
-   Returns true if a link is found, and provides the logical operators on that path.
-   It further returns an error in case of navigation challenges (with error case TREE_NO_ERROR
-   signaling successful navigation irrespective of outcome.
+Finds logical linkages between a source and target node in the tree they are embedded in.
+Returns true if a link is found, and provides the logical operators on that path.
+It further returns an error in case of navigation challenges (with error case TREE_NO_ERROR
+signaling successful navigation irrespective of outcome).
 */
 func FindLogicalLinkage(sourceNode *Node, targetNode *Node) (bool, []string, NodeError) {
 
@@ -621,7 +704,7 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node) (bool, []string, Nod
 	if err.ErrorCode != TREE_NO_ERROR {
 		return false, ops, err
 	}
-	// If found in downwards search, return
+	// If found in upwards search, return
 	if foundUpwards {
 		return true, ops, err
 	}
@@ -631,11 +714,11 @@ func FindLogicalLinkage(sourceNode *Node, targetNode *Node) (bool, []string, Nod
 }
 
 /*
-   Searches for a given node upward in the tree structure by recursively moving upwards, while excluding previously explored
-   unsuccessful branches (Parameter lastNode). The parameter originNode and targetNode are retained as reference to the search
-   origin and target. opsPath retains all logical operators along the path.
-   Returns true in case of successful outcome, with logical operators provided alongside. It further returns an error
-   (per default with error code TREE_NO_ERROR indicating that no navigation issue occurred throughout the tree - irrespective of the outcome).
+Searches for a given node upward in the tree structure by recursively moving upwards, while excluding previously explored
+unsuccessful branches (Parameter lastNode). The parameter originNode and targetNode are retained as reference to the search
+origin and target. opsPath retains all logical operators along the path.
+Returns true in case of successful outcome, with logical operators provided alongside. It further returns an error
+(per default with error code TREE_NO_ERROR indicating that no navigation issue occurred throughout the tree - irrespective of the outcome).
 */
 func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []string) (bool, []string, NodeError) {
 
@@ -653,8 +736,11 @@ func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []
 
 	// If not successful, recurse upwards, and attempt again, with reference to the explore parent as last node (to prevent repeated exploration)
 	if !response {
-		// Explicit include logical operator if moving upward
-		opsPath = append(opsPath, lastNode.Parent.LogicalOperator)
+
+		// Explicitly include logical operator if moving upward (if populated)
+		if lastNode.Parent.LogicalOperator != "" {
+			opsPath = append(opsPath, lastNode.Parent.LogicalOperator)
+		}
 		//Println("Search one level higher above ", lastNode.Parent)
 		response, ops, err = searchUpward(originNode, lastNode.Parent, targetNode, opsPath)
 	}
@@ -663,12 +749,12 @@ func searchUpward(originNode *Node, lastNode *Node, targetNode *Node, opsPath []
 }
 
 /*
-   Searches downwards from a given node (startNode), exploring any left branch first (recursively), followed by the right one (recursively).
-   The lastNode indicates the last node explored in preceding search (i.e., a nested node), preventing the exploration of the underlying path.
-   The originNode retains the reference to the search origin, and targetNode is the reference to the target.
-   opsPath retains all operators found along the path.
-   Returns true if successful, alongside the relevant logical operators along the path, as well as an error
-   (per default with error code TREE_NO_ERROR indicating that no navigation issue occurred throughout the tree - irrespective of the outcome).
+Searches downwards from a given node (startNode), exploring any left branch first (recursively), followed by the right one (recursively).
+The lastNode indicates the last node explored in preceding search (i.e., a nested node), preventing the exploration of the underlying path.
+The originNode retains the reference to the search origin, and targetNode is the reference to the target.
+opsPath retains all operators found along the path.
+Returns true if successful, alongside the relevant logical operators along the path, as well as an error
+(per default with error code TREE_NO_ERROR indicating that no navigation issue occurred throughout the tree - irrespective of the outcome).
 */
 func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNode *Node, opsPath []string) (bool, []string, NodeError) {
 
@@ -678,9 +764,9 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		return true, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 
-	// if leaf and does not match, return false
-	if startNode.IsLeafNode() {
-		//Println("Search node ", startNode, " is leaf, but does not corresponding to the target node. Node: ", targetNode)
+	// if leaf and does not match && if entry does not contain Node[] collection (in which case there are embedded statements), return false
+	if startNode.IsLeafNode() && (startNode == nil || startNode.Entry == nil || reflect.TypeOf(startNode.Entry) != reflect.TypeOf([]*Node{})) {
+		Println("Search node ", startNode, " is leaf, but does not corresponding to the target node. Node: ", targetNode)
 		return false, opsPath, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 
@@ -692,11 +778,30 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 	}
 
 	// Append start node operator
-	ops = append(ops, startNode.LogicalOperator)
-	//Println("Added logical operator ", startNode.LogicalOperator)
+	if startNode.LogicalOperator != "" {
+		ops = append(ops, startNode.LogicalOperator)
+		//Println("Added logical operator ", startNode.LogicalOperator)
+	}
 
 	// Predefine response values
-	err := NodeError{ErrorCode: TREE_NO_ERROR}
+	errSuccess := NodeError{ErrorCode: TREE_NO_ERROR}
+
+	// If left and right are empty, check for []Node in entry (extrapolated statement) - should only hold if no branch (i.e., left and right) is populated
+	// NOTE: Avoid upward search following downward search into []Node, since that may lead to infinite loop
+	if startNode.Left == nil && startNode.Right == nil && reflect.TypeOf(startNode.Entry) == reflect.TypeOf([]*Node{}) {
+		for _, v := range startNode.Entry.([]*Node) {
+			response, ops4, err := searchDownward(originNode, startNode, v, targetNode, ops)
+			// return lacking success if appearing
+			if err.ErrorCode != TREE_NO_ERROR {
+				return false, ops4, err
+			}
+			// If positive outcome
+			if response {
+				Println("Found target in nested statement collection (extrapolated structure)")
+				return true, ops4, errSuccess
+			}
+		}
+	}
 
 	// Test left first - it must not be nil, and not be the last explored node (i.e., a left child of the currently explored one)
 	if startNode.Left != nil && startNode.Left != lastNode {
@@ -709,7 +814,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on left side")
-			return true, ops2, err
+			return true, ops2, errSuccess
 		}
 		// Delegate downwards
 		//Println("- Test left left")
@@ -721,7 +826,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on left left side")
-			return true, ops3, err
+			return true, ops3, errSuccess
 		}
 		//Println("- Test left right")
 		response, ops3, err = searchDownward(originNode, startNode.Left.Right, startNode.Left.Right, targetNode, ops2)
@@ -732,7 +837,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on left right side")
-			return true, ops3, err
+			return true, ops3, errSuccess
 		}
 	}
 	// Test right (will only be done if left was not successful)
@@ -747,7 +852,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on right side")
-			return true, ops2, err
+			return true, ops2, errSuccess
 		}
 		// Delegate downwards
 		//Println("- Test right left")
@@ -759,7 +864,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			//Println("Found target on right left side")
-			return true, ops3, err
+			return true, ops3, errSuccess
 		}
 		//Println("- Test right right")
 		response, ops3, err = searchDownward(originNode, startNode.Right.Right, startNode.Right.Right, targetNode, ops2)
@@ -770,16 +875,17 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 		// If positive outcome
 		if response {
 			Println("Found target on right right side")
-			return true, ops3, err
+			return true, ops3, errSuccess
 		}
 	}
+
 	//Println("Final result: false")
-	return false, ops, err
+	return false, ops, errSuccess
 }
 
 /*
-   Combines existing nodes into new node and returns newly generated node.
-   Returns an error if component types of input nodes differ (should not be combined).
+Combines existing nodes into new node and returns newly generated node.
+Returns an error if component types of input nodes differ (should not be combined).
 */
 func Combine(leftNode *Node, rightNode *Node, logicalOperator string) (*Node, NodeError) {
 
@@ -817,16 +923,18 @@ func Combine(leftNode *Node, rightNode *Node, logicalOperator string) (*Node, No
 	return &newNode, NodeError{ErrorCode: TREE_NO_ERROR}
 }
 
-/**
-  Adds non-shared values to the node, i.e., values that are not shared across subnodes, but attached to the
-  node itself.
+/*
+*
+
+	Adds non-shared values to the node, i.e., values that are not shared across subnodes, but attached to the
+	node itself.
 */
 func (n *Node) InsertNonSharedValues(value string) {
 	n.ElementOrder = append(n.ElementOrder, value)
 }
 
 /*
-   Creates a generic node, with various options
+Creates a generic node, with various options
 */
 func ComponentNode(entry string, leftValue string, rightValue string, componentType string, sharedValueLeft []string, sharedValueRight []string, logicalOperator string) *Node {
 
@@ -895,7 +1003,7 @@ func ComponentNode(entry string, leftValue string, rightValue string, componentT
 }
 
 /*
-   Validates all nodes from this node downwards with respect to population as linking node or leaf node.
+Validates all nodes from this node downwards with respect to population as linking node or leaf node.
 */
 func (n *Node) Validate() (bool, NodeError) {
 	if n.Entry == nil && (n.Left == nil || n.Right == nil) {
@@ -937,7 +1045,7 @@ func (n *Node) Validate() (bool, NodeError) {
 }
 
 /*
-   Counts the number of leaves of node tree
+Counts the number of leaves of node tree
 */
 func (n *Node) CountLeaves() int {
 	if n == nil {
@@ -964,8 +1072,8 @@ func (n *Node) CountLeaves() int {
 }
 
 /*
-   Calculates state complexity for given node and returns the result.
-   Number of options on which the calculation is based can be retrieved using CountLeaves().
+Calculates state complexity for given node and returns the result.
+Number of options on which the calculation is based can be retrieved using CountLeaves().
 */
 func (n *Node) CalculateStateComplexity() (int, NodeError) {
 	if n == nil {
@@ -982,7 +1090,7 @@ func (n *Node) CalculateStateComplexity() (int, NodeError) {
 	}
 	if n.Left == nil && n.Right == nil && !n.HasPrimitiveEntry() {
 		// Must be nested statement, so delegate execution to statement
-		stmt := n.Entry.(Statement)
+		stmt := n.Entry.(*Statement)
 		return stmt.CalculateComplexity().TotalStateComplexity, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 	// Check if nested elements contain complexity
@@ -1029,8 +1137,8 @@ func (n *Node) GetNodeBelowSyntheticRootNode() *Node {
 }
 
 /*
-   Indicates whether a given node has a linkage (wAND) within the same component
-   (e.g., Cex(shared (left [AND] right) middle (left2 [XOR] right2) shared)).
+Indicates whether a given node has a linkage (wAND) within the same component
+(e.g., Cex(shared (left [AND] right) middle (left2 [XOR] right2) shared)).
 */
 func (n *Node) HasWithinComponentLinkage() bool {
 	if n.Parent != nil && n.Parent.LogicalOperator == SAND_WITHIN_COMPONENTS {
@@ -1046,7 +1154,7 @@ func (n *Node) HasWithinComponentLinkage() bool {
 }
 
 /*
-   Returns all nodes that are in the same branch under a within-component linkage (i.e., wAND operators).
+Returns all nodes that are in the same branch under a within-component linkage (i.e., wAND operators).
 */
 func (n *Node) getAllNodesInWithinComponentLinkageBranch() []*Node {
 	if n.Parent != nil && n.Parent.LogicalOperator == SAND_WITHIN_COMPONENTS {
@@ -1060,7 +1168,8 @@ func (n *Node) getAllNodesInWithinComponentLinkageBranch() []*Node {
 }
 
 /*
-   Returns root node of given tree the node independent of linking logical operators.
+Returns root node of given tree independent of linking logical operators.
+Internally it checks the chain of parent relationships. If no parent exists, the node itself is returned.
 */
 func (n *Node) GetRootNode() *Node {
 	if n.Parent == nil {
@@ -1074,12 +1183,22 @@ func (n *Node) GetRootNode() *Node {
 }
 
 /*
-   Returns leaf nodes of a given node as arrays of arrays of nodes.
-   The two-dimensional array allows for separate storage of multiple arrays for a given component (e.g., multiple attributes, aims, etc.).
-   The parameter aggregateImplicitLinkages indicates whether the nodes for a given tree with implicitly linked branches
-   should be returned as a single tree, or multiple trees.
+Returns leaf nodes of a given node as arrays of arrays of nodes.
+The two-dimensional array allows for separate storage of multiple arrays for a given component (e.g., multiple attributes, aims, etc.).
+The parameter aggregateImplicitLinkages indicates whether the nodes for a given tree with implicitly linked branches
+should be returned as a single tree, or multiple trees.
 */
 func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
+	return n.GetLeafNodesWithoutGivenNode(aggregateImplicitLinkages, nil)
+}
+
+/*
+Returns leaf nodes of a given node as arrays of arrays of nodes, while ignoring a given node in the output (nil, if none to be ignored).
+The two-dimensional array allows for separate storage of multiple arrays for a given component (e.g., multiple attributes, aims, etc.).
+The parameter aggregateImplicitLinkages indicates whether the nodes for a given tree with implicitly linked branches
+should be returned as a single tree, or multiple trees.
+*/
+func (n *Node) GetLeafNodesWithoutGivenNode(aggregateImplicitLinkages bool, nodeToBeIgnored *Node) [][]*Node {
 
 	// Error checking first
 	if n == nil {
@@ -1094,7 +1213,10 @@ func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
 	if n.Left == nil && n.Right == nil && n.Entry != "" {
 		// Must be single leaf node (entry)
 		inner := []*Node{n}
-		returnNode = append(returnNode, inner)
+		if n != nodeToBeIgnored {
+			// Check whether to be ignored - only add if not be ignored
+			returnNode = append(returnNode, inner)
+		}
 		return returnNode
 	}
 
@@ -1120,7 +1242,8 @@ func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
 			aggregate = 0
 		}
 
-		res := aggregateNodes(aggregate, n.Left.GetLeafNodes(aggregateImplicitLinkages), n.Right.GetLeafNodes(aggregateImplicitLinkages), returnNode)
+		res := aggregateNodes(aggregate, n.Left.GetLeafNodesWithoutGivenNode(aggregateImplicitLinkages, nodeToBeIgnored),
+			n.Right.GetLeafNodesWithoutGivenNode(aggregateImplicitLinkages, nodeToBeIgnored), returnNode)
 		Println("Returning following aggregated nodes for operator", n.LogicalOperator, ": ", res)
 		return res
 	}
@@ -1145,9 +1268,67 @@ func (n *Node) GetLeafNodes(aggregateImplicitLinkages bool) [][]*Node {
 }
 
 /*
-   Enables different forms of node aggregation, where aggregationType 0 indicates flat combination of nodes in array ([ ..., one, two, ...]),
-   and aggregationType 1 indicates returning node arrays within node array ([ ..., [one, two], ...])
-   Takes populated leaf arrays as input and prepared return structure for output.
+Returns top-level nodes containing statements. If none is found, returns nil.
+*/
+func (n *Node) GetTopLevelStatementNodes() []*Node {
+
+	// Move to root first and work downwards
+	root := n.GetRootNode()
+
+	// Check that root is not empty
+	if root.IsEmptyOrNilNode() {
+		return nil
+	}
+
+	// Navigate downwards
+	return findTopLevelStatementBelowNode(root, []*Node{})
+}
+
+/*
+Retrieves top-level statements in nodes on or below given node.
+
+Takes starting node as input as well as initialized collection for returned statements.
+*/
+func findTopLevelStatementBelowNode(node *Node, stmts []*Node) []*Node {
+
+	// Test whether node itself is single and has statement embedded
+	if node.Entry != nil && reflect.TypeOf(node.Entry) == reflect.TypeOf(&Statement{}) {
+		// If root has statement in Entry, then return this as top-level statement
+		return append(stmts, node)
+	}
+
+	// Iterate through nodes array (if present)
+	if node.Entry != nil && reflect.TypeOf(node.Entry) == reflect.TypeOf([]*Node{}) {
+		for _, v := range node.Entry.([]*Node) {
+			stmts = findTopLevelStatementBelowNode(v, stmts)
+		}
+	}
+
+	// test left side downwards
+	if node.IsCombination() && !node.Left.IsEmptyOrNilNode() {
+		if node.Left.IsCombination() || reflect.TypeOf(node.Left.Entry) != reflect.TypeOf([]*Statement{}) {
+			stmts = findTopLevelStatementBelowNode(node.Left, stmts)
+		} else if reflect.TypeOf(node.Left.Entry) == reflect.TypeOf(&Statement{}) {
+			stmts = append(stmts, node.Left)
+		}
+	}
+
+	// test right side downwards
+	if node.IsCombination() && !node.Right.IsEmptyOrNilNode() {
+		if node.Right.IsCombination() || reflect.TypeOf(node.Right.Entry) != reflect.TypeOf([]*Statement{}) {
+			stmts = findTopLevelStatementBelowNode(node.Right, stmts)
+		} else if reflect.TypeOf(node.Right.Entry) == reflect.TypeOf(&Statement{}) {
+			stmts = append(stmts, node.Right)
+		}
+	}
+
+	return stmts
+}
+
+/*
+Enables different forms of node aggregation, where aggregationType 0 indicates flat combination of nodes in array ([ ..., one, two, ...]),
+and aggregationType 1 indicates returning node arrays within node array ([ ..., [one, two], ...])
+Takes populated leaf arrays as input and prepared return structure for output.
 */
 func aggregateNodes(aggregationType int, leftNodes [][]*Node, rightNodes [][]*Node, returnNode [][]*Node) [][]*Node {
 	switch aggregationType {
@@ -1181,7 +1362,7 @@ func aggregateNodes(aggregationType int, leftNodes [][]*Node, rightNodes [][]*No
 }
 
 /*
-   Calculate depth of node tree
+Calculate depth of node tree
 */
 func (n *Node) CalculateDepth() int {
 	if n == nil {
@@ -1206,14 +1387,14 @@ func (n *Node) CalculateDepth() int {
 }
 
 /*
-   Indicates whether node is leaf node
+Indicates whether node is leaf node
 */
 func (n *Node) IsLeafNode() bool {
 	return n == nil || (n.Left == nil && n.Right == nil)
 }
 
 /*
-   Indicates whether node contains valid combination (i.e., left and right and logical operator are populated).
+Indicates whether node contains valid combination (i.e., left and right and logical operator are populated).
 */
 func (n *Node) IsCombination() bool {
 	return n.Entry == nil && !n.Left.IsNil() &&
@@ -1221,14 +1402,14 @@ func (n *Node) IsCombination() bool {
 }
 
 /*
-   Indicates whether node has populated logical operator, but does not check for proper assignment of left and right children.
+Indicates whether node has populated logical operator, but does not check for proper assignment of left and right children.
 */
 func (n *Node) hasLogicalOperator() bool {
 	return n.LogicalOperator != ""
 }
 
 /*
-   Indicates whether node is empty (i.e., has "zero values" in fields) or is nil (implies empty node).
+Indicates whether node is empty (i.e., has "zero values" in fields) or is nil (implies empty node).
 */
 func (n *Node) IsEmptyOrNilNode() bool {
 
@@ -1251,16 +1432,16 @@ func (n *Node) IsEmptyOrNilNode() bool {
 }
 
 /*
-   Indicates if node is nil.
+Indicates if node is nil.
 */
 func (n *Node) IsNil() bool {
 	return n == nil
 }
 
 /*
-   Applies statement parsing function to all entries below a given node.
+Applies statement parsing function to all entries below a given node.
 */
-func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) ParsingError {
+func (n *Node) ParseAllEntries(function func(string) (*Statement, ParsingError)) ParsingError {
 	if n.IsNil() {
 		return ParsingError{ErrorCode: PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Attempted to parse nil element."}
 	}
@@ -1293,10 +1474,10 @@ func (n *Node) ParseAllEntries(function func(string) (Statement, ParsingError)) 
 }
 
 /*
-   Returns suffix of given node, or, if nested, of parent node if it has logical operator.
-   Inheritance only works up to node with logical operator and populated suffix
-   (i.e., will walk upward until finding node with logical operator and suffix).
-   Returns empty string if no suffix present.
+Returns suffix of given node, or, if nested, of parent node if it has logical operator.
+Inheritance only works up to node with logical operator and populated suffix
+(i.e., will walk upward until finding node with logical operator and suffix).
+Returns empty string if no suffix present.
 */
 func (n *Node) GetSuffix() string {
 	if n.Suffix != nil {
@@ -1315,7 +1496,7 @@ func (n *Node) GetSuffix() string {
 }
 
 /*
-   Indicates whether node has own private nodes (referenced via PrivateNodes field)
+Indicates whether node has own private nodes (referenced via PrivateNodes field)
 */
 func (n *Node) HasPrivateNodes() bool {
 	if n.PrivateNodeLinks != nil && len(n.PrivateNodeLinks) > 0 {
@@ -1326,7 +1507,7 @@ func (n *Node) HasPrivateNodes() bool {
 }
 
 /*
-   Indicates whether node has annotations (referenced via Annotations field)
+Indicates whether node has annotations (referenced via Annotations field)
 */
 func (n *Node) HasAnnotations() bool {
 	if n.GetAnnotations() != nil && n.GetAnnotations() != nil && len(n.GetAnnotations().(string)) > 0 {
@@ -1337,8 +1518,8 @@ func (n *Node) HasAnnotations() bool {
 }
 
 /*
-   Returns annotations for specific node. If non-synthetic parent nodes hold annotations,
-   those are inherited.
+Returns annotations for specific node. If non-synthetic parent nodes hold annotations,
+those are inherited.
 */
 func (n *Node) GetAnnotations() interface{} {
 
@@ -1356,4 +1537,16 @@ func (n *Node) GetAnnotations() interface{} {
 		// Return own value if existing
 		return n.Annotations
 	}
+}
+
+/*
+Helper function to pretty-print node arrays
+*/
+func PrintNodes(nodes []*Node) string {
+	outString := "\n"
+	for i, v := range nodes {
+		outString += "Node " + strconv.Itoa(i) + ": \n"
+		outString += v.String() + "\n"
+	}
+	return outString
 }

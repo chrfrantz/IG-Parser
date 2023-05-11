@@ -59,7 +59,7 @@ func TestD3LibraryRead(t *testing.T) {
 	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}
@@ -109,7 +109,7 @@ func TestACELibraryRead(t *testing.T) {
 	if outputString != expectedOutput {
 		fmt.Println("Produced output:\n", outputString)
 		fmt.Println("Expected output:\n", expectedOutput)
-		err6 := exporter.WriteToFile(errorFile, outputString)
+		err6 := exporter.WriteToFile(errorFile, outputString, true)
 		if err6 != nil {
 			t.Fatal("Error attempting to write error file. Error:", err6.Error())
 		}

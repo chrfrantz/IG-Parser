@@ -89,12 +89,11 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 	Println(combinations)
 
 	// Depth first (level is 1-based, index is 0-based)
-	level := 0 //len(combinations)
+	level := 0
 
 	// Link input node to temporary node for incremental addition of elements - needs to be copied back prior to return
-	//if nodeTree == nil {
 	nodeTree := &tree.Node{}
-	//}
+
 	// Map to keep order of entry for correct tree construction (retention of order)
 	orderMap := make(map[int]*tree.Node)
 
@@ -330,10 +329,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 			// Increase to explore other entries
 			idx++
 		}
-		// break out if combination has been found and processed - must be top-level combination
-		// TODO - check output
-		//return node, "(" + left + " [" + node.LogicalOperator + "] " + right + ")", tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-		//return node, "", tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+
 		Println("==Finished parsing on level " + strconv.Itoa(level))
 
 		// Increase level
@@ -345,7 +341,6 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 	Println(combinations)
 
 	// Reconstructing node based on order of node input
-	//Println("Node order: ")
 	ct := 0
 
 	// Default error to test for invalid combinations
@@ -526,32 +521,14 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 			}
 			if b.Left != 0 && b.OperatorVal != "" {
 				// Update complete marker
-				//b := levelMap[level][levelIdx]
 				b.Complete = true
 				levelMap[level][levelIdx] = b
 				Println("Expression is complete.")
 			} else {
 				Println("Detected end, but combination incomplete (Missing operator or left parenthesis). " +
 					"Discarding combination. (Input: '" + expression + "')")
-				// Delete incomplete entry - will lead to removal of shared strings...
-				/*delete(levelMap[level], levelIdx)
-				// Check whether all information from that level has to be deleted
-				if len(levelMap[level]) == 0 {
-					delete(levelMap, level)
-				}*/
 				Print("Map on given level after processing: ")
 				Println(levelMap[level])
-				// Retrieve higher level
-				/*_, ok := levelMap[level+1]
-				if !ok {
-					Print("No nested complete combination, so deleted this incomplete one: ")
-					Println(levelMap[level])
-					// If no higher-level exists (within the lower level), delete this incomplete entry
-					delete(levelMap, level)
-				} else {
-					// else retain
-					Println("Nested complete combination, so incomplete higher-level combination is retained.")
-				}*/
 			}
 
 			// Configure mode
@@ -700,101 +677,15 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 		return nil, nil, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IMBALANCED_PARENTHESES, ErrorMessage: msg}
 	}
 
-	// Check for non-parsed prefix or suffix of input string
-	/*i := 0
-	firstIdx := -1
-	lastIdx := -1
-	for i < len(levelMap) {
-		if _, ok := levelMap[i]; ok {
-			if firstIdx == -1 {
-				// Assign first value
-				firstIdx = levelMap[i].Left
-				Println("Prefix pos: " + strconv.Itoa(firstIdx))
-			}
-			if levelMap[i].Right > lastIdx {
-				// Assign highest last index
-				lastIdx = levelMap[i].Right
-				Println("Suffix pos: " + strconv.Itoa(lastIdx))
-			}
-		}
-		i++
-	}
-	prefix := ""
-	suffix := ""
-	if firstIdx > 0 {
-		prefix = strings.Trim(expression[:firstIdx], " (")
-	}
-	if lastIdx != -1 {
-		suffix = strings.Trim(expression[lastIdx+1:], ") ")
-	}
-	if prefix != "" || suffix != "" {
-		Println("Prefix: " + prefix)
-		Println("Suffix: " + suffix)
-		ignoredElements := []string{}
-		errorString := ""
-		if prefix != "" {
-			ignoredElements = append(ignoredElements, prefix)
-			errorString += prefix
-		}
-		if suffix != "" {
-			ignoredElements = append(ignoredElements, suffix)
-			if errorString != "" {
-				errorString += ", "
-			}
-			errorString += suffix
-		}
-		Println("Returning expression (ignored elements: " + errorString + "): " + expression)
-		return levelMap, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING,
-			ErrorMessage: "Parsing was successful, but expression parts were ignored during coding (" + errorString + "). " +
-			"This commonly occurs when logical operators between simple strings and combinations are omitted " +
-			"(e.g., ... some string (left [AND] right) ...) and not wrapped by parentheses to signal shared elements. " +
-			"In this case, simple strings are ignored in the parsing process.",
-			ErrorIgnoredElements: ignoredElements}
-	}*/
-
 	Println("Returning expression (complete parsing): " + expression)
 	// if no omitted elements during parsing, regular return without error
 	return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
-Processes potential inheritance of shared element values from parent to child nodes,
-where both parent and child nodes have AND operators
+Symbols to be ignored when determining strings shared across combinations (e.g., 'shared' in 'Bdir(shared (left [AND] right))') - commonly parentheses and braces
 */
-/*
-func inheritSharedElements(node *tree.Node) {
-		SHARED_ELEMENT_INHERITANCE_MODE != SHARED_ELEMENT_INHERIT_NOTHING {
-
-		switch SHARED_ELEMENT_INHERITANCE_MODE {
-		case SHARED_ELEMENT_INHERIT_OVERRIDE:
-			// Overwrite child with parent shared element values
-			if node.Parent.SharedLeft != nil {
-				node.SharedLeft = node.Parent.SharedLeft
-			}
-			if node.Parent.SharedRight != nil {
-				node.SharedRight = node.Parent.SharedRight
-			}
-		case SHARED_ELEMENT_INHERIT_APPEND:
-			if node.Parent.SharedLeft != nil && node.SharedLeft != nil {
-				// Append child to parent values and assign to child
-				node.SharedLeft = append(node.Parent.SharedLeft,node.SharedLeft...)
-			} else if node.Parent.SharedLeft != nil {
-				//if child is empty, just overwrite
-				node.SharedLeft = node.Parent.SharedLeft
-			}
-			if node.Parent.SharedRight != nil && node.SharedRight != nil {
-				// Append child to parent values and assign to child
-				node.SharedRight = append(node.Parent.SharedRight, node.SharedRight...)
-			} else if node.Parent.SharedRight != nil {
-				//if child is empty, just overwrite
-				node.SharedRight = node.Parent.SharedRight
-			}
-		}
-		Println("Inherited shared component from parent component in mode " + SHARED_ELEMENT_INHERITANCE_MODE + ": " +
-			"Left: " + fmt.Sprint(node.SharedLeft) + ", Right: " + fmt.Sprint(node.SharedRight))
-	}
-}
-*/
+const ignoredSymbolsInSharedFields = "(){}"
 
 /*
 Extracts left and right shared elements of a combination (e.g., (left shared (left [AND] right) right shared))
@@ -838,32 +729,38 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 			}
 
 			// Get rid of parentheses first
-			val = strings.Trim(val, "()")
+			val = strings.Trim(val, ignoredSymbolsInSharedFields)
 			// Then get rid of spaces
 			val = strings.TrimSpace(val)
 			Println("Identified left shared value:", val)
-			sharedLeft = append(sharedLeft, val)
+			if val != "" {
+				sharedLeft = append(sharedLeft, val)
+			}
 		} else {
 			// If element is left (e.g., wAND combined on same level), only consider string to boundary as shared
 			val := input[boundaries[level][index-1].Right:boundaries[level][index].Left]
 			// Get rid of parentheses first
-			val = strings.Trim(val, "()")
+			val = strings.Trim(val, ignoredSymbolsInSharedFields)
 			// Then get rid of spaces
 			val = strings.TrimSpace(val)
 			Println("Identified left shared value in multi-value component:", val)
-			sharedLeft = append(sharedLeft, val)
+			if val != "" {
+				sharedLeft = append(sharedLeft, val)
+			}
 		}
 
 		// RIGHT SIDE
 		// Check if other combination (i.e., higher index) exists, and only consider elements to that boundary as shared right
-		if val, ok := boundaries[level][index+1]; ok {
-			val := input[boundaries[level][index].Right:val.Left]
+		if value, ok := boundaries[level][index+1]; ok {
+			val := input[boundaries[level][index].Right:value.Left]
 			// Get rid of parentheses first
-			val = strings.Trim(val, "()")
+			val = strings.Trim(val, ignoredSymbolsInSharedFields)
 			// Then get rid of spaces
 			val = strings.TrimSpace(val)
 			Println("Identified right shared value in multi-value component:", val)
-			sharedRight = append(sharedRight, val)
+			if val != "" {
+				sharedRight = append(sharedRight, val)
+			}
 		} else {
 			// Else take the entire remaining string on the right, unless ...
 			val := input[boundaries[level][index].Right:]
@@ -885,12 +782,24 @@ func extractSharedComponents(input string, boundaries map[int]map[int]tree.Bound
 				val = input[boundaries[level][index].Right:boundaries[level-1][outerBoundary].Right]
 			}
 			// Get rid of parentheses first
-			val = strings.Trim(val, "()")
+			val = strings.Trim(val, ignoredSymbolsInSharedFields)
 			// Then get rid of spaces
 			val = strings.TrimSpace(val)
 			Println("Identified right shared value:", val)
-			sharedRight = append(sharedRight, val)
+			if val != "" {
+				sharedRight = append(sharedRight, val)
+			}
 		}
+	}
+	// Return nil if nothing found
+	if len(sharedLeft) == 0 && len(sharedRight) == 0 {
+		return nil, nil
+	}
+	if len(sharedLeft) == 0 && len(sharedRight) != 0 {
+		return nil, sharedRight
+	}
+	if len(sharedLeft) != 0 && len(sharedRight) == 0 {
+		return sharedLeft, nil
 	}
 	return sharedLeft, sharedRight
 }

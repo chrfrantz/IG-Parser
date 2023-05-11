@@ -33,7 +33,7 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	// Output type
 	Println("Output type:", outputType)
 	// Convert input
-	output, err2 := endpoints.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", exporter.IncludeHeader())
+	output, err2 := endpoints.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", true, exporter.IncludeHeader())
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {
 		retStruct.Success = false
 		retStruct.Error = true
@@ -64,7 +64,11 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	// Return success if parsing was successful
 	retStruct.Success = true
 	retStruct.CodedStmt = codedStmt
-	retStruct.Output = output
+	tabularOutput := ""
+	for _, v := range output {
+		tabularOutput += v.Output
+	}
+	retStruct.Output = tabularOutput
 	err := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_TABULAR, retStruct)
 	if err != nil {
 		log.Println("Error processing default template:", err.Error())

@@ -44,7 +44,7 @@
 
 <p>&nbsp;</p>
 <p>&nbsp;</p>
-<h1>IG Parser</h1>
+<h1><a style="text-decoration:none" href="https://github.com/chrfrantz/IG-Parser" target="_blank">IG Parser</a></h1>
 <h2>A Parser for Institutional Statements encoded in the <a href="/help/" target="_blank">IG Script Notation</a> of the <a href="https://newinstitutionalgrammar.org" target="_blank">Institutional Grammar 2.0</a></h2>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
@@ -52,23 +52,23 @@
     <form method="POST">
         <!-- Original Statement entry field -->
         <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
-        <textarea name="rawStmt" onfocusin="check(this)" onkeyup="check(this)">{{.RawStmt}}</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()">{{.RawStmt}}</textarea><br />
         <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip"><a href="/help/" target="_blank">Encoded Statement:</a></span>
         <!-- ACE Editor; copies any content to hidden textarea -->
-        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea()" onpaste="copyEditorContentToTextArea()">{{.CodedStmt}}</div>
+        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea()">{{.CodedStmt}}</div>
         <script>
-            var editor = ace.edit("editor");
-            editor.session.setMode("ace/mode/text");
+            let editor = ace.edit("editor");
+            editor.session.setMode("ace/mode/text"); // generic text syntax (with bracket matching)
             // Option documentation: https://github.com/ajaxorg/ace/wiki/Configuring-Ace
-            editor.setOption("showLineNumbers", true);
-            editor.setOption("wrap", true);
+            editor.setOption("showLineNumbers", true); // show line numbers
+            editor.setOption("wrap", true); // activate text wrapping
             editor.setOption("showGutter", true); // panel on the left
             editor.setOption("showPrintMargin", false); // 80-character margin marker
             editor.setOption("behavioursEnabled", false);
             editor.setOption("cursorStyle", "ace");
             editor.setOption("fontFamily", "monospace"); // has to be monospace for correct operation
-            editor.setOption("fontSize", 16);
+            editor.setOption("fontSize", 16); // font size
             editor.setOption("minLines", 5); // standard size
             editor.setOption("maxLines", 30); // number of lines before using scrollbar
 
@@ -76,11 +76,97 @@
             Copies content from editor to hidden textarea (which is used for form submission)
              */
             function copyEditorContentToTextArea() {
-                var ta = document.getElementById("codedStmt");
+                let ta = document.getElementById("codedStmt");
                 // Populate textarea with editor content
                 ta.value = editor.getValue();
             }
+
+            // Local storage
+
+            /*
+            Stores the editor content in browser local storage.
+             */
+            function saveFormContent() {
+                // Store encoded statement
+                let content = editor.getValue();
+                localStorage.setItem("codedStmt", content);
+                //console.log("Storing content " + content)
+
+                // Store raw statement
+                content = document.getElementById("rawStmt").value;
+                if(content != null) {
+                    localStorage.setItem("rawStmt", content);
+                    //console.log("Storing content " + content)
+                }
+
+                // Check for statement ID element before modifying content,
+                // since it is only available in tabular output version
+                let tmpId = document.getElementById("stmtId");
+                if(tmpId != null) {
+                    localStorage.setItem("stmtId", tmpId.value);
+                    //console.log("Storing content " + tmpId.value)
+                }
+            }
+
+            /*
+            Loads the content stored in local storage into editor
+             */
+            function loadFormContent() {
+                // Load encoded statement
+                // If value is stored ...
+                if(localStorage.getItem("codedStmt") != null) {
+                    // ... populate editor content ...
+                    let content = localStorage.getItem("codedStmt");
+                    editor.setValue(content);
+                    // ... and update underlying text area
+                    copyEditorContentToTextArea();
+                    //console.log("Loading content " + content)
+                }
+                // Load raw statement
+                if(localStorage.getItem("rawStmt") != null && document.getElementById("rawStmt") != null) {
+                    let content = localStorage.getItem("rawStmt");
+                    document.getElementById("rawStmt").value = content;
+                    //console.log("Loading content " + content)
+                }
+                // Load statement ID
+                if(localStorage.getItem("stmtId") != null && document.getElementById("stmtId") != null) {
+                    let content = localStorage.getItem("stmtId");
+                    document.getElementById("stmtId").value = content;
+                    //console.log("Loading content " + content)
+                }
+            }
+
+            /*
+            Resets fields to original default content
+             */
+            function resetContent() {
+                // Reset coded statement
+                editor.setValue({{.DefaultCodedStmt}})
+                // and copy back to hidden text area
+                copyEditorContentToTextArea();
+
+                // Reset raw statement
+                document.getElementById("rawStmt").value = {{.DefaultRawStmt}};
+
+                // Reset statement ID (if existing)
+                if(document.getElementById("stmtId") != null) {
+                    document.getElementById("stmtId").value = {{.DefaultStmtId}};
+                }
+
+                // Save Statement ID explicitly, since it does not display in visual mode and
+                // may otherwise not be saved using the saveFormContent()
+                localStorage.setItem("stmtId", {{.DefaultStmtId}});
+                // Save reset values in local storage
+                saveFormContent();
+            }
+
+            // Loads form contents from local storage upon window load
+            window.onload = (event) => {
+                loadFormContent();
+            };
         </script>
 
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />
+        <!-- Link to reset form content to default values -->
+        <span data-text="This resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a href="" onclick="resetContent()">Reset to default statement example</a></span><br /><br />

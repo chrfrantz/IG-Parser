@@ -16,10 +16,10 @@ func OpenBrowser(url string) error {
 
 	// Switch depending on operating system
 	switch runtime.GOOS {
-	case "windows":
+	case "windows": // Windows
 		cmd = "cmd"
 		args = []string{"/c", "start"}
-	case "darwin":
+	case "darwin": // Mac OS
 		cmd = "open"
 	default: // "linux", "freebsd", "openbsd", "netbsd"
 		cmd = "xdg-open"

@@ -78,16 +78,18 @@ loop:
 }
 
 /*
-Generates the statement IDs per component category for quick retrieval
-Inputs are statements composed of associated nodes (Structure: [statement][Node references for components].
-In addition, the output can be returned in terms of individual references (e.g., 1,2,3,4, etc.), or as aggregate ranges
+Generates the statement IDs per component category for quick retrieval.
+Inputs are statements composed of associated nodes (Structure: [statement][Node references for components]).
+
+The output can be returned in terms of individual references (e.g., 1,2,3,4, etc.), or as aggregate ranges
 (e.g., 1-4,6,9-13). The latter is usually useful if producing human-readable output.
 If indicated, references can be incremented during aggregation (e.g., 1 is entered as 2, 2 as 3, etc.) This may be
 particularly useful if converting from 0- to 1-based indices.
+
 Returns an array of maps of nodes pointing to arrays of associated statement IDs, or if generateRanges is activated,
 ranges of statement references, alongside potential incrementing of reference values.
 Structure: [column ID of component]map[node reference for each value of component (e.g., Farmer, Certifier)][statement IDs
-where component value apply]
+where component value applies]
 */
 func GenerateLogicalOperatorLinkagePerCombination(stmts [][]*Node, generateRanges bool, incrementReferences bool) []map[*Node][]string {
 

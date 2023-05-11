@@ -26,4 +26,4 @@ var DEBUG_OUTPUT_GENERATION = false
 var DEBUG_FINAL_OUTPUT = false
 
 // Debug information related to the frontend (e.g., web frontend). Can be used by any third-party application.
-var DEBUG_FRONTEND = true
+var DEBUG_FRONTEND = false

@@ -47,38 +47,45 @@ type Statement struct {
 Returns statement as formatted string that reflects tree structure (vertical orientation, with indentation of nested elements).
 */
 func (s *Statement) String() string {
+	return s.string(0)
+}
+
+/*
+Variant of String() with indentation level passed into output (for pretty printing of nested structures)
+*/
+func (s *Statement) string(indentationLevel int) string {
 	out := ""
 
-	out = s.printComponent(out, s.Attributes, ATTRIBUTES, false, false, false)
-	out = s.printComponent(out, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, false, false)
-	out = s.printComponent(out, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY, true, false, false)
-	out = s.printComponent(out, s.Deontic, DEONTIC, false, false, false)
-	out = s.printComponent(out, s.Aim, AIM, false, false, false)
-	out = s.printComponent(out, s.DirectObject, DIRECT_OBJECT, false, false, false)
-	out = s.printComponent(out, s.DirectObjectComplex, DIRECT_OBJECT, true, false, false)
-	out = s.printComponent(out, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, false, false)
-	out = s.printComponent(out, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY, true, false, false)
-	out = s.printComponent(out, s.IndirectObject, INDIRECT_OBJECT, false, false, false)
-	out = s.printComponent(out, s.IndirectObjectComplex, INDIRECT_OBJECT, true, false, false)
-	out = s.printComponent(out, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, false, false)
-	out = s.printComponent(out, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.Attributes, ATTRIBUTES, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.Deontic, DEONTIC, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.Aim, AIM, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.DirectObject, DIRECT_OBJECT, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.DirectObjectComplex, DIRECT_OBJECT, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.IndirectObject, INDIRECT_OBJECT, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.IndirectObjectComplex, INDIRECT_OBJECT, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY, true, false, false)
 
-	out = s.printComponent(out, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, false, false)
-	out = s.printComponent(out, s.ActivationConditionComplex, ACTIVATION_CONDITION, true, false, false)
-	out = s.printComponent(out, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, false, false)
-	out = s.printComponent(out, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.ActivationConditionComplex, ACTIVATION_CONDITION, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT, true, false, false)
 
-	out = s.printComponent(out, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, false, false)
-	out = s.printComponent(out, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, false, false)
-	out = s.printComponent(out, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY, true, false, false)
-	out = s.printComponent(out, s.Modal, MODAL, false, false, false)
-	out = s.printComponent(out, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, false, false)
-	out = s.printComponent(out, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, false, false)
-	out = s.printComponent(out, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES, true, false, false)
-	out = s.printComponent(out, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, false, false)
-	out = s.printComponent(out, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.Modal, MODAL, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, false, false)
+	out = s.printComponent(out, indentationLevel, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY, true, false, false)
 
-	out = s.printComponent(out, s.OrElse, OR_ELSE, true, false, false)
+	out = s.printComponent(out, indentationLevel, s.OrElse, OR_ELSE, true, false, false)
 
 	return out
 }
@@ -87,6 +94,7 @@ func (s *Statement) String() string {
 Appends component information for output string
 Input:
 - input string to append output to
+- indentation level (indicating nesting level for pretty printing)
 - Node whose content is to be appended
 - Symbol associated with component
 - Indicator whether component is complex
@@ -95,21 +103,25 @@ Input:
 
 Returns string for printing
 */
-func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol string, complex bool, flatOutput bool, includeComponentSymbol bool) string {
+func (s *Statement) printComponent(inputString string, indentationLevel int, node *Node, nodeSymbol string, complex bool, flatOutput bool, includeComponentSymbol bool) string {
 
 	b := strings.Builder{}
 	b.WriteString(inputString)
 
 	sep := ": "
 	suffix := "\n"
-	complexPrefix := "{\n"
 
-	complexSuffix := "\n}"
-	complexSuffixBuilder := strings.Builder{}
-	complexSuffixBuilder.WriteString(complexSuffix)
+	indentString := ""
+	i := 0
+	for i < indentationLevel {
+		indentString += MinimumIndentPrefix
+		i++
+	}
 
 	// If node is not nil
 	if node != nil {
+		// Prepend indentationLevel
+		b.WriteString(indentString)
 		// Only flat output of component (human-readable, no symbols)
 		if flatOutput {
 			// Generate output for node
@@ -142,6 +154,12 @@ func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol st
 		if complex {
 			// Complex (i.e., nested) node output
 
+			complexPrefix := "{\n"
+			// Indent closing brace at deeper level due to indentation of content
+			complexSuffix := "\n" + indentString + MinimumIndentPrefix + "}"
+			complexSuffixBuilder := strings.Builder{}
+			complexSuffixBuilder.WriteString(complexSuffix)
+
 			// Append complex node-specific information to the end of nested statement
 			// Assumes that suffix and annotations are in string format for nodes that have nested statements
 			// TODO: see whether that needs to be adjusted
@@ -166,12 +184,16 @@ func (s *Statement) printComponent(inputString string, node *Node, nodeSymbol st
 				complexSuffixBuilder.WriteString(")")
 			}
 
+			// Write out pre-generated information ...
+			// Write prefix
 			b.WriteString(complexPrefix)
-			b.WriteString(node.String())
+			// Write node component content (may include nested structure)
+			b.WriteString(node.string(indentationLevel + 1))
+			// Write complex node suffix
 			b.WriteString(complexSuffixBuilder.String())
 		} else {
 			// Simple output
-			b.WriteString(node.String())
+			b.WriteString(node.string(indentationLevel))
 		}
 		// Append suffix
 		b.WriteString(suffix)
@@ -186,36 +208,36 @@ Return flat string of embedded statement (human-readable output (no linebreaks);
 func (s Statement) StringFlatStatement(includeComponentSymbol bool) string {
 	out := ""
 
-	out = s.printComponent(out, s.Attributes, ATTRIBUTES, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.Deontic, DEONTIC, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.Aim, AIM, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.DirectObject, DIRECT_OBJECT, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.DirectObjectComplex, DIRECT_OBJECT, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.IndirectObject, INDIRECT_OBJECT, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.IndirectObjectComplex, INDIRECT_OBJECT, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.Attributes, ATTRIBUTES, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.Deontic, DEONTIC, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.Aim, AIM, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.DirectObject, DIRECT_OBJECT, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.DirectObjectComplex, DIRECT_OBJECT, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.IndirectObject, INDIRECT_OBJECT, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.IndirectObjectComplex, INDIRECT_OBJECT, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY, true, true, includeComponentSymbol)
 
-	out = s.printComponent(out, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ActivationConditionComplex, ACTIVATION_CONDITION, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ActivationConditionComplex, ACTIVATION_CONDITION, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT, true, true, includeComponentSymbol)
 
-	out = s.printComponent(out, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.Modal, MODAL, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.Modal, MODAL, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY, true, true, includeComponentSymbol)
 
-	out = s.printComponent(out, s.OrElse, OR_ELSE, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.OrElse, OR_ELSE, true, true, includeComponentSymbol)
 
 	// Cut last element if any output string exists (since it will contain an appended whitespace)
 	if out != "" {
@@ -231,36 +253,36 @@ Return flat string of embedded statement (human-readable output (no linebreaks);
 func (s *Statement) StringFlat(includeComponentSymbol bool) string {
 	out := ""
 
-	out = s.printComponent(out, s.Attributes, ATTRIBUTES, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.Deontic, DEONTIC, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.Aim, AIM, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.DirectObject, DIRECT_OBJECT, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.DirectObjectComplex, DIRECT_OBJECT, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.IndirectObject, INDIRECT_OBJECT, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.IndirectObjectComplex, INDIRECT_OBJECT, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.Attributes, ATTRIBUTES, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.AttributesPropertySimple, ATTRIBUTES_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.AttributesPropertyComplex, ATTRIBUTES_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.Deontic, DEONTIC, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.Aim, AIM, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.DirectObject, DIRECT_OBJECT, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.DirectObjectComplex, DIRECT_OBJECT, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.DirectObjectPropertySimple, DIRECT_OBJECT_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.DirectObjectPropertyComplex, DIRECT_OBJECT_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.IndirectObject, INDIRECT_OBJECT, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.IndirectObjectComplex, INDIRECT_OBJECT, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.IndirectObjectPropertySimple, INDIRECT_OBJECT_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.IndirectObjectPropertyComplex, INDIRECT_OBJECT_PROPERTY, true, true, includeComponentSymbol)
 
-	out = s.printComponent(out, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ActivationConditionComplex, ACTIVATION_CONDITION, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ActivationConditionSimple, ACTIVATION_CONDITION, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ActivationConditionComplex, ACTIVATION_CONDITION, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ExecutionConstraintSimple, EXECUTION_CONSTRAINT, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ExecutionConstraintComplex, EXECUTION_CONSTRAINT, true, true, includeComponentSymbol)
 
-	out = s.printComponent(out, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.Modal, MODAL, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES, true, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, true, includeComponentSymbol)
-	out = s.printComponent(out, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutedEntity, CONSTITUTED_ENTITY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutedEntityPropertySimple, CONSTITUTED_ENTITY_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutedEntityPropertyComplex, CONSTITUTED_ENTITY_PROPERTY, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.Modal, MODAL, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutiveFunction, CONSTITUTIVE_FUNCTION, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutingProperties, CONSTITUTING_PROPERTIES, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutingPropertiesComplex, CONSTITUTING_PROPERTIES, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutingPropertiesPropertySimple, CONSTITUTING_PROPERTIES_PROPERTY, false, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.ConstitutingPropertiesPropertyComplex, CONSTITUTING_PROPERTIES_PROPERTY, true, true, includeComponentSymbol)
 
-	out = s.printComponent(out, s.OrElse, OR_ELSE, true, true, includeComponentSymbol)
+	out = s.printComponent(out, 0, s.OrElse, OR_ELSE, true, true, includeComponentSymbol)
 
 	// Cut last element if any output string exists (since it will contain an appended whitespace)
 	if out != "" {
@@ -393,37 +415,6 @@ func (s *Statement) generateLeafArrays(aggregateImplicitLinkages bool, level int
 /*
 Generates a leaf array for a given component under consideration of node as being of simple or complex nature.
 Appends to existing structure if provided (i.e., not nil) to allow for iterative invocation.
-For a version that allows for iterative invocation, consider #getComponentLeafArray.
-For returning only leaves that contain suffix information, consider #getComponentLeafArrayWithSuffix.
-
-Input:
-- Reference to component node for which leaf elements are to be extracted
-- Component symbol associated with component
-- Indicator whether element embedded in node is complex (i.e., nested statement)
-- The parameter aggregateImplicitLinkages indicates whether implicitly linked trees of nodes should be returned as a single tree, or as separate trees.
-- The parameter level indicates whether all nodes should be returned, or only ones that contain suffix information.
-
-- Indicator whether all leaf nodes should be returned, or only one satisfying particular conditions
-  (0 --> all nodes, 1 --> only ones with non-empty suffix).
-
-Returns:
-- Node map of nodes associated with components
-- Reference map counting number of components
-*/
-/*func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, complex bool, aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
-
-	// Map holding reference from component type (e.g., ATTRIBUTES) to number of entries (relevant for reconstruction)
-	referenceMap := map[string]int{}
-
-	// Counter for overall number of entries
-	nodesMap := make([][]*Node, 0)
-
-	return getComponentLeafArray(nodesMap, referenceMap, componentNode, componentSymbol, complex, aggregateImplicitLinkages, level)
-}*/
-
-/*
-Generates a leaf array for a given component under consideration of node as being of simple or complex nature.
-Appends to existing structure if provided (i.e., not nil) to allow for iterative invocation.
 For returning only leaves that contain suffix information consider #getComponentLeafArrayWithSuffix.
 Input:
   - maps of nodes potentially including existing nodes for other components. Will be created internally if nil
@@ -549,6 +540,70 @@ func (s *Statement) GetPropertyComponent(n *Node, complex bool) []*Node {
 		}
 	}
 	return out
+}
+
+/*
+Copies components from a given statement into statement on which the function is called. Checks whether target
+component is empty before copying.
+*/
+func CopyComponentsFromStatement(stmtToCopyTo *Statement, stmtToCopyFrom *Statement) *Statement {
+
+	// Regulative
+	stmtToCopyTo.Attributes = copyComponentValue(stmtToCopyTo.Attributes, stmtToCopyFrom.Attributes)
+	stmtToCopyTo.AttributesPropertySimple = copyComponentValue(stmtToCopyTo.AttributesPropertySimple, stmtToCopyFrom.AttributesPropertySimple)
+	stmtToCopyTo.AttributesPropertyComplex = copyComponentValue(stmtToCopyTo.AttributesPropertyComplex, stmtToCopyFrom.AttributesPropertyComplex)
+	stmtToCopyTo.Deontic = copyComponentValue(stmtToCopyTo.Deontic, stmtToCopyFrom.Deontic)
+	stmtToCopyTo.Aim = copyComponentValue(stmtToCopyTo.Aim, stmtToCopyFrom.Aim)
+	stmtToCopyTo.DirectObject = copyComponentValue(stmtToCopyTo.DirectObject, stmtToCopyFrom.DirectObject)
+	stmtToCopyTo.DirectObjectComplex = copyComponentValue(stmtToCopyTo.DirectObjectComplex, stmtToCopyFrom.DirectObjectComplex)
+	stmtToCopyTo.DirectObjectPropertySimple = copyComponentValue(stmtToCopyTo.DirectObjectPropertySimple, stmtToCopyFrom.DirectObjectPropertySimple)
+	stmtToCopyTo.DirectObjectPropertyComplex = copyComponentValue(stmtToCopyTo.DirectObjectPropertyComplex, stmtToCopyFrom.DirectObjectPropertyComplex)
+	stmtToCopyTo.IndirectObject = copyComponentValue(stmtToCopyTo.IndirectObject, stmtToCopyFrom.IndirectObject)
+	stmtToCopyTo.IndirectObjectComplex = copyComponentValue(stmtToCopyTo.IndirectObjectComplex, stmtToCopyFrom.IndirectObjectComplex)
+	stmtToCopyTo.IndirectObjectPropertySimple = copyComponentValue(stmtToCopyTo.IndirectObjectPropertySimple, stmtToCopyFrom.IndirectObjectPropertySimple)
+	stmtToCopyTo.IndirectObjectPropertyComplex = copyComponentValue(stmtToCopyTo.IndirectObjectPropertyComplex, stmtToCopyFrom.IndirectObjectPropertyComplex)
+
+	// Constitutive
+	stmtToCopyTo.ConstitutedEntity = copyComponentValue(stmtToCopyTo.ConstitutedEntity, stmtToCopyFrom.ConstitutedEntity)
+	stmtToCopyTo.ConstitutedEntityPropertySimple = copyComponentValue(stmtToCopyTo.ConstitutedEntityPropertySimple, stmtToCopyFrom.ConstitutedEntityPropertySimple)
+	stmtToCopyTo.ConstitutedEntityPropertyComplex = copyComponentValue(stmtToCopyTo.ConstitutedEntityPropertyComplex, stmtToCopyFrom.ConstitutedEntityPropertyComplex)
+	stmtToCopyTo.Modal = copyComponentValue(stmtToCopyTo.Modal, stmtToCopyFrom.Modal)
+	stmtToCopyTo.ConstitutiveFunction = copyComponentValue(stmtToCopyTo.ConstitutiveFunction, stmtToCopyFrom.ConstitutiveFunction)
+	stmtToCopyTo.ConstitutingProperties = copyComponentValue(stmtToCopyTo.ConstitutingProperties, stmtToCopyFrom.ConstitutingProperties)
+	stmtToCopyTo.ConstitutingPropertiesComplex = copyComponentValue(stmtToCopyTo.ConstitutingPropertiesComplex, stmtToCopyFrom.ConstitutingPropertiesComplex)
+	stmtToCopyTo.ConstitutingPropertiesPropertySimple = copyComponentValue(stmtToCopyTo.ConstitutingPropertiesPropertySimple, stmtToCopyFrom.ConstitutingPropertiesPropertySimple)
+	stmtToCopyTo.ConstitutingPropertiesPropertyComplex = copyComponentValue(stmtToCopyTo.ConstitutingPropertiesPropertyComplex, stmtToCopyFrom.ConstitutingPropertiesPropertyComplex)
+
+	// Shared components
+	stmtToCopyTo.ActivationConditionSimple = copyComponentValue(stmtToCopyTo.ActivationConditionSimple, stmtToCopyFrom.ActivationConditionSimple)
+	stmtToCopyTo.ActivationConditionComplex = copyComponentValue(stmtToCopyTo.ActivationConditionComplex, stmtToCopyFrom.ActivationConditionComplex)
+	stmtToCopyTo.ExecutionConstraintSimple = copyComponentValue(stmtToCopyTo.ExecutionConstraintSimple, stmtToCopyFrom.ExecutionConstraintSimple)
+	stmtToCopyTo.ExecutionConstraintComplex = copyComponentValue(stmtToCopyTo.ExecutionConstraintComplex, stmtToCopyFrom.ExecutionConstraintComplex)
+	stmtToCopyTo.OrElse = copyComponentValue(stmtToCopyTo.OrElse, stmtToCopyFrom.OrElse)
+
+	return stmtToCopyTo
+
+}
+
+/*
+Overwrites the component value of the statement on which the function is called with the given
+component value. Combines input with target component if it is populated.
+*/
+func copyComponentValue(targetComponent *Node, sourceComponent *Node) *Node {
+	if sourceComponent != nil {
+		// If target component is empty, simply substitute ...
+		if targetComponent == nil {
+			targetComponent = sourceComponent
+		} else {
+			// ... else combine with existing value (using synthetic AND (bAND))
+			combinedComponent, err := Combine(targetComponent, sourceComponent, SAND_BETWEEN_COMPONENTS)
+			if err.ErrorCode != TREE_NO_ERROR {
+				Println("Component copying failed. Error: ", err)
+			}
+			targetComponent = combinedComponent
+		}
+	}
+	return targetComponent
 }
 
 /*

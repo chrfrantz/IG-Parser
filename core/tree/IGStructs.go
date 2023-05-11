@@ -411,7 +411,7 @@ var IGLogicalOperators = []string{
 	NOT,
 }
 
-/**
+/*
 Signals boundary values for detected combinations
 */
 type Boundaries struct {
@@ -484,7 +484,7 @@ const PARSING_ERROR_INVALID_PARENTHESES_COMBINATION = "INVALID_PARENTHESES_COMBI
 const PARSING_ERROR_PATTERN_EXTRACTION = "PATTERN_EXTRACTION_ERROR"
 
 // Detecting combinations of nested statements with varying component references
-// (e.g., {Cac{stmt1} [AND] Cex{stmt2}}, but should be{Cac{stmt1} [AND] Cac{stmt2}})
+// (e.g., Cac{Cac{stmt1} [AND] Cex{stmt2}}, but should be Cac{Cac{stmt1} [AND] Cac{stmt2}})
 const PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION = "INVALID_TYPE_COMBINATIONS_IN_NESTED_STATEMENT_COMBINATIONS"
 
 // Indicates that operations was imposed on nil element
@@ -507,6 +507,18 @@ const PARSING_ERROR_EMBEDDED_NODE_ERROR = "EMBEDDED_NODE_ERROR"
 
 // Indicates invalid output type (should be one of TabularOutputGeneratorConfig #OUTPUT_TYPE_CSV or #OUTPUT_TYPE_GOOGLE_SHEETS or #OUTPUT_TYPE_NONE)
 const PARSING_ERROR_INVALID_OUTPUT_TYPE = "INVALID_OUTPUT_TYPE"
+
+// Indicates unexpected number of nodes in array
+const PARSING_ERROR_TOO_MANY_NODES = "TOO_MANY_NODES"
+
+// Indicates invalid type (i.e., no node or statement) during visual output generation
+const PARSING_ERROR_INVALID_TYPE_VISUAL_OUTPUT = "INVALID_TYPE_FOR_VISUAL_OUTPUT"
+
+// Indicates unknown input type for parsing (i.e., not *Statement and not *Node)
+const PARSING_ERROR_UNKNOWN_INPUT_TYPE = "UNKNOWN_INPUT_TYPE"
+
+// Indicates multiple pair combinations on a given nesting level (there should only be one on a given nesting level; instead they should be horizontally nested (e.g., { left [AND] { right [XOR] right2 } })
+const PARSING_ERROR_MULTIPLE_COMPONENT_PAIRS_ON_SAME_LEVEL = "MULTIPLE_COMPONENT_PAIRS_ON_NESTING_LEVEL"
 
 /*
 Error type signaling errors during statement parsing
@@ -700,8 +712,9 @@ func (c *StateComplexity) String() string {
 }
 
 /*
-Collapses repeated occurrences of values in a given array (e.g., [AND] [AND] becomes [AND]).
-However, only applies to immediate repetition, not across the entire input
+Collapses repeated occurrences of values in a given array (e.g., [AND] [AND] becomes [AND]) including
+operators deemed equivalent as specified by passing as parameter valuesToCollapse (e.g., wAND, AND).
+However, only applies to immediate repetition (i.e., operator immediately preceding), not across the entire input.
 */
 func CollapseAdjacentOperators(inputArray []string, valuesToCollapse []string) []string {
 
@@ -715,9 +728,11 @@ func CollapseAdjacentOperators(inputArray []string, valuesToCollapse []string) [
 			outSlice = append(outSlice, v)
 			continue
 		}
-		// If last value is the same as this one
-		res, _ := StringInSlice(v, valuesToCollapse)
-		if res {
+		// Check whether value of concern is in array of values to consider the same
+		thisValueInCollapsableValueSlice, _ := StringInSlice(v, valuesToCollapse)
+		// Check whether last item in input array is in collapsable array
+		lastValueInCollapsableValueSlice, _ := StringInSlice(outSlice[len(outSlice)-1], valuesToCollapse)
+		if thisValueInCollapsableValueSlice && lastValueInCollapsableValueSlice {
 			// do nothing
 		} else {
 			// else append

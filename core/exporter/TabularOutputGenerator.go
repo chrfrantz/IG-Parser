@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -28,6 +29,9 @@ const stmtIdPrefix = "'"
 
 // Separator for logical operator expressions (e.g., OR[650.1,650.2]|AND[123.1,123.2])
 const logicalOperatorSeparator = ";"
+
+// Suffix separator for extrapolated statements (e.g., Base ID (1.1) with operator . extrapolated statements would be 1.1.1, 1.1.2, etc.)
+const extrapolatedStatementSuffixSeparator = "."
 
 // Left bracket for logical combination expressions
 const logicalCombinationLeft = parser.LEFT_BRACKET
@@ -69,6 +73,7 @@ are to be included in output.
 Input:
   - Atomic statements with corresponding node references [statement][node references]
   - Input statement annotations (i.e., of statement, not components)
+  - String representing linkage to other statements (not components) produced based on extrapolated component pairs
   - Map with component name as key and corresponding number of columns in input stmts (i.e., same component can have
     values across multiple columns)
   - References to entries for given nodes as indicated by logical operators, and used to produce corresponding linkages
@@ -84,7 +89,7 @@ Output:
 - Array of header symbols (used for component linkage references)
 - Array of header symbols names (for human-readable header construction)
 */
-func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string, outputType string, printHeaders bool) ([]map[string]string, []string, []string, tree.ParsingError) {
+func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmtLogicalLinks string, componentFrequency map[string]int, logicalLinks []map[*tree.Node][]string, stmtId string, headerSeparator string, outputType string, printHeaders bool) ([]map[string]string, []string, []string, tree.ParsingError) {
 
 	if headerSeparator == "" {
 		return nil, nil, nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_MISSING_SEPARATOR_VALUE,
@@ -153,7 +158,11 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 		// Create new entry with individual ID
 
 		// Add statement ID for specific instance
-		subStmtId := generateStatementIDint(stmtId, stmtCt+1)
+		subStmtId := stmtId
+		// Only generate subIDs if indeed multiple statements (i.e., some form of nesting)
+		if len(stmts) > 1 {
+			subStmtId = generateStatementIDint(stmtId, stmtCt+1)
+		}
 		// Add statement ID to entryMap
 		entryMap[stmtIdColHeader] = subStmtId
 		// String linking all logical operators for a given row
@@ -349,9 +358,9 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 				if entryVals[0].IsCombination() {
 					Println("Detected statement combination")
 					// If combination of statements, retrieve all elements
-					stmts := entryVals[0].GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
+					combStmts := entryVals[0].GetLeafNodes(tree.AGGREGATE_IMPLICIT_LINKAGES)
 					// Flatten array and override entry values for iteration
-					entryVals = tree.Flatten(stmts)
+					entryVals = tree.Flatten(combStmts)
 					Println("Flattened combination:", entryVals)
 				} else {
 					Println("Detected individual nested statement")
@@ -479,6 +488,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 			if errorVal.ErrorCode != tree.PARSING_NO_ERROR {
 				return nil, nil, nil, errorVal
 			}
+			Println("Logical expressions for atomic statement:", logicalValue)
 		}
 
 		Println("Entries (complete row - before adding logical operators and nested statements):", entryMap)
@@ -490,6 +500,11 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 			// Reset for next round
 			logicalValue = ""
 		}
+		// Append the logical expression for linkage to other statements (extrapolated statements) at the end of each top-level statement row
+		if stmtLogicalLinks != "" {
+			// Add to EntryMap
+			entryMap[logLinkColHeaderStmts] = stmtLogicalLinks
+		}
 		// Add to entries map for statement to map for all statements (collection for return)
 		entriesMap = append(entriesMap, entryMap)
 	}
@@ -499,11 +514,11 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 
 		Println("Nested Statement to parse, ID:", val.ID, ", Annotations:", val.NestedStmt.Annotations, ", Stmt:", val.NestedStmt)
 
-		log.Println("Parsing nested statement ...")
+		Println("Parsing nested statement ...")
 		// Parse individual nested statements on component level in order to attach those to main output
-		_, nestedMap, nestedHeaders, nestedHeadersNames, err := GenerateTabularOutputFromParsedStatement(val.NestedStmt.Entry.(tree.Statement), val.NestedStmt.Annotations, val.ID, "", tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders)
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return nil, nil, nil, errorVal
+		nestedTabularResult := GenerateTabularOutputFromParsedStatement(val.NestedStmt, nil, val.NestedStmt.Annotations, val.ID, "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders)
+		if nestedTabularResult.Error.ErrorCode != tree.PARSING_NO_ERROR {
+			return nil, nil, nil, nestedTabularResult.Error
 		}
 
 		// Add linkages between statements (statement-level combinations)
@@ -511,25 +526,51 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, comp
 		// Determine linkages to fellow nested statements
 		stmtLinksString, err := generateLogicalLinksExpressionForStatements(val.NestedStmt, componentNestedStmts)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return nil, nil, nil, errorVal
+			return nil, nil, nil, err
 		}
+		Println("Logical links to other statements: ", stmtLinksString)
 
-		// Add identified linkages to nestedMap (i.e., for all atomic statements)
-		for i := range nestedMap {
-			nestedMap[i][logLinkColHeaderStmts] = stmtLinksString
+		// Add identified linkages to nestedMap (i.e., for all atomic statements on *same level* (don't overwrite lower levels!)
+		if stmtLinksString != "" {
+			// Check for nesting prefix first (to prevent overriding statements with higher-level nesting
+			// (e.g., Bdir{ A(actor) Cac{ A(actor2) ...}; here only atomic statements with the same nesting level
+			// (i.e., Bdir{ A(actor) } should be appended
+			// This is identified based on the uniform prefix for such statements that will all conclude with "}." followed by unique ID
+			// Example: Top level 123.1 --> no nesting, but same level; {123.1}.1 --> first nesting level; {{123.1}.1}.1 --> second nesting level
+			nestedIdPrefix := ""
+			if strings.Contains(val.ID, "}.") {
+				nestedIdPrefix = val.ID[:strings.LastIndex(val.ID, "}.")]
+			}
+			for i := range nestedTabularResult.StatementMap {
+				// If prefix exists and the prefix applies also to the atomic statement of concern ...
+				if nestedIdPrefix != "" && strings.HasPrefix(nestedTabularResult.StatementMap[i][stmtIdColHeader], nestedIdPrefix) {
+					// ... then append ...
+					if nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] != "" {
+						nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] =
+							nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] + componentStmtRefSeparator + stmtLinksString
+					} else {
+						// ... or assign outright
+						nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] = stmtLinksString
+					}
+					// else do not assign at all (since statements are likely on lower nesting level
+				} else if nestedIdPrefix == "" {
+					// ... else if no prefix exists (i.e., no nesting), simply assign to all statements (must be on same level)
+					nestedTabularResult.StatementMap[i][logLinkColHeaderStmts] = stmtLinksString
+				}
+			}
 		}
 
 		// Add Logical linkage header if not already existing
-		nestedHeaders = addElementIfNotExisting(logLinkColHeaderStmts, nestedHeaders)
-		nestedHeadersNames = addElementIfNotExisting(logLinkColHeaderStmts, nestedHeadersNames)
+		nestedTabularResult.HeaderSymbols = addElementIfNotExisting(logLinkColHeaderStmts, nestedTabularResult.HeaderSymbols)
+		nestedTabularResult.HeaderNames = addElementIfNotExisting(logLinkColHeaderStmts, nestedTabularResult.HeaderNames)
 
 		// Add nested entries to top-level list
-		entriesMap = append(entriesMap, nestedMap...)
+		entriesMap = append(entriesMap, nestedTabularResult.StatementMap...)
 
 		// Merge headers to consider nested ones
-		headerSymbols = tree.MergeSlices(headerSymbols, nestedHeaders, indexSymbol)
+		headerSymbols = tree.MergeSlices(headerSymbols, nestedTabularResult.HeaderSymbols, indexSymbol)
 		// Merge header names to consider nested ones
-		headerSymbolsNames = tree.MergeSlices(headerSymbolsNames, nestedHeadersNames, indexSymbol)
+		headerSymbolsNames = tree.MergeSlices(headerSymbolsNames, nestedTabularResult.HeaderNames, indexSymbol)
 	}
 
 	// Organise headers
@@ -612,7 +653,7 @@ filename the output should be printed to (should be "" if no output is to be pri
 
 Returns string containing flat output as well as potential parsing error
 */
-func printTabularOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string, printHeaders bool) (string, tree.ParsingError) {
+func printTabularOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string, overwrite bool, printHeaders bool) (string, tree.ParsingError) {
 
 	// Prepare builder
 	builder := strings.Builder{}
@@ -650,7 +691,7 @@ func printTabularOutput(statementMap []map[string]string, headerCols []string, h
 
 	// Write file
 	if filename != "" {
-		err := WriteToFile(filename, builder.String())
+		err := WriteToFile(filename, builder.String(), overwrite)
 		if err != nil {
 			return builder.String(), tree.ParsingError{ErrorCode: tree.PARSING_ERROR_WRITE, ErrorMessage: err.Error()}
 		}
@@ -664,13 +705,13 @@ Generates CSV output from map of categorized statement elements, as well as head
 Further requires column header names for output generation, alongside specification of separator symbol.
 Optionally writes to file (if filename is provided).
 */
-func generateCSVOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string, printHeaders bool) (string, tree.ParsingError) {
+func generateCSVOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string, overwrite bool, printHeaders bool) (string, tree.ParsingError) {
 
 	// Linebreak at the end of each entry
 	suffix := "\n"
 
 	// Delegate actual printing
-	return printTabularOutput(statementMap, headerCols, headerColsNames, "", stmtIdPrefix, suffix, separator, filename, printHeaders)
+	return printTabularOutput(statementMap, headerCols, headerColsNames, "", stmtIdPrefix, suffix, separator, filename, overwrite, printHeaders)
 }
 
 /*
@@ -678,7 +719,7 @@ Generates Google Sheets output from map of categorized statement elements, as we
 Further requires column header names for output generation, alongside specification of separator symbol.
 Optionally writes to file (if filename is provided).
 */
-func generateGoogleSheetsOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string, printHeaders bool) (string, tree.ParsingError) {
+func generateGoogleSheetsOutput(statementMap []map[string]string, headerCols []string, headerColsNames []string, separator string, filename string, overwrite bool, printHeaders bool) (string, tree.ParsingError) {
 
 	// Quote to terminate input string for Google Sheets interpretation
 	quote := "\""
@@ -699,30 +740,191 @@ func generateGoogleSheetsOutput(statementMap []map[string]string, headerCols []s
 	suffix := bsuf.String()
 
 	// Delegate actual printing
-	return printTabularOutput(statementMap, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename, printHeaders)
+	return printTabularOutput(statementMap, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename, overwrite, printHeaders)
+}
+
+/*
+Generates IDs for extrapolated statements by appending a suffix identifying the separate statements to a given base ID.
+The returned map can be used for dynamic resolution of IDs and associated nodes (e.g., to generate logical linkages).
+Relies on #extrapolatedStatementSuffixSeparator as separator between base ID and suffix.
+*/
+func generateExtrapolatedStatementIDs(stmts []*tree.Node, baseId string) map[*tree.Node]string {
+
+	stmtIds := map[*tree.Node]string{}
+
+	for i, v := range stmts {
+		// Generate unique derived ID per statement by appending and incrementing suffix
+		stmtIds[v] = baseId + extrapolatedStatementSuffixSeparator + strconv.Itoa(i+1)
+	}
+
+	return stmtIds
+}
+
+/*
+Generates logical linkages string from a given statement to all other extrapolated statements to be used in tabular output.
+Takes potentially prepopulated logical link string, source node, node array of all nodes (filters against source node) as well
+as the pregenerated map of Node-to-ID mappings (generated using #generateExtrapolatedStatementIDs).
+*/
+func generateLogicalLinkageForExtrapolatedStatements(logicalExpressionString string, source *tree.Node, stmts []*tree.Node, IDs map[*tree.Node]string) (string, tree.ParsingError) {
+
+	//logLinkString := ""
+	builder := strings.Builder{}
+	// Switch to assess whether first operator string has already been appended (to ensure correct separation of additional logical operator expressions)
+	logicalStringInitiated := false
+	if len(logicalExpressionString) > 0 {
+		// since the operator string is not empty, it must already contain decomposed operator strings - thus requiring separation of further entries
+		logicalStringInitiated = true
+	}
+
+	for _, v := range stmts {
+		if v != source {
+
+			// Extract logical linkages from node tree
+			res, ops, err := tree.FindLogicalLinkage(source, v)
+			if err.ErrorCode != tree.TREE_NO_ERROR {
+				errorMsg := fmt.Sprint("Error when parsing retrieving operator linkages: ", err.ErrorMessage)
+				Println(errorMsg)
+				return "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_LOGICAL_EXPRESSION_GENERATION}
+			}
+			if res {
+				if CollapseOperators() {
+					Println("Collapsing adjacent AND, bAND and wAND operators ...")
+					// Collapse adjacent AND operators
+					ops = tree.CollapseAdjacentOperators(ops, []string{tree.AND, tree.SAND_BETWEEN_COMPONENTS, tree.SAND_WITHIN_COMPONENTS})
+				}
+				Println("Node", IDs[source], "has linkage", ops, "to", IDs[v])
+				if logicalStringInitiated {
+					// Append logical operator separator if logical operator linkage already exists
+					builder.WriteString(logicalOperatorSeparator)
+				} else {
+					// Any further printing of logical operators for given component will lead to addition of separator
+					logicalStringInitiated = true
+				}
+				// ... and append to logical expression column string
+				builder.WriteString(fmt.Sprint(ops))
+				// Internal separator between logical operator and target statement ID
+				builder.WriteString(".")
+				// Leading bracket
+				builder.WriteString(logicalCombinationLeft)
+				// Write ID for given target node
+				builder.WriteString(IDs[v])
+				// Trailing bracket
+				builder.WriteString(logicalCombinationRight)
+			}
+		}
+	}
+	// Return generated logical expression for given component
+	return builder.String(), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+}
+
+/*
+Generates combined tabular output for given statements in node array.
+Uses #GenerateTabularOutputFromParsedStatement function internally.
+*/
+func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations interface{}, stmtId string, filename string, overwrite bool, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool) []TabularOutputResult {
+
+	results := []TabularOutputResult{}
+
+	for i, stmtNode := range stmts {
+		Println("Processing output for node entry ", i)
+
+		// Extract potential hierarchy
+		topLevelStmts := stmtNode.GetTopLevelStatementNodes()
+
+		// Prepare return structure
+		var res TabularOutputResult
+
+		overwriteFile := overwrite
+		printHeadersInFile := printHeaders
+
+		for j, topLevelStmt := range topLevelStmts {
+
+			// Suppress repeated headers if appending extrapolated statements to output file
+			if j > 0 {
+				// temporary override if component pair combinations are printed (chained printing)
+				overwriteFile = false
+				printHeadersInFile = false
+			}
+
+			// single node: simply parse node in isolation
+			res = GenerateTabularOutputFromParsedStatement(topLevelStmt, topLevelStmts, annotations, stmtId, filename, overwriteFile, aggregateImplicitLinkages, separator, outputFormat, printHeadersInFile)
+			if res.Error.ErrorCode != tree.PARSING_NO_ERROR {
+				Println("Error during output generation for single statement. Statement ignored from output (Statement node: " + stmtNode.String() + ")")
+
+			}
+			results = append(results, res)
+		}
+	}
+
+	return results
 }
 
 /*
 Generates Google Sheets tabular output for a given parsed statement, with a given statement ID.
-Generates all substatements and logical combination linkages in Google Sheets output format.
-Additionally returns array of statement entries, header symbols and corresponding header symbol names.
+Generates all substatements and logical combination linkages in specified output format (e.g., Google Sheets, CSV).
+Additionally returns array of statement entries, header symbols and corresponding header symbol names wrapped in generic return structure.
+Allows for specification of statement-level annotations passed to output.
 Allows for specification of separator to delimit generated flat file output.
 Allows for specification of output file type (e.g., Google Sheets, CSV) based on constants #OUTPUT_TYPE_GOOGLE_SHEETS or #OUTPUT_TYPE_CSV.
 If filename is provided, the result is printed to the corresponding file.
+It is further necessary to indicate whether files should be overwritten or appended to
 If printHeaders is true, the header row will be included in output.
 */
-func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotations interface{}, stmtId string, filename string, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool) (string, []map[string]string, []string, []string, tree.ParsingError) {
+func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.Node, annotations interface{}, stmtId string, filename string, overwrite bool, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool) TabularOutputResult {
+
+	// Prepopulate derived IDs for uniform access
+	derivedIDs := map[*tree.Node]string{}
+	derivedIDs[node] = stmtId
+
+	// String holding all logical linkages to other statements
+	logicalLinkageStmts := ""
+	// Determine linkages to other statements (if extrapolating is needed)
+	if len(allStmts) > 1 {
+
+		// Overwrite if multiple statements
+		derivedIDs = generateExtrapolatedStatementIDs(allStmts, stmtId)
+
+		// Generate strings indicating linkages between statements
+		linkString, err := generateLogicalLinkageForExtrapolatedStatements("", node, allStmts, derivedIDs)
+		if err.ErrorCode != tree.PARSING_NO_ERROR {
+			Println("Error when generating extrapolated statement linkages: ", err)
+			return TabularOutputResult{}
+		}
+		// Append links for all statements
+		logicalLinkageStmts += linkString
+	}
+
+	var stmt *tree.Statement
+
 	Println(" Step: Extracting leaf arrays")
+	// Extract statement from node - varies whether it is ...
+	switch reflect.TypeOf(node.Entry) {
+	case reflect.TypeOf(&tree.Statement{}):
+		// first-order statement component
+		stmt = node.Entry.(*tree.Statement)
+	case reflect.TypeOf([]*tree.Node{}):
+		// component-level nested pair combination
+		stmt = node.Entry.([]*tree.Node)[0].Entry.(*tree.Statement)
+	default:
+		result := TabularOutputResult{}
+		result.Error = tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNKNOWN_INPUT_TYPE, ErrorMessage: "Parsing failed for unknown input type " + reflect.TypeOf(node.Entry).String() +
+			". Please report this error (alongside Request ID and input statement) to the developer for further investigation."}
+		return result
+	}
 	// Retrieve leaf arrays from generated tree (alongside frequency indications for components)
-	leafArrays, componentRefs := statement.GenerateLeafArrays(aggregateImplicitLinkages)
+	leafArrays, componentRefs := stmt.GenerateLeafArrays(aggregateImplicitLinkages)
 
 	Println(" Generated leaf arrays: ", leafArrays, " component: ", componentRefs)
+
+	// Prepare return structure
+	result := TabularOutputResult{Output: "", StatementMap: nil, HeaderSymbols: nil, HeaderNames: nil}
 
 	Println(" Step: Generate permutations of leaf arrays (atomic statements)")
 	// Generate all permutations of logically-linked components to produce statements
 	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return "", nil, nil, nil, err
+		result.Error = err
+		return result
 	}
 
 	Println(" Generated permutations: ", res)
@@ -735,36 +937,36 @@ func GenerateTabularOutputFromParsedStatement(statement tree.Statement, annotati
 
 	Println(" Step: Generate tabular output")
 
-	// Prepare export to tabular output
-	statementMap, statementHeaders, statementHeaderNames, err := generateStatementMatrix(res, annotations, componentRefs, links, stmtId, separator, outputFormat, printHeaders)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return "", nil, nil, nil, err
+	// Prepare export to tabular output (including pre-generated annotations and logical linkage to other statements)
+	result.StatementMap, result.HeaderSymbols, result.HeaderNames, result.Error = generateStatementMatrix(res, annotations, logicalLinkageStmts, componentRefs, links, derivedIDs[node], separator, outputFormat, printHeaders)
+	if result.Error.ErrorCode != tree.PARSING_NO_ERROR {
+		return result
 	}
 
 	// Default output
-	output := ""
+	result.Output = ""
 
 	switch outputFormat {
 	case OUTPUT_TYPE_NONE:
 		// No output generated (useful for internal use such as parsing of nested statements) - simply return matrices and empty flat output
-		return output, statementMap, statementHeaders, statementHeaderNames, err
+		return result
 	case OUTPUT_TYPE_GOOGLE_SHEETS:
 		// Create Google Sheets output based on generated map, alongside header names as output
-		output, err = generateGoogleSheetsOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename, printHeaders)
+		result.Output, result.Error = generateGoogleSheetsOutput(result.StatementMap, result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return output, statementMap, statementHeaders, statementHeaderNames, err
+			return result
 		}
 	case OUTPUT_TYPE_CSV:
 		// Create CSV output based on generated map, alongside header names as output
-		output, err = generateCSVOutput(statementMap, statementHeaders, statementHeaderNames, separator, filename, printHeaders)
+		result.Output, result.Error = generateCSVOutput(result.StatementMap, result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return output, statementMap, statementHeaders, statementHeaderNames, err
+			return result
 		}
 	default:
-		return "", nil, nil, nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OUTPUT_TYPE, ErrorMessage: "Invalid output type specified. Should be Google Sheets or CSV."}
+		result = TabularOutputResult{Output: "", StatementMap: nil, HeaderSymbols: nil, HeaderNames: nil, Error: tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OUTPUT_TYPE, ErrorMessage: "Invalid output type specified. Should be Google Sheets or CSV."}}
 	}
 
-	return output, statementMap, statementHeaders, statementHeaderNames, err
+	return result
 }
 
 /*
@@ -823,7 +1025,7 @@ func generateHeaderRow(stringToAppendTo string, componentFrequency map[string]in
 /*
 Generates logical expression string for given component entry for a given statement.
 It relies on the expression string as input, alongside the statement of concern, as well as component index.
-In addition a slice of all header symbols is required (to generate reference to columns in logical expressions),
+In addition, a slice of all header symbols is required (to generate reference to columns in logical expressions),
 as well as the logical links for a given component value. Finally, the statement ID is used to generate the corresponding
 substatement IDs used in the link references.
 It returns the link for the particular table entry.
@@ -990,12 +1192,20 @@ func generateStatementIDint(mainID string, subStmtIndex int) string {
 }
 
 /*
-Writes data to given file - overwrites file if existing
+Writes data to given file - overwrites or appends to file as specified.
 */
-func WriteToFile(filename string, content string) error {
+func WriteToFile(filename string, content string, overwrite bool) error {
 
-	// Create file
-	f, err := os.Create(filename)
+	// Open file, create if not existing, and append if existing
+	var f *os.File
+	var err error
+	if overwrite {
+		// Open file in overwrite mode
+		f, err = os.Create(filename)
+	} else {
+		// Open file in append mode
+		f, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	}
 	if err != nil {
 		return err
 	}
@@ -1018,7 +1228,7 @@ func WriteToFile(filename string, content string) error {
 	if err2 != nil {
 		return err2
 	}
-	log.Println("Wrote file " + filename)
+	log.Println("Wrote to file " + filename)
 
 	// No error
 	return nil

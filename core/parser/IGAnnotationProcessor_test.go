@@ -14,10 +14,12 @@ func TestExtractComponentLinkageNonAggregateLinkages(t *testing.T) {
 	tree.AGGREGATE_IMPLICIT_LINKAGES = false
 
 	// Parse statement, which should consider private suffices
-	s, err := ParseStatement(text)
+	stmt, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing error for statement", text)
 	}
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	fmt.Println(s.String())
 
@@ -43,10 +45,12 @@ func TestExtractComponentLinkageAggregateLinkages(t *testing.T) {
 	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
 	// Parse statement, which should consider private suffices
-	s, err := ParseStatement(text)
+	stmt, err := ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Parsing error for statement", text)
 	}
+
+	s := stmt[0].Entry.(*tree.Statement)
 
 	fmt.Println(s.String())
 

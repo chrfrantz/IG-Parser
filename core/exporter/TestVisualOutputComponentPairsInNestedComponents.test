@@ -1,0 +1,69 @@
+{"name": "AND",
+"children": [{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "Individuals", "comp": "A", "level": 1},
+{"name": "must", "comp": "D", "level": 1},
+{"name": "monitor", "comp": "I", "level": 1},
+{"name": "compliance", "comp": "Bdir", "level": 1},
+{"name": "OR",
+"children": [{"name": "repeated offense", "comp": "Cac", "level": 1},
+{"name": "other reasons", "comp": "Cac", "level": 1}], "comp": "Cac", "level": 1},
+{"name": "OR",
+"children": [{
+"name": "O",
+"level": 2, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 2},
+{"name": "must", "comp": "D", "level": 2},
+{"name": "enforce", "comp": "I", "level": 2},
+{"name": "compliance", "comp": "Bdir", "level": 2}
+]
+},
+{
+"name": "O",
+"level": 2, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 2},
+{"name": "must", "comp": "D", "level": 2},
+{"name": "delegate", "comp": "I", "level": 2},
+{"name": "enforcement", "comp": "Bdir", "level": 2}
+]
+}], "comp": "O", "level": 1}
+]
+},
+{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "Individuals", "comp": "A", "level": 1},
+{"name": "must", "comp": "D", "level": 1},
+{"name": "report", "comp": "I", "level": 1},
+{"name": "violation", "comp": "Bdir", "level": 1},
+{"name": "OR",
+"children": [{"name": "repeated offense", "comp": "Cac", "level": 1},
+{"name": "other reasons", "comp": "Cac", "level": 1}], "comp": "Cac", "level": 1},
+{"name": "OR",
+"children": [{
+"name": "O",
+"level": 2, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 2},
+{"name": "must", "comp": "D", "level": 2},
+{"name": "enforce", "comp": "I", "level": 2},
+{"name": "compliance", "comp": "Bdir", "level": 2}
+]
+},
+{
+"name": "O",
+"level": 2, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 2},
+{"name": "must", "comp": "D", "level": 2},
+{"name": "delegate", "comp": "I", "level": 2},
+{"name": "enforcement", "comp": "Bdir", "level": 2}
+]
+}], "comp": "O", "level": 1}
+]
+}], "comp": "", "level": 0}
