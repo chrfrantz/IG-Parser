@@ -15,7 +15,10 @@ import (
 // Default file name for error output
 const errorFile = "errorOutput.error"
 
-func TestConverterHandlerSheetsGet(t *testing.T) {
+/*
+Tests standard GET request on tabular output version.
+*/
+func TestConverterHandlerGoogleSheetsGet(t *testing.T) {
 
 	// Initialize templates
 	Init()

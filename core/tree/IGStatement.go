@@ -415,37 +415,6 @@ func (s *Statement) generateLeafArrays(aggregateImplicitLinkages bool, level int
 /*
 Generates a leaf array for a given component under consideration of node as being of simple or complex nature.
 Appends to existing structure if provided (i.e., not nil) to allow for iterative invocation.
-For a version that allows for iterative invocation, consider #getComponentLeafArray.
-For returning only leaves that contain suffix information, consider #getComponentLeafArrayWithSuffix.
-
-Input:
-- Reference to component node for which leaf elements are to be extracted
-- Component symbol associated with component
-- Indicator whether element embedded in node is complex (i.e., nested statement)
-- The parameter aggregateImplicitLinkages indicates whether implicitly linked trees of nodes should be returned as a single tree, or as separate trees.
-- The parameter level indicates whether all nodes should be returned, or only ones that contain suffix information.
-
-- Indicator whether all leaf nodes should be returned, or only one satisfying particular conditions
-  (0 --> all nodes, 1 --> only ones with non-empty suffix).
-
-Returns:
-- Node map of nodes associated with components
-- Reference map counting number of components
-*/
-/*func GetSingleComponentLeafArray(componentNode *Node, componentSymbol string, complex bool, aggregateImplicitLinkages bool, level int) ([][]*Node, map[string]int) {
-
-	// Map holding reference from component type (e.g., ATTRIBUTES) to number of entries (relevant for reconstruction)
-	referenceMap := map[string]int{}
-
-	// Counter for overall number of entries
-	nodesMap := make([][]*Node, 0)
-
-	return getComponentLeafArray(nodesMap, referenceMap, componentNode, componentSymbol, complex, aggregateImplicitLinkages, level)
-}*/
-
-/*
-Generates a leaf array for a given component under consideration of node as being of simple or complex nature.
-Appends to existing structure if provided (i.e., not nil) to allow for iterative invocation.
 For returning only leaves that contain suffix information consider #getComponentLeafArrayWithSuffix.
 Input:
   - maps of nodes potentially including existing nodes for other components. Will be created internally if nil
