@@ -2814,6 +2814,96 @@ func TestComponentPairCombinationTreeParsingWithAtomicComponentsAndComponentComb
 }
 
 /*
+Tests multiple component pairs on a given nesting level. Should lead to error message.
+*/
+func TestComponentPairCombinationTreeParsingMultipleComponentPairs(t *testing.T) {
+
+	text := " A(actor) D(may) {I(leftAim) Bdir(leftObject) [OR] I(rightAim) Bdir(rightObject)} {Cac(leftCondition) Cex(leftConstraint) [XOR] Cac(rightCondition) Cex(rightConstraint)} "
+
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_MULTIPLE_COMPONENT_PAIRS_ON_SAME_LEVEL {
+		t.Fatal("Parsing should have returned error identifying multiple component pairs, but returned error ", err)
+	}
+}
+
+/*
+Tests single component pair on different nesting levels. Should parse.
+*/
+func TestComponentPairCombinationTreeParsingComponentPairOnDifferentLevels(t *testing.T) {
+
+	text := " A(actor) D(may) {I(leftAim) Bdir(leftObject) [OR] I(rightAim) Bdir(rightObject)} Cac{ {A(actor2) I(aim2) [XOR] A(actor3) I(aim3)} } "
+
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should not have returned error, but returned error ", err)
+	}
+}
+
+/*
+Tests the automated expansion of component combinations (e.g., 'Bdir(left [XOR] right)' to 'Bdir((left [XOR] right))') to support the coding.
+*/
+func TestAutomatedExpansionOfParenthesesForComponentCombinations(t *testing.T) {
+
+	// Combinations in statement explicitly miss inner component parentheses
+	text := " A(actor) D(may) I(leftAim [XOR] rightAim) Bdir((leftObject [XOR] middleObject) [AND] rightObject) Cex(constraint) "
+
+	s, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should not have returned error, but returned error ", err)
+	}
+
+	fmt.Println(s)
+
+	stmt := s[0].Entry.(*tree.Statement)
+
+	fmt.Println(stmt)
+
+	// Check Aim
+
+	if !stmt.Aim.IsCombination() {
+		t.Fatal("Aim should be combination")
+	}
+
+	if stmt.Aim.LogicalOperator != "XOR" {
+		t.Fatal("Aim should have logical operator XOR, but has ", stmt.Aim.LogicalOperator)
+	}
+
+	if stmt.Aim.Left.Entry != "leftAim" {
+		t.Fatal("Aim should have left value leftAim, but has ", stmt.Aim.Left.Entry)
+	}
+
+	if stmt.Aim.Right.Entry != "rightAim" {
+		t.Fatal("Aim should have right value rightAim, but has ", stmt.Aim.Right.Entry)
+	}
+
+	// Check Object
+
+	if !stmt.DirectObject.IsCombination() {
+		t.Fatal("Direct object should be combination")
+	}
+
+	if stmt.DirectObject.LogicalOperator != "AND" {
+		t.Fatal("Direct object component combination should have logical operator AND, but has ", stmt.DirectObject.LogicalOperator)
+	}
+
+	if stmt.DirectObject.Left.LogicalOperator != "XOR" {
+		t.Fatal("Direct object left nested component combination should have logical operator XOR, but has ", stmt.DirectObject.Left.LogicalOperator)
+	}
+
+	if stmt.DirectObject.Left.Left.Entry != "leftObject" {
+		t.Fatal("Direct object left left component should have value leftObject, but has ", stmt.DirectObject.Left.Left.Entry)
+	}
+
+	if stmt.DirectObject.Left.Right.Entry != "middleObject" {
+		t.Fatal("Direct object left right component should have value middleObject, but has ", stmt.DirectObject.Left.Right.Entry)
+	}
+
+	if stmt.DirectObject.Right.Entry != "rightObject" {
+		t.Fatal("Direct object right component should have value rightObject, but has ", stmt.DirectObject.Right.Entry)
+	}
+}
+
+/*
 Tests ExtractComponentContent() function.
 */
 /*func TestExtractComponentContent(t *testing.T) {

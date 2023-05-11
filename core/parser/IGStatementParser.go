@@ -135,18 +135,29 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
 	// Process component pair combinations and extrapolate into multiple statements
 	if len(compAndNestedStmts[3]) > 0 {
-		extrapolatedStmts, err2 := extrapolateStatementWithPairedComponents(&s, compAndNestedStmts[3])
-		if err2.ErrorCode != tree.PARSING_NO_ERROR {
-			return extrapolatedStmts, err
-		}
-		Println("Final statements (with extrapolation): " + tree.PrintNodes(extrapolatedStmts))
+		if len(compAndNestedStmts[3]) > 1 {
+			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_MULTIPLE_COMPONENT_PAIRS_ON_SAME_LEVEL,
+				ErrorMessage: "The coding contains multiple component pairs on the same nesting level. " +
+					"There should only be one component pair expression on a given level (e.g., { left options [OR] right options } for simple cases, " +
+					"or for complex cases with more options, e.g., { first option [AND] { second option [OR] third option } }, etc. " +
+					"Consider getting in touch with the maintainer in case you believe that you encounter a case that requires multiple separate component pairs on a given nesting level. " +
+					"The expressions of concern are: '" + strings.Join(compAndNestedStmts[3], " , ") + "'",
+				ErrorIgnoredElements: compAndNestedStmts[3]}
+		} else {
+			// If one component pair combination on a given nesting level, extrapolate (may contain nested pair combination (e.g., { left [AND] { right [XOR] alsoRight }})
+			extrapolatedStmts, err2 := extrapolateStatementWithPairedComponents(&s, compAndNestedStmts[3])
+			if err2.ErrorCode != tree.PARSING_NO_ERROR {
+				return extrapolatedStmts, err2
+			}
+			Println("Final statements (with extrapolation): " + tree.PrintNodes(extrapolatedStmts))
 
-		return extrapolatedStmts, err2
+			return extrapolatedStmts, err2
+		}
 	} else {
 		Println("No expansion of statement necessary (no component pair combinations in input)")
 	}
 
-	// Else return wrapped statement
+	// Else return wrapped statement (no extrapolation included)
 	return []*tree.Node{&tree.Node{Entry: &s}}, err
 }
 
@@ -1633,10 +1644,15 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 		// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string if not combined
 		componentString = componentString[1 : len(componentString)-1]
 
-		node1, _, err := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
-		if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
-			log.Println("Error when parsing synthetically linked element. Error:", err)
-			return nil, err
+		node1, _, err2 := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
+		if err2.ErrorCode == tree.PARSING_ERROR_LOGICAL_OPERATOR_OUTSIDE_COMBINATION {
+			// Means that there is logical operator, but probably missing outer parentheses.
+			// Try again by augmenting with parentheses, before return error if it still fails.
+			node1, _, err2 = ParseIntoNodeTree(leftPar+componentString+rightPar, false, leftPar, rightPar)
+		}
+		if err2.ErrorCode != tree.PARSING_NO_ERROR && err2.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+			log.Println("Error when parsing synthetically linked element. Error:", err2)
+			return nil, err2
 		}
 		// Attach component name to top-level element (will be accessible to children via GetComponentName())
 		if !node1.IsEmptyOrNilNode() {
