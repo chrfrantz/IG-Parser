@@ -2904,13 +2904,13 @@ func TestAutomatedExpansionOfParenthesesForComponentCombinations(t *testing.T) {
 }
 
 /*
-Tests ExtractComponentContent() function.
+Tests extractComponentContent() function.
 */
 /*func TestExtractComponentContent(t *testing.T) {
 
 	text := "A(content1)"
 
-	content, err := ExtractComponentContent(tree.ATTRIBUTES, false, text, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
+	content, err := extractComponentContent(tree.ATTRIBUTES, false, text, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of content.")
 	}
