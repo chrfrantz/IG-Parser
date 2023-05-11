@@ -169,4 +169,4 @@
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />
         <!-- Link to reset form content to default values -->
-        <a href="" onclick="resetContent()">Reset to default statement (Note: this overwrites your coding)</a><br />
+        <span data-text="This resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a href="" onclick="resetContent()">Reset to default statement example</a></span><br /><br />
