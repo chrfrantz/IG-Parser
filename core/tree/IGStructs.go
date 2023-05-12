@@ -520,6 +520,9 @@ const PARSING_ERROR_UNKNOWN_INPUT_TYPE = "UNKNOWN_INPUT_TYPE"
 // Indicates multiple pair combinations on a given nesting level (there should only be one on a given nesting level; instead they should be horizontally nested (e.g., { left [AND] { right [XOR] right2 } })
 const PARSING_ERROR_MULTIPLE_COMPONENT_PAIRS_ON_SAME_LEVEL = "MULTIPLE_COMPONENT_PAIRS_ON_NESTING_LEVEL"
 
+// Indicates invalid type when calculating degree of variability (or other complexity metrics)
+const PARSING_ERROR_INVALID_TYPE_COMPLEXITY_CALCULATION = "INVALID_TYPE_FOR_COMPLEXITY_CALCULATION"
+
 /*
 Error type signaling errors during statement parsing
 */

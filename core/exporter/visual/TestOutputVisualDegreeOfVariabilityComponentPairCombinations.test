@@ -1,0 +1,67 @@
+{"name": "XOR",
+"children": [{
+"name": "DoV: 9",
+"level": 1, 
+"children": [
+{"name": "AND",
+"children": [{"name": "certifying agent", "comp": "A", "level": 1, "dov": "1"},
+{"name": "OR",
+"children": [{"name": "borrower", "comp": "A", "level": 1, "dov": "1"},
+{"name": "wife", "comp": "A", "level": 1, "dov": "1"}], "comp": "A", "level": 1, "dov": "3"}], "comp": "A", "level": 1, "dov": "3"},
+{"name": "investigate", "comp": "I", "level": 1, "dov": "1"},
+{"name": "wAND",
+"children": [{"name": "OR",
+"children": [{"name": "Act", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "regulations of this part", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "3"}, {"name": "AND",
+"children": [{"name": "production [operations] and", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "handling operations", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "XOR",
+"children": [{"name": "shipping", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "packing facilities", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "2"}], "comp": "Bdir", "level": 1, "dov": "4"},
+{"name": "may", "comp": "M", "level": 1, "dov": "1"},
+{
+"name": "Cac",
+"level": 2, "dov": "1", 
+"children": [
+{"name": "actor2", "comp": "A", "level": 2, "dov": "1"},
+{"name": "aim2", "comp": "I", "level": 2, "dov": "1"}
+]
+},
+{"name": "XOR",
+"children": [{"name": "Act", "comp": "Cex", "level": 1, "dov": "1"},
+{"name": "regulations in this part", "comp": "Cex", "level": 1, "dov": "1"}], "comp": "Cex", "level": 1, "dov": "2"}
+]
+},
+{
+"name": "DoV: 9",
+"level": 1, 
+"children": [
+{"name": "AND",
+"children": [{"name": "certifying agent", "comp": "A", "level": 1, "dov": "1"},
+{"name": "OR",
+"children": [{"name": "borrower", "comp": "A", "level": 1, "dov": "1"},
+{"name": "wife", "comp": "A", "level": 1, "dov": "1"}], "comp": "A", "level": 1, "dov": "3"}], "comp": "A", "level": 1, "dov": "3"},
+{"name": "investigate", "comp": "I", "level": 1, "dov": "1"},
+{"name": "wAND",
+"children": [{"name": "OR",
+"children": [{"name": "Act", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "regulations of this part", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "3"}, {"name": "AND",
+"children": [{"name": "production [operations] and", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "handling operations", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "XOR",
+"children": [{"name": "shipping", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "packing facilities", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "2"}], "comp": "Bdir", "level": 1, "dov": "4"},
+{"name": "may", "comp": "M", "level": 1, "dov": "1"},
+{
+"name": "Cac",
+"level": 2, "dov": "1", 
+"children": [
+{"name": "actor3", "comp": "A", "level": 2, "dov": "1"},
+{"name": "aim3", "comp": "I", "level": 2, "dov": "1"}
+]
+},
+{"name": "XOR",
+"children": [{"name": "Act", "comp": "Cex", "level": 1, "dov": "1"},
+{"name": "regulations in this part", "comp": "Cex", "level": 1, "dov": "1"}], "comp": "Cex", "level": 1, "dov": "2"}
+]
+}], "comp": "", "level": 0}

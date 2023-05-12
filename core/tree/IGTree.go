@@ -1089,9 +1089,19 @@ func (n *Node) CalculateStateComplexity() (int, NodeError) {
 		return 1, NodeError{ErrorCode: TREE_NO_ERROR}
 	}
 	if n.Left == nil && n.Right == nil && !n.HasPrimitiveEntry() {
-		// Must be nested statement, so delegate execution to statement
-		stmt := n.Entry.(*Statement)
-		return stmt.CalculateComplexity().TotalStateComplexity, NodeError{ErrorCode: TREE_NO_ERROR}
+		// Must be nested statement, so delegate execution to statement, ...
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf(&Statement{}) {
+			stmt := n.Entry.(*Statement)
+			return stmt.CalculateComplexity().TotalStateComplexity, NodeError{ErrorCode: TREE_NO_ERROR}
+		}
+		// ... or component pair statement (i.e., extrapolated into multiple statements)
+		if reflect.TypeOf(n.Entry) == reflect.TypeOf(&Node{}) {
+			stmt := n.Entry.([]*Node)[0].Entry.(*Statement)
+			return stmt.CalculateComplexity().TotalStateComplexity, NodeError{ErrorCode: TREE_NO_ERROR}
+		}
+		// Invalid type - not yet handled
+		return -1, NodeError{ErrorCode: PARSING_ERROR_INVALID_TYPE_COMPLEXITY_CALCULATION,
+			ErrorMessage: "No complexity calculation possible for type " + reflect.TypeOf(n.Entry).String()}
 	}
 	// Check if nested elements contain complexity
 	if n.Left != nil && n.Right != nil {
