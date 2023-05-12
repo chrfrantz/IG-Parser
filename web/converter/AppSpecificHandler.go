@@ -2,7 +2,7 @@ package converter
 
 import (
 	"IG-Parser/core/endpoints"
-	"IG-Parser/core/exporter"
+	"IG-Parser/core/exporter/tabular"
 	"IG-Parser/core/tree"
 	"IG-Parser/web/converter/shared"
 	"fmt"
@@ -20,20 +20,20 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	// Now, adjust to user settings based on UI output
 	// Define whether output is dynamic
 	Println("Setting dynamic output:", dynamicOutput)
-	exporter.SetDynamicOutput(dynamicOutput)
+	tabular.SetDynamicOutput(dynamicOutput)
 	// Define whether output is IG Extended (component-level nesting)
 	Println("Setting IG Extended output:", produceIGExtendedOutput)
-	exporter.SetProduceIGExtendedOutput(produceIGExtendedOutput)
+	tabular.SetProduceIGExtendedOutput(produceIGExtendedOutput)
 	// Define whether annotations are included
 	Println("Setting annotations:", includeAnnotations)
-	exporter.SetIncludeAnnotations(includeAnnotations)
+	tabular.SetIncludeAnnotations(includeAnnotations)
 	// Define whether header row is included
 	Println("Setting header row:", printHeaders)
-	exporter.SetIncludeHeaders(printHeaders)
+	tabular.SetIncludeHeaders(printHeaders)
 	// Output type
 	Println("Output type:", outputType)
 	// Convert input
-	output, err2 := endpoints.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", true, exporter.IncludeHeader())
+	output, err2 := endpoints.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", true, tabular.IncludeHeader())
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {
 		retStruct.Success = false
 		retStruct.Error = true
@@ -95,16 +95,16 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	// Now, adjust to user settings based on UI output
 	// Define whether output is dynamic
 	Println("Setting dynamic output:", dynamicOutput)
-	exporter.SetDynamicOutput(dynamicOutput)
+	tabular.SetDynamicOutput(dynamicOutput)
 	// Define whether output is IG Extended (component-level nesting)
 	Println("Setting IG Extended output:", produceIGExtendedOutput)
-	exporter.SetProduceIGExtendedOutput(produceIGExtendedOutput)
+	tabular.SetProduceIGExtendedOutput(produceIGExtendedOutput)
 	// Define whether annotations are included
 	Println("Setting annotations:", includeAnnotations)
-	exporter.SetIncludeAnnotations(includeAnnotations)
+	tabular.SetIncludeAnnotations(includeAnnotations)
 	// Define whether Degree of Variability is included
 	Println("Setting Degree of Variability (DoV):", includeDoV)
-	exporter.SetIncludeDegreeOfVariability(includeDoV)
+	tabular.SetIncludeDegreeOfVariability(includeDoV)
 	// Setting flat printing
 	Println("Setting flat printing of properties:", flatOutput)
 	tree.SetFlatPrinting(flatOutput)

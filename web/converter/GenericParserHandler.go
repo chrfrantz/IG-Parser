@@ -2,7 +2,7 @@ package converter
 
 import (
 	"IG-Parser/core/config"
-	"IG-Parser/core/exporter"
+	"IG-Parser/core/exporter/tabular"
 	"IG-Parser/web/converter/shared"
 	"IG-Parser/web/helper"
 	"fmt"
@@ -153,7 +153,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		IncludeDoV:                formValueIncludeDoV,
 		IncludeHeaders:            formValueIncludeHeaders,
 		OutputType:                formValueOutputType,
-		OutputTypes:               exporter.OUTPUT_TYPES,
+		OutputTypes:               tabular.OUTPUT_TYPES,
 		PrintPropertyTree:         formValuePropertyTree,
 		PrintBinaryTree:           formValueBinaryTree,
 		ActivationConditionsOnTop: formValueMoveActivationConditionsToTop,
@@ -321,7 +321,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			retStruct.OutputType = val
 		} else {
 			// Use default parameter
-			retStruct.OutputType = exporter.DEFAULT_OUTPUT_TYPES
+			retStruct.OutputType = tabular.DEFAULT_OUTPUT_TYPES
 		}
 
 		// VISUAL PARAMETERS

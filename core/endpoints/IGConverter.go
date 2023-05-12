@@ -1,7 +1,7 @@
 package endpoints
 
 import (
-	"IG-Parser/core/exporter"
+	"IG-Parser/core/exporter/tabular"
 	"IG-Parser/core/parser"
 	"IG-Parser/core/tree"
 )
@@ -22,10 +22,10 @@ indicates whether the target file will be overwritten upon repeated write.
 If printHeaders is set, the output includes the header row.
 Returns tabular output as string, and error (defaults to tree.PARSING_NO_ERROR).
 */
-func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType string, filename string, overwrite bool, printHeaders bool) ([]exporter.TabularOutputResult, tree.ParsingError) {
+func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType string, filename string, overwrite bool, printHeaders bool) ([]tabular.TabularOutputResult, tree.ParsingError) {
 
 	// Use separator specified by default
-	separator := exporter.CellSeparator
+	separator := tabular.CellSeparator
 
 	Println(" Step: Parse input statement")
 	// Explicitly activate printing of shared elements
@@ -40,7 +40,7 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 	Println("Parsed statement:", stmts)
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	results := exporter.GenerateTabularOutputFromParsedStatements(stmts, "", stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders)
+	results := tabular.GenerateTabularOutputFromParsedStatements(stmts, "", stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders)
 	for _, res := range results {
 		if res.Error.ErrorCode != tree.PARSING_NO_ERROR {
 			return results, res.Error
@@ -77,9 +77,9 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 
 	// Prepare visual output for nodes
 	Println(" Step: Generate visual output structure (combined statements)")
-	output, err2 = stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(),
+	output, err2 = stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
 		//output, err2 = tree.PrintHeader(stmts[0], tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(),
-		exporter.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err2.ErrorCode != tree.TREE_NO_ERROR {
 		return output, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMBEDDED_NODE_ERROR, ErrorMessage: err2.ErrorMessage}
 	}
@@ -91,7 +91,7 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 	if filename != "" {
 		Println("  - Writing to file ...")
 
-		err3 := exporter.WriteToFile(filename, output, true)
+		err3 := tabular.WriteToFile(filename, output, true)
 		if err3 != nil {
 			Println("  - Problems when writing file "+filename+", Error:", err3)
 		}

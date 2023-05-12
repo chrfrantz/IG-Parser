@@ -1,4 +1,4 @@
-package exporter
+package tabular
 
 import "IG-Parser/core/tree"
 
