@@ -2904,6 +2904,57 @@ func TestAutomatedExpansionOfParenthesesForComponentCombinations(t *testing.T) {
 }
 
 /*
+Tests the separation of input strings into statement patterns (basic components including combinations, nested component, nested statement combinations and component pair combinations).
+
+Types:
+- Components (and combinations): A(actor); A((actor1 [XOR] actor2))
+- Component nesting syntax: Cac{ A(actor) I(action) }
+- Component combination syntax: Cac{ Cac{A(leftNestedA) I(leftNestedI)} [XOR] Cac{A(rightNestedA) I(rightNestedI)} }
+- Component pair combination syntax: { Cac{A(leftNestedA) I(leftNestedI)} [XOR] Cac{A(rightNestedA) I(rightNestedI)} }
+*/
+func TestSeparateComponentsNestedStatementsCombinationsAndComponentPairs(t *testing.T) {
+
+	text := "D(deontic) Cac(atomicCondition) (meaningless content) Bind(indirectobject) Cac{A(atomicnestedcondition)} " +
+		"{I(maintain) Bdir((order [AND] control))  Cac{A(sharednestedcondition)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}} " +
+		" Cac{Cac{ A(leftcombo) I(leftaim) } [XOR] Cac{ Cac{ A(rightleftcombo) I(rightleftaim) } [AND] Cac{ A(rightrightcombo) I(rightrightaim) }}} " +
+		" Bdir(left [XOR] right) A((actor1 [AND] actor2)) Bdir{ somecontent } " +
+		" Cex{ Cex{ A(anotherLeft) I(anotherAim) } [XOR] Cex{ I(anotherRightAim) Cex(embeddedCex) }} " +
+		" {A(actor1) I(aim1) [XOR] {A(actor2) I(aim2) [AND] A(actor3) I(aim3)}}"
+
+	types, err := separateComponentsNestedStatementsCombinationsAndComponentPairs(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during parsing. Error: ", err)
+	}
+
+	// Basic statements (note: includes all whitespaces not fitting elsewhere - filtered in downstream processing)
+	if types[0][0] != "D(deontic) Cac(atomicCondition) (meaningless content) Bind(indirectobject)      Bdir(left [XOR] right) A((actor1 [AND] actor2))     " {
+		t.Fatal("Wrong entry in basic components")
+	}
+	// nested components
+	if types[1][0] != "Cac{A(atomicnestedcondition)}" {
+		t.Fatal("Wrong entry in nested components")
+	}
+	if types[1][1] != "Bdir{ somecontent }" {
+		t.Fatal("Wrong entry in nested components")
+	}
+	// nested statement combinations
+	if types[2][0] != "Cac{Cac{ A(leftcombo) I(leftaim) } [XOR] Cac{ Cac{ A(rightleftcombo) I(rightleftaim) } [AND] Cac{ A(rightrightcombo) I(rightrightaim) }}}" {
+		t.Fatal("Wrong entry in nested statement combinations")
+	}
+	if types[2][1] != "Cex{ Cex{ A(anotherLeft) I(anotherAim) } [XOR] Cex{ I(anotherRightAim) Cex(embeddedCex) }}" {
+		t.Fatal("Wrong entry in nested statement combinations")
+	}
+	// component pair combinations
+	if types[3][0] != "{I(maintain) Bdir((order [AND] control))  Cac{A(sharednestedcondition)} [XOR] {I(sustain) Bdir(peace) [OR] I(prevent) Bdir(war)}}" {
+		t.Fatal("Wrong entry in component pair combinations")
+	}
+	if types[3][1] != "{A(actor1) I(aim1) [XOR] {A(actor2) I(aim2) [AND] A(actor3) I(aim3)}}" {
+		t.Fatal("Wrong entry in component pair combinations")
+	}
+
+}
+
+/*
 Tests extractComponentContent() function.
 */
 /*func TestExtractComponentContent(t *testing.T) {
