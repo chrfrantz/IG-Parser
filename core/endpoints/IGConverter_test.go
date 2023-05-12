@@ -115,3 +115,25 @@ func TestInvalidAttributeStatementVisualTree(t *testing.T) {
 		t.Fatal("Statement parsing should produce error")
 	}
 }
+
+/*
+Tests degree of variability for visual tree output.
+*/
+func TestDegreeOfVariabilityVisualTree(t *testing.T) {
+
+	// Statement with various complexity
+	text := "A(certifying agent [AND] (borrower [OR] wife)) M(may) I(investigate) " +
+		"Bdir((complaints of noncompliance with the (Act [OR] regulations of this part) " +
+		"concerning " +
+		"(production [operations] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
+		")" +
+		"Cex(for compliance with the (Act [XOR] regulations in this part))."
+
+	// Activate degree of variability in output
+	tabular.SetIncludeDegreeOfVariability(true)
+
+	_, err := ConvertIGScriptToVisualTree(text, "650", "")
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Statement parsing should not fail")
+	}
+}

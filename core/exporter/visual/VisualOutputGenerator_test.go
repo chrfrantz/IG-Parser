@@ -556,7 +556,7 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 /*
 Tests multiple combinations embedded in second level phrase/side of first-order statement.
 */
-func TestMultiLevelEmbeddedCombinations(t *testing.T) {
+func TestVisualOutputMultiLevelEmbeddedCombinations(t *testing.T) {
 
 	// Entry containing multiple combinations on right side of first-order combination
 	text := "Cex(( left1 [XOR] shared (left [AND] right) via (left2 [XOR] right2)))"
@@ -1844,6 +1844,75 @@ func TestVisualOutputComponentPairsInNestedComponents(t *testing.T) {
 
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualComponentPairsInNestedComponents.test")
+	if err3 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err4 := tabular.WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests visual output for degree of variability with component combinations.
+*/
+func TestVisualOutputDegreeOfVariabilityComponentCombinations(t *testing.T) {
+
+	// Statement with various combinations
+	text := "A(certifying agent [AND] (borrower [OR] wife)) M(may) I(investigate) " +
+		"Bdir((complaints of noncompliance with the (Act [OR] regulations of this part) " +
+		"concerning " +
+		"(production [operations] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
+		") " +
+		"Cac{Cac{A(actor2) I(aim2)} [XOR] Cac{A(actor3) I(aim3)}} " +
+		"Cex(for compliance with the (Act [XOR] regulations in this part))."
+
+	// Deactivate annotations
+	tabular.SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	tabular.SetIncludeDegreeOfVariability(true)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
+		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err2.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating node tree:", err2)
+	}
+
+	outputString := output
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err3 := os.ReadFile("TestOutputVisualDegreeOfVariabilityComponentCombinations.test")
 	if err3 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}

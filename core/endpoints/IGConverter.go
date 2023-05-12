@@ -78,7 +78,6 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 	// Prepare visual output for nodes
 	Println(" Step: Generate visual output structure (combined statements)")
 	output, err2 = stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
-		//output, err2 = tree.PrintHeader(stmts[0], tree.FlatPrinting(), tree.BinaryPrinting(), exporter.IncludeAnnotations(),
 		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err2.ErrorCode != tree.TREE_NO_ERROR {
 		return output, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMBEDDED_NODE_ERROR, ErrorMessage: err2.ErrorMessage}

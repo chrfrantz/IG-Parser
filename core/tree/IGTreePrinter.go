@@ -55,8 +55,8 @@ func (s *Statement) PrintTree(parent *Node, printFlat bool, printBinary bool, in
 		rootName = "DoV: " + strconv.Itoa(s.CalculateComplexity().TotalStateComplexity)
 	}
 
-	if parent != nil {
-		// if it is a nested statement, use component name it nests on as name
+	if parent != nil && parent.GetComponentName() != "" {
+		// if it is a nested statement with component name, use component name it nests on as name
 		rootName = parent.GetComponentName()
 	}
 
