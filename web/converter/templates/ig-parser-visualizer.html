@@ -33,7 +33,7 @@
 {{template "coding-interface.html" . }}
 
 <!-- link to switch between parser versions -->
-<span data-text=""><a href="/">Switch to tabular version of IG Parser</a></span><br /><br />
+<span data-text=""><a href="/" onclick="saveFormContent()">Switch to tabular version of IG Parser</a></span><br /><br />
 
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
 
@@ -42,10 +42,12 @@
 <input id="propertyTree" name="propertyTree" type="checkbox" {{.PrintPropertyTree}} /><label for="propertyTree">Embed component properties in tree structure (as opposed to capturing those in labels associated with component) (default: on)</label>
 <input id="binaryTree" name="binaryTree" type="checkbox" {{.PrintBinaryTree}} /><label for="binaryTree">Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)</label>
 <input id="actCondTop" name="actCondTop" type="checkbox" {{.ActivationConditionsOnTop}} /><label for="actCondTop">Print activation conditions node (if present) as first node in output (default: off)</label>
-Height of output canvas (in pixels): <input name="canvasHeight" type="number" value="{{.Height}}">
-Width of output canvas (in pixels): <input name="canvasWidth" type="number" value="{{.Width}}"><br />
+Height of output canvas (in pixels): <input id="canvasHeight" name="canvasHeight" type="number" value="{{.Height}}">
+Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" type="number" value="{{.Width}}">
+<!-- Link to reset canvas dimensions to default values -->
+<span data-text="Resets canvas height and width to default values." class="tooltip"><a href="" onclick="resetCanvas()">Reset canvas dimensions</a></span><br /><br />
 
-<input value="Generate visual output" type="submit">
+<input value="Generate visual output" onclick="saveFormContent()" type="submit">
 {{if .Error}}
 <div class="error">
     Error: {{.Message}}

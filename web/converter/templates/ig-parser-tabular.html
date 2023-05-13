@@ -2,7 +2,7 @@
 {{template "coding-interface.html" . }}
 
 <!-- link to switch between parser versions -->
-<span data-text=""><a href="/visual/">Switch to visual version of IG Parser</a></span><br /><br />
+<span data-text=""><a href="/visual/" onclick="saveFormContent()">Switch to visual version of IG Parser</a></span><br /><br />
 
 <!-- additional entry field -->
 <span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
@@ -24,7 +24,7 @@
 {{ end }}
 </select>
 
-<input value="Generate tabular output" type="submit">
+<input value="Generate tabular output" onclick="saveFormContent()" type="submit">
 {{if .Error}}
 <div class="error">
     Error: {{.Message}}

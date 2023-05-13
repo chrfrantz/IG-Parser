@@ -48,8 +48,12 @@ type ReturnStruct struct {
 	Output string
 	// Width of output canvas
 	Width int
+	// Default width of output canvas
+	DefaultWidth int
 	// Height of output canvas
 	Height int
+	// Default height of output canvas
+	DefaultHeight int
 	// Transaction ID
 	TransactionId string
 	// IG Script help link

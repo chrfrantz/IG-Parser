@@ -99,13 +99,90 @@
                     //console.log("Storing content " + content)
                 }
 
-                // Check for statement ID element before modifying content,
-                // since it is only available in tabular output version
+                // Elements specific to distinctive versions;
+                // require checks for presence prior to saving
+
+                // Tabular-specific fields
+
+                // Statement ID
                 let tmpId = document.getElementById("stmtId");
                 if(tmpId != null) {
                     localStorage.setItem("stmtId", tmpId.value);
                     //console.log("Storing content " + tmpId.value)
                 }
+
+                // Extended output
+                let tmpExt = document.getElementById("igExtended");
+                if(tmpExt != null) {
+                    localStorage.setItem("igExtended", tmpExt.checked);
+                    //console.log("Storing content " + tmpExt.checked)
+                }
+
+                // Logico output (both for tabular and visual)
+                let tmpAnno = document.getElementById("annotations");
+                if(tmpAnno != null) {
+                    localStorage.setItem("annotations", tmpAnno.checked);
+                    //console.log("Storing content " + tmpAnno.checked)
+                }
+
+                // Include headers
+                let tmpHdr = document.getElementById("includeHeaders");
+                if(tmpHdr != null) {
+                    localStorage.setItem("includeHeaders", tmpHdr.checked);
+                    //console.log("Storing content " + tmpHdr.checked)
+                }
+
+                // Tabular output format
+                let tmpType = document.getElementById("outputType");
+                if(tmpType != null) {
+                    localStorage.setItem("outputType", tmpType.value);
+                    //console.log("Storing content w" + tmpType.value)
+                }
+
+                // Visual-specific fields
+
+                // Dov
+                let tmpDov = document.getElementById("dov");
+                if(tmpDov != null) {
+                    localStorage.setItem("dov", tmpDov.checked);
+                    //console.log("Storing content " + tmpDov.checked)
+                }
+
+                // Include Property tree
+                let tmpProp = document.getElementById("propertyTree");
+                if(tmpProp != null) {
+                    localStorage.setItem("propertyTree", tmpProp.checked);
+                    //console.log("Storing content " + tmpProp.checked)
+                }
+
+                // Include Binary tree
+                let tmpBin = document.getElementById("binaryTree");
+                if(tmpBin != null) {
+                    localStorage.setItem("binaryTree", tmpBin.checked);
+                    //console.log("Storing content " + tmpBin.checked)
+                }
+
+                // Activation condition
+                let tmpAct = document.getElementById("actCondTop");
+                if(tmpAct != null) {
+                    localStorage.setItem("actCondTop", tmpAct.checked);
+                    //console.log("Storing content " + tmpAct.checked)
+                }
+
+                // Canvas height
+                let tmpHgt = document.getElementById("canvasHeight");
+                if(tmpHgt != null) {
+                    localStorage.setItem("canvasHeight", tmpHgt.value);
+                    //console.log("Storing content h " + tmpHgt.value)
+                }
+
+                // Canvas width
+                let tmpWdt = document.getElementById("canvasWidth");
+                if(tmpWdt != null) {
+                    localStorage.setItem("canvasWidth", tmpWdt.value);
+                    //console.log("Storing content w" + tmpWdt.value)
+                }
+
             }
 
             /*
@@ -128,12 +205,137 @@
                     document.getElementById("rawStmt").value = content;
                     //console.log("Loading content " + content)
                 }
+
+                // Tabular-specific fields
+
                 // Load statement ID
                 if(localStorage.getItem("stmtId") != null && document.getElementById("stmtId") != null) {
                     let content = localStorage.getItem("stmtId");
                     document.getElementById("stmtId").value = content;
                     //console.log("Loading content " + content)
                 }
+
+                // Load IG Extended
+                if(localStorage.getItem("igExtended") != null && document.getElementById("igExtended") != null) {
+                    let content = localStorage.getItem("igExtended");
+                    if(content == "true") {
+                        document.getElementById("igExtended").checked = true;
+                        //console.log("Loading content " + content)
+                    }
+                    if(content == "false") {
+                        document.getElementById("igExtended").checked = false;
+                        //console.log("Loading content " + content)
+                    }
+                    // nothing stored - leave value unchanged
+                }
+
+                // Load IG Logico (Tabular and Visual)
+                if(localStorage.getItem("annotations") != null && document.getElementById("annotations") != null) {
+                    let content = localStorage.getItem("annotations");
+                    if(content == "true") {
+                        document.getElementById("annotations").checked = true;
+                        //console.log("Loading content " + content)
+                    }
+                    if(content == "false") {
+                        document.getElementById("annotations").checked = false;
+                        //console.log("Loading content " + content)
+                    }
+                    // nothing stored - leave value unchanged
+                }
+
+                // Load Header setting
+                if(localStorage.getItem("includeHeaders") != null && document.getElementById("includeHeaders") != null) {
+                    let content = localStorage.getItem("includeHeaders");
+                    if(content == "true") {
+                        document.getElementById("includeHeaders").checked = true;
+                        //console.log("Loading content " + content)
+                    }
+                    if(content == "false") {
+                        document.getElementById("includeHeaders").checked = false;
+                        //console.log("Loading content " + content)
+                    }
+                    // nothing stored - leave value unchanged
+                }
+
+                // Load Tabular output format
+                if(localStorage.getItem("outputType") != null && document.getElementById("outputType") != null) {
+                    let content = localStorage.getItem("outputType");
+                    document.getElementById("outputType").value = content;
+                    //console.log("Loading content " + content)
+                }
+
+                // Visual-specific fields
+
+                // Load Dov
+                if(localStorage.getItem("dov") != null && document.getElementById("dov") != null) {
+                    let content = localStorage.getItem("dov");
+                    if(content == "true") {
+                        document.getElementById("dov").checked = true;
+                        //console.log("Loading content " + content)
+                    }
+                    if(content == "false") {
+                        document.getElementById("dov").checked = false;
+                        //console.log("Loading content " + content)
+                    }
+                    // nothing stored - leave value unchanged
+                }
+
+                // Load Property tree
+                if(localStorage.getItem("propertyTree") != null && document.getElementById("propertyTree") != null) {
+                    let content = localStorage.getItem("propertyTree");
+                    if(content == "true") {
+                        document.getElementById("propertyTree").checked = true;
+                        //console.log("Loading content " + content)
+                    }
+                    if(content == "false") {
+                        document.getElementById("propertyTree").checked = false;
+                        //console.log("Loading content " + content)
+                    }
+                    // nothing stored - leave value unchanged
+                }
+
+                // Load Binary tree
+                if(localStorage.getItem("binaryTree") != null && document.getElementById("binaryTree") != null) {
+                    let content = localStorage.getItem("binaryTree");
+                    if(content == "true") {
+                        document.getElementById("binaryTree").checked = true;
+                        //console.log("Loading content " + content)
+                    }
+                    if(content == "false") {
+                        document.getElementById("binaryTree").checked = false;
+                        //console.log("Loading content " + content)
+                    }
+                    // nothing stored - leave value unchanged
+                }
+
+                // Load Activation conditions
+                if(localStorage.getItem("actCondTop") != null && document.getElementById("actCondTop") != null) {
+                    let content = localStorage.getItem("actCondTop");
+                    if(content == "true") {
+                        document.getElementById("actCondTop").checked = true;
+                        //console.log("Loading content " + content)
+                    }
+                    if(content == "false") {
+                        document.getElementById("actCondTop").checked = false;
+                        //console.log("Loading content " + content)
+                    }
+                    // nothing stored - leave value unchanged
+                }
+
+                // Load canvas height
+                if(localStorage.getItem("canvasHeight") != null && document.getElementById("canvasHeight") != null) {
+                    let content = localStorage.getItem("canvasHeight");
+                    document.getElementById("canvasHeight").value = content;
+                    //console.log("Loading content " + content)
+                }
+
+                // Load canvas width
+                if(localStorage.getItem("canvasWidth") != null && document.getElementById("canvasWidth") != null) {
+                    let content = localStorage.getItem("canvasWidth");
+                    document.getElementById("canvasWidth").value = content;
+                    //console.log("Loading content " + content)
+                }
+
             }
 
             /*
@@ -160,6 +362,25 @@
                 saveFormContent();
             }
 
+            /*
+            Resets canvas to original default content
+             */
+            function resetCanvas() {
+
+                // Reset canvas height (if existing)
+                if(document.getElementById("canvasHeight") != null) {
+                    document.getElementById("canvasHeight").value = {{.DefaultHeight}};
+                }
+
+                // Reset canvas width (if existing)
+                if(document.getElementById("canvasWidth") != null) {
+                    document.getElementById("canvasWidth").value = {{.DefaultWidth}};
+                }
+
+                // Save reset values in local storage
+                saveFormContent();
+            }
+
             // Loads form contents from local storage upon window load
             window.onload = (event) => {
                 loadFormContent();
@@ -169,4 +390,4 @@
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />
         <!-- Link to reset form content to default values -->
-        <span data-text="This resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a href="" onclick="resetContent()">Reset to default statement example</a></span><br /><br />
+        <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a href="" onclick="resetContent()">Reset to default statement example</a></span><br /><br />
