@@ -84,11 +84,11 @@
     <form method="POST">
         
         <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea><br />
         
         <span data-text="Click to open a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip"><a href="/help/" target="_blank">Encoded Statement:</a></span>
         
-        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea()">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance](review [AND] (reward [XOR] sanction)) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act [XOR] regulations in this part)) under the condition that Cac{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were non-compliant [OR] violated) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</div>
+        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance](review [AND] (reward [XOR] sanction)) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act [XOR] regulations in this part)) under the condition that Cac{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were non-compliant [OR] violated) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</div>
         <script>
             let editor = ace.edit("editor");
             editor.session.setMode("ace/mode/text"); 
@@ -131,11 +131,88 @@
 
                 
                 
+
+                
+
+                
                 let tmpId = document.getElementById("stmtId");
                 if(tmpId != null) {
                     localStorage.setItem("stmtId", tmpId.value);
                     
                 }
+
+                
+                let tmpExt = document.getElementById("igExtended");
+                if(tmpExt != null) {
+                    localStorage.setItem("igExtended", tmpExt.checked);
+                    
+                }
+
+                
+                let tmpAnno = document.getElementById("annotations");
+                if(tmpAnno != null) {
+                    localStorage.setItem("annotations", tmpAnno.checked);
+                    
+                }
+
+                
+                let tmpHdr = document.getElementById("includeHeaders");
+                if(tmpHdr != null) {
+                    localStorage.setItem("includeHeaders", tmpHdr.checked);
+                    
+                }
+
+                
+                let tmpType = document.getElementById("outputType");
+                if(tmpType != null) {
+                    localStorage.setItem("outputType", tmpType.value);
+                    
+                }
+
+                
+
+                
+                let tmpDov = document.getElementById("dov");
+                if(tmpDov != null) {
+                    localStorage.setItem("dov", tmpDov.checked);
+                    
+                }
+
+                
+                let tmpProp = document.getElementById("propertyTree");
+                if(tmpProp != null) {
+                    localStorage.setItem("propertyTree", tmpProp.checked);
+                    
+                }
+
+                
+                let tmpBin = document.getElementById("binaryTree");
+                if(tmpBin != null) {
+                    localStorage.setItem("binaryTree", tmpBin.checked);
+                    
+                }
+
+                
+                let tmpAct = document.getElementById("actCondTop");
+                if(tmpAct != null) {
+                    localStorage.setItem("actCondTop", tmpAct.checked);
+                    
+                }
+
+                
+                let tmpHgt = document.getElementById("canvasHeight");
+                if(tmpHgt != null) {
+                    localStorage.setItem("canvasHeight", tmpHgt.value);
+                    
+                }
+
+                
+                let tmpWdt = document.getElementById("canvasWidth");
+                if(tmpWdt != null) {
+                    localStorage.setItem("canvasWidth", tmpWdt.value);
+                    
+                }
+
             }
 
             
@@ -157,12 +234,137 @@
                     document.getElementById("rawStmt").value = content;
                     
                 }
+
+                
+
                 
                 if(localStorage.getItem("stmtId") != null && document.getElementById("stmtId") != null) {
                     let content = localStorage.getItem("stmtId");
                     document.getElementById("stmtId").value = content;
                     
                 }
+
+                
+                if(localStorage.getItem("igExtended") != null && document.getElementById("igExtended") != null) {
+                    let content = localStorage.getItem("igExtended");
+                    if(content == "true") {
+                        document.getElementById("igExtended").checked = true;
+                        
+                    }
+                    if(content == "false") {
+                        document.getElementById("igExtended").checked = false;
+                        
+                    }
+                    
+                }
+
+                
+                if(localStorage.getItem("annotations") != null && document.getElementById("annotations") != null) {
+                    let content = localStorage.getItem("annotations");
+                    if(content == "true") {
+                        document.getElementById("annotations").checked = true;
+                        
+                    }
+                    if(content == "false") {
+                        document.getElementById("annotations").checked = false;
+                        
+                    }
+                    
+                }
+
+                
+                if(localStorage.getItem("includeHeaders") != null && document.getElementById("includeHeaders") != null) {
+                    let content = localStorage.getItem("includeHeaders");
+                    if(content == "true") {
+                        document.getElementById("includeHeaders").checked = true;
+                        
+                    }
+                    if(content == "false") {
+                        document.getElementById("includeHeaders").checked = false;
+                        
+                    }
+                    
+                }
+
+                
+                if(localStorage.getItem("outputType") != null && document.getElementById("outputType") != null) {
+                    let content = localStorage.getItem("outputType");
+                    document.getElementById("outputType").value = content;
+                    
+                }
+
+                
+
+                
+                if(localStorage.getItem("dov") != null && document.getElementById("dov") != null) {
+                    let content = localStorage.getItem("dov");
+                    if(content == "true") {
+                        document.getElementById("dov").checked = true;
+                        
+                    }
+                    if(content == "false") {
+                        document.getElementById("dov").checked = false;
+                        
+                    }
+                    
+                }
+
+                
+                if(localStorage.getItem("propertyTree") != null && document.getElementById("propertyTree") != null) {
+                    let content = localStorage.getItem("propertyTree");
+                    if(content == "true") {
+                        document.getElementById("propertyTree").checked = true;
+                        
+                    }
+                    if(content == "false") {
+                        document.getElementById("propertyTree").checked = false;
+                        
+                    }
+                    
+                }
+
+                
+                if(localStorage.getItem("binaryTree") != null && document.getElementById("binaryTree") != null) {
+                    let content = localStorage.getItem("binaryTree");
+                    if(content == "true") {
+                        document.getElementById("binaryTree").checked = true;
+                        
+                    }
+                    if(content == "false") {
+                        document.getElementById("binaryTree").checked = false;
+                        
+                    }
+                    
+                }
+
+                
+                if(localStorage.getItem("actCondTop") != null && document.getElementById("actCondTop") != null) {
+                    let content = localStorage.getItem("actCondTop");
+                    if(content == "true") {
+                        document.getElementById("actCondTop").checked = true;
+                        
+                    }
+                    if(content == "false") {
+                        document.getElementById("actCondTop").checked = false;
+                        
+                    }
+                    
+                }
+
+                
+                if(localStorage.getItem("canvasHeight") != null && document.getElementById("canvasHeight") != null) {
+                    let content = localStorage.getItem("canvasHeight");
+                    document.getElementById("canvasHeight").value = content;
+                    
+                }
+
+                
+                if(localStorage.getItem("canvasWidth") != null && document.getElementById("canvasWidth") != null) {
+                    let content = localStorage.getItem("canvasWidth");
+                    document.getElementById("canvasWidth").value = content;
+                    
+                }
+
             }
 
             
@@ -189,6 +391,24 @@
             }
 
             
+
+            function resetCanvas() {
+
+                
+                if(document.getElementById("canvasHeight") != null) {
+                    document.getElementById("canvasHeight").value =  2000 ;
+                }
+
+                
+                if(document.getElementById("canvasWidth") != null) {
+                    document.getElementById("canvasWidth").value =  4000 ;
+                }
+
+                
+                saveFormContent();
+            }
+
+            
             window.onload = (event) => {
                 loadFormContent();
             };
@@ -197,11 +417,11 @@
         
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance](review [AND] (reward [XOR] sanction)) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act [XOR] regulations in this part)) under the condition that Cac{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were non-compliant [OR] violated) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</textarea><br />
         
-        <span data-text="This resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a href="" onclick="resetContent()">Reset to default statement example</a></span><br /><br />
+        <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a href="" onclick="resetContent()">Reset to default statement example</a></span><br /><br />
 
 
 
-<span data-text=""><a href="/">Switch to tabular version of IG Parser</a></span><br /><br />
+<span data-text=""><a href="/" onclick="saveFormContent()">Switch to tabular version of IG Parser</a></span><br /><br />
 
 <span data-text="This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements." class="tooltip">Parameters:</span>
 
@@ -210,10 +430,12 @@
 <input id="propertyTree" name="propertyTree" type="checkbox" checked /><label for="propertyTree">Embed component properties in tree structure (as opposed to capturing those in labels associated with component) (default: on)</label>
 <input id="binaryTree" name="binaryTree" type="checkbox" unchecked /><label for="binaryTree">Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)</label>
 <input id="actCondTop" name="actCondTop" type="checkbox" unchecked /><label for="actCondTop">Print activation conditions node (if present) as first node in output (default: off)</label>
-Height of output canvas (in pixels): <input name="canvasHeight" type="number" value="2000">
-Width of output canvas (in pixels): <input name="canvasWidth" type="number" value="4000"><br />
+Height of output canvas (in pixels): <input id="canvasHeight" name="canvasHeight" type="number" value="2000">
+Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" type="number" value="4000">
 
-<input value="Generate visual output" type="submit">
+<span data-text="Resets canvas height and width to default values." class="tooltip"><a href="" onclick="resetCanvas()">Reset canvas dimensions</a></span><br /><br />
+
+<input value="Generate visual output" onclick="saveFormContent()" type="submit">
 
 
 
