@@ -52,11 +52,11 @@
     <form method="POST">
         <!-- Original Statement entry field -->
         <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()">{{.RawStmt}}</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">{{.RawStmt}}</textarea><br />
         <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip"><a href="/help/" target="_blank">Encoded Statement:</a></span>
         <!-- ACE Editor; copies any content to hidden textarea -->
-        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea()">{{.CodedStmt}}</div>
+        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">{{.CodedStmt}}</div>
         <script>
             let editor = ace.edit("editor");
             editor.session.setMode("ace/mode/text"); // generic text syntax (with bracket matching)
