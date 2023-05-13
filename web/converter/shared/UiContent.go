@@ -62,9 +62,9 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"In all other cases the parser assumes that all component content is part of the combination (i.e., if a logical operator is present), " +
 	"(i.e., " + HTML_EM_START + "A(first [AND] second)" + HTML_EM_STOP + " is the same as " + HTML_EM_START + "A((first [AND] second))" + HTML_EM_STOP + ")." +
 	LINEBREAK + LINEBREAK +
-	"Example 1: " + HTML_EM_START + "A(Concert visitors) D(must) I(present) Bdir(tickets) to Bind(agent) at Cex(venue)." + HTML_EM_STOP + LINEBREAK +
-	" Note: Text outside the parentheses (here: 'to' and 'at the') is ignored during parsing." + LINEBREAK + LINEBREAK +
-	"Example 2: " + HTML_EM_START + "A(Both (concert visitors [AND] reporters)) D(must) I(present) Bdir,p(corresponding) Bdir(tickets) to Bind(agent [XOR] security personnel) at Cex(venue)." + HTML_EM_STOP + LINEBREAK +
+	"Example 1: " + HTML_EM_START + "A(Concert visitors) D(must) I(present) Bdir(tickets) to Bind(agent) at the Cex(venue)." + HTML_EM_STOP + LINEBREAK +
+	" Note: Text outside any encoded component (here: " + HTML_EM_START + "to" + HTML_EM_STOP + " and " + HTML_EM_START + "at the" + HTML_EM_STOP + ") is ignored during parsing." + LINEBREAK + LINEBREAK +
+	"Example 2: " + HTML_EM_START + "A(Both (concert visitors [AND] reporters)) D(must) I(present) Bdir,p(corresponding) Bdir(tickets) to Bind(agent [XOR] security personnel) at the Cex(venue)." + HTML_EM_STOP + LINEBREAK +
 	" Note: This example displays variably scoped component combinations as well as the coding of properties (in this case for the direct object; see supported property symbols for other components (e.g., A,p) in the table at the bottom)." +
 	LINEBREAK + LINEBREAK +
 	HTML_EM_START + "2.) Nested components (\"component-level nesting\" in IG): " + HTML_EM_STOP + LINEBREAK +
