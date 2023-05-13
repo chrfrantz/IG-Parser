@@ -20,7 +20,7 @@ fi
 
 # Tear down current version 
 echo "Undeploying running IG Parser instance ..."
-docker-compose down
+docker-compose down --remove-orphans
 if [ $? -ne 0 ]; then
   echo "Error when stopping service. Ensure you are running the script with superuser permissions (e.g., sudo)." 
   exit 1
