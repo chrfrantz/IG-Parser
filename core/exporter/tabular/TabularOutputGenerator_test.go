@@ -182,7 +182,7 @@ func TestSimpleTabularOutput(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 	// OVERRIDE dynamic output setting
 	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
@@ -275,7 +275,7 @@ func TestSimpleTabularOutputNoHeaders(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(false)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 	// OVERRIDE dynamic output setting
 	tree.AGGREGATE_IMPLICIT_LINKAGES = true
 
@@ -368,7 +368,7 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -462,7 +462,7 @@ func TestBasicTabularOutputCombinationsNoHeaders(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(false)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -555,7 +555,7 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -649,7 +649,7 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -744,7 +744,7 @@ func TestTabularOutputWithSharedLeftElements(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -839,7 +839,7 @@ func TestTabularOutputWithSharedRightElements(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -934,7 +934,7 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1030,7 +1030,7 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1129,7 +1129,7 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1227,7 +1227,7 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1324,7 +1324,7 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1423,7 +1423,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1522,7 +1522,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testin
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1621,7 +1621,7 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1721,7 +1721,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1824,7 +1824,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -1931,7 +1931,7 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2040,7 +2040,7 @@ func TestStaticTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcros
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2140,7 +2140,7 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := "|"
@@ -2233,7 +2233,7 @@ func TestStaticTabularOutputOrElseAnnotations(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = false
+	SetIncludeSharedElementsInTabularOutput(false)
 
 	// Take separator for Google Sheets output
 	separator := "|"
@@ -2356,7 +2356,7 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2459,7 +2459,7 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2564,7 +2564,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2669,7 +2669,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAndIGCore(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2775,7 +2775,7 @@ func TestStaticTabularOutputNestedProperties(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2874,7 +2874,7 @@ func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -2978,7 +2978,7 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3073,7 +3073,7 @@ func TestStaticTabularOutputBasicStatementPrivatePropertiesOnly(t *testing.T) {
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3168,7 +3168,7 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents(t *
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3273,7 +3273,7 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
 	// With shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3377,12 +3377,12 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 	SetIncludeAnnotations(false)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -3482,8 +3482,8 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 	SetIncludeAnnotations(false)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3577,8 +3577,8 @@ func TestStaticTabularOutputBasicStatementComponentLevelNestedPrivateAndSharedPr
 	SetIncludeAnnotations(false)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3683,12 +3683,12 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 	SetIncludeAnnotations(false)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -3789,12 +3789,12 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 	SetIncludeAnnotations(true)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -3894,8 +3894,8 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsGoogleSheets(t
 	SetIncludeAnnotations(false)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
@@ -3999,8 +3999,8 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsCSV(t *testing
 	SetIncludeAnnotations(false)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for CSV output
 	separator := "|"
@@ -4103,12 +4103,12 @@ func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 	SetIncludeAnnotations(true)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4208,12 +4208,12 @@ func TestStaticTabularOutputNestedStatementCombinationAnnotations(t *testing.T) 
 	SetIncludeAnnotations(true)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4317,12 +4317,12 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsGoogleSh
 	SetIncludeAnnotations(true)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4426,12 +4426,12 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsCSV(t *t
 	SetIncludeAnnotations(true)
 	// Indicates whether header row is included in output.
 	SetIncludeHeaders(true)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4520,12 +4520,12 @@ func TestStaticTabularOutputParsingOfWithinComponentLinkages(t *testing.T) {
 	SetProduceIGExtendedOutput(true)
 	// Indicates whether annotations are included in output.
 	SetIncludeAnnotations(true)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := "|"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4616,12 +4616,12 @@ func TestTabularOutputDefaultExample(t *testing.T) {
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4713,12 +4713,12 @@ func TestTabularOutputComplexMultilevelNesting(t *testing.T) {
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4810,12 +4810,12 @@ func TestTabularOutputBasicComponentPairs(t *testing.T) {
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4879,12 +4879,12 @@ func TestTabularOutputBasicComponentPairAndWithinComponentCombinations(t *testin
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -4948,12 +4948,12 @@ func TestTabularOutputBasicComponentPairAndWithinComponentCombinationsAndNestedS
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -5017,12 +5017,12 @@ func TestTabularOutputStandardStatementComponentPairs(t *testing.T) {
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -5086,12 +5086,12 @@ func TestTabularOutputComplexNestedCombinationsWithoutComponentPairs(t *testing.
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -5155,12 +5155,12 @@ func TestTabularOutputComplexNestedCombinationsWithComponentPairs(t *testing.T) 
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -5224,12 +5224,12 @@ func TestTabularOutputNestedCombinationsComponentLevelNestingAndComponentPairs(t
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -5292,12 +5292,12 @@ func TestTabularOutputLogicalOperatorsNeighbouringStatementsComponentPairs(t *te
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -5360,12 +5360,12 @@ func TestTabularOutputComponentPairsInNestedComponents(t *testing.T) {
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -5428,12 +5428,12 @@ func TestTabularOutputComponentPairsInNestedComponentsIGCore(t *testing.T) {
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
@@ -5497,12 +5497,12 @@ func TestTabularOutputExpandComponentCombinationsWithMissingParentheses(t *testi
 	SetIncludeAnnotations(true)
 	// Deactivate DoV
 	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
 
 	// Take separator for Google Sheets output
 	separator := ";"
 
-	// No shared elements
-	INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
 	// Test for correct configuration for static output
 	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
 		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")

@@ -53,17 +53,3 @@ func moveElementToLastPosition(elementToMove string, arrayToModify []string, add
 	}
 	return arrayToModify
 }
-
-/*
-Stringifies arrays of slices in whitespace-separated string. Does not add whitespace at beginning or end.
-*/
-func stringifySlices(elements []string) string {
-	outString := ""
-	for i, v := range elements {
-		outString += v
-		if i < len(elements)-1 {
-			outString += " "
-		}
-	}
-	return outString
-}

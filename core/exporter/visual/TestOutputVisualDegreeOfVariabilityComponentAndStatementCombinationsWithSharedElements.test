@@ -1,0 +1,42 @@
+{
+"name": "DoV: 18",
+"level": 1, "dov": "18", 
+"children": [
+{"name": "AND",
+"children": [{"name": "certifying agent", "comp": "A", "level": 1, "dov": "1"},
+{"name": "OR",
+"children": [{"name": "borrower", "comp": "A", "level": 1, "dov": "1"},
+{"name": "wife", "comp": "A", "level": 1, "dov": "1"}], "comp": "A", "level": 1, "dov": "3"}], "comp": "A", "level": 1, "dov": "3"},
+{"name": "investigate", "comp": "I", "level": 1, "dov": "1"},
+{"name": "wAND",
+"children": [{"name": "OR",
+"children": [{"name": "complaints of noncompliance with the Act concerning", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "complaints of noncompliance with the regulations of this part concerning", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "3"}, {"name": "AND",
+"children": [{"name": "concerning production [operations] and as well as", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "concerning handling operations as well as", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "XOR",
+"children": [{"name": "as well as shipping", "comp": "Bdir", "level": 1, "dov": "1"},
+{"name": "as well as packing facilities", "comp": "Bdir", "level": 1, "dov": "1"}], "comp": "Bdir", "level": 1, "dov": "2"}], "comp": "Bdir", "level": 1, "dov": "4"},
+{"name": "may", "comp": "M", "level": 1, "dov": "1"},
+{"name": "XOR",
+"children": [{
+"name": "Cac",
+"level": 2, "dov": "1", 
+"children": [
+{"name": "actor2", "comp": "A", "level": 2, "dov": "1"},
+{"name": "aim2", "comp": "I", "level": 2, "dov": "1"}
+]
+},
+{
+"name": "Cac",
+"level": 2, "dov": "1", 
+"children": [
+{"name": "actor3", "comp": "A", "level": 2, "dov": "1"},
+{"name": "aim3", "comp": "I", "level": 2, "dov": "1"}
+]
+}], "comp": "Cac", "level": 1, "dov": "2"},
+{"name": "XOR",
+"children": [{"name": "for compliance with the Act", "comp": "Cex", "level": 1, "dov": "1"},
+{"name": "for compliance with the regulations in this part", "comp": "Cex", "level": 1, "dov": "1"}], "comp": "Cex", "level": 1, "dov": "2"}
+]
+}

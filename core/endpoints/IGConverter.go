@@ -29,7 +29,7 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 
 	Println(" Step: Parse input statement")
 	// Explicitly activate printing of shared elements
-	//exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+	tabular.SetIncludeSharedElementsInTabularOutput(true)
 
 	// Parse IGScript statement into tree
 	stmts, err := parser.ParseStatement(statement)
@@ -64,6 +64,9 @@ Returns Visual tree structure as string, and error (defaults to tree.PARSING_NO_
 func ConvertIGScriptToVisualTree(statement string, stmtId string, filename string) (string, tree.ParsingError) {
 
 	Println(" Step: Parse input statement")
+
+	// Explicitly activate printing of shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(true)
 
 	// Parse IGScript statement into tree
 	stmts, err := parser.ParseStatement(statement)

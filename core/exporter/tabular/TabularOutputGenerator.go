@@ -185,12 +185,12 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 				// Provide default values for left and right elements (potentially used hereafter)
 				leftString := ""
 				rightString := ""
-				// If shared elements are to be included (based on configuration, extract those ...
-				if INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT {
+				// If shared elements are to be included (based on configuration, extract those ...)
+				if IncludeSharedElementsInTabularOutput() {
 					// Prepare left and right shared elements by stringifying
-					leftString = stringifySlices(statement[componentIdx].GetSharedLeft())
-					// but don't append whitespace just yet - depends on matching of shared strings later
-					rightString = stringifySlices(statement[componentIdx].GetSharedRight())
+					leftString = shared.StringifySlices(statement[componentIdx].GetSharedLeft())
+					// ... but don't append whitespace just yet - depends on matching of shared strings later
+					rightString = shared.StringifySlices(statement[componentIdx].GetSharedRight())
 					if rightString != "" {
 						// Add preceding whitespace
 						rightString = " " + rightString

@@ -85,3 +85,18 @@ func TestAggregateIfGreaterThan(t *testing.T) {
 	}
 
 }
+
+/*
+Tests stringifying string slices.
+*/
+func TestStringifySlices(t *testing.T) {
+
+	slc := []string{"first", "second", "third"}
+
+	out := StringifySlices(slc)
+
+	if out != "first second third" {
+		t.Fatal("Stringifying of slices failed. Result: " + out)
+	}
+
+}

@@ -10,9 +10,10 @@ import (
 )
 
 /*
-Tests the generation of basic tree output for visual output.
+Tests the generation of basic tree output for visual output. Suppresses shared
+elements in output.
 */
-func TestVisualOutputBasic(t *testing.T) {
+func TestVisualOutputBasicWithoutSharedElements(t *testing.T) {
 
 	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
@@ -34,6 +35,8 @@ func TestVisualOutputBasic(t *testing.T) {
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -58,7 +61,82 @@ func TestVisualOutputBasic(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := os.ReadFile("TestOutputVisualTreeOutputBasic.test")
+	content, err2 := os.ReadFile("TestOutputVisualTreeOutputBasicWithoutSharedElements.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := tabular.WriteToFile("errorOutput.error", outputString, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests the generation of basic tree output for visual output. Includes shared
+elements in output.
+*/
+func TestVisualOutputBasicWithSharedElements(t *testing.T) {
+
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// Activation condition 1
+		"Cac{E(Program Manager) F(is) P((approved [AND] committed))} " +
+		// Activation condition 2
+		"Cac{A(NOP Official) I(recognizes) Bdir(Program Manager)}"
+
+	// Deactivate annotations
+	tabular.SetIncludeAnnotations(false)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(true)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	tabular.SetIncludeDegreeOfVariability(false)
+	// Activate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(true)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(), tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputVisualTreeOutputBasicWithSharedElements.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -107,6 +185,8 @@ func TestVisualOutputNestedProperties(t *testing.T) {
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -179,6 +259,8 @@ func TestVisualOutputAnnotations(t *testing.T) {
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -440,6 +522,8 @@ func TestVisualOutputBasicNonBinaryTree(t *testing.T) {
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -506,6 +590,8 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -555,8 +641,9 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 
 /*
 Tests multiple combinations embedded in second level phrase/side of first-order statement.
+Includes shared elements in output.
 */
-func TestVisualOutputMultiLevelEmbeddedCombinations(t *testing.T) {
+func TestVisualOutputMultiLevelEmbeddedCombinationsWithSharedElements(t *testing.T) {
 
 	// Entry containing multiple combinations on right side of first-order combination
 	text := "Cex(( left1 [XOR] shared (left [AND] right) via (left2 [XOR] right2)))"
@@ -569,6 +656,8 @@ func TestVisualOutputMultiLevelEmbeddedCombinations(t *testing.T) {
 	tree.SetBinaryPrinting(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Activate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(true)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -593,7 +682,73 @@ func TestVisualOutputMultiLevelEmbeddedCombinations(t *testing.T) {
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err2 := os.ReadFile("TestOutputVisualMultiCombinationsPhrase.test")
+	content, err2 := os.ReadFile("TestOutputVisualMultiCombinationsPhraseWithSharedElements.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", outputString)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := tabular.WriteToFile("errorOutput.error", outputString, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests multiple combinations embedded in second level phrase/side of first-order statement.
+Suppresses shared elements in output.
+*/
+func TestVisualOutputMultiLevelEmbeddedCombinationsWithoutSharedElements(t *testing.T) {
+
+	// Entry containing multiple combinations on right side of first-order combination
+	text := "Cex(( left1 [XOR] shared (left [AND] right) via (left2 [XOR] right2)))"
+
+	// Deactivate annotations
+	tabular.SetIncludeAnnotations(false)
+	// Activate flat printing
+	tree.SetFlatPrinting(true)
+	// Activate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate DoV
+	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	// Generate tree output
+	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(), tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err1.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	}
+
+	outputString := output.String()
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputVisualMultiCombinationsPhraseWithoutSharedElements.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -634,6 +789,8 @@ func TestVisualOutputDefaultExample(t *testing.T) {
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -699,6 +856,8 @@ func TestVisualOutputDefaultExampleActivationConditionsFirst(t *testing.T) {
 	tree.SetMoveActivationConditionsToFront(true)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -1089,6 +1248,8 @@ func TestVisualOutputModeratelyComplexStatementWithNestedCombinationsPropertiesA
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -1221,6 +1382,8 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -1289,6 +1452,8 @@ func TestVisualOutputHigherOrderStatementNestedComponentCombinationsDefaultExamp
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(true)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -1425,6 +1590,8 @@ func TestVisualOutputExcessiveSymbolsOrMissingWhitespaceInNestedComponentCombina
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -1676,9 +1843,7 @@ func TestVisualOutputNestedCombinationsComponentLevelNestingAndComponentPairs(t 
 }
 
 /*
-Tests visual output for multi-level pair combinations
-
-TODO Fix in tabular layout mode
+Tests visual output for multi-level pair combinations.
 */
 func TestVisualOutputMultiLevelComponentPair(t *testing.T) {
 
@@ -1821,6 +1986,8 @@ func TestVisualOutputComponentPairsInNestedComponents(t *testing.T) {
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(false)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -1868,8 +2035,9 @@ func TestVisualOutputComponentPairsInNestedComponents(t *testing.T) {
 
 /*
 Tests visual output for degree of variability with component and statement combinations.
+Suppresses shared elements in output.
 */
-func TestVisualOutputDegreeOfVariabilityComponentAndStatementCombinations(t *testing.T) {
+func TestVisualOutputDegreeOfVariabilityComponentAndStatementCombinationsWithoutSharedElements(t *testing.T) {
 
 	// Statement with various combinations
 	text := "A(certifying agent [AND] (borrower [OR] wife)) M(may) I(investigate) " +
@@ -1890,6 +2058,8 @@ func TestVisualOutputDegreeOfVariabilityComponentAndStatementCombinations(t *tes
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(true)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
@@ -1912,7 +2082,79 @@ func TestVisualOutputDegreeOfVariabilityComponentAndStatementCombinations(t *tes
 	fmt.Println("Generated output: " + outputString)
 
 	// Read reference file
-	content, err3 := os.ReadFile("TestOutputVisualDegreeOfVariabilityComponentAndStatementCombinations.test")
+	content, err3 := os.ReadFile("TestOutputVisualDegreeOfVariabilityComponentAndStatementCombinationsWithoutSharedElements.test")
+	if err3 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err4 := tabular.WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests visual output for degree of variability with component and statement combinations.
+Includes shared elements in output.
+*/
+func TestVisualOutputDegreeOfVariabilityComponentAndStatementCombinationsWithSharedElements(t *testing.T) {
+
+	// Statement with various combinations
+	text := "A(certifying agent [AND] (borrower [OR] wife)) M(may) I(investigate) " +
+		"Bdir((complaints of noncompliance with the (Act [OR] regulations of this part) " +
+		"concerning " +
+		"(production [operations] and [AND] handling operations) as well as (shipping [XOR] packing facilities)) " +
+		") " +
+		"Cac{Cac{A(actor2) I(aim2)} [XOR] Cac{A(actor3) I(aim3)}} " +
+		"Cex(for compliance with the (Act [XOR] regulations in this part))."
+
+	// Deactivate annotations
+	tabular.SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	tabular.SetIncludeDegreeOfVariability(true)
+	// Activate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(true)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
+		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err2.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating node tree:", err2)
+	}
+
+	outputString := output
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err3 := os.ReadFile("TestOutputVisualDegreeOfVariabilityComponentAndStatementCombinationsWithSharedElements.test")
 	if err3 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}
@@ -1959,6 +2201,8 @@ func TestVisualOutputDegreeOfVariabilityComponentPairCombinations(t *testing.T) 
 	tree.SetMoveActivationConditionsToFront(false)
 	// Deactivate DoV
 	tabular.SetIncludeDegreeOfVariability(true)
+	// Deactivate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(false)
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)

@@ -33,7 +33,21 @@ var DEFAULT_OUTPUT_TYPES = OUTPUT_TYPE_GOOGLE_SHEETS
 /*
 Indicates whether shared elements are included in output
 */
-var INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+var include_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
+
+/*
+Sets indicator whether shared elements are included in tabular output.
+*/
+func SetIncludeSharedElementsInTabularOutput(includeSharedElements bool) {
+	include_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = includeSharedElements
+}
+
+/*
+Indicates whether shared elements are included in tabular output.
+*/
+func IncludeSharedElementsInTabularOutput() bool {
+	return include_SHARED_ELEMENTS_IN_TABULAR_OUTPUT
+}
 
 /*
 Indicates whether the coding follows the IG Core decomposition level (or IG Extended)

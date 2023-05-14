@@ -47,3 +47,17 @@ func FindMaxValue(arr []int, defaultValue int) int {
 		return defaultValue
 	}
 }
+
+/*
+Stringifies slices in whitespace-separated string. Does not add whitespace at beginning or end.
+*/
+func StringifySlices(elements []string) string {
+	outString := ""
+	for i, v := range elements {
+		outString += v
+		if i < len(elements)-1 {
+			outString += " "
+		}
+	}
+	return outString
+}

@@ -215,9 +215,29 @@ func (n *Node) PrintNodeTree(stmt *Statement, printFlat bool, printBinary bool, 
 				out.WriteString(TREE_PRINTER_OPEN_BRACE)
 				out.WriteString(TREE_PRINTER_KEY_NAME)
 				out.WriteString(TREE_PRINTER_EQUALS)
-				// Actual content (including escaping particular symbols)
+				// Actual content (including escaping particular symbols - and consideration of shared elements)
 				out.WriteString("\"")
-				out.WriteString(shared.EscapeSymbolsForExport(n.Entry.(string)))
+				outEntry := ""
+				// Check for left shared elements
+				if IncludeSharedElementsInVisualOutput() && n.GetSharedLeft() != nil {
+					outLeft := shared.StringifySlices(n.GetSharedLeft())
+					if outLeft != "" {
+						// If non-empty, prepend left shared part and separate from main entry value
+						outEntry += outLeft + " "
+					}
+				}
+				// Append actual entry
+				outEntry += n.Entry.(string)
+				// Check for right shared elements
+				if IncludeSharedElementsInVisualOutput() && n.GetSharedRight() != nil {
+					outRight := shared.StringifySlices(n.GetSharedRight())
+					if outRight != "" {
+						// If non-empty, append right shared part and separate from main entry value
+						outEntry += " " + outRight
+					}
+				}
+				// Write actual compound entry including left and right shared parts, including escaping of selected symbols
+				out.WriteString(shared.EscapeSymbolsForExport(outEntry))
 				out.WriteString("\"")
 
 				// Ensure that entry is closed

@@ -1,0 +1,15 @@
+{
+"name": "",
+"level": 0, 
+"children": [
+{"name": "XOR",
+"children": [{"name": "left1", "comp": "Cex", "level": 0},
+{"name": "wAND",
+"children": [{"name": "AND",
+"children": [{"name": "shared left via", "comp": "Cex", "level": 0},
+{"name": "shared right via", "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0},
+{"name": "XOR",
+"children": [{"name": "via left2", "comp": "Cex", "level": 0},
+{"name": "via right2", "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0}], "comp": "Cex", "level": 0}
+]
+}

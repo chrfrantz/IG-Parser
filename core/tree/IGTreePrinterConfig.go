@@ -58,3 +58,23 @@ Indicates whether activation condition output should be moved to the top in the 
 func MoveActivationConditionsToFront() bool {
 	return moveActivationConditionsToFront
 }
+
+/*
+Indicates whether shared elements (i.e., preceding or following core entry in the case of scoped combinations)
+are included in output. Example: Bdir(sharedLeft (leftOption [XOR] rightOption) rightShared)
+*/
+var includeSharedElementsInVisualOutput = true
+
+/*
+Indicates whether shared elements are included in visual output.
+*/
+func IncludeSharedElementsInVisualOutput() bool {
+	return includeSharedElementsInVisualOutput
+}
+
+/*
+Sets visual output parameter indicating whether shared elements are included in output.
+*/
+func SetIncludeSharedElementsInVisualOutput(includeSharedElements bool) {
+	includeSharedElementsInVisualOutput = includeSharedElements
+}
