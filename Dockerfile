@@ -19,6 +19,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mai
 FROM scratch
 
 LABEL maintainer="cf@christopherfrantz.org"
+LABEL stage=runner
 
 WORKDIR /
 

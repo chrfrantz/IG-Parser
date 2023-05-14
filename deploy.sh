@@ -26,6 +26,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Delete runtime image generated as part of previous build process
+echo "Deleting image of undeployed IG Parser instance ..."
+docker image prune --filter label=stage=runner -f
+if [ $? -ne 0 ]; then
+  echo "Error when deleting runner images following undeploying. Ensure you are running the script with superuser permissions (e.g., sudo)."
+  exit 1
+fi
+
 # Pull latest version
 echo "Retrieving latest version ..."
 git pull
