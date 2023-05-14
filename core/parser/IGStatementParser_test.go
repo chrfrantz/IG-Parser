@@ -2955,17 +2955,19 @@ func TestSeparateComponentsNestedStatementsCombinationsAndComponentPairs(t *test
 }
 
 /*
-Tests extractComponentContent() function.
+Tests input with correct parentheses/braces counts, but wrong order (i.e., not matching).
+Tests the search exhaustion in #GetComponentContent().
 */
-/*func TestExtractComponentContent(t *testing.T) {
+func TestWrongParenthesisOrderButCorrectCount(t *testing.T) {
 
-	text := "A(content1)"
+	// Problem area is Bdir,p and Bdir (parentheses)
+	text := "A(actor) Bdir,p(left [AND] right)) Bdir((left [AND] right) Cac(condition) something else"
 
-	content, err := extractComponentContent(tree.ATTRIBUTES, false, text, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of content.")
+	// Test for error during parsing. Should pick up on ordering problem.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_UNABLE_TO_EXTRACT_COMPONENT_CONTENT {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_UNABLE_TO_EXTRACT_COMPONENT_CONTENT+", but returned error ", err)
 	}
 
-	fmt.Println(content)
-
-}*/
+}

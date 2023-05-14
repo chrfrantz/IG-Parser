@@ -462,6 +462,10 @@ const PARSING_ERROR_EMPTY_LEAF = "EMPTY_LEAF_VALUE"
 // Indicates that parentheses are umbalanced during parsing
 const PARSING_ERROR_IMBALANCED_PARENTHESES = "IMBALANCED_PARENTHESES"
 
+// Indicates inability to extract component content
+// (likely due to incorrect parenthesis/braces ordering/hierarchy -- see extractComponentContent())
+const PARSING_ERROR_UNABLE_TO_EXTRACT_COMPONENT_CONTENT = "UNABLE_TO_EXTRACT_COMPONENT_CONTENT"
+
 // Indicates that component was not found during preprocessing
 const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 

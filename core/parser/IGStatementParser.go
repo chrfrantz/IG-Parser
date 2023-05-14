@@ -1272,7 +1272,6 @@ func extractComponentContent(component string, propertyComponent bool, input str
 			r, err = regexp.Compile(componentRoot + COMPONENT_SUFFIX_SYNTAX + tree.PROPERTY_SYNTAX_SUFFIX + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
 			if err != nil {
 				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
-				//log.Fatal("Error", err.Error())
 			}
 
 		}
@@ -1293,7 +1292,8 @@ func extractComponentContent(component string, propertyComponent bool, input str
 		if len(result) > 0 {
 			// Start search after potential suffix and annotation elements
 			startPos = result[0][0] + len(resultContent) - len(leftPar)
-			Println("Start position: ", startPos)
+			Println("Component: ", resultContent)
+			Println("Search start position: ", startPos)
 		} else {
 			// Returns component strings once opening parenthesis symbol is no longer found
 			return componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
@@ -1307,6 +1307,8 @@ func extractComponentContent(component string, propertyComponent bool, input str
 
 		for i, letter := range processedString[startPos:] {
 
+			//Println("Letter to iterate over in parentheses/braces search: " + string(letter))
+
 			switch string(letter) {
 			case leftPar:
 				parCount++
@@ -1317,7 +1319,7 @@ func extractComponentContent(component string, propertyComponent bool, input str
 					leadString := resultContent[:len(resultContent)-len(leftPar)]
 					// String containing content only (including parentheses)
 					contentString := processedString[startPos : startPos+i+1]
-					Println(contentString)
+					Println("Identified component content: " + contentString)
 					// Store candidate string before cutting off potential leading component identifier (if nested statement)
 					candidateString := leadString + contentString
 					if !strings.HasSuffix(component, tree.PROPERTY_SYNTAX_SUFFIX) && !propertyComponent &&
@@ -1344,6 +1346,14 @@ func extractComponentContent(component string, propertyComponent bool, input str
 			if stop {
 				break
 			}
+		}
+		if !stop {
+			// Could not find terminating parenthesis/brace if stop is not set but input string exhausted
+			// Common issue: they may have passed parentheses count as part of initial validation, but may not be in correct order.
+			// Example: Bdir,p(left [AND] right)) Bdir((left [AND] right)
+			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNABLE_TO_EXTRACT_COMPONENT_CONTENT,
+				ErrorMessage: "Could not determine component content of component '" + resultContent + "'. " +
+					"Please review parentheses/braces in input '" + processedString + "'."}
 		}
 	}
 }
