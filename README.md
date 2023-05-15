@@ -51,7 +51,7 @@ The scope of a component is specified by opening and closing parentheses.
 All components of a statement are annotated correspondingly, without concern for order, or repetition. 
 The parser further tolerates multiple component annotations of the same kind. Multiple Attributes, 
 for example (e.g., `A(Farmer) D(must) I(comply) A(Certifier)`, are effectively interpreted as a combination (i.e., 
-`A((Farmer [AND] Certifier)) D(must) I(comply)`) in the parsing process.  
+`A(Farmer [AND] Certifier) D(must) I(comply)`) in the parsing process.  
 
 Any symbols outside the encoded components and combinations of components are ignored by the parser.
 
@@ -86,31 +86,34 @@ Combinations*. As indicated above, separate components of the same type are inte
 AND-combined. To explicitly specify the nature of the logical relationship (e.g., conjunction, 
 inclusive/exclusive disjunction), combinations need to be explicitly specified in the following format:
 
-`componentSymbol((componentValue1 [logicalOperator] componentValue2))`
+`componentSymbol(componentValue1 [logicalOperator] componentValue2)`
 
-Example: 
-* `A((actor [XOR] owner))`
-* `I((report [XOR] review))`
+Note: Per default, combinations are scoped to cover both component values (i.e., `componentValue1` and `componentValue2`). In practice, it may be relevant to scope combinations more narrowly within a statement to capture the statement semantics, e.g., `A((production [AND] handling) responsible)` reflecting `production responsible and handling responsible`.
+
+Examples: 
+* `A(actor [XOR] owner)` (Alternative: `A((actor [XOR] owner))`)
+* `A(involved (driver [OR] passenger))` (showcasing partial scoping of combination -- resulting in `involved driver or involved passenger`) 
+* `I(report [XOR] review)`
 
 Component combinations can be nested arbitrarily deep, i.e., any component can be a combination itself, for example:
 
-`componentSymbol((componentValue1 [logicalOperator] (componentValue2 [logicalOperator] componentValue3)))`
+`componentSymbol(componentValue1 [logicalOperator] (componentValue2 [logicalOperator] componentValue3))`
 
 Example:
-* `A((certifier [AND] (owner [XOR] inspector)))` 
-* `A(((operator [OR] certifier) [AND] (owner [XOR] inspector)))`
+* `A(certifier [AND] (owner [XOR] inspector))` 
+* `A((operator [OR] certifier) [AND] (owner [XOR] inspector))`
 
-Where more than two components are linked by the same logical operator, the indication of precedence is optional. 
+Where components are linked by the same logical operator, the indication of precedence is optional. 
 
 Example:
-* `A((certifier [AND] owner [AND] inspector))`
+* `A(certifier [AND] owner [AND] inspector)`
 
 Supported logical operators:
 
 * `[AND]` - conjunction (i.e., "and")
 * `[OR]` - inclusive disjunction (i.e., "and/or")
 * `[XOR]` - exclusive disjunction (i.e., "either or")
-* `[NOT]` - negation (i.e., "not")
+* `[NOT]` - negation (i.e., "not") -- Note: not yet fully supported by parser
 
 Invalid operators (e.g., `[AN]`) will be ignored in the parsing process.
 
