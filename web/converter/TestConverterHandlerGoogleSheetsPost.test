@@ -92,96 +92,68 @@
                 
 
                 
-                content = document.getElementById("rawStmt").value;
-                if(content != null) {
-                    localStorage.setItem("rawStmt", content);
+                saveValue("rawStmt")
+
+                
+                
+
+                
+
+                
+                saveValue("stmtId")
+
+                
+                saveCheckbox("igExtended")
+
+                
+                saveCheckbox("annotations")
+
+                
+                saveCheckbox("includeHeaders")
+
+                
+                saveValue("outputType")
+
+                
+
+                
+                saveCheckbox("dov")
+
+                
+                saveCheckbox("propertyTree")
+
+                
+                saveCheckbox("binaryTree")
+
+                
+                saveCheckbox("actCondTop")
+
+                
+                saveValue("canvasHeight")
+
+                
+                saveValue("canvasWidth")
+
+            }
+
+            
+
+            function saveCheckbox(fieldId) {
+                let tmpField = document.getElementById(fieldId);
+                if(tmpField != null) {
+                    localStorage.setItem(fieldId, tmpField.checked);
                     
                 }
+            }
 
-                
-                
+            
 
-                
-
-                
-                let tmpId = document.getElementById("stmtId");
-                if(tmpId != null) {
-                    localStorage.setItem("stmtId", tmpId.value);
+            function saveValue(fieldId) {
+                let tmpField = document.getElementById(fieldId);
+                if(tmpField != null) {
+                    localStorage.setItem(fieldId, tmpField.value);
                     
                 }
-
-                
-                let tmpExt = document.getElementById("igExtended");
-                if(tmpExt != null) {
-                    localStorage.setItem("igExtended", tmpExt.checked);
-                    
-                }
-
-                
-                let tmpAnno = document.getElementById("annotations");
-                if(tmpAnno != null) {
-                    localStorage.setItem("annotations", tmpAnno.checked);
-                    
-                }
-
-                
-                let tmpHdr = document.getElementById("includeHeaders");
-                if(tmpHdr != null) {
-                    localStorage.setItem("includeHeaders", tmpHdr.checked);
-                    
-                }
-
-                
-                let tmpType = document.getElementById("outputType");
-                if(tmpType != null) {
-                    localStorage.setItem("outputType", tmpType.value);
-                    
-                }
-
-                
-
-                
-                let tmpDov = document.getElementById("dov");
-                if(tmpDov != null) {
-                    localStorage.setItem("dov", tmpDov.checked);
-                    
-                }
-
-                
-                let tmpProp = document.getElementById("propertyTree");
-                if(tmpProp != null) {
-                    localStorage.setItem("propertyTree", tmpProp.checked);
-                    
-                }
-
-                
-                let tmpBin = document.getElementById("binaryTree");
-                if(tmpBin != null) {
-                    localStorage.setItem("binaryTree", tmpBin.checked);
-                    
-                }
-
-                
-                let tmpAct = document.getElementById("actCondTop");
-                if(tmpAct != null) {
-                    localStorage.setItem("actCondTop", tmpAct.checked);
-                    
-                }
-
-                
-                let tmpHgt = document.getElementById("canvasHeight");
-                if(tmpHgt != null) {
-                    localStorage.setItem("canvasHeight", tmpHgt.value);
-                    
-                }
-
-                
-                let tmpWdt = document.getElementById("canvasWidth");
-                if(tmpWdt != null) {
-                    localStorage.setItem("canvasWidth", tmpWdt.value);
-                    
-                }
-
             }
 
             
@@ -197,143 +169,72 @@
                     copyEditorContentToTextArea();
                     
                 }
+
                 
-                if(localStorage.getItem("rawStmt") != null && document.getElementById("rawStmt") != null) {
-                    let content = localStorage.getItem("rawStmt");
-                    document.getElementById("rawStmt").value = content;
-                    
+                loadValue("rawStmt")
+
+                
+
+                
+                loadValue("stmtId")
+
+                
+                loadCheckbox("igExtended")
+
+                
+                loadCheckbox("annotations")
+
+                
+                loadCheckbox("includeHeaders")
+
+                
+                loadValue("outputType")
+
+                
+
+                
+                loadCheckbox("dov")
+
+                
+                loadCheckbox("propertyTree")
+
+                
+                loadCheckbox("binaryTree")
+
+                
+                loadCheckbox("actCondTop")
+
+                
+                loadValue("canvasHeight")
+
+                
+                loadValue("canvasWidth")
+
+            }
+
+            
+
+            function loadValue(fieldId) {
+                if(localStorage.getItem(fieldId) != null && document.getElementById(fieldId) != null) {
+                    document.getElementById(fieldId).value = localStorage.getItem(fieldId);
                 }
+            }
 
-                
+            
 
-                
-                if(localStorage.getItem("stmtId") != null && document.getElementById("stmtId") != null) {
-                    let content = localStorage.getItem("stmtId");
-                    document.getElementById("stmtId").value = content;
-                    
-                }
-
-                
-                if(localStorage.getItem("igExtended") != null && document.getElementById("igExtended") != null) {
-                    let content = localStorage.getItem("igExtended");
-                    if(content == "true") {
-                        document.getElementById("igExtended").checked = true;
+            function loadCheckbox(fieldId) {
+                if(localStorage.getItem(fieldId) != null && document.getElementById(fieldId) != null) {
+                    let content = localStorage.getItem(fieldId);
+                    if(content === "true") {
+                        document.getElementById(fieldId).checked = true;
                         
                     }
-                    if(content == "false") {
-                        document.getElementById("igExtended").checked = false;
-                        
-                    }
-                    
-                }
-
-                
-                if(localStorage.getItem("annotations") != null && document.getElementById("annotations") != null) {
-                    let content = localStorage.getItem("annotations");
-                    if(content == "true") {
-                        document.getElementById("annotations").checked = true;
-                        
-                    }
-                    if(content == "false") {
-                        document.getElementById("annotations").checked = false;
-                        
-                    }
-                    
-                }
-
-                
-                if(localStorage.getItem("includeHeaders") != null && document.getElementById("includeHeaders") != null) {
-                    let content = localStorage.getItem("includeHeaders");
-                    if(content == "true") {
-                        document.getElementById("includeHeaders").checked = true;
-                        
-                    }
-                    if(content == "false") {
-                        document.getElementById("includeHeaders").checked = false;
-                        
-                    }
-                    
-                }
-
-                
-                if(localStorage.getItem("outputType") != null && document.getElementById("outputType") != null) {
-                    let content = localStorage.getItem("outputType");
-                    document.getElementById("outputType").value = content;
-                    
-                }
-
-                
-
-                
-                if(localStorage.getItem("dov") != null && document.getElementById("dov") != null) {
-                    let content = localStorage.getItem("dov");
-                    if(content == "true") {
-                        document.getElementById("dov").checked = true;
-                        
-                    }
-                    if(content == "false") {
-                        document.getElementById("dov").checked = false;
+                    if(content === "false") {
+                        document.getElementById(fieldId).checked = false;
                         
                     }
                     
                 }
-
-                
-                if(localStorage.getItem("propertyTree") != null && document.getElementById("propertyTree") != null) {
-                    let content = localStorage.getItem("propertyTree");
-                    if(content == "true") {
-                        document.getElementById("propertyTree").checked = true;
-                        
-                    }
-                    if(content == "false") {
-                        document.getElementById("propertyTree").checked = false;
-                        
-                    }
-                    
-                }
-
-                
-                if(localStorage.getItem("binaryTree") != null && document.getElementById("binaryTree") != null) {
-                    let content = localStorage.getItem("binaryTree");
-                    if(content == "true") {
-                        document.getElementById("binaryTree").checked = true;
-                        
-                    }
-                    if(content == "false") {
-                        document.getElementById("binaryTree").checked = false;
-                        
-                    }
-                    
-                }
-
-                
-                if(localStorage.getItem("actCondTop") != null && document.getElementById("actCondTop") != null) {
-                    let content = localStorage.getItem("actCondTop");
-                    if(content == "true") {
-                        document.getElementById("actCondTop").checked = true;
-                        
-                    }
-                    if(content == "false") {
-                        document.getElementById("actCondTop").checked = false;
-                        
-                    }
-                    
-                }
-
-                
-                if(localStorage.getItem("canvasHeight") != null && document.getElementById("canvasHeight") != null) {
-                    let content = localStorage.getItem("canvasHeight");
-                    document.getElementById("canvasHeight").value = content;
-                    
-                }
-
-                
-                if(localStorage.getItem("canvasWidth") != null && document.getElementById("canvasWidth") != null) {
-                    let content = localStorage.getItem("canvasWidth");
-                    document.getElementById("canvasWidth").value = content;
-                    
-                }
-
             }
 
             
