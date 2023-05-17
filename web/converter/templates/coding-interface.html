@@ -163,20 +163,22 @@
             Loads the content stored in local storage into editor
              */
             function loadFormContent() {
-                // Load encoded statement
-                // If value is stored ...
-                if(localStorage.getItem("codedStmt") != null) {
-                    // ... populate editor content ...
-                    let content = localStorage.getItem("codedStmt");
-                    editor.setValue(content);
-                    // ... and update underlying text area
-                    copyEditorContentToTextArea();
-                    //console.log("Loading content " + content)
+                // Load encoded statement if overriding of browser storage is not set
+                if {{.OverrideSavedStmts}} === false {
+                    // If value is stored ...
+                    if (localStorage.getItem("codedStmt") != null) {
+                        // ... populate editor content ...
+                        let content = localStorage.getItem("codedStmt");
+                        editor.setValue(content);
+                        // ... and update underlying text area
+                        copyEditorContentToTextArea();
+                        //console.log("Loading content " + content)
+                    }
+
+                    // Load raw statement
+                    loadValue("rawStmt")
+
                 }
-
-                // Load raw statement
-                loadValue("rawStmt")
-
                 // Tabular-specific fields
 
                 // Load statement ID

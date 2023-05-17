@@ -191,19 +191,21 @@
 
             function loadFormContent() {
                 
-                
-                if(localStorage.getItem("codedStmt") != null) {
+                if  false  === false {
                     
-                    let content = localStorage.getItem("codedStmt");
-                    editor.setValue(content);
+                    if (localStorage.getItem("codedStmt") != null) {
+                        
+                        let content = localStorage.getItem("codedStmt");
+                        editor.setValue(content);
+                        
+                        copyEditorContentToTextArea();
+                        
+                    }
+
                     
-                    copyEditorContentToTextArea();
-                    
+                    loadValue("rawStmt")
+
                 }
-
-                
-                loadValue("rawStmt")
-
                 
 
                 

@@ -12,6 +12,8 @@ type ReturnStruct struct {
 	Error bool
 	// Message shown to user
 	Message string
+	// Override browser-saved values (if values are passed by URL parameters)
+	OverrideSavedStmts bool
 	// Original unparsed statement
 	RawStmt string
 	// Default raw statement (to support form reset)

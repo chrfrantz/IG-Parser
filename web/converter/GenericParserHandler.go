@@ -141,6 +141,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		Success:                   false,
 		Error:                     false,
 		Message:                   message,
+		OverrideSavedStmts:        false,
 		RawStmt:                   formValueRawStmt,
 		DefaultRawStmt:            shared.RAW_STATEMENT,
 		CodedStmt:                 formValueCodedStmt,
@@ -236,6 +237,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		if suc {
 			retStruct.RawStmt = val
 			resetValues = true
+			// Override browser-saved content
+			retStruct.OverrideSavedStmts = true
 		}
 
 		// Parameter: IG Script-coded statement - consider interaction with raw statement
@@ -246,6 +249,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 			if retStruct.CodedStmt != shared.ANNOTATED_STATEMENT && retStruct.RawStmt == shared.RAW_STATEMENT {
 				retStruct.RawStmt = ""
 			}
+			// Override browser-saved content
+			retStruct.OverrideSavedStmts = true
 		} else if resetValues {
 			// Reset value, since the default coded statement will likely not correspond.
 			retStruct.CodedStmt = ""
@@ -257,7 +262,11 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		val, suc = extractUrlParameters(r, shared.PARAM_STATEMENT_ID)
 		if suc {
 			retStruct.StmtId = val
+			// Override browser-saved content
+			retStruct.OverrideSavedStmts = true
 		}
+
+		// NOTE: The following parameters would be overridden by browser-saved values where existing!
 
 		// Parameter: Dynamic output
 		val, suc = extractUrlParameters(r, shared.PARAM_DYNAMIC_SCHEMA)
