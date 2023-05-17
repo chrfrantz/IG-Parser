@@ -228,6 +228,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		retStruct.StmtId = shared.STATEMENT_ID
 
 		// CHECK FOR URL PARAMETERS TO CUSTOMIZE EXECUTION
+		// NOTE: When using URL parameters, ensure to substitute all semicolons in URL parameters with %3B
 
 		// Set switch to indicate potential need to align raw and coded statement field entries
 		resetValues := false
