@@ -164,7 +164,7 @@
              */
             function loadFormContent() {
                 // Load encoded statement if overriding of browser storage is not set
-                if {{.OverrideSavedStmts}} === false {
+                if ({{.OverrideSavedStmts}} === false) {
                     // If value is stored ...
                     if (localStorage.getItem("codedStmt") != null) {
                         // ... populate editor content ...
