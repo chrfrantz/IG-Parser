@@ -503,7 +503,25 @@ func (n *Node) appendPropertyNodes(stringToPrepend string, stmt *Statement, prin
 								if entryAdded {
 									stringToAppendTo.WriteString(", ")
 								}
-								// Append each entry individually
+
+								// Check for different types of private nodes - can be node arrays (expanded component pairs), statements (single nested statements), or strings (primitive entries).
+								// If statement ...
+								if reflect.TypeOf(v.Entry) == reflect.TypeOf(&Statement{}) {
+									// Embed statement into node array (and let it be printed after that)
+									elem := []*Node{&Node{Entry: v.Entry}}
+									// Override entry for downstream processing
+									v.Entry = elem
+								}
+
+								// If private property is node array (i.e., actually complex) (or an embedded statement -- see above) ...
+								if reflect.TypeOf(v.Entry) == reflect.TypeOf([]*Node{}) {
+									// Flatten it into string ...
+									elem := v.Entry.([]*Node)[0].StringFlat()
+									// ... and override output
+									v.Entry = elem
+								}
+
+								// Append each entry individually as string
 								stringToAppendTo.WriteString(shared.EscapeSymbolsForExport(v.Entry.(string)))
 								entryAdded = true
 							}

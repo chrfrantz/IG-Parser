@@ -1,0 +1,12 @@
+{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "notification", "comp": "E", "level": 1},
+{"name": "shall", "comp": "M", "level": 1},
+{"name": "provide", "comp": "F", "level": 1},
+{"name": "bAND",
+"children": [{"name": "description of each noncompliance", "comp": "P", "level": 1}, {"name": "facts upon which the notification of noncompliance is based", "comp": "P", "level": 1},
+{"name": "date", "comp": "P", "level": 1, "prop": "private component, certified operation must rebut XOR correct noncompliance each, certified operation must submit documentation supporting bAND each such correction when correction is possible, date is defined Gregorian calendar"}], "comp": "P", "level": 1}
+]
+}
