@@ -236,7 +236,7 @@ In the following, you will find selected examples that highlight the practical u
 * Simple regulative statement: 
   * `A(Operator) D(must) I(comply) Bdir(with regulations)`
 * Component combination: 
-  * `A(Operator) D(must) I(comply [AND] respond) Bdir(with/to regulations)`
+  * `A(Operator) D(must) I(comply with [AND] respond to) Bdir(regulations)`
 * Component-level nesting: 
   * `A(Farmer) D(must) I(comply) with Bdir(provisions) Cac{A(Farmer) I(has lodged) for Bdir(application) Bdir,p(certification)}`
 * Component-level nesting over multiple levels: 
@@ -244,7 +244,7 @@ In the following, you will find selected examples that highlight the practical u
 * Component-level nesting on various components (e.g., Bdir and Cac) embedded in combinations of nested statements (Cac): 
   * `A(Program Manager) D(may) I(administer) Bdir(sanctions) Cac{Cac{A(Program Manager) I(suspects) Bdir{A(farmer) I(violates [OR] does not comply) with Bdir(regulations)}} [OR] Cac{A(Program Manager) I(has witnessed) Bdir,p(farmer's) Bdir(non-compliance) Cex(in the past)}}`
 * Complex statement; showcasing combined use of various features (e.g., component-level combinations, nested statement combinations (activation conditions, Or else)): 
-  * `A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), D(must) I(inspect), I(review [AND] (revise [AND] resubmit)) Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) Cex(for compliance with the (Act or [XOR] regulations in this part)) if Cac{Cac{A(Program Manager) I(suspects [OR] establishes) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}, or else O{O{A,p(Manager's) A(supervisor) D(may) I(suspend [XOR] revoke) Bdir,p(Program Manager's) Bdir(authority)} [XOR] O{A(regional board) D(may) I(warn [OR] fine) Bdir,p(violating) Bdir(Program Manager)}}`
+  * `A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), D(must) I(inform), I(review [AND] (recertify [XOR] sanction)) Bdir(approved (certified production [AND] handling operations [AND] accredited certifying agents)) Cex(according to the guidelines provided in the (Act [XOR] regulations in this part)) if Cac{Cac{A(Program Manager) I(suspects [OR] establishes) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}, or else O{O{A,p(Manager's) A(supervisor) D(may) I(suspend [XOR] revoke) Bdir,p(Program Manager's) Bdir(authority)} [XOR] O{A(regional board) D(may) I(warn [OR] fine) Bdir,p(violating) Bdir(Program Manager)}}`
 * Object-Property Relationships; showcasing linkage of private nodes with specific component instances (especially where implicit component-level combinations occur), alongside a shared property that apply to both objects (note that for this example, the AND-linkage between the different direct objects is implicit):
   * `A,p(Certified) A(agent) D(must) I(request) Bdir,p(independently) Bdir1,p(authorized) Bdir1(report) and Bdir2,p(audited) Bdir2(financial documents).`
 * Semantic annotations; showcasing the basic use of annotations on arbitrary components:
