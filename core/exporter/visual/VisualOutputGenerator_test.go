@@ -1758,7 +1758,7 @@ func TestVisualOutputComponentLevelNestingInNestedComponentCombinationsInCompone
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualComponentLevelNestingInNestedComponentCombinationsInComponentPairs.test")
 	if err3 != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
 	}
 
 	// Extract expected output
@@ -1821,7 +1821,7 @@ func TestVisualOutputNestedCombinationsComponentLevelNestingAndComponentPairs(t 
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualNestedCombinationsComponentLevelNestingAndComponentPairs.test")
 	if err3 != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
 	}
 
 	// Extract expected output
@@ -1884,7 +1884,7 @@ func TestVisualOutputMultiLevelComponentPair(t *testing.T) {
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualMultiLevelComponentPair.test")
 	if err3 != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
 	}
 
 	// Extract expected output
@@ -1947,7 +1947,7 @@ func TestVisualOutputComplexNestedCombinationsWithComponentPairs(t *testing.T) {
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualComplexNestedCombinationsWithComponentPairs.test")
 	if err3 != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
 	}
 
 	// Extract expected output
@@ -2012,7 +2012,7 @@ func TestVisualOutputComponentPairsInNestedComponents(t *testing.T) {
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualComponentPairsInNestedComponents.test")
 	if err3 != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
 	}
 
 	// Extract expected output
@@ -2084,7 +2084,7 @@ func TestVisualOutputDegreeOfVariabilityComponentAndStatementCombinationsWithout
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualDegreeOfVariabilityComponentAndStatementCombinationsWithoutSharedElements.test")
 	if err3 != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
 	}
 
 	// Extract expected output
@@ -2156,7 +2156,7 @@ func TestVisualOutputDegreeOfVariabilityComponentAndStatementCombinationsWithSha
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualDegreeOfVariabilityComponentAndStatementCombinationsWithSharedElements.test")
 	if err3 != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
 	}
 
 	// Extract expected output
@@ -2227,7 +2227,82 @@ func TestVisualOutputDegreeOfVariabilityComponentPairCombinations(t *testing.T) 
 	// Read reference file
 	content, err3 := os.ReadFile("TestOutputVisualDegreeOfVariabilityComponentPairCombinations.test")
 	if err3 != nil {
-		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err4 := tabular.WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests visual output for nested properties, including component pairs, simple nested statements and primitive properties.
+*/
+func TestVisualOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAndPrimitiveProperty(t *testing.T) {
+
+	// Statement with multi-level nesting, combinations as well as component pairs
+	text := "Such E(notification) M(shall) F(provide): (1) A P(description of each noncompliance); " +
+		"(2) The P(facts upon which the notification of noncompliance is based); and " +
+		"(3) The P1(date) " +
+		// Component-pair property
+		"P1,p{by which the A(certified operation) D(must) " +
+		"{I(rebut [XOR] correct) Bdir,p(each) Bdir(noncompliance) [AND] I(submit) Bdir,p(supporting) " +
+		"Bdir(documentation) of Bdir,p(each such correction) Cac(when correction is possible)}} " +
+		// Primitive property
+		"P1,p(private component) " +
+		// nested property
+		"P1,p{where E(date) F(is defined) in the P(Gregorian calendar)}."
+
+	// Deactivate annotations
+	tabular.SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	tabular.SetIncludeDegreeOfVariability(false)
+	// Activate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(true)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
+		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err2.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating node tree:", err2)
+	}
+
+	outputString := output
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err3 := os.ReadFile("TestOutputVisualPrivateNestedProperties.test")
+	if err3 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
 	}
 
 	// Extract expected output

@@ -312,16 +312,73 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 				if !ProduceDynamicOutput() && statement[componentIdx].HasPrivateNodes() {
 					for _, privateNodeValue := range statement[componentIdx].PrivateNodeLinks {
 
-						// Check for existing private nodes ...
-						existing := entryMap[privateNodeValue.GetComponentName()]
-						if len(existing) > 0 {
-							// ... and append if necessary
-							existing += cellValueSeparator
+						// If iterated private node is of type statement (single nested statement),
+						// embed into node slice to enforce corresponding processing ...
+						if reflect.TypeOf(privateNodeValue.Entry) == reflect.TypeOf(&tree.Statement{}) {
+							tempNode := []*tree.Node{&tree.Node{Entry: privateNodeValue.Entry.(*tree.Statement)}}
+							// Reassign node-slice-embedded statement to iterated item
+							privateNodeValue.Entry = tempNode
 						}
-						// Add actual value
-						existing += privateNodeValue.Entry.(string)
-						// (Re)Assign to entry to be output
-						entryMap[privateNodeValue.GetComponentName()] = existing
+
+						// Nested private properties
+						if reflect.TypeOf(privateNodeValue.Entry) == reflect.TypeOf([]*tree.Node{}) {
+							for _, v := range privateNodeValue.Entry.([]*tree.Node) {
+
+								if ProduceIGExtendedOutput() {
+									// IG Extended --> expand into nested statements referenced here, and appended as part of other nested statements
+									stmtRef := ""
+
+									// Check for existing private nodes ...
+									existing := entryMap[privateNodeValue.GetComponentName()+tree.REF_SUFFIX]
+									if len(existing) > 0 {
+										// ... and append if necessary
+										existing += cellValueSeparator
+									}
+
+									// Generate (and cache) new statement ID for nested statement
+									componentNestedStmtsMap, nestedStatementIdx, componentNestedStmts, stmtRef = generateNewNestedStatementID(v, componentNestedStmtsMap, nestedStatementIdx, componentNestedStmts, stmtId)
+
+									// Add nested statement ID to existing value
+									existing += stmtRef
+
+									// Assign ID to reference field
+									entryMap[privateNodeValue.GetComponentName()+tree.REF_SUFFIX] = existing
+								} else {
+									// IG Core --> print flat string representation of nested statement
+
+									// Check for existing private nodes ...
+									existing := entryMap[privateNodeValue.GetComponentName()]
+									if len(existing) > 0 {
+										// ... and append if necessary
+										existing += cellValueSeparator
+									}
+
+									// Print flat content
+									existing += v.StringFlat()
+
+									// (Re)Assign to entry to be output
+									entryMap[privateNodeValue.GetComponentName()] = existing
+								}
+
+							}
+							// processing of registered nested statement will occur later
+
+							// non-nested private nodes ...
+						} else if reflect.TypeOf(privateNodeValue.Entry) == reflect.TypeOf("") {
+
+							// Check for existing private nodes ...
+							existing := entryMap[privateNodeValue.GetComponentName()]
+							if len(existing) > 0 {
+								// ... and append if necessary
+								existing += cellValueSeparator
+							}
+
+							// Add actual primitive value
+							existing += privateNodeValue.Entry.(string)
+
+							// (Re)Assign to entry to be output
+							entryMap[privateNodeValue.GetComponentName()] = existing
+						}
 					}
 					Println("Added private nodes to given output node")
 				}
@@ -380,32 +437,8 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 
 					if ProduceIGExtendedOutput() {
 
-						// Retrieve ID of already identified statements ...
-						if nestedStmtID, ok := componentNestedStmtsMap[entryVal]; ok {
-							// Prepare reference to be saved
-							idToReferenceInCell = nestedStmtID
-						} else {
-							// ... else create new one
-							// Generate ID for component-level nested statement
-							b := strings.Builder{}
-							b.WriteString(componentNestedLeft)
-							b.WriteString(stmtId)
-							b.WriteString(componentNestedRight)
-							b.WriteString(stmtIdSeparator)
-							b.WriteString(strconv.Itoa(nestedStatementIdx))
-							nestedStmtId := b.String()
-							Println("Generated ID for nested statement:", nestedStmtId)
-							// Add component-level nested statement
-							componentNestedStmts = append(componentNestedStmts,
-								IdentifiedStmt{nestedStmtId, entryVal})
-							// Add newly identified nested statement to lookup index
-							componentNestedStmtsMap[entryVal] = nestedStmtId
-							// Increase index for component-level nested statements (for next round)
-							nestedStatementIdx++
-							// Prepare reference to to-be component-level nested statements to output
-							idToReferenceInCell = nestedStmtId
-							Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Annotations:", entryVal.Annotations, ", Val:", entryVal, ")")
-						}
+						// Generate (and cache) new statement ID for nested statement
+						componentNestedStmtsMap, nestedStatementIdx, componentNestedStmts, idToReferenceInCell = generateNewNestedStatementID(entryVal, componentNestedStmtsMap, nestedStatementIdx, componentNestedStmts, stmtId)
 					}
 
 					if ProduceDynamicOutput() {
@@ -586,6 +619,45 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 	headerSymbolsNames = moveElementToLastPosition(logLinkColHeaderComps, headerSymbolsNames, true)
 
 	return entriesMap, headerSymbols, headerSymbolsNames, errorVal
+}
+
+/*
+Generate new nested statement ID for given nested input statement, and adds it to index of nested statements.
+Returns extended structures containing new statement.
+*/
+func generateNewNestedStatementID(entryVal *tree.Node, componentNestedStmtsMap map[*tree.Node]string, nestedStatementIdx int, componentNestedStmts []IdentifiedStmt, stmtId string) (map[*tree.Node]string, int, []IdentifiedStmt, string) {
+
+	idToReferenceInCell := ""
+
+	// Retrieve ID of already identified statements ...
+	if nestedStmtID, ok := componentNestedStmtsMap[entryVal]; ok {
+		// Prepare reference to be saved
+		idToReferenceInCell = nestedStmtID
+	} else {
+		// ... else create new one
+		// Generate ID for component-level nested statement
+		b := strings.Builder{}
+		b.WriteString(componentNestedLeft)
+		b.WriteString(stmtId)
+		b.WriteString(componentNestedRight)
+		b.WriteString(stmtIdSeparator)
+		b.WriteString(strconv.Itoa(nestedStatementIdx))
+		nestedStmtId := b.String()
+		Println("Generated ID for nested statement:", nestedStmtId)
+		// Add component-level nested statement
+		componentNestedStmts = append(componentNestedStmts,
+			IdentifiedStmt{nestedStmtId, entryVal})
+		// Add newly identified nested statement to lookup index
+		componentNestedStmtsMap[entryVal] = nestedStmtId
+		// Increase index for component-level nested statements (for next round)
+		nestedStatementIdx++
+		// Prepare reference to to-be component-level nested statements to output
+		idToReferenceInCell = nestedStmtId
+		Println("Parsing: Added nested statement (ID:", nestedStmtId, ", Annotations:", entryVal.Annotations, ", Val:", entryVal, ")")
+	}
+
+	return componentNestedStmtsMap, nestedStatementIdx, componentNestedStmts, idToReferenceInCell
+
 }
 
 /*

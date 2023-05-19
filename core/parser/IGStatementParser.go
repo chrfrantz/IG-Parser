@@ -86,7 +86,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		}
 
 		// Reorganize tree by shifting private nodes into PrivateNode fields of components and removing them from statement tree
-		ProcessPrivateComponentLinkages(&s)
+		ProcessPrivateComponentLinkages(&s, false)
 
 		Println("Basic statement: " + s.String())
 	}
@@ -129,6 +129,9 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 			ret := []*tree.Node{&tree.Node{Entry: &s}}
 			return ret, err
 		}
+		// Process potential private nodes for complex components
+		ProcessPrivateComponentLinkages(&s, true)
+
 	}
 
 	Println("Statement (after assigning nested elements, before expanding statement with paired components):\n" + s.String())

@@ -87,10 +87,14 @@ func FindNodesLinkedViaSuffix(sourceTree *tree.Node, targetTree *tree.Node) map[
 }
 
 /*
-Processes reorganization of statements to convert parsed elements as private elements based on suffix-based linkages.
-Operates directly on provided statement.
+Processes reorganization of statements by iterating over statement to identify private linkages amongst
+components and properties identified by suffix. Converts parsed elements into private nodes and attaches
+those to associated components. It operates directly on provided statement.
+
+Parameters include the statement to operate on, as well as the indication whether to identify linkages
+for simple (for basic statements) or complex properties (properties that themselves consist of nested statements/structures).
 */
-func ProcessPrivateComponentLinkages(s *tree.Statement) {
+func ProcessPrivateComponentLinkages(s *tree.Statement, complex bool) {
 
 	Println("Statement before reviewing linkages: ", s)
 
@@ -119,23 +123,46 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 
 		for elem := range v {
 
+			// Extract source component for which associated candidate private components are sought
 			sourceComponentElement := v[elem]
-			//Println("Source:", sourceComponentElement)
-			//Println("Source component:", sourceComponentElement.GetComponentName())
 
 			switch sourceComponentElement.GetComponentName() {
 			case tree.ATTRIBUTES:
-				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.AttributesPropertySimple)
+				if complex {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.AttributesPropertyComplex)
+				} else {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.AttributesPropertySimple)
+				}
 			case tree.AIM:
-				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ExecutionConstraintSimple)
+				if complex {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ExecutionConstraintComplex)
+				} else {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ExecutionConstraintSimple)
+				}
 			case tree.DIRECT_OBJECT:
-				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.DirectObjectPropertySimple)
+				if complex {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.DirectObjectPropertyComplex)
+				} else {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.DirectObjectPropertySimple)
+				}
 			case tree.INDIRECT_OBJECT:
-				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.IndirectObjectPropertySimple)
+				if complex {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.IndirectObjectPropertyComplex)
+				} else {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.IndirectObjectPropertySimple)
+				}
 			case tree.CONSTITUTED_ENTITY:
-				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutedEntityPropertySimple)
+				if complex {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutedEntityPropertyComplex)
+				} else {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutedEntityPropertySimple)
+				}
 			case tree.CONSTITUTING_PROPERTIES:
-				linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutingPropertiesPropertySimple)
+				if complex {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutingPropertiesPropertyComplex)
+				} else {
+					linkedLeaves = FindNodesLinkedViaSuffix(sourceComponentElement, s.ConstitutingPropertiesPropertySimple)
+				}
 			default:
 				Println("Could not find match for component name", sourceComponentElement.GetComponentName())
 			}
@@ -190,30 +217,54 @@ func ProcessPrivateComponentLinkages(s *tree.Statement) {
 					Println("Reset A,p ...")
 					s.AttributesPropertySimple = nil
 				}
+				if reflect.DeepEqual(pair.Tgt, s.AttributesPropertyComplex) {
+					Println("Reset A,p (complex) ...")
+					s.AttributesPropertyComplex = nil
+				}
 			case tree.AIM:
 				if reflect.DeepEqual(pair.Tgt, s.ExecutionConstraintSimple) {
 					Println("Reset Cex ...")
 					s.ExecutionConstraintSimple = nil
+				}
+				if reflect.DeepEqual(pair.Tgt, s.ExecutionConstraintComplex) {
+					Println("Reset Cex (complex) ...")
+					s.ExecutionConstraintComplex = nil
 				}
 			case tree.DIRECT_OBJECT:
 				if reflect.DeepEqual(pair.Tgt, s.DirectObjectPropertySimple) {
 					Println("Reset Bdir,p ...")
 					s.DirectObjectPropertySimple = nil
 				}
+				if reflect.DeepEqual(pair.Tgt, s.DirectObjectPropertyComplex) {
+					Println("Reset Bdir,p (complex) ...")
+					s.DirectObjectPropertyComplex = nil
+				}
 			case tree.INDIRECT_OBJECT:
 				if reflect.DeepEqual(pair.Tgt, s.IndirectObjectPropertySimple) {
 					Println("Reset Bind,p ...")
 					s.IndirectObjectPropertySimple = nil
+				}
+				if reflect.DeepEqual(pair.Tgt, s.IndirectObjectPropertyComplex) {
+					Println("Reset Bind,p (complex) ...")
+					s.IndirectObjectPropertyComplex = nil
 				}
 			case tree.CONSTITUTED_ENTITY:
 				if reflect.DeepEqual(pair.Tgt, s.ConstitutedEntityPropertySimple) {
 					Println("Reset E,p ...")
 					s.ConstitutedEntityPropertySimple = nil
 				}
+				if reflect.DeepEqual(pair.Tgt, s.ConstitutedEntityPropertyComplex) {
+					Println("Reset E,p (complex) ...")
+					s.ConstitutedEntityPropertyComplex = nil
+				}
 			case tree.CONSTITUTING_PROPERTIES:
 				if reflect.DeepEqual(pair.Tgt, s.ConstitutingPropertiesPropertySimple) {
 					Println("Reset P,p ...")
 					s.ConstitutingPropertiesPropertySimple = nil
+				}
+				if reflect.DeepEqual(pair.Tgt, s.ConstitutingPropertiesPropertyComplex) {
+					Println("Reset P,p (complex) ...")
+					s.ConstitutingPropertiesPropertyComplex = nil
 				}
 			default:
 				Println("Node deletion from tree: Could not find match for component name", pair.Src.GetComponentName())

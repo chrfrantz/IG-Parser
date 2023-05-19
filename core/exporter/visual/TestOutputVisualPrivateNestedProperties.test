@@ -1,0 +1,45 @@
+{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "notification", "comp": "E", "level": 1},
+{"name": "shall", "comp": "M", "level": 1},
+{"name": "provide", "comp": "F", "level": 1},
+{"name": "bAND",
+"children": [{"name": "description of each noncompliance", "comp": "P", "level": 1}, {"name": "facts upon which the notification of noncompliance is based", "comp": "P", "level": 1},
+{"name": "date", "comp": "P", "level": 1, "pos": "b", "children": [{"name": "bAND",
+"children": [{"name": "private component", "comp": "P,p", "level": 1}, {
+"name": "P,p",
+"level": 2, 
+"children": [
+{"name": "certified operation", "comp": "A", "level": 2},
+{"name": "must", "comp": "D", "level": 2},
+{"name": "XOR",
+"children": [{"name": "rebut", "comp": "I", "level": 2},
+{"name": "correct", "comp": "I", "level": 2}], "comp": "I", "level": 2},
+{"name": "noncompliance", "comp": "Bdir", "level": 2, "pos": "b", "children": [{"name": "each", "comp": "Bdir,p", "level": 2}]}
+]
+}, {
+"name": "P,p",
+"level": 2, 
+"children": [
+{"name": "certified operation", "comp": "A", "level": 2},
+{"name": "must", "comp": "D", "level": 2},
+{"name": "submit", "comp": "I", "level": 2},
+{"name": "documentation", "comp": "Bdir", "level": 2, "pos": "b", "children": [{"name": "bAND",
+"children": [{"name": "supporting", "comp": "Bdir,p", "level": 2},
+{"name": "each such correction", "comp": "Bdir,p", "level": 2}], "comp": "Bdir,p", "level": 2}]},
+{"name": "when correction is possible", "comp": "Cac", "level": 2}
+]
+},
+{
+"name": "P,p",
+"level": 2, 
+"children": [
+{"name": "date", "comp": "E", "level": 2},
+{"name": "is defined", "comp": "F", "level": 2},
+{"name": "Gregorian calendar", "comp": "P", "level": 2}
+]
+}], "comp": "P,p", "level": 1}]}], "comp": "P", "level": 1}
+]
+}

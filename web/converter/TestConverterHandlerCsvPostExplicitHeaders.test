@@ -160,7 +160,7 @@
 
             function loadFormContent() {
                 
-                if  false  === false {
+                if ( false  === false) {
                     
                     if (localStorage.getItem("codedStmt") != null) {
                         

@@ -5550,4 +5550,83 @@ func TestTabularOutputExpandComponentCombinationsWithMissingParentheses(t *testi
 
 }
 
+/*
+Tests visual output for nested properties, including component pairs, simple nested statements and primitive properties.
+*/
+func TestTabularOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAndPrimitiveProperty(t *testing.T) {
+
+	// Statement with multi-level nesting, combinations as well as component pairs
+	text := "Such E(notification) M(shall) F(provide): (1) A P(description of each noncompliance); " +
+		"(2) The P(facts upon which the notification of noncompliance is based); and " +
+		"(3) The P1(date) " +
+		// Component-pair property
+		"P1,p{by which the A(certified operation) D(must) " +
+		"{I(rebut [XOR] correct) Bdir,p(each) Bdir(noncompliance) [AND] I(submit) Bdir,p(supporting) " +
+		"Bdir(documentation) of Bdir,p(each such correction) Cac(when correction is possible)}} " +
+		// Primitive property
+		"P1,p(private component) " +
+		// nested property
+		"P1,p{where E(date) F(is defined) in the P(Gregorian calendar)}."
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) != 1 {
+		t.Fatal("Wrong statement count: ", stmts)
+	}
+
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating output:", err)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaPrivateNestedProperties.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Aggregate output if multiple results
+	output := ""
+	for _, v := range results {
+		output += v.Output
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
 // test with invalid statement and empty input nodes, unbalanced parentheses, missing ID

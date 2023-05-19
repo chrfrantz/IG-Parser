@@ -27,7 +27,7 @@ type Node struct {
 	LogicalOperator string
 	// Implicitly holds element order by keeping non-shared elements and references to nodes in order of addition
 	ElementOrder []interface{}
-	// Suffix for distinctive references to related component instances (e.g., A,p1 pointing to A1)
+	// Suffix for distinctive references to related component instances (e.g., A1,p pointing to A1)
 	Suffix interface{}
 	// Annotations for element - to be stored without surrounding brackets
 	Annotations interface{}

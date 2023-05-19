@@ -416,7 +416,7 @@ func (n *Node) appendPropertyNodes(stringToPrepend string, stmt *Statement, prin
 		if len(allNodes) == 0 || (len(allNodes) > 0 && allNodes[0] == nil) {
 			includeAllNodes = false
 		}
-		Println("Append nodes are property nodes:", includeAllNodes)
+		Println("Append nodes that are property nodes:", includeAllNodes)
 
 		// Check whether private nodes are populated
 		if len(n.PrivateNodeLinks) > 0 && n.PrivateNodeLinks[0] != nil {
