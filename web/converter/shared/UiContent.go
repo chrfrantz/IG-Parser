@@ -15,10 +15,10 @@ const HEADER_SCRIPT_LINK = "Opens an overview of of IG Script syntax (opens new 
 const HEADER_IG_LINK = "Opens Institutional Grammar 2.0 website (opens new tab)"
 
 // Default example statement
-const RAW_STATEMENT = "Regional Managers, on behalf of the Secretary, may review, and reward or sanction, approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation."
+const RAW_STATEMENT = "Once policy comes into force, relevant regulators must monitor and enforce compliance."
 
 // Encoded example statement, including properties and semantic annotations
-const ANNOTATED_STATEMENT = "A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance](review [AND] (reward [XOR] sanction)) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act [XOR] regulations in this part)) under the condition that Cac{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were non-compliant [OR] violated) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}."
+const ANNOTATED_STATEMENT = "Cac{Once E(policy) F(comes into force)} A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance)."
 
 // Default example ID
 const STATEMENT_ID = "123"
