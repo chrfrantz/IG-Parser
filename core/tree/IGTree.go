@@ -886,6 +886,7 @@ func searchDownward(originNode *Node, lastNode *Node, startNode *Node, targetNod
 /*
 Combines existing nodes into new node and returns newly generated node.
 Returns an error if component types of input nodes differ (should not be combined).
+Returns tree.TREE_NO_ERROR in case of success.
 */
 func Combine(leftNode *Node, rightNode *Node, logicalOperator string) (*Node, NodeError) {
 

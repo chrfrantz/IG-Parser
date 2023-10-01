@@ -84,11 +84,11 @@
     <form method="POST">
         
         <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">Once policy comes into force, relevant regulators must monitor and enforce compliance.</textarea><br />
         
         <span data-text="Click to open a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         
-        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance](review [AND] (reward [XOR] sanction)) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act [XOR] regulations in this part)) under the condition that Cac{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were non-compliant [OR] violated) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</div>
+        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">Cac{Once E(policy) F(comes into force)} A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance).</div>
         <script>
             let editor = ace.edit("editor");
             editor.session.setMode("ace/mode/text"); 
@@ -274,12 +274,12 @@
 
             function resetContent() {
                 
-                editor.setValue("A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance](review [AND] (reward [XOR] sanction)) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act [XOR] regulations in this part)) under the condition that Cac{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were non-compliant [OR] violated) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.")
+                editor.setValue("Cac{Once E(policy) F(comes into force)} A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance).")
                 
                 copyEditorContentToTextArea();
 
                 
-                document.getElementById("rawStmt").value = "Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.";
+                document.getElementById("rawStmt").value = "Once policy comes into force, relevant regulators must monitor and enforce compliance.";
 
                 
                 if(document.getElementById("stmtId") != null) {
@@ -314,13 +314,29 @@
             
             window.onload = (event) => {
                 loadFormContent();
+
+                
+                generateUrl("example2", "Example Statement 2 (moderately complex)",
+                    "?rawStmt=When%20an%20inspection,%20review,%20or%20investigation%20of%20an%20accredited%20certifying%20agent%20by%20the%20Program%20Manager%20reveals%20any%20non-compliance%20with%20the%20Act%20or%20regulations%20in%20this%20part,%20a%20written%20notification%20of%20non-compliance%20shall%20be%20sent%20to%20the%20certifying%20agent.&codedStmt=Cac%7BWhen%20A(Program%20Manager)%20I[act=detect%20non-compliance](reveals)%20Bdir%7BA,p(accredited)%20A(certifying%20agent)%20I[act=non-compliant]([is%20not%20in%20compliance])%20with%20the%20Bdir(Act%20[OR]%20regulations%20in%20this%20part)%20Cac%7BWhen%20A(Program%20Manager)%20I[act=monitors](([inspects]%20[OR]%20[reviews])%20[OR]%20[investigates])%20Bdir,p(accredited)%20Bdir(certifying%20agent)%7D%7D%7D%20A([Program%20Manager])%20D(shall)%20I[act=sanction]([send])%20Bdir(notification)%20Bdir,p(of%20non-compliance)%20to%20the%20Bind,p(accredited)%20Bind(certifying%20agent).")
+                generateUrl("example3", "Example Statement 3 (complex)",
+                    "?rawStmt=Regional%20Managers,%20on%20behalf%20of%20the%20Secretary,%20may%20review,%20and%20reward%20or%20sanction,%20approved%20certified%20production%20and%20handling%20operations%20and%20accredited%20certifying%20agents%20for%20compliance%20with%20the%20Act%20or%20regulations%20in%20this%20part,%20under%20the%20condition%20that%20Operations%20were%20non-compliant%20or%20violated%20organic%20farming%20provisions%20and%20Manager%20has%20concluded%20investigation.&codedStmt=A,p(Regional)%20A[role=enforcer,type=animate](Managers),%20Cex(on%20behalf%20of%20the%20Secretary),%20D[stringency=permissive](may)%20I[act=performance](review%20[AND]%20(reward%20[XOR]%20sanction))%20Bdir,p(approved)%20Bdir1,p(certified)%20Bdir1[role=monitored,type=animate](production%20[operations])%20and%20Bdir[role=monitored,type=animate](handling%20operations)%20and%20Bdir2,p(accredited)%20Bdir2[role=monitor,type=animate](certifying%20agents)%20Cex[ctx=purpose](for%20compliance%20with%20the%20(Act%20[XOR]%20regulations%20in%20this%20part))%20under%20the%20condition%20that%20Cac%7BCac[state]%7BA[role=monitored,type=animate](Operations)%20I[act=violate](were%20non-compliant%20[OR]%20violated)%20Bdir[type=inanimate](organic%20farming%20provisions)%7D%20[AND]%20Cac[state]%7BA[role=enforcer,type=animate](Manager)%20I[act=terminate](has%20concluded)%20Bdir[type=activity](investigation)%7D%7D.");
             };
+
+            
+            function generateUrl(exampleId, linkText, linkParameter) {
+                let link = document.getElementById(exampleId);
+                link.textContent = linkText;
+                link.href = window.location.pathname + linkParameter;
+            }
+
         </script>
 
         
-        <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance](review [AND] (reward [XOR] sanction)) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act [XOR] regulations in this part)) under the condition that Cac{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were non-compliant [OR] violated) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</textarea><br />
+        <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">Cac{Once E(policy) F(comes into force)} A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance).</textarea><br />
         
-        <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a href="" onclick="resetContent()">Reset to default statement example</a></span><br /><br />
+        <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example1" href="#" onclick="resetContent()">Reset to default statement example</a></span>
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations." class="tooltip"><a id="example2" href="#">Example Statement 2 (moderately complex)</a></span>
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a complex example statement showcasing combinations of nested activation conditions in addition to the features showcased in the second example." class="tooltip"><a id="example3" href="#">Example Statement 3 (complex)</a></span><br /><br />
 
 
 
