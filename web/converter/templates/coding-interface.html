@@ -496,30 +496,6 @@
                 link.textContent = linkText;
                 link.href = window.location.pathname + linkParameter;
             }
-            
-                        // https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts
-            /*
-            editor.commands.addCommand({
-            name: 'myCommand',
-            bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
-            exec: function(editor) {
-                //...
-            },
-                readOnly: true, // false if this command should not apply in readOnly mode
-                // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
-                // scrollIntoView: "cursor", control how cursor is scolled into view after the command
-            });
-
-            // https://stackoverflow.com/questions/62975874/how-to-disable-browser-default-keybindings-with-javascript
-            // https://stackoverflow.com/questions/52928751/vanilla-javascript-disable-all-key-combos-whatsoever-in-an-entire-website?rq=3
-            // Want to keep ctrl A, C, V, X, Z, Y
-            // Maybe use 
-            // CTRL-Shift = ,p and or else (bdir,bind,p,e)
-            //        Q,W,E,  R , T  , D , 1 ,2,3,4,5
-            // CTRL = A,I,D,BDIR,BIND,CAC,CEX,E,F,M,P
-            */
-
-            
 
             // Keybinds for read only mode
             document.addEventListener("keydown", function(event) {
