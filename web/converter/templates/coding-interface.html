@@ -59,7 +59,7 @@
         <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">{{.CodedStmt}}</div>
         <script>
             let editor = ace.edit("editor");
-            editor.session.setMode("ace/mode/text"); // generic text syntax (with bracket matching)
+            editor.session.setMode("ace/mode/igscriptnotation"); // IG Script Notation Syntax
             // Option documentation: https://github.com/ajaxorg/ace/wiki/Configuring-Ace
             editor.setOption("showLineNumbers", true); // show line numbers
             editor.setOption("wrap", true); // activate text wrapping

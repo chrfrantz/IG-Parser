@@ -39,7 +39,7 @@ const HELP_PATH = "help/"
 //go:embed css/default.css css/favicon.ico
 var cssFiles embed.FS
 
-//go:embed libraries/d3.v7.min.js libraries/ace/ace.js
+//go:embed libraries/d3.v7.min.js libraries/ace/ace.js libraries/ace/mode-igscriptnotation.js
 var libraryFiles embed.FS
 
 //go:embed converter/templates/ig-parser-user-guide.html

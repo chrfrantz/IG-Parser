@@ -341,3 +341,101 @@ Modifications to ace.js:
     display: block; padding: 0.2em 0 0.6em 0;
 }
 .classic { padding: 0.8em 1em; }*/
+
+/*
+Ace.js annotation highlighting:
+*/
+
+.ace_Attribute {
+    /*
+    background-color: #F18F01;
+    */
+    background-color: #AAE7CC;
+    border-radius: 3px;
+}
+
+.ace_Deontic {
+    background-color: #AAE7CC;
+    border-radius: 3px;
+}
+
+.ace_Aim {
+    background-color: #AAE7CC;
+    border-radius: 3px;
+}
+
+.ace_Direct_Object {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Indirect_Object {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Activation_Condition {
+    background-color: #F292A4;
+    border-radius: 3px;
+}
+
+.ace_Activation_Constraint {
+    background-color: #F292A4;
+    border-radius: 3px;
+}
+
+.ace_Constituted_Entity {
+    background-color: #FCD581;
+    border-radius: 3px;
+}
+
+.ace_Modal {
+    background-color: #FCD581;
+    border-radius: 3px;
+}
+
+.ace_Constitutive_Function {
+    background-color: #FCD581;
+    border-radius: 3px;
+}
+
+.ace_Constituting_Properties {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Or_Else {
+    background-color: #F292A4;
+    border-radius: 3px;
+}
+
+.ace_Logical_Operator {
+    background-color: #F292A4;
+    border-radius: 3px;
+}
+
+.ace_Semantic_Annotation {
+    background-color: #dfd9d9;
+    text-decoration: underline;
+    border-radius: 3px;
+}
+
+.ace_Direct_Object_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Indirect_Object_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Attribute_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Constituting_Properties_Properties {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
