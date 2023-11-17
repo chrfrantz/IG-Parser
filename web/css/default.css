@@ -439,3 +439,12 @@ Ace.js annotation highlighting:
     background-color: #abc8d3;
     border-radius: 3px;
 }
+
+.text_tooltip {
+    background:#000;
+    font-size: 13px;
+    color:#fff;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0 2px 0 2px;
+}

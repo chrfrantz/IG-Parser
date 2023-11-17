@@ -138,6 +138,38 @@
             }
 
             /*
+            Shows a tooltip on symbol hover. Shows the full name of the symbol.
+            */
+            var prevToken = ""
+            var tooltip
+            editor.on('mousemove', function(e) {
+                //var position = editor.getCursorPosition();
+                var position = e.getDocumentPosition();
+                var token = editor.session.getTokenAt(position.row, position.column);
+                if (token && token !=prevToken)  {
+                    if (prevToken != "") {
+                        document.body.removeChild(tooltip);
+                        prevToken = ""
+                    }
+                    if (token.type != 'text') {
+                        prevToken = token;
+                        //console.log(position.row, position.column, position)
+                        // Get the position of the coordinates
+                        let pos = editor.renderer.textToScreenCoordinates(position.row, position.column);
+                        //console.log(pos)
+                        tooltip = document.createElement('div');
+                        // Replace the underscore with a space and show the token type
+                        tooltip.innerHTML = token.type.replaceAll("_"," ");
+                        tooltip.setAttribute("class", "text_tooltip")
+                        tooltip.style.position = 'absolute';
+                        tooltip.style.top = pos.pageY-25 + 'px';
+                        tooltip.style.left = pos.pageX + 'px';
+                        document.body.appendChild(tooltip);
+                    }
+                }
+            });
+
+            /*
             Saves value of a given field into localStorage. Takes checkbox field ID (not value field) as input.
              */
             function saveCheckbox(fieldId) {
