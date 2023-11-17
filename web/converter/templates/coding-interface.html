@@ -59,9 +59,11 @@
         <div id="buttons">
             <div class="button" role="button" tabindex="0" id="undo">Undo</div>
             <div class="button" role="button" tabindex="0" id="redo">Redo</div>
-            <!-- <div class="button" role="button" tabindex="0" id="lock">Read-only</div> -->
+            <div class="button" role="button" tabindex="0" id="lock">Text mode</div>
+            <div class="button" role="button" tabindex="0" id="nested">Nested</div>
+            <div class="button" role="button" tabindex="0" id="semantic">Semantic Annotation</div>
             <div class="button" role="button" tabindex="0" id="symbols">Symbols</div>
-            <div class="button" role="button" tabindex="0" id="symbols">Keybinds</div>
+            <div class="button" role="button" tabindex="0" id="keybinds">Keybinds</div>
         </div>
         <!-- ACE Editor; copies any content to hidden textarea -->
         <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">{{.CodedStmt}}</div>
@@ -162,15 +164,50 @@
                 editor.redo();
             });
 
-            /*
+            // Permissive readonly, allows redo and undo
             document.getElementById("lock").addEventListener("click", function() {
-                editor.setReadOnly(!editor.getReadOnly());
+                button = document.getElementById("lock")
+                console.log(button.textContent)
+                if (editor.getReadOnly()) {
+                    editor.setOption("readOnly", false)
+                    button.textContent = "Text mode"
+                    button.classList.toggle('toggleActive')
+                    
+                    console.log(button.textContent)
+                } else {
+                    editor.setOption("readOnly", "nocursor")
+                    button.textContent = "Edit mode"
+                    button.classList.toggle('toggleActive')
+                    
+                    console.log(button.textContent)
+                }
+                
             });
-            */
+
+            let nested = false
+            // Toggle for nested symbols
+            document.getElementById("nested").addEventListener("click", function() {
+                button = document.getElementById("nested")
+                button.classList.toggle('toggleActive')
+                nested = !nested
+            });
+
+            let semanticAnnotation = false
+            // Toggle for nested symbols
+            document.getElementById("semantic").addEventListener("click", function() {
+                button = document.getElementById("semantic")
+                button.classList.toggle('toggleActive')
+                semanticAnnotation = !semanticAnnotation
+            });
 
             // Symbols modal
             document.getElementById("symbols").addEventListener("click", function() {
                 document.getElementById("symbolModal").showModal();
+            });
+
+            // Keybindings modal
+            document.getElementById("keybinds").addEventListener("click", function() {
+                document.getElementById("keybindModal").showModal();
             });
 
             // Function for closing modals
@@ -186,18 +223,23 @@
 
             // Symbols for the annotateSelection function
             var symbols = {
-                "A":{"symbol": "A", "bracket":["(",")"], "semantic": true},
-                "I":{"symbol": "I", "bracket":["(",")"], "semantic": true},
-                "D":{"symbol": "D", "bracket":["(",")"], "semantic": true},
-                "Bdir":{"symbol": "Bdir", "bracket":["(",")"], "semantic": true},
-                "Bind":{"symbol": "Bind", "bracket":["(",")"], "semantic": true},
-                "Cac":{"symbol": "Cac", "bracket":["(",")"], "semantic": true},
-                "Cex":{"symbol": "Cex", "bracket":["(",")"], "semantic": true},
-                "O":{"symbol": "O", "bracket":["{","}"], "semantic": true},
-                "E":{"symbol": "E", "bracket":["(",")"], "semantic": true},
-                "F":{"symbol": "F", "bracket":["(",")"], "semantic": true},
-                "M":{"symbol": "M", "bracket":["(",")"], "semantic": true},
-                "P":{"symbol": "P", "bracket":["(",")"], "semantic": true},
+                "A":{"symbol": "A", "bracket":["(",")"]},
+                "A,p":{"symbol": "A,p", "bracket":["(",")","{","}"], "nested": true},
+                "I":{"symbol": "I", "bracket":["(",")"]},
+                "D":{"symbol": "D", "bracket":["(",")"]},
+                "Bdir":{"symbol": "Bdir", "bracket":["(",")","{","}"], "nested": true},
+                "Bdir,p":{"symbol": "Bdir,p", "bracket":["(",")","{","}"], "nested": true},
+                "Bind":{"symbol": "Bind", "bracket":["(",")","{","}"], "nested": true},
+                "Bind,p":{"symbol": "Bind,p", "bracket":["(",")","{","}"], "nested": true},
+                "Cac":{"symbol": "Cac", "bracket":["(",")","{","}"], "nested": true},
+                "Cex":{"symbol": "Cex", "bracket":["(",")","{","}"], "nested": true},
+                "O":{"symbol": "O", "bracket":["{","}"]},
+                "E":{"symbol": "E", "bracket":["(",")"]},
+                "E,p":{"symbol": "E,p", "bracket":["(",")","{","}"], "nested": true},
+                "F":{"symbol": "F", "bracket":["(",")"], "nested": true},
+                "M":{"symbol": "M", "bracket":["(",")"]},
+                "P":{"symbol": "P", "bracket":["(",")","{","}"], "nested": true},
+                "P,p":{"symbol": "P,p", "bracket":["(",")","{","}"], "nested": true},
             }
 
             /*
@@ -230,11 +272,16 @@
 
                 // Build the output with a symbol and the corresponding brackets
                 let outputText = symbols[symbol].symbol;
-                outputText += symbols[symbol]["semantic"] ? "" : "[]";
-                outputText += symbols[symbol].bracket[0];
+                // If the semanticAnnotation toggle is active add brackets for it
+                outputText += semanticAnnotation ? "[]" : "";
+                let bracketStart = 0
+                if (nested && symbols[symbol]["nested"]){
+                    bracketStart += 2
+                }
+                outputText += symbols[symbol].bracket[bracketStart];
                 outputText += selectionText;
 
-                outputText += symbols[symbol].bracket[1];
+                outputText += symbols[symbol].bracket[bracketStart+1];
 
 
                 editor.session.replace(new ace.Range(selectionRange.start.row, selectionRange.start.column, 
@@ -449,6 +496,91 @@
                 link.textContent = linkText;
                 link.href = window.location.pathname + linkParameter;
             }
+            
+                        // https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts
+            /*
+            editor.commands.addCommand({
+            name: 'myCommand',
+            bindKey: {win: 'Ctrl-M',  mac: 'Command-M'},
+            exec: function(editor) {
+                //...
+            },
+                readOnly: true, // false if this command should not apply in readOnly mode
+                // multiSelectAction: "forEach", optional way to control behavior with multiple cursors
+                // scrollIntoView: "cursor", control how cursor is scolled into view after the command
+            });
+
+            // https://stackoverflow.com/questions/62975874/how-to-disable-browser-default-keybindings-with-javascript
+            // https://stackoverflow.com/questions/52928751/vanilla-javascript-disable-all-key-combos-whatsoever-in-an-entire-website?rq=3
+            // Want to keep ctrl A, C, V, X, Z, Y
+            // Maybe use 
+            // CTRL-Shift = ,p and or else (bdir,bind,p,e)
+            //        Q,W,E,  R , T  , D , 1 ,2,3,4,5
+            // CTRL = A,I,D,BDIR,BIND,CAC,CEX,E,F,M,P
+            */
+
+            
+
+            // Keybinds for read only mode
+            document.addEventListener("keydown", function(event) {
+                if (editor.getReadOnly()) {
+                    // Enable undo and redo
+                    if (event.ctrlKey || event.cmdKey) {
+                        console.log(event.key, event.ctrlKey)
+                        if (event.key == "z") {
+                            editor.undo();
+                            return
+                        } else if (event.key == "y") {
+                            editor.redo();
+                            return
+                        }
+                    }
+
+                    console.log(event.key, event.shiftKey)
+                    // Handle keybinds
+                    switch (event.key.toLowerCase()) {
+                        case "q": 
+                            if (event.shiftKey) {
+                                annotateSelection('A,p');
+                            } else {
+                                annotateSelection('A');}
+                        break
+                        case "w": annotateSelection('D'); break
+                        case "e": annotateSelection('I'); break
+                        case "r": 
+                            if (event.shiftKey) {
+                                annotateSelection('Bdir,p');
+                            } else {
+                                annotateSelection('Bdir');}
+                        break
+                        case "t": 
+                            if (event.shiftKey) {
+                                annotateSelection('Bind,p');
+                            } else {
+                                annotateSelection('Bind');}
+                        break
+                        case "a": annotateSelection('Cac'); break
+                        case "s": annotateSelection('Cex'); break
+                        case "d": 
+                            if (event.shiftKey) {
+                                annotateSelection('E,p');
+                            } else {
+                                annotateSelection('E');}
+                        break
+                        case "f": annotateSelection('M'); break
+                        case "1": annotateSelection('O'); break
+                        case "2": annotateSelection('L'); break
+                        case "3": annotateSelection('F'); break
+                        case "4": 
+                            annotateSelection('P');
+                        break
+                        case "¤":
+                            annotateSelection('P,p');
+                        break
+                        case "|":; break
+                    }
+                }
+            });
 
         </script>
 
@@ -490,8 +622,35 @@
                 <tr><td><b>O</b></td><td>Or Else**</td></tr>
             </table>
             * In addition to component annotation, these components support component-level nesting, with braces scoping the nested statements (e.g., " + <b> + "Bdir{ ... }" + </b>, <b>Bdir,p{ ... }</b>, etc.).<br>
-            ** The Or else component only allows component-level nesting (i.e., substitution by an entire statement).
+            ** The Or else component only allows component-level nesting (i.e., substitution by an entire statement).<br>
             <div class="button" role="button" tabindex="0" id="symbolModalClose" style="float:right" autofocus onkeydown="closeModal(event.key,'symbolModal')" onclick="closeModal(null,'symbolModal')">Close</div>
+        </dialog>
+
+        <dialog id="keybindModal">
+            <table>
+                <tr><th>Keybinding</th><th>IG 2.0 Component</th></tr>
+                <tr><td><b>q</b></td><td>Attributes</td></tr>
+                <tr><td><b>shift-q</b></td><td>Attributes Property</td></tr>
+                <tr><td><b>w</b></td><td>Deontic</td></tr>
+                <tr><td><b>e</b></td><td>Aim</td></tr>
+                <tr><td><b>r</b></td><td>Direct Object</td></tr>
+                <tr><td><b>Shift-r</b></td><td>Direct Object Property</td></tr>
+                <tr><td><b>t</b></td><td>Indirect Object</td></tr>
+                <tr><td><b>Shift-t</b></td><td>Indirect Object Property</td></tr>
+                <tr><td><b>a</b></td><td>Activation Condition</td></tr>
+                <tr><td><b>s</b></td><td>Execution Constraint</td></tr>
+                <tr><td><b>d</b></td><td>Constituted Entity</td></tr>
+                <tr><td><b>shift-D</b></td><td>Constituted Entity Property</td></tr>
+                <tr><td><b>f</b></td><td>Modal</td></tr>
+                <tr><td><b>3</b></td><td>Constitutive Function</td></tr>
+                <tr><td><b>4</b></td><td>Constituting Properties</td></tr>
+                <tr><td><b>Shift-4</b></td><td>Constituting Properties Properties</td></tr>
+                <tr><td><b>1</b></td><td>Or Else</td></tr>
+                <tr><td><b>2</b></td><td>Logical Operator*</td></tr>
+            </table>
+            * If the selection is not a logical operator it will be marked as a semantic annotation instead.<br>
+            Other Keybindings are also supported. Such as copying and pasting in the editor and default undo and redo. <br>
+            <div class="button" role="button" tabindex="0" id="keybindModalClose" style="float:right" autofocus onkeydown="closeModal(event.key,'keybindModal')" onclick="closeModal(null,'keybindModal')">Close</div>
         </dialog>
 
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->

@@ -473,3 +473,13 @@ Modal styling (dialog html element for displaying information in the editor)
 ::backdrop {
     background-color: rgba(125, 125, 125, 0.3);
 }
+
+:focus {
+    outline: 2px solid blue;
+}
+
+/* Toggle buttons */
+.toggleActive {
+    background-color: #000;
+    color: #fff;
+}
