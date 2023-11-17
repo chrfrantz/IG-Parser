@@ -55,6 +55,14 @@
         <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">{{.RawStmt}}</textarea><br />
         <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
+        <!-- Editor buttons -->
+        <div id="buttons">
+            <div class="button" role="button" tabindex="0" id="undo">Undo</div>
+            <div class="button" role="button" tabindex="0" id="redo">Redo</div>
+            <!-- <div class="button" role="button" tabindex="0" id="lock">Read-only</div> -->
+            <div class="button" role="button" tabindex="0" id="symbols">Symbols</div>
+            <div class="button" role="button" tabindex="0" id="symbols">Keybinds</div>
+        </div>
         <!-- ACE Editor; copies any content to hidden textarea -->
         <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">{{.CodedStmt}}</div>
         <script>
@@ -71,6 +79,14 @@
             editor.setOption("fontSize", 16); // font size
             editor.setOption("minLines", 5); // standard size
             editor.setOption("maxLines", 30); // number of lines before using scrollbar
+
+            editor.commands.addCommand({
+                name: "tabNextElement",
+                bindKey: { win: "Tab", mac: "Tab"},
+                exec: function(editor) {
+                    document.GetElementById("next").focus;
+                }
+            })
 
             /*
             Copies content from editor to hidden textarea (which is used for form submission)
@@ -136,6 +152,37 @@
                 saveValue("canvasWidth")
 
             }
+
+            // Editor buttons above the editor
+            document.getElementById("undo").addEventListener("click", function() {
+                editor.undo();
+            });
+
+            document.getElementById("redo").addEventListener("click", function() {
+                editor.redo();
+            });
+
+            /*
+            document.getElementById("lock").addEventListener("click", function() {
+                editor.setReadOnly(!editor.getReadOnly());
+            });
+            */
+
+            // Symbols modal
+            document.getElementById("symbols").addEventListener("click", function() {
+                document.getElementById("symbolModal").showModal();
+            });
+
+            // Function for closing modals
+            function closeModal(event, modalId){
+                // If the function was executed by a keypress, check if it was enter, else just return
+                if (event != null) {
+                    if (event != "Enter")
+                    return
+                }
+                document.getElementById(modalId).close();
+            }
+
 
             // Symbols for the annotateSelection function
             var symbols = {
@@ -406,20 +453,46 @@
         </script>
 
         <div id="buttons">
-            <div class="button" onclick="annotateSelection('A')">Attribute</div>
-            <div class="button" onclick="annotateSelection('I')">Aim</div>
-            <div class="button" onclick="annotateSelection('D')">Deontic</div>
-            <div class="button" onclick="annotateSelection('Bdir')">Direct Object</div>
-            <div class="button" onclick="annotateSelection('Bind')">Indirect Object</div>
-            <div class="button" onclick="annotateSelection('Cac')">Activation Condition</div>
-            <div class="button" onclick="annotateSelection('Cex')">Execution Constraint</div>
-            <div class="button" onclick="annotateSelection('O')">Or Else</div>
-            <div class="button" onclick="annotateSelection('L')">Logical Operator</div>
-            <div class="button" onclick="annotateSelection('E')">Constituted Entity</div>
-            <div class="button" onclick="annotateSelection('F')">Constituted Function</div>
-            <div class="button" onclick="annotateSelection('M')">Modal</div>
-            <div class="button" onclick="annotateSelection('P')">Constitutive Properties</div>
+            <div class="button" role="button" id="next" tabindex="0" onclick="annotateSelection('A')">Attribute</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('I')">Aim</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('D')">Deontic</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bdir')">Direct Object</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bind')">Indirect Object</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Cac')">Activation Condition</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Cex')">Execution Constraint</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('O')">Or Else</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('L')">Logical Operator</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('E')">Constituted Entity</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('F')">Constituted Function</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('M')">Modal</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('P')">Constitutive Properties</div>
         </div>
+
+        <dialog id="symbolModal">
+            <table>
+                <tr><th>IG Script Symbol</th><th>Corresponding IG 2.0 Component</th></tr>
+                <tr><td><b>A</b></td><td>Attributes</td></tr>
+                <tr><td><b>A,p</b></td><td>Attributes Property*</td></tr>
+                <tr><td><b>D</b></td><td>Deontic</td></tr>
+                <tr><td><b>I</b></td><td>Aim</td></tr>
+                <tr><td><b>Bdir</b></td><td>Direct Object*</td></tr>
+                <tr><td><b>Bdir,p</b></td><td>Direct Object Property*</td></tr>
+                <tr><td><b>Bind</b></td><td>Indirect Object*</td></tr>
+                <tr><td><b>Bind,p</b></td><td>Indirect Object Property*</td></tr>
+                <tr><td><b>Cac</b></td><td>Activation Condition*</td></tr>
+                <tr><td><b>Cex</b></td><td>Execution Constraint*</td></tr>
+                <tr><td><b>E</b></td><td>Constituted Entity</td></tr>
+                <tr><td><b>E,p</b></td><td>Constituted Entity Property</td></tr>
+                <tr><td><b>M</b></td><td>Modal</td></tr>
+                <tr><td><b>F</b></td><td>Constitutive Function</td></tr>
+                <tr><td><b>P</b></td><td>Constituting Properties*</td></tr>
+                <tr><td><b>P,p</b></td><td>Constituting Properties Properties*</td></tr>
+                <tr><td><b>O</b></td><td>Or Else**</td></tr>
+            </table>
+            * In addition to component annotation, these components support component-level nesting, with braces scoping the nested statements (e.g., " + <b> + "Bdir{ ... }" + </b>, <b>Bdir,p{ ... }</b>, etc.).<br>
+            ** The Or else component only allows component-level nesting (i.e., substitution by an entire statement).
+            <div class="button" role="button" tabindex="0" id="symbolModalClose" style="float:right" autofocus onkeydown="closeModal(event.key,'symbolModal')" onclick="closeModal(null,'symbolModal')">Close</div>
+        </dialog>
 
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />

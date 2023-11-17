@@ -466,3 +466,10 @@ Ace.js annotation highlighting:
     border-radius: 3px;
     cursor: pointer;
 }
+
+/*
+Modal styling (dialog html element for displaying information in the editor)
+*/
+::backdrop {
+    background-color: rgba(125, 125, 125, 0.3);
+}
