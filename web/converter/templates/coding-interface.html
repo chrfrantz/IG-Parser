@@ -159,9 +159,22 @@
             document.getElementById("undo").addEventListener("click", function() {
                 editor.undo();
             });
+            document.getElementById("undo").addEventListener("keydown", function(event) {
+                console.log(event, event.key)
+                if (event.key == "Enter"){
+                editor.redo();
+                }
+            });
 
             document.getElementById("redo").addEventListener("click", function() {
                 editor.redo();
+            });
+
+            document.getElementById("redo").addEventListener("keydown", function(event) {
+                console.log(event, event.key)
+                if (event.key == "Enter"){
+                editor.redo();
+                }
             });
 
             // Permissive readonly, allows redo and undo
@@ -246,7 +259,12 @@
             Adds the selected symbol surrounding the selected span or at the cursor location. 
             Takes a symbol (string) as input.
             */
-            function annotateSelection(symbol) {
+            function annotateSelection(symbol, key) {
+                // If called using keyboard input, ignore it if the key is not enter
+                console.log("KEY is: ", key, key == undefined, key != "Enter")
+                if (key !== undefined && key !== "Enter") {
+                    return
+                }
                 console.log("Annotating selection with: ", symbol);
                 let selectionText = editor.getSelectedText();
                 let selectionRange = editor.getSelectionRange();
@@ -499,10 +517,16 @@
 
             // Keybinds for read only mode
             document.addEventListener("keydown", function(event) {
+                // Enables Enter as an interact option for all buttons
+                if (event.key == "Enter" && event.target.classList.contains("button")) {
+                    event.target.click();
+                    return
+                }
+
                 if (editor.getReadOnly()) {
                     // Enable undo and redo
                     if (event.ctrlKey || event.cmdKey) {
-                        console.log(event.key, event.ctrlKey)
+                        //console.log(event.key, event.ctrlKey)
                         if (event.key == "z") {
                             editor.undo();
                             return
@@ -512,7 +536,7 @@
                         }
                     }
 
-                    console.log(event.key, event.shiftKey)
+                    //console.log(event.key, event.shiftKey)
                     // Handle keybinds
                     switch (event.key.toLowerCase()) {
                         case "q": 
@@ -561,19 +585,28 @@
         </script>
 
         <div id="buttons">
+            Regulative:
             <div class="button" role="button" id="next" tabindex="0" onclick="annotateSelection('A')">Attribute</div>
+            <div class="button" role="button" id="next" tabindex="0" onclick="annotateSelection('A,p')">A. Property</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('I')">Aim</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('D')">Deontic</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bdir')">Direct Object</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bdir,p')">D.O. Property</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bind')">Indirect Object</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bind,p')">I.O. Property</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('Cac')">Activation Condition</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('Cex')">Execution Constraint</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('O')">Or Else</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('L')">Logical Operator</div>
+            <br>
+            Constitutive:
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('E')">Constituted Entity</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('E,p')">C.E. Property</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('F')">Constituted Function</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('M')">Modal</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('P')">Constitutive Properties</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('P,p')">C.P. Properties</div>
+            Other:
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('O')">Or Else</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('L')">Logical Operator</div>
         </div>
 
         <dialog id="symbolModal">
@@ -597,9 +630,9 @@
                 <tr><td><b>P,p</b></td><td>Constituting Properties Properties*</td></tr>
                 <tr><td><b>O</b></td><td>Or Else**</td></tr>
             </table>
-            * In addition to component annotation, these components support component-level nesting, with braces scoping the nested statements (e.g., " + <b> + "Bdir{ ... }" + </b>, <b>Bdir,p{ ... }</b>, etc.).<br>
+            * In addition to component annotation, these components support component-level nesting, <br>with braces scoping the nested statements (e.g., " + <b> + "Bdir{ ... }" + </b>, <b>Bdir,p{ ... }</b>, etc.).<br>
             ** The Or else component only allows component-level nesting (i.e., substitution by an entire statement).<br>
-            <div class="button" role="button" tabindex="0" id="symbolModalClose" style="float:right" autofocus onkeydown="closeModal(event.key,'symbolModal')" onclick="closeModal(null,'symbolModal')">Close</div>
+            <div class="button" role="button" tabindex="0" id="symbolModalClose" style="float:right" autofocus onclick="closeModal(null,'symbolModal')">Close</div>
         </dialog>
 
         <dialog id="keybindModal">
@@ -626,7 +659,7 @@
             </table>
             * If the selection is not a logical operator it will be marked as a semantic annotation instead.<br>
             Other Keybindings are also supported. Such as copying and pasting in the editor and default undo and redo. <br>
-            <div class="button" role="button" tabindex="0" id="keybindModalClose" style="float:right" autofocus onkeydown="closeModal(event.key,'keybindModal')" onclick="closeModal(null,'keybindModal')">Close</div>
+            <div class="button" role="button" tabindex="0" id="keybindModalClose" style="float:right" autofocus onclick="closeModal(null,'keybindModal')">Close</div>
         </dialog>
 
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
