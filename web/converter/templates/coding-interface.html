@@ -59,11 +59,16 @@
         <div id="buttons">
             <div class="button" role="button" tabindex="0" id="undo">Undo</div>
             <div class="button" role="button" tabindex="0" id="redo">Redo</div>
-            <div class="button" role="button" tabindex="0" id="lock">Text mode</div>
-            <div class="button" role="button" tabindex="0" id="nested">Nested</div>
-            <div class="button" role="button" tabindex="0" id="semantic">Semantic Annotation</div>
-            <div class="button" role="button" tabindex="0" id="symbols">Symbols</div>
-            <div class="button" role="button" tabindex="0" id="keybinds">Keybinds</div>
+            <span data-text="Toggles between text and edit mode. Text mode allows for free text editing. Edit mode allows for keybindings to add symbols." class="tooltip">
+            <div class="button" role="button" tabindex="0" id="lock">Text mode</div></span>
+            <span data-text="Toggles nesting, when on symbols which support nesting use the appropriate brackets for nesting on creation." class="tooltip">
+            <div class="button" role="button" tabindex="0" id="nested">Nested</div></span>
+            <span data-text="Toggles semantic annotation, when on symbols will be created with brackets for semantic annotation." class="tooltip">
+            <div class="button" role="button" tabindex="0" id="semantic">Semantic Annotation</div></span>
+            <span data-text="Shows a list of supported symbols and their respective IG 2.0 Components" class="tooltip">
+            <div class="button" role="button" tabindex="0" id="symbols">Symbols</div></span>
+            <span data-text="Shows a list of supported keybindings and their respective IG 2.0 Components" class="tooltip">
+            <div class="button" role="button" tabindex="0" id="keybinds">Keybinds</div></span>
         </div>
         <!-- ACE Editor; copies any content to hidden textarea -->
         <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">{{.CodedStmt}}</div>
@@ -197,16 +202,16 @@
                 
             });
 
-            let nested = false
             // Toggle for nested symbols
+            let nested = false
             document.getElementById("nested").addEventListener("click", function() {
                 button = document.getElementById("nested")
                 button.classList.toggle('toggleActive')
                 nested = !nested
             });
 
+            // Toggle for semantic annotations symbols
             let semanticAnnotation = false
-            // Toggle for nested symbols
             document.getElementById("semantic").addEventListener("click", function() {
                 button = document.getElementById("semantic")
                 button.classList.toggle('toggleActive')
@@ -666,5 +671,5 @@
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />
         <!-- Link to reset form content to default values -->
         <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example1" href="#" onclick="resetContent()">Reset to default statement example</a></span>
-        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations." class="tooltip"><a id="example2" href="#">Example Statement 2 (moderately complex)</a></span>
-        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a complex example statement showcasing combinations of nested activation conditions in addition to the features showcased in the second example." class="tooltip"><a id="example3" href="#">Example Statement 3 (complex)</a></span><br /><br />
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations. Overwrites the 'Original Statement' and 'Encoded Statement' fields" class="tooltip"><a id="example2" href="#">Example Statement 2 (moderately complex)</a></span>
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a complex example statement showcasing combinations of nested activation conditions in addition to the features showcased in the second example. Overwrites the 'Original Statement' and 'Encoded Statement' fields" class="tooltip"><a id="example3" href="#">Example Statement 3 (complex)</a></span><br /><br />
