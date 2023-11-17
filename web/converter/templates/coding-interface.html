@@ -137,6 +137,70 @@
 
             }
 
+            // Symbols for the annotateSelection function
+            var symbols = {
+                "A":{"symbol": "A", "bracket":["(",")"], "semantic": true},
+                "I":{"symbol": "I", "bracket":["(",")"], "semantic": true},
+                "D":{"symbol": "D", "bracket":["(",")"], "semantic": true},
+                "Bdir":{"symbol": "Bdir", "bracket":["(",")"], "semantic": true},
+                "Bind":{"symbol": "Bind", "bracket":["(",")"], "semantic": true},
+                "Cac":{"symbol": "Cac", "bracket":["(",")"], "semantic": true},
+                "Cex":{"symbol": "Cex", "bracket":["(",")"], "semantic": true},
+                "O":{"symbol": "O", "bracket":["{","}"], "semantic": true},
+                "E":{"symbol": "E", "bracket":["(",")"], "semantic": true},
+                "F":{"symbol": "F", "bracket":["(",")"], "semantic": true},
+                "M":{"symbol": "M", "bracket":["(",")"], "semantic": true},
+                "P":{"symbol": "P", "bracket":["(",")"], "semantic": true},
+            }
+
+            /*
+            Adds the selected symbol surrounding the selected span or at the cursor location. 
+            Takes a symbol (string) as input.
+            */
+            function annotateSelection(symbol) {
+                console.log("Annotating selection with: ", symbol);
+                let selectionText = editor.getSelectedText();
+                let selectionRange = editor.getSelectionRange();
+                console.log(selectionText)
+                console.log(selectionRange)
+                // Move the cursor to within the new symbol
+                cursorLocation = editor.selection.getCursor();
+
+                // Separate handling for logical operators
+                if (symbol == "L") {
+                    editor.session.replace(new ace.Range(selectionRange.start.row, selectionRange.start.column, 
+                        selectionRange.end.row, selectionRange.end.column), "["+selectionText.toUpperCase()+"]");
+                    
+                    // If the selection is empty move the cursor and activate the editor
+                    if (selectionText == "") {
+                        cursorLocation.column += 1;
+                        editor.moveCursorToPosition(cursorLocation);
+                        editor.clearSelection();
+                        editor.focus(); // Set the editor to in-focus, allowing for keyboard input
+                    }
+                    return
+                }
+
+                // Build the output with a symbol and the corresponding brackets
+                let outputText = symbols[symbol].symbol;
+                outputText += symbols[symbol]["semantic"] ? "" : "[]";
+                outputText += symbols[symbol].bracket[0];
+                outputText += selectionText;
+
+                outputText += symbols[symbol].bracket[1];
+
+
+                editor.session.replace(new ace.Range(selectionRange.start.row, selectionRange.start.column, 
+                    selectionRange.end.row, selectionRange.end.column), outputText);
+                // If the selection is empty move the cursor and activate the editor
+                if (selectionText == ""){
+                cursorLocation.column += outputText.length-1
+                editor.moveCursorToPosition(cursorLocation);
+                editor.clearSelection();
+                editor.focus(); // Set the editor to in-focus, allowing for keyboard input
+                }
+            }
+
             /*
             Shows a tooltip on symbol hover. Shows the full name of the symbol.
             */
@@ -339,6 +403,22 @@
             }
 
         </script>
+
+        <div id="buttons">
+            <div class="button" onclick="annotateSelection('A')">Attribute</div>
+            <div class="button" onclick="annotateSelection('I')">Aim</div>
+            <div class="button" onclick="annotateSelection('D')">Deontic</div>
+            <div class="button" onclick="annotateSelection('Bdir')">Direct Object</div>
+            <div class="button" onclick="annotateSelection('Bind')">Indirect Object</div>
+            <div class="button" onclick="annotateSelection('Cac')">Activation Condition</div>
+            <div class="button" onclick="annotateSelection('Cex')">Execution Constraint</div>
+            <div class="button" onclick="annotateSelection('O')">Or Else</div>
+            <div class="button" onclick="annotateSelection('L')">Logical Operator</div>
+            <div class="button" onclick="annotateSelection('E')">Constituted Entity</div>
+            <div class="button" onclick="annotateSelection('F')">Constituted Function</div>
+            <div class="button" onclick="annotateSelection('M')">Modal</div>
+            <div class="button" onclick="annotateSelection('P')">Constitutive Properties</div>
+        </div>
 
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />
