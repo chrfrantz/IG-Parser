@@ -221,6 +221,15 @@
                 document.getElementById(modalId).close();
             }
 
+            function linkIntercept(event) {
+                event.preventDefault();
+                href = event.target.href;
+                // Ask for confirmation
+                if (confirm("Showing an example overwrites the current work done.\nAre you sure you want to overwrite your current work?")){
+                    // Redirect if confirmed
+                    window.location.href=href;
+                }
+            }
 
             // Symbols for the annotateSelection function
             var symbols = {
@@ -568,7 +577,7 @@
         <div id="buttons">
             Regulative:
             <div class="button" role="button" id="next" tabindex="0" onclick="annotateSelection('A')">Attribute</div>
-            <div class="button" role="button" id="next" tabindex="0" onclick="annotateSelection('A,p')">A. Property</div>
+            <div class="button" role="button" tabindex="0" onclick="annotateSelection('A,p')">A. Property</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('I')">Aim</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('D')">Deontic</div>
             <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bdir')">Direct Object</div>
@@ -650,5 +659,5 @@
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">{{.CodedStmt}}</textarea><br />
         <!-- Link to reset form content to default values -->
         <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example1" href="#" onclick="resetContent()">Reset to default statement example</a></span>
-        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations. Overwrites the 'Original Statement' and 'Encoded Statement' fields" class="tooltip"><a id="example2" href="#">Example Statement 2 (moderately complex)</a></span>
-        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a complex example statement showcasing combinations of nested activation conditions in addition to the features showcased in the second example. Overwrites the 'Original Statement' and 'Encoded Statement' fields" class="tooltip"><a id="example3" href="#">Example Statement 3 (complex)</a></span><br /><br />
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example2" href="#" onclick="linkIntercept(event)">Example Statement 2 (moderately complex)</a></span>
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a complex example statement showcasing combinations of nested activation conditions in addition to the features showcased in the second example. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example3" href="#" onclick="linkIntercept(event)">Example Statement 3 (complex)</a></span><br /><br />
