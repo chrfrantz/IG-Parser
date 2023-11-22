@@ -472,6 +472,10 @@ Ace.js annotation highlighting:
     cursor: pointer;
 }
 
+.ace-tm .ace_marker-layer .ace_selection{
+    border-bottom: 2px rgb(82, 75, 76) dotted;
+}
+
 /*
 Modal styling (dialog html element for displaying information in the editor)
 */
