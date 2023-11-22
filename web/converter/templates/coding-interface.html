@@ -57,18 +57,18 @@
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip" id="editorLabel"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         <!-- Editor buttons -->
         <div id="buttons">
-            <div class="button" role="button" tabindex="0" id="undo">Undo</div>
-            <div class="button" role="button" tabindex="0" id="redo">Redo</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="undo">Undo</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="redo">Redo</div>
             <span data-text="Toggles between text and edit mode. Text mode allows for free text editing. Edit mode allows for keybindings to add symbols." class="tooltip">
-            <div class="button" role="button" tabindex="0" id="lock">Text mode</div></span>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="lock">Text mode</div></span>
             <span data-text="Toggles nesting, when on symbols which support nesting use the appropriate brackets for nesting on creation." class="tooltip">
-            <div class="button" role="button" tabindex="0" id="nested">Nesting</div></span>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="nested">Nesting</div></span>
             <span data-text="Toggles semantic annotation, when on symbols will be created with brackets for semantic annotation." class="tooltip">
-            <div class="button" role="button" tabindex="0" id="semantic">Semantic Annotation</div></span>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="semantic">Semantic Annotation</div></span>
             <span data-text="Shows a list of supported symbols and their respective IG 2.0 Components" class="tooltip">
-            <div class="button" role="button" tabindex="0" id="symbols">Symbols</div></span>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbols">Symbols</div></span>
             <span data-text="Shows a list of supported keybindings and their respective IG 2.0 Components" class="tooltip">
-            <div class="button" role="button" tabindex="0" id="keybinds">Keybinds</div></span>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybinds">Keybinds</div></span>
         </div>
         <!-- ACE Editor; copies any content to hidden textarea -->
         <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()" aria-labelledby="editorLabel">{{.CodedStmt}}</div>
@@ -576,27 +576,27 @@
 
         <div id="buttons">
             Regulative:
-            <div class="button" role="button" id="next" tabindex="0" onclick="annotateSelection('A')">Attribute</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('A,p')">A. Property</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('I')">Aim</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('D')">Deontic</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bdir')">Direct Object</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bdir,p')">D.O. Property</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bind')">Indirect Object</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Bind,p')">I.O. Property</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Cac')">Activation Condition</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('Cex')">Execution Constraint</div>
+            <div class="button" role="button" aria-pressed="false" id="next" tabindex="0" onclick="annotateSelection('A')">Attribute</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('A,p')">A. Property</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('I')">Aim</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('D')">Deontic</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Bdir')">Direct Object</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Bdir,p')">D.O. Property</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Bind')">Indirect Object</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Bind,p')">I.O. Property</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Cac')">Activation Condition</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Cex')">Execution Constraint</div>
             <br>
             Constitutive:
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('E')">Constituted Entity</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('E,p')">C.E. Property</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('F')">Constituted Function</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('M')">Modal</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('P')">Constitutive Properties</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('P,p')">C.P. Properties</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('E')">Constituted Entity</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('E,p')">C.E. Property</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('F')">Constituted Function</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('M')">Modal</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('P')">Constitutive Properties</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('P,p')">C.P. Properties</div>
             Other:
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('O')">Or Else</div>
-            <div class="button" role="button" tabindex="0" onclick="annotateSelection('L')">Logical Operator</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('O')">Or Else</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('L')">Logical Operator</div>
         </div>
 
         <!-- Modal for showing the symbols available to use in the editor and their corresponding IG 2.0 components -->
@@ -624,7 +624,7 @@
             * In addition to component annotation, these components support component-level nesting, <br>
             with braces scoping the nested statements (e.g., " + <b> + "Bdir{ ... }" + </b>, <b>Bdir,p{ ... }</b>, etc.).<br>
             ** The Or else component only allows component-level nesting (i.e., substitution by an entire statement).<br>
-            <div class="button" role="button" tabindex="0" id="symbolModalClose" style="float:right" autofocus onclick="closeModal('symbolModal')">Close</div>
+            <div class="button" role="button" aria-pressed="false" id="symbolModalClose" style="float:right" autofocus onclick="closeModal('symbolModal')">Close</div>
         </dialog>
 
         <!-- Modal for showing keybindings available in the editor, opens from a button on the page -->
@@ -652,7 +652,7 @@
             </table>
             * If the selection is not a logical operator it will be marked as a semantic annotation instead.<br>
             Other Keybindings are also supported. Such as copying and pasting in the editor and default undo and redo. <br>
-            <div class="button" role="button" tabindex="0" id="keybindModalClose" style="float:right" autofocus onclick="closeModal('keybindModal')">Close</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybindModalClose" style="float:right" autofocus onclick="closeModal('keybindModal')">Close</div>
         </dialog>
 
         <!-- Hidden textarea that holds encoded statement; this is used for form submission -->
