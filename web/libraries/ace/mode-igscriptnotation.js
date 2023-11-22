@@ -8,52 +8,56 @@ var IGScriptNotationHighlightRules = function () {
                 token : "Attribute",
                 // Symbol, followed by an opening bracket
                 //regex : /A(?:\d*)(?=(,p)*\s*[\[|\(|\{])/
-                regex : /A(?=[\[|\(|\{])/
+                // (?:\d*) non capturing , \d* capturing
+                regex : /A\d*(?=[\[|\(|\{])/
             },{
                 token : "Attribute_Property",
                 // Symbol, followed by an opening bracket
                 //regex : /A(?:\d*)(?=(,p)*\s*[\[|\(|\{])/
-                regex : /A\d*,p(?=[\[|\(|\{])/
+                regex : /A\d*,p\d*(?=[\[|\(|\{])/
             },{
                 token : "Deontic",
-                regex : /D(?:\d*)(?=[\[|\(|\{])/
+                regex : /D(?=[\[|\(|\{])/
             },{
                 token : "Aim",
-                regex : /I(?:\d*)(?=[\[|\(|\{])/
+                regex : /I(?=[\[|\(|\{])/
             },{
                 token : "Direct_Object",
-                regex : /Bdir(?:\d*)(?=[\[|\(|\{])/
+                regex : /Bdir\d*(?=[\[|\(|\{])/
             },{
                 token : "Direct_Object_Property",
-                regex : /Bdir\d*,p(?=[\[|\(|\{])/
+                regex : /Bdir\d*,p\d*(?=[\[|\(|\{])/
             },{
                 token : "Indirect_Object",
                 //regex : /Bind(?:\d*)(?=(,p)*\s*[\[|\(|\{])/
-                regex : /Bind(?:\d*)(?=[\[|\(|\{])/
+                regex : /Bind\d*(?=[\[|\(|\{])/
             },{
                 token : "Indirect_Object_Property",
-                regex : /Bind\d*,p(?=[\[|\(|\{])/
+                regex : /Bind\d*,p\d*(?=[\[|\(|\{])/
             },{
                 token : "Activation_Condition",
-                regex : /Cac(?:\d*)(?=[\[|\(|\{])/
+                regex : /Cac(?=[\[|\(|\{])/
             },{
                 token : "Activation_Constraint",
-                regex : /Cex(?:\d*)(?=[\[|\(|\{])/
+                regex : /Cex(?=[\[|\(|\{])/
             },{
                 token : "Constituted_Entity",
-                regex : /E(?:\d*)(?=(,p)*[\[|\(|\{])/
+                regex : /E\d*(?=[\[|\(|\{])/
+            },{
+                token : "Constituted_Entity_Property",
+                regex : /E\d*,p\d*(?=[\[|\(|\{])/
             },{
                 token : "Modal",
-                regex : /M(?:\d*)(?=[\[|\(|\{])/
+                regex : /M(?=[\[|\(|\{])/
             },{
                 token : "Constitutive_Function",
-                regex : /F(?:\d*)(?=[\[|\(|\{])/
+                regex : /F(?=[\[|\(|\{])/
             },{
                 token : "Constituting_Properties",
-                regex : /D(?:\d*)(?=[\[|\(|\{])/
+                regex : /P\d*(?=[\[|\(|\{])/
             },{
                 token : "Constituting_Properties_Properties",
-                regex : /D(?:\d*)(?=(,p)[\[|\(|\{])/
+                regex : /P\d*,p\d*(?=[\[|\(|\{])/
             },{
                 token : "Or_Else",
                 // Symbol, followed by any amount of whitespace and an opening bracket

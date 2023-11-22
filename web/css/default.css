@@ -437,6 +437,11 @@ Ace.js annotation highlighting:
     border-radius: 3px;
 }
 
+.ace_Constituted_Entity_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
 .text_tooltip {
     background:#000;
     font-size: 13px;
