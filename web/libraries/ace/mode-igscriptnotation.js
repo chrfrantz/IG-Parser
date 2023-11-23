@@ -17,6 +17,7 @@ var IGScriptNotationHighlightRules = function () {
                 regex : /A\d*,p\d*(?=[\[|\(|\{])/
             },{
                 token : "Deontic",
+                // Optionally (?=(?:\[.*\])?(?=[\(\{]))/
                 regex : /D(?=[\[|\(|\{])/
             },{
                 token : "Aim",
