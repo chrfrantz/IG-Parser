@@ -98,6 +98,14 @@
                 }
             })
 
+            editor.commands.addCommand({
+                name: "tabPrevElement",
+                bindKey: { win: "Shift-Tab", mac: "Shift-Tab"},
+                exec: function(editor) {
+                    document.GetElementById("keybinds").focus;
+                }
+            })
+
             /*
             Copies content from editor to hidden textarea (which is used for form submission)
              */
