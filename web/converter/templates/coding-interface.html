@@ -66,6 +66,8 @@
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="nested">Nesting</div></span>
             <span data-text="Toggles semantic annotation, when on symbols will be created with brackets for semantic annotation." class="tooltip">
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="semantic">Semantic Annotation</div></span>
+            <span data-text="Toggles selection mode, where annotation is performed through selecting a symbol then marking text to annotate the text with the symbol." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="selection">Selection Mode</div></span>
             <span data-text="Shows a list of supported symbols and their respective IG 2.0 Components" class="tooltip">
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbols">Symbols</div></span>
             <span data-text="Shows a list of supported keybindings and their respective IG 2.0 Components" class="tooltip">
@@ -92,7 +94,7 @@
                 name: "tabNextElement",
                 bindKey: { win: "Tab", mac: "Tab"},
                 exec: function(editor) {
-                    document.GetElementById("next").focus;
+                    document.GetElementById("A").focus;
                 }
             })
 
@@ -199,7 +201,7 @@
                 nested = !nested
             });
 
-            // Toggle for semantic annotations symbols
+            // Toggle for semantic annotations for symbols
             let semanticAnnotation = false
             document.getElementById("semantic").addEventListener("click", function() {
                 button = document.getElementById("semantic")
@@ -247,7 +249,7 @@
                 "O":{"symbol": "O", "bracket":["{","}"]},
                 "E":{"symbol": "E", "bracket":["(",")"]},
                 "E,p":{"symbol": "E,p", "bracket":["(",")","{","}"], "nested": true},
-                "F":{"symbol": "F", "bracket":["(",")"], "nested": true},
+                "F":{"symbol": "F", "bracket":["(",")"]},
                 "M":{"symbol": "M", "bracket":["(",")"]},
                 "P":{"symbol": "P", "bracket":["(",")","{","}"], "nested": true},
                 "P,p":{"symbol": "P,p", "bracket":["(",")","{","}"], "nested": true},
@@ -255,9 +257,9 @@
 
             /*
             Adds the selected symbol surrounding the selected span or at the cursor location. 
-            Takes a symbol (string) as input.
+            Takes a symbol (string) as input, corresponding with the object above.
             */
-            function annotateSelection(symbol, key) {
+            function annotateSelection(symbol) {
                 console.log("Annotating selection with: ", symbol);
                 let selectionText = editor.getSelectedText();
                 let selectionRange = editor.getSelectionRange();
@@ -338,6 +340,60 @@
                     }
                 }
             });
+
+            /*
+            Highlighting mode
+            */
+
+            let selectedSymbol = "A"   
+            let selectionMode = false  
+            let mouseDown = false      
+            // Toggle for selection mode
+            document.getElementById("selection").addEventListener("click", function() {
+                button = document.getElementById("selection")
+                button.classList.toggle('toggleActive')
+                button = document.getElementById(selectedSymbol)
+                button.classList.toggle('toggleActive')
+                selectionMode = !selectionMode
+            });
+
+            // For checking if the mouse is down
+            editor.on("mousedown", function() {
+                console.log("Mouse is down")
+                mouseDown = true
+            })
+
+            // On mouse up, if there is a selection and selection mode is on
+            // annotate the selection with the selected symbol
+            editor.on("mouseup", function() {
+                if (mouseDown) {
+                    if (selectionMode) {
+                        selection = editor.getSelectedText()
+                        console.log(selection)
+
+                        if (selection !== "") {
+                            annotateSelection(selectedSymbol)
+                        }
+                    }
+                    mouseDown = false
+                }
+            })
+
+            // Middleware function for the buttons
+            function symbolButtonHandler(symbol) {
+                // If selection mode is active, change which symbol is selected and toggle
+                // the active status of this symbol button and the previous symbol button.
+                if (selectionMode) {
+                    button = document.getElementById(selectedSymbol)
+                    button.classList.toggle('toggleActive')
+                    button = document.getElementById(symbol)
+                    button.classList.toggle('toggleActive')
+                    selectedSymbol = symbol
+                } else {
+                    // Just send the symbol on to the annotation function
+                    annotateSelection(symbol)
+                }
+            }
 
             /*
             Saves value of a given field into localStorage. Takes checkbox field ID (not value field) as input.
@@ -577,27 +633,27 @@
 
         <div id="buttons">
             Regulative:
-            <div class="button" role="button" aria-pressed="false" id="next" tabindex="0" onclick="annotateSelection('A')">Attribute</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('A,p')">A. Property</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('I')">Aim</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('D')">Deontic</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Bdir')">Direct Object</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Bdir,p')">D.O. Property</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Bind')">Indirect Object</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Bind,p')">I.O. Property</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Cac')">Activation Condition</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('Cex')">Execution Constraint</div>
+            <div class="button" role="button" aria-pressed="false" id="A" tabindex="0" onclick="symbolButtonHandler('A')">Attribute</div>
+            <div class="button" role="button" aria-pressed="false" id="A,p"    tabindex="0" onclick="symbolButtonHandler('A,p')">A. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="I"      tabindex="0" onclick="symbolButtonHandler('I')">Aim</div>
+            <div class="button" role="button" aria-pressed="false" id="D"      tabindex="0" onclick="symbolButtonHandler('D')">Deontic</div>
+            <div class="button" role="button" aria-pressed="false" id="Bdir"   tabindex="0" onclick="symbolButtonHandler('Bdir')">Direct Object</div>
+            <div class="button" role="button" aria-pressed="false" id="Bdir,p" tabindex="0" onclick="symbolButtonHandler('Bdir,p')">D.O. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="Bind"   tabindex="0" onclick="symbolButtonHandler('Bind')">Indirect Object</div>
+            <div class="button" role="button" aria-pressed="false" id="Bind,p" tabindex="0" onclick="symbolButtonHandler('Bind,p')">I.O. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="Cac"    tabindex="0" onclick="symbolButtonHandler('Cac')">Activation Condition</div>
+            <div class="button" role="button" aria-pressed="false" id="Cex"    tabindex="0" onclick="symbolButtonHandler('Cex')">Execution Constraint</div>
             <br>
             Constitutive:
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('E')">Constituted Entity</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('E,p')">C.E. Property</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('F')">Constituted Function</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('M')">Modal</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('P')">Constitutive Properties</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('P,p')">C.P. Properties</div>
+            <div class="button" role="button" aria-pressed="false" id="E"      tabindex="0" onclick="symbolButtonHandler('E')">Constituted Entity</div>
+            <div class="button" role="button" aria-pressed="false" id="E,p"    tabindex="0" onclick="symbolButtonHandler('E,p')">C.E. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="F"      tabindex="0" onclick="symbolButtonHandler('F')">Constituted Function</div>
+            <div class="button" role="button" aria-pressed="false" id="M"      tabindex="0" onclick="symbolButtonHandler('M')">Modal</div>
+            <div class="button" role="button" aria-pressed="false" id="P"      tabindex="0" onclick="symbolButtonHandler('P')">Constitutive Properties</div>
+            <div class="button" role="button" aria-pressed="false" id="P,p"    tabindex="0" onclick="symbolButtonHandler('P,p')">C.P. Properties</div>
             Other:
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('O')">Or Else</div>
-            <div class="button" role="button" aria-pressed="false" tabindex="0" onclick="annotateSelection('L')">Logical Operator</div>
+            <div class="button" role="button" aria-pressed="false" id="O"      tabindex="0" onclick="symbolButtonHandler('O')">Or Else</div>
+            <div class="button" role="button" aria-pressed="false" id="L"      tabindex="0" onclick="symbolButtonHandler('L')">Logical Operator</div>
         </div>
 
         <!-- Modal for showing the symbols available to use in the editor and their corresponding IG 2.0 components -->
