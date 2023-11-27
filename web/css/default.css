@@ -492,3 +492,10 @@ Modal styling (dialog html element for displaying information in the editor)
     background-color: #000;
     color: #fff;
 }
+
+/* Makes the selection mode unavailable for touch users */
+@media (pointer: coarse) {
+    #selection {
+        display: none;
+    }
+}
