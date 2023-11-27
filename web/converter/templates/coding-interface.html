@@ -90,6 +90,7 @@
             editor.setOption("minLines", 5); // standard size
             editor.setOption("maxLines", 30); // number of lines before using scrollbar
 
+            // Shift-tab to navigate down out of the editor
             editor.commands.addCommand({
                 name: "tabNextElement",
                 bindKey: { win: "Tab", mac: "Tab"},
@@ -98,6 +99,7 @@
                 }
             })
 
+            // Shift-tab to navigate up out of the editor
             editor.commands.addCommand({
                 name: "tabPrevElement",
                 bindKey: { win: "Shift-Tab", mac: "Shift-Tab"},
@@ -172,10 +174,12 @@
             }
 
             // Editor buttons above the editor
+            // Undo button for editor input
             document.getElementById("undo").addEventListener("click", function() {
                 editor.undo();
             });
 
+            // Redo button for editor input
             document.getElementById("redo").addEventListener("click", function() {
                 editor.redo();
             });
@@ -574,7 +578,7 @@
 
             // Keybinds for read only mode
             document.addEventListener("keydown", function(event) {
-                // Enables Enter as an interact option for all divs with the "button" class
+                // Enables the Enter key as an interact option for all divs with the "button" class
                 if (event.key == "Enter" && event.target.classList.contains("button")) {
                     event.target.click();
                     return
@@ -639,6 +643,7 @@
 
         </script>
 
+        <!-- Buttons for selecting symbols below the editor  -->
         <div id="buttons">
             Regulative:
             <div class="button" role="button" aria-pressed="false" id="A" tabindex="0" onclick="symbolButtonHandler('A')">Attribute</div>
