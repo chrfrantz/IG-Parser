@@ -188,19 +188,19 @@
             // Permissive readonly, allows redo and undo
             document.getElementById("lock").addEventListener("click", function() {
                 button = document.getElementById("lock")
-                console.log(button.textContent)
+                //console.log(button.textContent)
                 if (editor.getReadOnly()) {
                     editor.setOption("readOnly", false)
                     button.textContent = "Text mode"
                     button.classList.toggle('toggleActive')
                     
-                    console.log(button.textContent)
+                    //console.log(button.textContent)
                 } else {
                     editor.setOption("readOnly", "nocursor")
                     button.textContent = "Edit mode"
                     button.classList.toggle('toggleActive')
                     
-                    console.log(button.textContent)
+                    //console.log(button.textContent)
                 }
                 
             });
@@ -272,11 +272,11 @@
             Takes a symbol (string) as input, corresponding with the object above.
             */
             function annotateSelection(symbol) {
-                console.log("Annotating selection with: ", symbol);
+                //console.log("Annotating selection with: ", symbol);
                 let selectionText = editor.getSelectedText();
                 let selectionRange = editor.getSelectionRange();
-                console.log(selectionText)
-                console.log(selectionRange)
+                //console.log(selectionText)
+                //console.log(selectionRange)
                 // Move the cursor to within the new symbol
                 cursorLocation = editor.selection.getCursor();
 
@@ -371,7 +371,7 @@
 
             // For checking if the mouse is down
             editor.on("mousedown", function() {
-                console.log("Mouse is down")
+                //console.log("Mouse is down")
                 mouseDown = true
             })
 
@@ -381,7 +381,7 @@
                 if (mouseDown) {
                     if (selectionMode) {
                         selection = editor.getSelectedText()
-                        console.log(selection)
+                        //console.log(selection)
 
                         if (selection !== "") {
                             annotateSelection(selectedSymbol)
