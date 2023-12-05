@@ -1,6 +1,8 @@
 package shared
 
-import "strings"
+import (
+	"strings"
+)
 
 /*
 Replaces/escapes selected symbols in as far as relevant for export (e.g., quotation marks).
@@ -60,4 +62,24 @@ func StringifySlices(elements []string) string {
 		}
 	}
 	return outString
+}
+
+/*
+Detects the presence of duplicate components (i.e., component type and content).
+Returns empty string ("") if no duplicate component is found, else the first identified duplicate entry.
+*/
+func DuplicateElement(array []string) string {
+	// Iterate through array and compare each element with each other
+	for i := 0; i < len(array); i++ {
+		// Start at element i + 1
+		for j := i + 1; j < len(array); j++ {
+			// if element at index i is equal to element at index j ...
+			if array[i] == array[j] {
+				// ... then return duplicate element
+				return array[i]
+			}
+		}
+	}
+	// Return empty string - i.e., no duplicate found
+	return ""
 }

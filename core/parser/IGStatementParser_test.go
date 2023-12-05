@@ -2971,3 +2971,21 @@ func TestWrongParenthesisOrderButCorrectCount(t *testing.T) {
 	}
 
 }
+
+/*
+Tests duplicate components in input (detection of duplicate statements).
+*/
+func TestDuplicateComponentsInStatement(t *testing.T) {
+
+	// Input text with repeated components (copy-and-paste problem)
+	text := "A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance). " +
+		"A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance)."
+
+	// Test for error during parsing. Should pick up on duplicates.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_DUPLICATE_COMPONENT_ENTRIES {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_DUPLICATE_COMPONENT_ENTRIES+", but returned error ", err)
+	}
+
+}

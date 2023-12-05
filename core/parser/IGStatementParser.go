@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"IG-Parser/core/shared"
 	"IG-Parser/core/tree"
 	"fmt"
 	"log"
@@ -53,6 +54,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
 	// Extract component-only statement and override input (e.g., A(content))
 	if len(compAndNestedStmts[0]) > 0 {
+		// Assign array elements as text (for later string parsing)
 		text = compAndNestedStmts[0][0]
 	} else {
 		// else just reset input text (so no basic element is parsed)
@@ -1540,6 +1542,16 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 	}
 
 	Println("Components (Count:", len(componentStrings), "):", fmt.Sprint(componentStrings))
+
+	// Check for duplicates in individual atomic components
+	duplicateChk := shared.DuplicateElement(componentStrings)
+	if duplicateChk != "" {
+		// If duplicate is found, return contextualized error
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_DUPLICATE_COMPONENT_ENTRIES,
+			ErrorMessage: "Duplicate component entry '" + duplicateChk + "' found in input statement. " +
+				"Check for duplicate components and statements.",
+			ErrorIgnoredElements: []string{duplicateChk}}
+	}
 
 	// Initialize output string for parsing
 	componentString := ""

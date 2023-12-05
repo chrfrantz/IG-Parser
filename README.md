@@ -11,6 +11,8 @@ Deployed IG Parser:
 
 Note: Either version allows interactive switching to the respective other while preserving encoded statement information.
 
+See [Revision history](changelog.md) for detailed overview of changes.
+
 ## Overview
 
 IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used locally, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to syntactic principles and essential features of IG Script, followed by a set of examples showcasing all features. As a final aspect, deployment instructions for IG Parser are provided. 

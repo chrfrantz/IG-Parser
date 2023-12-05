@@ -472,6 +472,9 @@ const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
 // Indicates that multiple component symbols have been found in component specification -- points to incorrect coding
 const PARSING_ERROR_MULTIPLE_COMPONENTS_FOUND = "MULTIPLE_COMPONENTS_FOUND"
 
+// Indicates duplicate component values in input statement (i.e., both component type and content)
+const PARSING_ERROR_DUPLICATE_COMPONENT_ENTRIES = "DUPLICATE_COMPONENT_ENTRIES"
+
 // Indicates ignored elements during parsing (applies when parsing into tree) - in contrast to #PARSING_ERROR_IGNORED_NESTED_ELEMENTS
 const PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING = "IGNORED_ELEMENTS_NODE_PARSING"
 
