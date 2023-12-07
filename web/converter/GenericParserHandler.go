@@ -33,6 +33,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	formValueIncludeDoV := r.FormValue(shared.PARAM_DOV)
 	formValueIgExtendedOutput := r.FormValue(shared.PARAM_EXTENDED_OUTPUT)
 	formValueIncludeHeaders := r.FormValue(shared.PARAM_PRINT_HEADERS)
+	formValuePrintIgScript := r.FormValue(shared.PARAM_PRINT_IG_SCRIPT)
 	formValueOutputType := r.FormValue(shared.PARAM_OUTPUT_TYPE)
 	formValuePropertyTree := r.FormValue(shared.PARAM_PROPERTY_TREE)
 	formValueBinaryTree := r.FormValue(shared.PARAM_BINARY_TREE)
@@ -101,6 +102,13 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		printHeaders = false
 	}
 
+	// Selection for inclusion of IG Script in output
+	// If not received by POST, set IG Script output as default setting
+	if formValuePrintIgScript == "" && r.Method != http.MethodPost {
+		formValuePrintIgScript = tabular.DEFAULT_IG_SCRIPT_OUTPUT
+	}
+	Println("Form field (tabular) - Include IG Script-encoded statement in output: ", formValuePrintIgScript)
+
 	// Private property printing in output
 	printFlatProperties := false
 	Println("Form field (visual)  - Private property tree printing: ", formValuePropertyTree)
@@ -153,6 +161,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		IncludeAnnotations:        formValueIncludeAnnotations,
 		IncludeDoV:                formValueIncludeDoV,
 		IncludeHeaders:            formValueIncludeHeaders,
+		PrintIgScript:             formValuePrintIgScript,
+		PrintIgScriptSelection:    tabular.IG_SCRIPT_INCLUSION_OPTIONS,
 		OutputType:                formValueOutputType,
 		OutputTypes:               tabular.OUTPUT_TYPES,
 		PrintPropertyTree:         formValuePropertyTree,
@@ -171,6 +181,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		StmtIdHelp:                shared.HELP_STMT_ID,
 		ParametersHelp:            shared.HELP_PARAMETERS,
 		OutputTypeHelp:            shared.HELP_OUTPUT_TYPE,
+		IgScriptInclusionHelp:     shared.HELP_IG_SCRIPT_OUTPUT,
 		ReportHelp:                shared.HELP_REPORT,
 		Version:                   config.IG_PARSER_VERSION}
 
@@ -324,6 +335,16 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 				retStruct.IncludeHeaders = shared.CHECKBOX_UNCHECKED
 				printHeaders = false
 			}
+		}
+
+		// Parameter: IG Script inclusion
+		val, suc = extractUrlParameters(r, shared.PARAM_PRINT_IG_SCRIPT)
+		if val != "" {
+			// Read from parameter
+			retStruct.PrintIgScript = val
+		} else {
+			// Use default parameter
+			retStruct.PrintIgScript = tabular.DEFAULT_IG_SCRIPT_OUTPUT
 		}
 
 		// Parameter: Output type
@@ -487,7 +508,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Delegate to specific output handlers ...
 		if templateName == TEMPLATE_NAME_PARSER_TABULAR {
 			Println("Tabular output requested")
-			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType, printHeaders)
+			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType, printHeaders, formValuePrintIgScript)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			Println("Visual output requested")
 			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionsOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations, includeDoV)

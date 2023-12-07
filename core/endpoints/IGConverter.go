@@ -20,9 +20,10 @@ the nature of the output type (see TabularOutputGeneratorConfig #OUTPUT_TYPE_CSV
 and a filename for the output. If the filename is empty, no output will be written. The parameter overwrite
 indicates whether the target file will be overwritten upon repeated write.
 If printHeaders is set, the output includes the header row.
+printIgScriptInput specifies the inclusion of the original IG Script input in the generated output (see options in tabular.IG_SCRIPT_INCLUSION_OPTIONS).
 Returns tabular output as string, and error (defaults to tree.PARSING_NO_ERROR).
 */
-func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType string, filename string, overwrite bool, printHeaders bool) ([]tabular.TabularOutputResult, tree.ParsingError) {
+func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType string, filename string, overwrite bool, printHeaders bool, printIgScriptInput string) ([]tabular.TabularOutputResult, tree.ParsingError) {
 
 	// Use separator specified by default
 	separator := tabular.CellSeparator
@@ -40,7 +41,7 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 	Println("Parsed statement:", stmts)
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	results := tabular.GenerateTabularOutputFromParsedStatements(stmts, "", stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders)
+	results := tabular.GenerateTabularOutputFromParsedStatements(stmts, "", statement, stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders, printIgScriptInput)
 	for _, res := range results {
 		if res.Error.ErrorCode != tree.PARSING_NO_ERROR {
 			return results, res.Error

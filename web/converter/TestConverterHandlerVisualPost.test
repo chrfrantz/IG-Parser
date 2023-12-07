@@ -123,7 +123,7 @@
                 
 
                 
-                saveValue("rawStmt")
+                saveValue("rawStmt");
 
                 
                 
@@ -131,39 +131,42 @@
                 
 
                 
-                saveValue("stmtId")
+                saveValue("stmtId");
 
                 
-                saveCheckbox("igExtended")
+                saveCheckbox("igExtended");
 
                 
-                saveCheckbox("annotations")
+                saveCheckbox("annotations");
 
                 
-                saveCheckbox("includeHeaders")
+                saveCheckbox("includeHeaders");
 
                 
-                saveValue("outputType")
+                saveValue("outputType");
+
+                
+                saveValue("printIgScript");
 
                 
 
                 
-                saveCheckbox("dov")
+                saveCheckbox("dov");
 
                 
-                saveCheckbox("propertyTree")
+                saveCheckbox("propertyTree");
 
                 
-                saveCheckbox("binaryTree")
+                saveCheckbox("binaryTree");
 
                 
-                saveCheckbox("actCondTop")
+                saveCheckbox("actCondTop");
 
                 
-                saveValue("canvasHeight")
+                saveValue("canvasHeight");
 
                 
-                saveValue("canvasWidth")
+                saveValue("canvasWidth");
 
             }
 
@@ -209,39 +212,42 @@
                 
 
                 
-                loadValue("stmtId")
+                loadValue("stmtId");
 
                 
-                loadCheckbox("igExtended")
+                loadCheckbox("igExtended");
 
                 
-                loadCheckbox("annotations")
+                loadCheckbox("annotations");
 
                 
-                loadCheckbox("includeHeaders")
+                loadCheckbox("includeHeaders");
 
                 
-                loadValue("outputType")
+                loadValue("outputType");
+
+                
+                loadValue("printIgScript");
 
                 
 
                 
-                loadCheckbox("dov")
+                loadCheckbox("dov");
 
                 
-                loadCheckbox("propertyTree")
+                loadCheckbox("propertyTree");
 
                 
-                loadCheckbox("binaryTree")
+                loadCheckbox("binaryTree");
 
                 
-                loadCheckbox("actCondTop")
+                loadCheckbox("actCondTop");
 
                 
-                loadValue("canvasHeight")
+                loadValue("canvasHeight");
 
                 
-                loadValue("canvasWidth")
+                loadValue("canvasWidth");
 
             }
 
@@ -358,7 +364,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 
 
 
-<p>Version: 0.2.1</p>
+<p>Version: 0.3</p>
 
 </form>
 </div>

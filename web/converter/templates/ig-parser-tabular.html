@@ -14,7 +14,14 @@
 <!--<input id="dynamicSchema" name="dynamicSchema" type="checkbox" {{.DynamicOutput}} /><label for="dynamicSchema">Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)</label>-->
 <input id="igExtended" name="igExtended" type="checkbox" {{.IGExtendedOutput}} /><label for="igExtended">Produce IG Extended output (component-level nesting) (default: off)</label>
 <input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
-<input id="includeHeaders" name="includeHeaders" type="checkbox" {{.IncludeHeaders}} /><label for="includeHeaders">Include header row in output (default: on)</label><br />
+<input id="includeHeaders" name="includeHeaders" type="checkbox" {{.IncludeHeaders}} /><label for="includeHeaders">Include header row in output (default: on)</label>
+<span data-text="{{.IgScriptInclusionHelp}}" class="tooltip">Inclusion of IG Script-encoded statement in generated output:</span>
+<select id="printIgScript" name="printIgScript" type="select">
+    {{ range $type := .PrintIgScriptSelection }}
+    <option value="{{ $type }}" {{ if eq $.PrintIgScript $type }}selected="selected"{{ end }}>{{ $type }}</option>
+    {{ end }}
+</select>
+
 
 <!-- Output type -->
 <span data-text="{{.OutputTypeHelp}}" class="tooltip">Output format:</span>

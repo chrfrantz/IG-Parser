@@ -36,6 +36,10 @@ type ReturnStruct struct {
 	IncludeDoV string
 	// Include headers in output
 	IncludeHeaders string
+	// Include IG Script-encoded statement in output (Value: 0 --> no inclusion, 1 --> only on first atomic statement, 2 --> on all atomic statements)
+	PrintIgScript string
+	// Types of inclusion of IG script
+	PrintIgScriptSelection []string
 	// Output type indicator (e.g., Google Sheets, CSV)
 	OutputType string
 	// Output types (to populate UI)
@@ -72,6 +76,8 @@ type ReturnStruct struct {
 	StmtIdHelp string
 	// Help message for parameters
 	ParametersHelp string
+	// Help message for IG Script inclusion
+	IgScriptInclusionHelp string
 	// Help message for output format
 	OutputTypeHelp string
 	// Help message for report tooltip

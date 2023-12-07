@@ -93,7 +93,7 @@
                 //console.log("Storing content " + content)
 
                 // Store raw statement
-                saveValue("rawStmt")
+                saveValue("rawStmt");
 
                 // Elements specific to distinctive versions;
                 // require checks for presence prior to saving
@@ -101,39 +101,42 @@
                 // Tabular-specific fields
 
                 // Statement ID
-                saveValue("stmtId")
+                saveValue("stmtId");
 
                 // Extended output
-                saveCheckbox("igExtended")
+                saveCheckbox("igExtended");
 
                 // Logico output (both for tabular and visual)
-                saveCheckbox("annotations")
+                saveCheckbox("annotations");
 
                 // Include headers
-                saveCheckbox("includeHeaders")
+                saveCheckbox("includeHeaders");
 
                 // Tabular output format
-                saveValue("outputType")
+                saveValue("outputType");
+
+                // IG Script inclusion
+                saveValue("printIgScript");
 
                 // Visual-specific fields
 
                 // Dov
-                saveCheckbox("dov")
+                saveCheckbox("dov");
 
                 // Include Property tree
-                saveCheckbox("propertyTree")
+                saveCheckbox("propertyTree");
 
                 // Include Binary tree
-                saveCheckbox("binaryTree")
+                saveCheckbox("binaryTree");
 
                 // Activation condition
-                saveCheckbox("actCondTop")
+                saveCheckbox("actCondTop");
 
                 // Canvas height
-                saveValue("canvasHeight")
+                saveValue("canvasHeight");
 
                 // Canvas width
-                saveValue("canvasWidth")
+                saveValue("canvasWidth");
 
             }
 
@@ -182,39 +185,42 @@
                 // Tabular-specific fields
 
                 // Load statement ID
-                loadValue("stmtId")
+                loadValue("stmtId");
 
                 // Load IG Extended
-                loadCheckbox("igExtended")
+                loadCheckbox("igExtended");
 
                 // Load IG Logico (Tabular and Visual)
-                loadCheckbox("annotations")
+                loadCheckbox("annotations");
 
                 // Load Header setting
-                loadCheckbox("includeHeaders")
+                loadCheckbox("includeHeaders");
 
                 // Load Tabular output format
-                loadValue("outputType")
+                loadValue("outputType");
+
+                // Load IG Script inclusion choice
+                loadValue("printIgScript");
 
                 // Visual-specific fields
 
                 // Load Dov
-                loadCheckbox("dov")
+                loadCheckbox("dov");
 
                 // Load Property tree
-                loadCheckbox("propertyTree")
+                loadCheckbox("propertyTree");
 
                 // Load Binary tree
-                loadCheckbox("binaryTree")
+                loadCheckbox("binaryTree");
 
                 // Load Activation conditions
-                loadCheckbox("actCondTop")
+                loadCheckbox("actCondTop");
 
                 // Load canvas height
-                loadValue("canvasHeight")
+                loadValue("canvasHeight");
 
                 // Load canvas width
-                loadValue("canvasWidth")
+                loadValue("canvasWidth");
 
             }
 
