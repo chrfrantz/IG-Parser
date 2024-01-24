@@ -364,14 +364,14 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 
 
 
-<p>Version: 0.3</p>
+<p>Version: 0.3.1</p>
 
 </form>
 </div>
 
 
 
-<script src="/libraries/d3.v7.min.js"></script>
+<script src="/libraries/d3/d3.v7.min.js"></script>
 <script>
 
     

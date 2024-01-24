@@ -2,14 +2,15 @@ package main
 
 import (
 	"IG-Parser/core/endpoints"
-	"IG-Parser/core/exporter"
+	"IG-Parser/core/exporter/tabular"
 	"IG-Parser/core/tree"
 	"fmt"
 )
 
 /*
 Helper main function as development and debugging workbench.
-This is purely to support development and not included in the deployment!
+This is purely to support development (quick access to examples statements with distinctive features)
+This file is not included in the server-side deployment (i.e., the docker container does consider this file during build)!
 */
 func main() {
 
@@ -62,8 +63,8 @@ func main() {
 		" Cac{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}} " +
 		"{ Cac{A(precond2) I(dksjld)} [XOR] Cac{A(ldkjsjg) I(sdgjls)}}"
 
-	exporter.INCLUDE_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true
-	exporter.SetDynamicOutput(false)
+	tabular.SetIncludeSharedElementsInTabularOutput(true)
+	tabular.SetDynamicOutput(false)
 
 	fmt.Println("Shared mode:")
 	fmt.Println(tree.SHARED_ELEMENT_INHERITANCE_MODE)
@@ -75,7 +76,7 @@ func main() {
 		log.Fatal(err.Error())
 	}*/
 
-	endpoints.ConvertIGScriptToTabularOutput(text, "1.1", exporter.OUTPUT_TYPE_CSV, "example.csv", true, true)
+	endpoints.ConvertIGScriptToTabularOutput(text, "1.1", tabular.OUTPUT_TYPE_CSV, "example.csv", true, true, tabular.IG_SCRIPT_OUTPUT_NONE)
 
 	//fmt.Println(output)
 

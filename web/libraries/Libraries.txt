@@ -1,0 +1,5 @@
+Third-party libraries related to the web application should be added to this folder. 
+
+Please create a subfolder for each library that contains the relevant files (e.g., library, associated license).
+
+Preferrably add tests that test the access to the embedded libraries (see file 'Libraries_test.go' for examples).
