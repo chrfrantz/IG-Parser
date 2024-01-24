@@ -70,4 +70,4 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "Latest version should be deployed (check output for potential errors)"
+echo "Completed deployment of latest IG Parser version (check output for potential errors)"
