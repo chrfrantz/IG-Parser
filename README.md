@@ -52,7 +52,7 @@ The scope of a component is specified by opening and closing parentheses.
 
 All components of a statement are annotated correspondingly, without concern for order, or repetition. 
 The parser further tolerates multiple component annotations of the same kind. Multiple Attributes, 
-for example (e.g., `A(Farmer) D(must) I(comply) A(Certifier)`, are effectively interpreted as a combination (i.e., 
+for example (e.g., `A(Farmer) D(must) I(comply) A(Certifier)`), are effectively interpreted as a combination (i.e., 
 `A(Farmer [AND] Certifier) D(must) I(comply)`) in the parsing process.  
 
 Any symbols outside the encoded components and combinations of components are ignored by the parser.
