@@ -1,6 +1,6 @@
 # IG Parser Revisions
 
-* Version 0.3.1 - Added contributor information and reorganized dependencies. No semantic changes.
+* Version 0.3.1 - Added contributor information, reorganized dependencies. Fixed bug when parsing pair combinations without logical operators.
 * Version 0.3   - Added option to include IG Script source in generated tabular output.
 * Version 0.2.1 - Bugfix: Prevent parsing of duplicate input (e.g., duplicate components with same values/statements).
 * Version 0.2   - Added support for component pair combinations in input; enabled interactive switching between visual and tabular output variants; added saving of user settings in browser storage.
