@@ -1801,14 +1801,14 @@ func TestInvalidNestedCombination(t *testing.T) {
 	text := "Cac{Cac{A(actor) I(action)} [XOR] Cac(simple content)}"
 
 	_, err := ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_INVALID_COMBINATION {
+	if err.ErrorCode != tree.PARSING_ERROR_INVALID_COMBINATION {
 		t.Fatal("Parsing did not pick up on erroneous combination.")
 	}
 
 	text = "Cac{Cac(simple content) [OR] Cac{A(actor) I(action)} [OR] Cac{A(actor2) I(action2)}}"
 
 	_, err = ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_INVALID_COMBINATION {
+	if err.ErrorCode != tree.PARSING_ERROR_INVALID_COMBINATION {
 		t.Fatal("Parsing did not pick up on erroneous combination.")
 	}
 
@@ -2988,4 +2988,55 @@ func TestDuplicateComponentsInStatement(t *testing.T) {
 			tree.PARSING_ERROR_DUPLICATE_COMPONENT_ENTRIES+", but returned error ", err)
 	}
 
+}
+
+/*
+Tests for missing or incorrect logical operator on component pair level but operator contained in
+embedded component property combination
+*/
+func TestInvalidComponentPairCombinationWithMissingLogicalOperatorButNestedComponentPropertyCombinations(t *testing.T) {
+
+	// Input text with missing logical operator on component pair level but component combination in one pair
+	text := "{I(prioritise) Bdir,p(swift [AND] predictable) Bdir(emission reductions) AND I(enhance) Bdir(removals) Cex(by natural sinks)}"
+
+	// Test for error during parsing. Should pick up on missing component pair.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_INVALID_COMPONENT_PAIR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_INVALID_COMPONENT_PAIR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for missing or incorrect logical operator on component pair level but containing component combination
+(will be initially mistaken as nested statement, but caught during deep parsing).
+*/
+func TestInvalidComponentPairCombinationWithMissingLogicalOperatorButComponentCombination(t *testing.T) {
+
+	// Input text with missing logical operator on component pair level
+	text := "A(actor) {I(action1 [XOR] action2) Bdir(object1) and I(action3) Bdir(object2)}"
+
+	// Test for error during parsing. Should pick up on missing component pair.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+", but returned error ", err)
+	}
+}
+
+/*
+Tests for missing or incorrect logical operator on component pair level (and no further logical operator in pair)
+(will be initially mistaken as nested statement, but caught during deep parsing).
+*/
+func TestInvalidComponentPairCombinationWithMissingLogicalOperator(t *testing.T) {
+
+	// Input text with missing logical operator on component pair level
+	text := "A(actor) {I(action1) Bdir(object1) and I(action3) Bdir(object2)}"
+
+	// Test for error during parsing. Should pick up on missing component pair.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+", but returned error ", err)
+	}
 }

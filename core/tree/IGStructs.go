@@ -438,23 +438,28 @@ func (b *Boundaries) String() string {
 		"  Complete: " + strconv.FormatBool(b.Complete) + "\n}"
 }
 
+// Indicates that there were no issues during parsing
+const PARSING_NO_ERROR = "NO_ERROR_DURING_PARSING"
+
 // Signals invalid component combinations on a given parsing level (generally non-AND components)
 const PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS = "INVALID_LOGICAL_OPERATOR_COMBINATIONS"
 
 // Signals the detection of a logical operator outside a combination (i.e., no left or right side)
 const PARSING_ERROR_LOGICAL_OPERATOR_OUTSIDE_COMBINATION = "LOGICAL_OPERATOR_OUTSIDE_COMBINATION"
 
-// Indicates that there were no issues during parsing
-const PARSING_NO_ERROR = "NO_ERROR_DURING_PARSING"
-
 // Indicates nested statements ignored during coding (relevant when parsing nested statements) - in contrast to #PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING
 const PARSING_ERROR_IGNORED_NESTED_ELEMENTS = "IGNORED_ELEMENTS_NESTED_STATEMENT_PARSING"
 
 // Signals that no combinations were found in input
-const PARSING_NO_COMBINATIONS = "NO_COMBINATIONS_IN_INPUT"
+const PARSING_ERROR_NO_COMBINATIONS = "NO_COMBINATIONS_IN_INPUT"
 
 // Signals invalid combination expression (e.g., missing left, right, or operator)
-const PARSING_INVALID_COMBINATION = "INVALID_COMBINATION_IN_INPUT"
+const PARSING_ERROR_INVALID_COMBINATION = "INVALID_COMBINATION_IN_INPUT"
+
+// Signals invalid component pair when attempting to decompose component pair (generally missing logical operator)
+// Note: throws tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS error if component combination in either pair leaf
+// (e.g., I(left [AND] right)) or component property combination (e.g., Bdir,p(left [AND] right))
+const PARSING_ERROR_INVALID_COMPONENT_PAIR = "INVALID_COMPONENT_PAIR_COMBINATION"
 
 // Signals empty leaf value during parsing
 const PARSING_ERROR_EMPTY_LEAF = "EMPTY_LEAF_VALUE"

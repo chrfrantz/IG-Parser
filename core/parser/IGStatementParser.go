@@ -44,7 +44,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 	Println("Identified statement element patterns prior to parsing:\n" +
 		" - individual atomic components (e.g., 'A(actor)') including component combinations (e.g., 'Bdir((left [AND] right))') ( --> element [0]): \n" +
 		" ==> " + fmt.Sprint(compAndNestedStmts[0]) + " --> Count: " + strconv.Itoa(len(compAndNestedStmts[0])) + "\n" +
-		" - nested statements/components (e.g., 'Bdir{ A(nestedA) I(nestedI) }') ( --> element [1]): \n" +
+		" - nested statements/components (e.g., 'Bdir{ A(nestedA) I(nestedI) }'). Note: may also contain invalid component pairs - to be filtered later ( --> element [1]): \n" +
 		" ==> " + fmt.Sprint(compAndNestedStmts[1]) + " --> Count: " + strconv.Itoa(len(compAndNestedStmts[1])) + "\n" +
 		" - nested component combinations (e.g., 'Cac{ Cac{A(leftNestedA) I(leftNestedI)} [XOR] Cac{A(rightNestedA) I(rightNestedI)} }') ( --> element [2]): \n" +
 		" ==> " + fmt.Sprint(compAndNestedStmts[2]) + " --> Count: " + strconv.Itoa(len(compAndNestedStmts[2])) + "\n" +
@@ -306,8 +306,9 @@ func separateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 					// ... else deem it single nested statement
 
 					// Append extracted nested statements including component prefix (e.g., Cac{ A(stuff) ... })
+					// Note: may be incorrect, since no checking for leading component - will be caught during deep parsing
 					completeNestedStmts = append(completeNestedStmts, v)
-					Println("Added candidate for single nested statement:", v)
+					Println("Added candidate for single nested statement (to be checked during deep parsing):", v)
 
 					// Remove nested statement from overall statement
 					statement = strings.ReplaceAll(statement, v, "")
@@ -373,7 +374,7 @@ func separateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 }
 
 /*
-Identifies any nested statements for subsequent deep detection.
+Generically identifies any nested statements for subsequent deep detection (component-level, combinations, combination pairs).
 
 Used by #separateComponentsNestedStatementsCombinationsAndComponentPairs.
 */
@@ -756,7 +757,7 @@ The error code tree.PARSING_ERROR_NIL_ELEMENT indicates inability to extract the
 In this case the violating statement is passed in the string array provided as part of the error object.
 Error tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION and tree.PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION
 point to an invalid combination of different component types (e.g., Cac and Bdir)
-Error tree.PARSING_INVALID_COMBINATION points to syntactic issues during combination parsing.
+Error tree.PARSING_ERROR_INVALID_COMBINATION points to syntactic issues during combination parsing.
 */
 func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo string) tree.ParsingError {
 
@@ -785,7 +786,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 		Println("Entry to parse for component type: " + entry)
 		// Extract prefix (i.e., component type) for node, but check whether it contains nested statement
 		if strings.Index(entry, LEFT_BRACE) == -1 {
-			return tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION, ErrorMessage: "Element in combination of nested statement does not contain nested statement. Element of concern: " + entry}
+			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMBINATION, ErrorMessage: "Element in combination of nested statement does not contain nested statement. Element of concern: " + entry}
 		}
 		prefix, prop, err := extractComponentType(entry[:strings.Index(entry, LEFT_BRACE)])
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1066,6 +1067,14 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 
 		// Extract leaves for conversion
 		leaves := idvStmt.GetLeafNodes(true)
+		// Test for unsuccessful extraction of leaves - this results in empty array with "nil" entry.
+		// This is caused by lack of logical operator on component pair level, but logical operators contained in components in either pair
+		// Example: '{ I(action1 [XOR] action2) Bdir(object1) and I(action3) Bdir(object2) }' <-- note the missing logical operator between pairs
+		if len(leaves) == 0 || (len(leaves) == 1 && len(leaves[0]) == 1 && leaves[0][0].Entry == nil) {
+			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_PAIR, ErrorMessage: "Invalid component pair found (Missing logical operator?). " +
+				"Please review expression '" + v + "'."}
+		}
+		// More leaf elements in component pair than expected
 		if len(leaves) > 1 {
 			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_TOO_MANY_NODES, ErrorMessage: "Too many nodes generated for atomic statement."}
 		}
@@ -1077,7 +1086,7 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 			// Parse content of tree
 			tpNode, err := ParseStatement(v2.Entry.(string))
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
-				Println("Error when parsing statement: ", err)
+				Println("Error when parsing statement: ", err, "; expression for which parsing failed:", v2.Entry)
 				return nil, err
 			}
 
@@ -1601,7 +1610,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 			// Parse first component into node
 			if node.IsEmptyOrNilNode() {
 				node1, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
-				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 					log.Println("Error when parsing synthetically linked element. Error:", err)
 					return nil, err
 				}
@@ -1623,7 +1632,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 				// Parse any additional components into node and combine
 				// If cached node is already populated, create separate node and link afterwards
 				node2, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
-				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 					log.Println("Error when parsing synthetically linked element. Error:", err)
 					return nil, err
 				}
@@ -1681,7 +1690,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 			// Try again by augmenting with parentheses, before return error if it still fails.
 			node1, _, err2 = ParseIntoNodeTree(leftPar+componentString+rightPar, false, leftPar, rightPar)
 		}
-		if err2.ErrorCode != tree.PARSING_NO_ERROR && err2.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+		if err2.ErrorCode != tree.PARSING_NO_ERROR && err2.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 			log.Println("Error when parsing synthetically linked element. Error:", err2)
 			return nil, err2
 		}
@@ -1708,13 +1717,13 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 	Println("Full string: " + componentString)
 
 	// Some error check and override
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
 		log.Println("Error during component parsing:", err.Error())
 	}
 
 	// Override missing combination error, since it is not relevant at this level
-	if err.ErrorCode == tree.PARSING_NO_COMBINATIONS {
+	if err.ErrorCode == tree.PARSING_ERROR_NO_COMBINATIONS {
 		err.ErrorCode = tree.PARSING_NO_ERROR
 		err.ErrorMessage = ""
 	}

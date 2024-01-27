@@ -67,7 +67,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 		!strings.Contains(input, tree.SAND_BETWEEN_COMPONENTS_BRACKETS) {
 
 		node := &tree.Node{Entry: strings.Trim(input, " ")}
-		return node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_COMBINATIONS,
+		return node, input, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_NO_COMBINATIONS,
 			ErrorMessage: "The input does not contain combinations"}
 	}
 
@@ -80,7 +80,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 	// If no valid combinations are left, the parsing is finished
 	if len(combinations) == 0 {
 		node := &tree.Node{Entry: strings.Trim(input, " ")}
-		return node, strings.Trim(input, " "), tree.ParsingError{ErrorCode: tree.PARSING_NO_COMBINATIONS,
+		return node, strings.Trim(input, " "), tree.ParsingError{ErrorCode: tree.PARSING_ERROR_NO_COMBINATIONS,
 			ErrorMessage: "The input does not contain combinations"}
 	}
 
@@ -205,7 +205,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 
 					Println("Go deep on left side: " + left)
 					leftNode, left, err := ParseIntoNodeTree(left, true, leftPar, rightPar)
-					if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+					if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 						return nil, left, err
 					}
 
@@ -277,7 +277,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 
 					Println("Go deep on right side: " + right)
 					rightNode, right, err := ParseIntoNodeTree(right, true, leftPar, rightPar)
-					if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
+					if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 						return nil, right, err
 					}
 
@@ -516,7 +516,7 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 			// Test whether indices are identical or immediately following - suggesting gaps in values
 			if (b.Operator + len(b.OperatorVal) + 2) == b.Right {
 				msg := "Input contains invalid combination expression in the range '" + expression[b.Left:b.Right] + "'."
-				return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
+				return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMBINATION,
 					ErrorMessage: msg}
 			}
 			if b.Left != 0 && b.OperatorVal != "" {
@@ -601,7 +601,7 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 				if levelMap[level][levelIdx].Left == i {
 					msg := "Input contains invalid combination expression in the range '" + expression[levelMap[level][levelIdx].Left:] + "'."
 					log.Println(msg)
-					return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION,
+					return levelMap, nonSharedElements, expression, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMBINATION,
 						ErrorMessage: msg}
 				}
 
