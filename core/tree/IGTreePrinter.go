@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+/*
+This file contains the basic visual tree output generation functionality.
+Due to the tight linkage to the tree structure, this functionality is
+provided in the tree package, as opposed to exporter package and invoked
+from endpoints. Associated tests are provided in the exporter/visual package.
+*/
+
 // Entry delimiters
 const TREE_PRINTER_OPEN_BRACE = "{"
 const TREE_PRINTER_CLOSE_BRACE = "}"

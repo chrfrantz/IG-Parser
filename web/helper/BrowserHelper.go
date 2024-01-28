@@ -6,6 +6,11 @@ import (
 )
 
 /*
+This file contains OS-independent functionality to start web browsers upon service instantiation
+when deploying locally.
+*/
+
+/*
 Attempts to open a browser for a given URL on selected operating systems.
 Returns error if launch fails.
 Based on code provided under: https://gist.github.com/sevkin/9798d67b2cb9d07cb05f89f14ba682f8

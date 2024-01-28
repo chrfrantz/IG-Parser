@@ -8,6 +8,11 @@ import (
 )
 
 /*
+This file includes top-level web invocation handlers.
+- Invokes functionality in GenericParserHandler.go.
+*/
+
+/*
 Template reference
 */
 var tmpl *template.Template

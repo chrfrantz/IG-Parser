@@ -5,6 +5,10 @@ import (
 )
 
 /*
+This file contains helper functions for the tabular output generation.
+*/
+
+/*
 Adds element to (the end of) array if not existing.
 */
 func addElementIfNotExisting(elementToAdd string, arrayToAddTo []string) []string {

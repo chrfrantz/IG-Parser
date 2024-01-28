@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+/*
+This file contains the main regular expressions used in the statement
+parsing process.
+*/
+
 // Define constants for parentheses and braces
 const LEFT_PARENTHESIS = "("
 const RIGHT_PARENTHESIS = ")"

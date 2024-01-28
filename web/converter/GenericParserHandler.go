@@ -14,6 +14,12 @@ import (
 )
 
 /*
+Generic handler for pre-processing of web application input.
+- Invoked by web handlers provided in Handler.go.
+- Invokes output-specific handlers (AppSpecificHandler.go).
+*/
+
+/*
 Second-level general handler that retrieves and preprocesses information from input.
 Delegates to third-order handler for output-specific generation.
 Should be invoked by #ConverterHandlerTabular() and #ConverterHandlerVisual().

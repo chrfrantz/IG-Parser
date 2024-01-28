@@ -5,6 +5,10 @@ import (
 )
 
 /*
+This file provides generic helper functions relevant across packages.
+*/
+
+/*
 Replaces/escapes selected symbols in as far as relevant for export (e.g., quotation marks).
 */
 func EscapeSymbolsForExport(rawValue string) string {

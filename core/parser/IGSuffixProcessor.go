@@ -7,6 +7,12 @@ import (
 )
 
 /*
+This file contains functionality related to the parsing of component suffices,
+such as A,p as well as private linkages between components and properties (e.g., A1,p).
+- Invoked by IGStatementParser.go
+*/
+
+/*
 Identifies links via elements in suffices (if multiple, comma-separated ones, it extracts only first)
 between leaf nodes in source and target nodes.
 Returns map of linked nodes, with key being the source node, and the value being an array of matched target nodes.

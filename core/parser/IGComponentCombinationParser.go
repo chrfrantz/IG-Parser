@@ -9,6 +9,12 @@ import (
 )
 
 /*
+This file provides functionality to parse node combinations based on
+logical operators.
+- Invoked by IGStatementParser.go
+*/
+
+/*
 Parses combinations in string. The syntactic form of input is:
 "( leftSide [OPERATOR] rightSide )", where [OPERATOR] is one
 of the logical operators [AND], [OR], [XOR] (including brackets),

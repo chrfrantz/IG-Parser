@@ -11,6 +11,10 @@ import (
 )
 
 /*
+This file contains functionality related to log file generation.
+*/
+
+/*
 Generates random unique 8-character ID and filename including current datetime in YYYYMMDDHHMMSS format and ID.
 */
 func GenerateUniqueIdAndFilename() (string, string) {

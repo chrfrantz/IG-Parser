@@ -11,6 +11,10 @@ import (
 )
 
 /*
+Contains output-specific handler to be invoked by GenericParserHandler.go.
+*/
+
+/*
 Third-level handler generating tabular output in response to web request.
 Should be invoked by #converterHandler().
 */

@@ -12,6 +12,11 @@ import (
 	"strings"
 )
 
+/*
+This file contains the tabular output generation functionality, including
+associated constants relevant for output formatting.
+*/
+
 // Separator for main statement ID (e.g., 123) and suffix for introduced substatement (e.g., .1, i.e., 123.1)
 const stmtIdSeparator = "."
 
@@ -806,7 +811,7 @@ func printTabularOutput(statementMap []map[string]string, igScriptInput string, 
 }
 
 /*
-Generates CSV output from map of categorized statement elements, IG Script input (included in output if parameterized via printIgScriptInput), 
+Generates CSV output from map of categorized statement elements, IG Script input (included in output if parameterized via printIgScriptInput),
 as well as header columns (symbols and names) for output generation.
 Further requires column header names for output generation, alongside specification of separator symbol.
 Optionally writes to file (if filename is provided), with option to overwrite existing files,
@@ -822,7 +827,7 @@ func generateCSVOutput(statementMap []map[string]string, igScriptInput string, h
 }
 
 /*
-Generates Google Sheets output from map of categorized statement elements, IG Script input (for consideration in output - parameterized via printIgScriptInput), 
+Generates Google Sheets output from map of categorized statement elements, IG Script input (for consideration in output - parameterized via printIgScriptInput),
 as well as header columns (symbols and names) for output generation.
 Further requires column header names for output generation, alongside specification of separator symbol.
 Optionally writes to file (if filename is provided), with option to overwrite existing files,

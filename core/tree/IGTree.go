@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+/*
+This includes basic tree parsing functionality underlying the statement tree construction.
+*/
+
 type Node struct {
 	// Linkage to parent
 	Parent *Node

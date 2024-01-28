@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+/*
+This files contains constants relevant for the tree structure parsing, including
+parsing errors.
+*/
+
 // Internal column header for components with nested statement references
 const REF_SUFFIX = "-Ref"
 
