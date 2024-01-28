@@ -364,7 +364,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 
 
 
-<p>Version: 0.3.1</p>
+<p>Version: 0.4</p>
 
 </form>
 </div>
