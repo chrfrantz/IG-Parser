@@ -1,4 +1,4 @@
 package config
 
 // IG Parser Version
-const IG_PARSER_VERSION = "0.3.1"
+const IG_PARSER_VERSION = "0.4"
