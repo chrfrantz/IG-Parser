@@ -187,20 +187,25 @@ Non-nested and nested components can be used in the same statement (e.g., `... C
 
 #### Component Pair Combinations
 
-Where a range of components together form an alternative in a given statement (require linkage to another range of components by logical operators), IG Script supports the ability to indicate such so-called *component pair combinations*. 
+Where a range of components together form an alternative in a given statement (require linkage to another range of components by logical operators), IG Script supports the ability to indicate such so-called *component pair combinations* or *component tuple combinations*. 
 
 For instance the statement `A(actor) D(must) {I(perform action) on Bdir(object1) Cex(in a particular way) [XOR] I(prevent action) on Bdir(object2) by Cex(some specific means)}` draws on the same actor, but -- in contrast to combinations of nested statements -- we see *combinations of pairs of different components* in this statement, effective rendering those as two distinct statements. Braces (without indication of the component symbol as done for nested statement combinations) are used to indicate the scope of a given component pair (here `I(perform action) on Bdir(object1) Cex(in a particular way)` as first component pair, and `I(prevent action) on Bdir(object2) by Cex(some specific means)` as the second one, both of which are combined by `[XOR]`; but both statements have the same attribute `actor` and deontic `must`). Operationally, the parser expands this into two distinct (but logically linked) statements: 
 * `A(actor) D(must) I(perform action) on Bdir(object1) Cex(in a particular way)`
 * `[XOR]`
 * `A(actor) D(must) I(prevent action) on Bdir(object2) by Cex(some specific means)`
 
+Note further that either pair or tuple can consist of an arbitrary number of components and can be imbalanced and use different components on either side. For example the statement `A(actor) D(must) {I(perform action) [XOR] I(prevent action) on Bdir(object2) and affects Bind(object3) by Cex(some specific means)}`, with a single component on the left side (`I(perform action)`) and multiple on the right side (`I(prevent action) on Bdir(object2) and affects Bind(object3) by Cex(some specific means)`) is equally valid input and decomposes into the statements
+* `A(actor) D(must) I(perform action)`
+* `[XOR]`
+* `A(actor) D(must) I(prevent action) on Bdir(object2) and affects Bind(object3) by Cex(some specific means)`
+
 The use of component pairs can occur on any level of nesting, including top-level statements (as shown in the first example), within nested statements, statement combinations, and embed basic component combinations (e.g., `A(actor) D(must) {I(perform action) on Bdir((objectA [AND] objectB)) Cex(in a particular way) [XOR] I(prevent action) on Bdir(objectC) by Cex(some specific means)}`). 
 
-Furthermore, an arbitrary number of component pairs can be combined by means of using the syntax (similar to nested statement combinations) to indicate precedence amongst multiple component pairs.
+Furthermore, an arbitrary number of component pairs/tuples can be combined by using the syntax (similar to nested statement combinations) to indicate precedence amongst multiple component pairs with varying logical operators.
 
-Example: `A(actor1) {I(action1) Bdir(directobject1) Bind(indirectobject1) [XOR] {I(action2) Bdir(directobject2) Bind(indirectobject2) [AND] I(action3) Bdir(directobject3) Bind(indirectobject3)}} Cac(condition1)`
+Example: `A(actor1) {I(action1) Bdir(directobject1) [XOR] {I(action2) Bdir(directobject2) Bind(indirectobject2) [AND] I(action3) Bdir(directobject3) Cex(constraint3)}} Cac(condition1)`
 
-In this example the center part reflects the combination of component pairs using the following logical pattern `{ ... [XOR] { ... [AND] ... }}`, all of which share the same attribute (`actor1`) and activation condition (`condition1`). 
+In this example the center part reflects the combination of different component pairs using the following logical pattern `{ ... [XOR] { ... [AND] ... }}`, all of which share the same attribute (`actor1`) and activation condition (`condition1`). 
 
 #### Object-Property Relationships
 
@@ -229,7 +234,9 @@ Note that the extended syntax that supports Object-Property Relationships is fur
 
 In addition to the parsing of component annotations and combinations of various kinds, the parser further supports semantic annotations of components according to the taxonomies outlined in the [Institutional Grammar 2.0 Codebook](https://arxiv.org/abs/2008.08937).
 
-The syntax (including support for suffices introduced above) is `componentSymbolSuffix[semanticAnnotation](component content)`, i.e., any component can be augmented with `[semantic annotation content]`, e.g., `Cac[context=state](Upon certification)`.
+The syntax (including support for suffices introduced above) is `componentSymbolSuffix[semanticAnnotation](component content)`, i.e., any component can be augmented with `[semantic annotation content]`, e.g., `Cac[context=state](Upon certification)`. 
+
+This also applies to nested components, e.g., `Cac[condition=violation]{A[entity=actor,animate](actor) I[act=violate](violates) Bdir[entity=target,inanimate](something)}`, as well as for compound components, e.g., `Bdir[type=target](leftObject [XOR] rightObject)`, in which case the annotation `type=target` is attached to both `leftObject` and `rightObject` in the generated output. 
 
 ### Examples
 
@@ -254,6 +261,7 @@ In the following, you will find selected examples that highlight the practical u
 
  ### Common issues
   * Parentheses/braces need to match. The parser calls out if a mismatch exists. Parentheses are applied when components are specified (or combinations thereof), and braces are used to signal component-level nesting (i.e., statements embedded within components) and statement combinations (i.e., combinations of component-level nested statements).
+    * *One important special case to bear in mind* is that the input itself (i.e., the content to be encoded) may contain parentheses (e.g., `... under the following conditions 1) the actor must not ..., 2) the actor must not ...`. In such cases, the parentheses must be removed as part of the preprocessing of the text input, since the parser cannot differentiate between parentheses used for the encoding and the ones contained in the content.
   * Ensure whitespace between symbols and logical operators to ensure correct parsing. However, excess words between parentheses and logical operator are permissible. (Note: The parser has builtin tolerance toward various issues, but may not handle this correctly under all circumstances.)
     * This example works: `A(actor) I(act)`
     * This one is incorrect: `A(actor)I(act)` due to missing whitespace.
