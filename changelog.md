@@ -1,5 +1,6 @@
 # IG Parser Revisions
 
+* Version 0.4.1 - Added validation button to test raw statement input for imbalanced parentheses (and copies content into 'Encoded Statement' field following successful valiation).
 * Version 0.4 - Added contributor information and licensing. Reorganized dependencies and code base, including file commenting. Bugfix: Prevent crash when parsing pair combinations without logical operators.
 * Version 0.3   - Added option to include IG Script source in generated tabular output.
 * Version 0.2.1 - Bugfix: Prevent parsing of duplicate input (e.g., duplicate components with same values/statements).

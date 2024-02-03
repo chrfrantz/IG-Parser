@@ -103,10 +103,23 @@ a:hover {
     margin: auto;
 }
 
+/*
+Formatting for copy-to-clipboard button
+ */
 .button1 {
     width: 50%;
 }
 
+/*
+Formatting for validate button
+ */
+.button2 {
+    width: 100%;
+}
+
+/*
+Formatting of error message
+ */
 .error {
     color: red;
 }

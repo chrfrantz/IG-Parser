@@ -52,7 +52,49 @@
     <form method="POST">
         <!-- Original Statement entry field -->
         <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">{{.RawStmt}}</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">{{.RawStmt}}</textarea>
+        <!-- Validation error message field -->
+        <div class="error" id="validateError"></div>
+        <!-- Validate button -->
+        <button class="button2" type="button" id="buttonValidate" onclick="checkRawStatementContent()">Validate 'Original Statement' input (checks for imbalanced parentheses) and copy validated content into 'Encoded Statement' field</button></br></br>
+        <script>
+            /*
+            Validates content of 'Original Statement' field by testing for imbalanced parentheses
+            and provides feedback based on error field. Copies successfully validated input
+            into 'Encoded Statement' field.
+             */
+            function checkRawStatementContent() {
+                // Retrieve raw content field value
+                let rawContent = document.getElementById("rawStmt").value
+                // Count left parentheses
+                let leftParCount = (rawContent.match(/\(/g) || []).length
+                // Count right parentheses
+                let rightParCount = (rawContent.match(/\)/g) || []).length
+                // ... if parenthesis count differs, show error
+                if (leftParCount !== rightParCount) {
+                    let validateError = document.getElementById("validateError");
+                    validateError.innerHTML = "Found imbalanced parentheses in raw input (" +
+                        leftParCount + " opening and " + rightParCount + " closing parentheses).\n" +
+                        "Please remove or balance parentheses to before encoding the statement."
+                } else {
+                    let validateError = document.getElementById("validateError")
+                    validateError.innerHTML = "";
+                    // Copy into 'Encoded Statement' textarea ...
+                    let editor = ace.edit("editor");
+                    // ... but only if editor field is empty
+                    if (editor.getValue().length === 0) {
+                        editor.setValue(rawContent);
+                        // ... and if content has not already been copied
+                    } else if (editor.getValue() !== rawContent) {
+                        // ... else print error
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "The 'Original Statement' content is valid, but has not been copied into the 'Encoded Statement' field, " +
+                            "since this field already contains content (to prevent accidental overwriting of encoded statement).\<br/\>" +
+                            "To enforce copying, please empty the 'Encoded Statement' field and validate again, or copy the content manually.";
+                    } // do nothing if raw statement content is already in editor
+                }
+            }
+        </script>
         <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         <!-- ACE Editor; copies any content to hidden textarea -->
