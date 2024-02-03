@@ -56,7 +56,9 @@
         <!-- Validation error message field -->
         <div class="error" id="validateError"></div>
         <!-- Validate button -->
-        <button class="button2" type="button" id="buttonValidate" onclick="checkRawStatementContent()">Validate 'Original Statement' input (checks for imbalanced parentheses) and copy validated content into 'Encoded Statement' field</button></br></br>
+        <button class="button2" type="button" id="buttonValidate" switch="validate" onclick="checkRawStatementContent()">
+            Validate 'Original Statement' input (checks for imbalanced parentheses)
+            and copy validated content into 'Encoded Statement' field</button></br></br>
         <script>
             /*
             Validates content of 'Original Statement' field by testing for imbalanced parentheses
@@ -64,35 +66,67 @@
             into 'Encoded Statement' field.
              */
             function checkRawStatementContent() {
-                // Retrieve raw content field value
-                let rawContent = document.getElementById("rawStmt").value
-                // Count left parentheses
-                let leftParCount = (rawContent.match(/\(/g) || []).length
-                // Count right parentheses
-                let rightParCount = (rawContent.match(/\)/g) || []).length
-                // ... if parenthesis count differs, show error
-                if (leftParCount !== rightParCount) {
-                    let validateError = document.getElementById("validateError");
-                    validateError.innerHTML = "Found imbalanced parentheses in raw input (" +
-                        leftParCount + " opening and " + rightParCount + " closing parentheses).\n" +
-                        "Please remove or balance parentheses to before encoding the statement."
-                } else {
-                    let validateError = document.getElementById("validateError")
-                    validateError.innerHTML = "";
-                    // Copy into 'Encoded Statement' textarea ...
+
+                // Button 'switch' field can have values 'overwrite' or 'validate'
+                let buttonType = document.getElementById("buttonValidate").getAttribute("switch");
+
+                if (buttonType === "overwrite") {
+                    // OVERWRITE MODE
+
+                    // Read value from raw statement
+                    let rawContent = document.getElementById("rawStmt").value;
+                    // Populate editor
                     let editor = ace.edit("editor");
-                    // ... but only if editor field is empty
-                    if (editor.getValue().length === 0) {
-                        editor.setValue(rawContent);
-                        // ... and if content has not already been copied
-                    } else if (editor.getValue() !== rawContent) {
-                        // ... else print error
+                    editor.setValue(rawContent);
+                    // Reset button to validate mode
+                    document.getElementById("buttonValidate").setAttribute("switch", "validate");
+                    document.getElementById("buttonValidate").innerText =
+                        "Validate 'Original Statement' input (checks for imbalanced parentheses) and " +
+                        "copy validated content into 'Encoded Statement' field";
+                    // Empty the error message
+                    let validateError = document.getElementById("validateError");
+                    validateError.innerHTML = "";
+
+                } else if (buttonType === "validate") {
+                    // VALIDATE MODE
+
+                    // Retrieve raw content field value
+                    let rawContent = document.getElementById("rawStmt").value;
+                    // Count left parentheses
+                    let leftParCount = (rawContent.match(/\(/g) || []).length;
+                    // Count right parentheses
+                    let rightParCount = (rawContent.match(/\)/g) || []).length;
+                    // ... if parenthesis count differs, show error
+                    if (leftParCount !== rightParCount) {
+                        // Populate error message
                         let validateError = document.getElementById("validateError");
-                        validateError.innerHTML = "The 'Original Statement' content is valid, but has not been copied into the 'Encoded Statement' field, " +
-                            "since this field already contains content (to prevent accidental overwriting of encoded statement).\<br/\>" +
-                            "To enforce copying, please empty the 'Encoded Statement' field and validate again, or copy the content manually.";
-                    } // do nothing if raw statement content is already in editor
-                }
+                        validateError.innerHTML = "Found imbalanced parentheses in raw input (" +
+                            leftParCount + " opening and " + rightParCount + " closing parentheses).\n" +
+                            "Please remove or balance parentheses to before encoding the statement.";
+                    } else {
+                        // Reset error message
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "";
+                        // Copy into 'Encoded Statement' textarea ...
+                        let editor = ace.edit("editor");
+                        // ... but only if editor field is empty
+                        if (editor.getValue().length === 0) {
+                            editor.setValue(rawContent);
+                            // ... and if content has not already been copied
+                        } else if (editor.getValue() !== rawContent) {
+                            // ... else print error
+                            let validateError = document.getElementById("validateError");
+                            validateError.innerHTML = "The 'Original Statement' content is valid, but has not been copied into the 'Encoded Statement' field, " +
+                                "since this field already contains content (to prevent accidental overwriting of encoded statement).\<br/\>" +
+                                "You can enforce the overwriting using the button below.";
+
+                            // Switch button to overwrite mode
+                            document.getElementById("buttonValidate").setAttribute("switch", "overwrite");
+                            document.getElementById("buttonValidate").innerText = "Confirm overwriting of 'Encoded Statement' entry with 'Original Statement' entry";
+
+                        } // do nothing if raw statement content is already in editor
+                    }
+                } // no other button switch value supported as of now
             }
         </script>
         <!-- Encoded Statement entry field -->
