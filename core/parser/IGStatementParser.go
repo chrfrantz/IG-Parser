@@ -170,6 +170,12 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		Println("No expansion of statement necessary (no component pair combinations in input)")
 	}
 
+	// Return error indicating that statement is empty
+	if s.IsEmpty() {
+		Println("Statement is empty - returning error " + tree.PARSING_ERROR_EMPTY_STATEMENT)
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_STATEMENT}
+	}
+
 	// Else return wrapped statement (no extrapolation included)
 	return []*tree.Node{&tree.Node{Entry: &s}}, err
 }

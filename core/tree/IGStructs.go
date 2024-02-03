@@ -507,6 +507,9 @@ const PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION = "INVALID_TYP
 // Indicates that operations was imposed on nil element
 const PARSING_ERROR_NIL_ELEMENT = "INVALID_PARSING_OF_NIL_ELEMENT"
 
+// Indicates empty statement (as result to parsing)
+const PARSING_ERROR_EMPTY_STATEMENT = "EMPTY STATEMENT"
+
 // Indicates an unexpected parsing error - can be diverse
 const PARSING_ERROR_UNEXPECTED_ERROR = "UNEXPECTED_ERROR"
 

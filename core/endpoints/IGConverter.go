@@ -38,7 +38,7 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 		return nil, err
 	}
 
-	Println("Parsed statement:", stmts)
+	Println("    - Parsed statement:", stmts)
 
 	// Run composite generation and return output and error. Will write file if filename != ""
 	results := tabular.GenerateTabularOutputFromParsedStatements(stmts, "", statement, stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders, printIgScriptInput)
@@ -75,13 +75,11 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 		return "", err
 	}
 
-	output := ""
-
-	err2 := tree.NodeError{}
+	Println("    - Parsed statement:", stmts)
 
 	// Prepare visual output for nodes
 	Println(" Step: Generate visual output structure (combined statements)")
-	output, err2 = stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
 		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err2.ErrorCode != tree.TREE_NO_ERROR {
 		return output, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMBEDDED_NODE_ERROR, ErrorMessage: err2.ErrorMessage}

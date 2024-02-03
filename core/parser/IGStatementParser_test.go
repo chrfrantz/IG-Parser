@@ -3040,3 +3040,506 @@ func TestInvalidComponentPairCombinationWithMissingLogicalOperator(t *testing.T)
 			tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+", but returned error ", err)
 	}
 }
+
+/*
+Tests for empty statement
+*/
+func TestEmptyStatement(t *testing.T) {
+
+	// Empty input text
+	text := ""
+
+	// Test for error during parsing. Should pick up on empty input.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_EMPTY_STATEMENT {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_EMPTY_STATEMENT+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement with whitespace
+*/
+func TestEmptyStatementWhitespace(t *testing.T) {
+
+	// Empty input text
+	text := " "
+
+	// Test for error during parsing. Should pick up on empty input.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_EMPTY_STATEMENT {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_EMPTY_STATEMENT+", but returned error ", err)
+	}
+}
+
+/*
+Tests for uncoded statement
+*/
+func TestEmptyUncodedText(t *testing.T) {
+
+	// Uncoded input text
+	text := "Once policy comes into force, relevant regulators must monitor and enforce compliance."
+
+	// Test for error during parsing. Should pick up on empty input.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_EMPTY_STATEMENT {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_EMPTY_STATEMENT+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in for all single components.
+*/
+func TestEmptyStatementAgainstSingleComponents(t *testing.T) {
+
+	// Input text with single component
+	text := "A(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "A,p(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "D(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "I(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "Bdir(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "Bdir,p(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "Bind(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "Bind,p(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "Cac(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "Cex(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "E(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "E,p(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "M(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "F(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "P(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Input text with single component
+	text = "P,p(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err = ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentCac(t *testing.T) {
+
+	// Input text with complex component
+	text := "Cac{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentCex(t *testing.T) {
+
+	// Input text with complex component
+	text := "Cex{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentBdir(t *testing.T) {
+
+	// Input text with complex component
+	text := "Bdir{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentBdirp(t *testing.T) {
+
+	// Input text with complex component
+	text := "Bdir,p{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstInvalidComplexComponentA(t *testing.T) {
+
+	// Input text with complex component
+	text := "A{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentAp(t *testing.T) {
+
+	// Input text with complex component
+	text := "A,p{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentBind(t *testing.T) {
+
+	// Input text with complex component
+	text := "Bind{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentBindp(t *testing.T) {
+
+	// Input text with complex component
+	text := "Bind,p{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstInvalidComplexComponentE(t *testing.T) {
+
+	// Input text with complex component
+	text := "E{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentEp(t *testing.T) {
+
+	// Input text with complex component
+	text := "E,p{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentP(t *testing.T) {
+
+	// Input text with complex component
+	text := "P{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentPp(t *testing.T) {
+
+	// Input text with complex component
+	text := "P,p{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in complex component.
+*/
+func TestEmptyStatementAgainstComplexComponentO(t *testing.T) {
+
+	// Input text with complex component
+	text := "O{ A(actor) D(must) I(sanction) }"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in basic regulative statement.
+*/
+func TestEmptyStatementAgainstInvalidComponent(t *testing.T) {
+
+	// Input text with single component
+	text := "O(value)"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_ERROR_EMPTY_STATEMENT {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_ERROR_EMPTY_STATEMENT+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in basic regulative statement.
+*/
+func TestEmptyStatementAgainstBasicRegulativeStatement(t *testing.T) {
+
+	// Input text with basic statement
+	text := "A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance). "
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in basic constitutive statement.
+*/
+func TestEmptyStatementAgainstBasicConstitutiveStatement(t *testing.T) {
+
+	// Input text with basic statement
+	text := "E(regulators) F(have the right) to P(monitor [AND] enforce). "
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in regulative statement with complex component.
+*/
+func TestEmptyStatementAgainstStatementWithNestedComponent(t *testing.T) {
+
+	// Input text with complex component
+	text := "A(actor) D(must) I(act) Cac{Once E(policy) F(comes into force)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}
+
+/*
+Tests for empty statement in component pair.
+*/
+func TestEmptyStatementAgainstComponentPair(t *testing.T) {
+
+	// Input text with missing logical operator on component pair level
+	text := "A(actor) {I(action1) Bdir(object1) [AND] I(action3) Bdir(object2)}"
+
+	// Test for error during parsing. Should not throw error.
+	_, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+}

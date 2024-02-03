@@ -34,12 +34,13 @@
 
     /*
     Auto-adjusts height of target entry field based on content.
-     */
+    */
     function check(target) {
         let offset = 0
         target.style.height = 'auto';
         target.style.height = target.scrollHeight + offset + 'px';
     }
+
 </script>
 
 <p>&nbsp;</p>
@@ -52,7 +53,7 @@
     <form method="POST">
         <!-- Original Statement entry field -->
         <span data-text="{{.RawStmtHelp}}" class="tooltip">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">{{.RawStmt}}</textarea>
+        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">{{.RawStmt}}</textarea>
         <!-- Validation error message field -->
         <div class="error" id="validateError"></div>
         <!-- Validate button -->
@@ -78,6 +79,9 @@
                     // Populate editor
                     let editor = ace.edit("editor");
                     editor.setValue(rawContent);
+                    // Ensure that content in hidden text area is synchronized
+                    copyEditorContentToTextArea();
+
                     // Reset button to validate mode
                     document.getElementById("buttonValidate").setAttribute("switch", "validate");
                     document.getElementById("buttonValidate").innerText =
@@ -118,7 +122,7 @@
                             let validateError = document.getElementById("validateError");
                             validateError.innerHTML = "The 'Original Statement' content is valid, but has not been copied into the 'Encoded Statement' field, " +
                                 "since this field already contains content (to prevent accidental overwriting of encoded statement).\<br/\>" +
-                                "You can enforce the overwriting using the button below.";
+                                "Confirm if you indeed want to overwrite the 'Encoded Statement' content with the 'Original Statement' content.";
 
                             // Switch button to overwrite mode
                             document.getElementById("buttonValidate").setAttribute("switch", "overwrite");

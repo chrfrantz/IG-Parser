@@ -41,6 +41,7 @@
         target.style.height = 'auto';
         target.style.height = target.scrollHeight + offset + 'px';
     }
+
 </script>
 
 <p>&nbsp;</p>
@@ -53,7 +54,83 @@
     <form method="POST">
         
         <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea>
+        
+        <div class="error" id="validateError"></div>
+        
+        <button class="button2" type="button" id="buttonValidate" switch="validate" onclick="checkRawStatementContent()">
+            Validate 'Original Statement' input (checks for imbalanced parentheses)
+            and copy validated content into 'Encoded Statement' field</button></br></br>
+        <script>
+            
+
+            function checkRawStatementContent() {
+
+                
+                let buttonType = document.getElementById("buttonValidate").getAttribute("switch");
+
+                if (buttonType === "overwrite") {
+                    
+
+                    
+                    let rawContent = document.getElementById("rawStmt").value;
+                    
+                    let editor = ace.edit("editor");
+                    editor.setValue(rawContent);
+                    
+                    copyEditorContentToTextArea();
+
+                    
+                    document.getElementById("buttonValidate").setAttribute("switch", "validate");
+                    document.getElementById("buttonValidate").innerText =
+                        "Validate 'Original Statement' input (checks for imbalanced parentheses) and " +
+                        "copy validated content into 'Encoded Statement' field";
+                    
+                    let validateError = document.getElementById("validateError");
+                    validateError.innerHTML = "";
+
+                } else if (buttonType === "validate") {
+                    
+
+                    
+                    let rawContent = document.getElementById("rawStmt").value;
+                    
+                    let leftParCount = (rawContent.match(/\(/g) || []).length;
+                    
+                    let rightParCount = (rawContent.match(/\)/g) || []).length;
+                    
+                    if (leftParCount !== rightParCount) {
+                        
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "Found imbalanced parentheses in raw input (" +
+                            leftParCount + " opening and " + rightParCount + " closing parentheses).\n" +
+                            "Please remove or balance parentheses to before encoding the statement.";
+                    } else {
+                        
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "";
+                        
+                        let editor = ace.edit("editor");
+                        
+                        if (editor.getValue().length === 0) {
+                            editor.setValue(rawContent);
+                            
+                        } else if (editor.getValue() !== rawContent) {
+                            
+                            let validateError = document.getElementById("validateError");
+                            validateError.innerHTML = "The 'Original Statement' content is valid, but has not been copied into the 'Encoded Statement' field, " +
+                                "since this field already contains content (to prevent accidental overwriting of encoded statement).\<br/\>" +
+                                "Confirm if you indeed want to overwrite the 'Encoded Statement' content with the 'Original Statement' content.";
+
+                            
+                            document.getElementById("buttonValidate").setAttribute("switch", "overwrite");
+                            document.getElementById("buttonValidate").innerText = "Confirm overwriting of 'Encoded Statement' entry with 'Original Statement' entry";
+
+                        } 
+                    }
+                } 
+            }
+        </script>
         
         <span data-text="Click to open a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         
@@ -350,11 +427,21 @@
 
 </select>
 
-<input value="Generate tabular output" onclick="saveFormContent()" type="submit">
+<button id="generate" class="submit" value="Generate tabular output" onclick="saveFormContent()" type="submit">Generate tabular output</button>
+<script>
+    
+
+    const submitButton = document.getElementById("generate");
+
+    submitButton.addEventListener("click", () => {
+        submitButton.classList.add("button-loading");
+    });
+</script>
 
 
 
-<p>Version: 0.3.1</p>
+
+<p>Version: 0.5</p>
 
 </form>
 </div>

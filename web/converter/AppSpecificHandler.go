@@ -48,13 +48,15 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 		switch err2.ErrorCode {
 		case tree.PARSING_ERROR_EMPTY_LEAF:
 			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
+		case tree.PARSING_ERROR_EMPTY_STATEMENT:
+			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
 		default:
 			retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
 		}
 		// Execute template
 		err3 := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_TABULAR, retStruct)
 		if err3 != nil {
-			log.Println("Error processing default template:", err3.Error())
+			log.Println("Error processing tabular template:", err3.Error())
 			http.Error(w, "Could not process request.", http.StatusInternalServerError)
 		}
 
@@ -124,15 +126,19 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 		retStruct.Success = false
 		retStruct.Error = true
 		retStruct.CodedStmt = codedStmt
+		// Deal with potential errors and prepopulate return message
 		switch err2.ErrorCode {
 		case tree.PARSING_ERROR_EMPTY_LEAF:
+			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
+		case tree.PARSING_ERROR_EMPTY_STATEMENT:
 			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
 		default:
 			retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
 		}
+		// Execute template
 		err3 := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_VISUAL, retStruct)
 		if err3 != nil {
-			log.Println("Error processing default template:", err3.Error())
+			log.Println("Error processing visual template:", err3.Error())
 			http.Error(w, "Could not process request.", http.StatusInternalServerError)
 		}
 
