@@ -192,6 +192,9 @@
                 saveValue("outputType");
 
                 
+                saveValue("printOriginalStatement");
+
+                
                 saveValue("printIgScript");
 
                 
@@ -271,6 +274,9 @@
 
                 
                 loadValue("outputType");
+
+                
+                loadValue("printOriginalStatement");
 
                 
                 loadValue("printIgScript");
@@ -405,7 +411,17 @@
 <input id="igExtended" name="igExtended" type="checkbox" checked /><label for="igExtended">Produce IG Extended output (component-level nesting) (default: off)</label>
 <input id="annotations" name="annotations" type="checkbox" unchecked /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
 <input id="includeHeaders" name="includeHeaders" type="checkbox" unchecked /><label for="includeHeaders">Include header row in output (default: on)</label>
-<span data-text="Indicates whether the IG Script-encoded statement is included in the output by introducing an additional column following the Statement ID. Choices include the exclusion (no additional column), the inclusion for the first atomic statement only (i.e., first row following the header row), or the inclusion for all atomic statements (i.e., each row)." class="tooltip">Inclusion of IG Script-encoded statement in generated output:</span>
+<span data-text="Indicates whether the Original Statement is included in the output by introducing an additional column following the Statement ID. Choices include the exclusion (no additional column), the inclusion for the first atomic statement only (i.e., first row following the header row), or the inclusion for all atomic statements (i.e., each row)." class="tooltip">Inclusion of Original Statement in generated output:</span>
+<select id="printOriginalStatement" name="printOriginalStatement" type="select">
+    
+    <option value="No inclusion of Original Statement in output (i.e., no additional column)" >No inclusion of Original Statement in output (i.e., no additional column)</option>
+    
+    <option value="Include Original Statement for first atomic statement only (i.e., in first row following optional header row)" >Include Original Statement for first atomic statement only (i.e., in first row following optional header row)</option>
+    
+    <option value="Include Original Statement for each atomic statement (i.e., in each row)" >Include Original Statement for each atomic statement (i.e., in each row)</option>
+    
+</select>
+<span data-text="Indicates whether the IG Script-encoded statement is included in the output by introducing an additional column following the Statement ID (or the Original Statement if activated). Choices include the exclusion (no additional column), the inclusion for the first atomic statement only (i.e., first row following the header row), or the inclusion for all atomic statements (i.e., each row)." class="tooltip">Inclusion of IG Script-encoded statement in generated output:</span>
 <select id="printIgScript" name="printIgScript" type="select">
     
     <option value="No inclusion of IG Script coding in output (i.e., no additional column)" >No inclusion of IG Script coding in output (i.e., no additional column)</option>
@@ -415,7 +431,6 @@
     <option value="Include IG Script-encoded statement for each atomic statement (i.e., in each row)" >Include IG Script-encoded statement for each atomic statement (i.e., in each row)</option>
     
 </select>
-
 
 
 <span data-text="The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol (&#39;|&#39;) as delimiter/separator." class="tooltip">Output format:</span>

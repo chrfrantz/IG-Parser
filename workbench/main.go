@@ -12,7 +12,7 @@ Helper main function as development and debugging workbench.
 This is purely to support development (quick access to examples statements with distinctive features)
 This file is not included in the server-side deployment (i.e., the docker container does consider this file during build)!
 */
-func main() {
+func mainWorkbench() {
 
 	// complex baseline statement containing all patterns
 	text := "D(deontic) Cac(atomicCondition) (lkjsdkljs) Bind(indirectobject) Cac{A(atomicnestedcondition)} " +
@@ -76,7 +76,7 @@ func main() {
 		log.Fatal(err.Error())
 	}*/
 
-	endpoints.ConvertIGScriptToTabularOutput(text, "1.1", tabular.OUTPUT_TYPE_CSV, "example.csv", true, true, tabular.IG_SCRIPT_OUTPUT_NONE)
+	endpoints.ConvertIGScriptToTabularOutput("", text, "1.1", tabular.OUTPUT_TYPE_CSV, "example.csv", true, true, tabular.ORIGINAL_STATEMENT_OUTPUT_NONE, tabular.IG_SCRIPT_OUTPUT_NONE)
 
 	//fmt.Println(output)
 

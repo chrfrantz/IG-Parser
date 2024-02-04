@@ -29,6 +29,9 @@ const PARAM_EXTENDED_OUTPUT = "igExtended"
 // Header printing
 const PARAM_PRINT_HEADERS = "includeHeaders"
 
+// Original Statement input
+const PARAM_PRINT_ORIGINAL_STATEMENT = "printOriginalStatement"
+
 // IG Script printing
 const PARAM_PRINT_IG_SCRIPT = "printIgScript"
 

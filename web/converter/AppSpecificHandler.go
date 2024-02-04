@@ -18,7 +18,7 @@ Contains output-specific handler to be invoked by GenericParserHandler.go.
 Third-level handler generating tabular output in response to web request.
 Should be invoked by #converterHandler().
 */
-func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string, retStruct shared.ReturnStruct, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, outputType string, printHeaders bool, printIgScriptInput string) {
+func handleTabularOutput(w http.ResponseWriter, originalStatement string, codedStmt string, stmtId string, retStruct shared.ReturnStruct, dynamicOutput bool, produceIGExtendedOutput bool, includeAnnotations bool, outputType string, printHeaders bool, printOriginalStatement string, printIgScriptInput string) {
 	// Run default configuration
 	shared.SetDefaultConfig()
 	// Now, adjust to user settings based on UI output
@@ -34,15 +34,18 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	// Define whether header row is included
 	Println("Setting header row:", printHeaders)
 	tabular.SetIncludeHeaders(printHeaders)
+	// Indicate whether Original Statement input is included in output
+	Println("Include Original Statement input in generated output:", printOriginalStatement)
 	// Indicate whether IG Script input is included in output
 	Println("Include IG Script input in generated output:", printIgScriptInput)
 	// Output type
 	Println("Output type:", outputType)
 	// Convert input
-	output, err2 := endpoints.ConvertIGScriptToTabularOutput(codedStmt, stmtId, outputType, "", true, tabular.IncludeHeader(), printIgScriptInput)
+	output, err2 := endpoints.ConvertIGScriptToTabularOutput(originalStatement, codedStmt, stmtId, outputType, "", true, tabular.IncludeHeader(), printOriginalStatement, printIgScriptInput)
 	if err2.ErrorCode != tree.PARSING_NO_ERROR {
 		retStruct.Success = false
 		retStruct.Error = true
+		retStruct.RawStmt = originalStatement
 		retStruct.CodedStmt = codedStmt
 		// Deal with potential errors and prepopulate return message
 		switch err2.ErrorCode {
@@ -71,6 +74,7 @@ func handleTabularOutput(w http.ResponseWriter, codedStmt string, stmtId string,
 	}
 	// Return success if parsing was successful
 	retStruct.Success = true
+	retStruct.RawStmt = originalStatement
 	retStruct.CodedStmt = codedStmt
 	tabularOutput := ""
 	for _, v := range output {

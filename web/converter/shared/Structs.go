@@ -36,6 +36,10 @@ type ReturnStruct struct {
 	IncludeDoV string
 	// Include headers in output
 	IncludeHeaders string
+	// Include Original Statement in output (Value: 0 --> no inclusion, 1 --> only on first atomic statement, 2 --> on all atomic statements)
+	PrintOriginalStatement string
+	// Types of inclusion of Original Statement
+	PrintOriginalStatementSelection []string
 	// Include IG Script-encoded statement in output (Value: 0 --> no inclusion, 1 --> only on first atomic statement, 2 --> on all atomic statements)
 	PrintIgScript string
 	// Types of inclusion of IG script
@@ -76,6 +80,8 @@ type ReturnStruct struct {
 	StmtIdHelp string
 	// Help message for parameters
 	ParametersHelp string
+	// Help message for Original Statement inclusion
+	OriginalStatementInclusionHelp string
 	// Help message for IG Script inclusion
 	IgScriptInclusionHelp string
 	// Help message for output format

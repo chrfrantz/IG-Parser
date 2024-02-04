@@ -223,6 +223,9 @@
                 saveValue("outputType");
 
                 
+                saveValue("printOriginalStatement");
+
+                
                 saveValue("printIgScript");
 
                 
@@ -302,6 +305,9 @@
 
                 
                 loadValue("outputType");
+
+                
+                loadValue("printOriginalStatement");
 
                 
                 loadValue("printIgScript");

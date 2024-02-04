@@ -53,6 +53,9 @@ const componentNestedRight = parser.RIGHT_BRACE
 // Column identifier for Statement ID
 const stmtIdColHeader = "Statement ID"
 
+// Column identifier for Original Statement input
+const stmtOriginalStatementHeader = "Original Statement"
+
 // Column identifier for IG Script-encoded statement
 const stmtIgScriptHeader = "IG Script Encoding"
 
@@ -557,7 +560,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 
 		Println("Parsing nested statement ...")
 		// Parse individual nested statements on component level in order to attach those to main output
-		nestedTabularResult := GenerateTabularOutputFromParsedStatement(val.NestedStmt, nil, "", val.NestedStmt.Annotations, val.ID, "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders, IG_SCRIPT_OUTPUT_NONE)
+		nestedTabularResult := GenerateTabularOutputFromParsedStatement(val.NestedStmt, nil, "", "", val.NestedStmt.Annotations, val.ID, "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders, ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 		if nestedTabularResult.Error.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, nil, nil, nestedTabularResult.Error
 		}
@@ -723,6 +726,7 @@ Generates final tabular output based on input statement matrices, alongside head
 
 Input includes
 statement matrix (i.e., parsed institutional statements decomposed into matrix structure),
+Original statement input (for consideration in output - parameterized via printOriginalStatement),
 IG Script input (for consideration in output - parameterized via printIgScript),
 header symbols (ordered IG component symbols associated with matrix columns),
 header names (ordered and associated with header symbols),
@@ -732,11 +736,12 @@ row suffix (suffix for each row - to accommodate specific output formats),
 separator used to separate individual cells per row,
 filename the output should be printed to (should be "" if no output is to be printed),
 printHeaders to indicate whether the header row is to be included in output,
+printOriginalStatement to indicate the inclusion of the original statement input in the generated output (for options see tabular.ORIGINAL_STATEMENT_INCLUSION_OPTIONS).
 printIgScript to indicate the inclusion of the original IG Script input in the generated output (for options see tabular.IG_SCRIPT_INCLUSION_OPTIONS).
 
 Returns string containing flat output as well as potential parsing error
 */
-func printTabularOutput(statementMap []map[string]string, igScriptInput string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string, overwrite bool, printHeaders bool, printIgScript string) (string, tree.ParsingError) {
+func printTabularOutput(statementMap []map[string]string, originalStatement string, igScriptInput string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string, overwrite bool, printHeaders bool, printOriginalStatement string, printIgScript string) (string, tree.ParsingError) {
 
 	// Prepare builder
 	builder := strings.Builder{}
@@ -748,8 +753,14 @@ func printTabularOutput(statementMap []map[string]string, igScriptInput string, 
 		for _, v := range headerColsNames {
 			builder.WriteString(v)
 			builder.WriteString(separator)
-			// Immediately write IG Script header (if input is not empty)
+			// Immediately write optional Original Statement and IG Script headers (if input is not empty)
 			if v == stmtIdColHeader {
+				// Include column for Original Statement output if some form of output is selected
+				if printOriginalStatement != ORIGINAL_STATEMENT_OUTPUT_NONE {
+					// Column for Original Statement content
+					builder.WriteString(stmtOriginalStatementHeader)
+					builder.WriteString(separator)
+				}
 				// Include column for IG Script output if some form of output is selected
 				if printIgScript != IG_SCRIPT_OUTPUT_NONE {
 					// Column for IG Script content
@@ -777,13 +788,40 @@ func printTabularOutput(statementMap []map[string]string, igScriptInput string, 
 				builder.WriteString(entry[header])
 				builder.WriteString(separator)
 			}
+			// Add Original Statement column entry (if not deactivated)
+			if header == stmtIdColHeader && printOriginalStatement != ORIGINAL_STATEMENT_OUTPUT_NONE {
+				switch printOriginalStatement {
+				case ORIGINAL_STATEMENT_OUTPUT_FIRST_ENTRY:
+					// Only print for the first actual entry (index 0)
+					if i == 0 {
+						// Write full entry with content in first entry row
+						builder.WriteString(originalStatement)
+						builder.WriteString(separator)
+					} else {
+						// ... else just add whitespace and separator
+						builder.WriteString(" ")
+						builder.WriteString(separator)
+					}
+				case ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES:
+					// Print in every row
+					builder.WriteString(originalStatement)
+					builder.WriteString(separator)
+				default:
+					log.Println("Invalid Original Statement output specification ('" + printOriginalStatement + "'). Output suppressed.")
+				}
+			}
 			// Add IG Script column entry (if not deactivated)
 			if header == stmtIdColHeader && printIgScript != IG_SCRIPT_OUTPUT_NONE {
 				switch printIgScript {
 				case IG_SCRIPT_OUTPUT_FIRST_ENTRY:
 					// Only print for the first actual entry (index 0)
 					if i == 0 {
+						// Write full entry with content in first entry row
 						builder.WriteString(igScriptInput)
+						builder.WriteString(separator)
+					} else {
+						// ... else just add whitespace and separator
+						builder.WriteString(" ")
 						builder.WriteString(separator)
 					}
 				case IG_SCRIPT_OUTPUT_ALL_ENTRIES:
@@ -817,23 +855,23 @@ Further requires column header names for output generation, alongside specificat
 Optionally writes to file (if filename is provided), with option to overwrite existing files,
 as well as options to print header lines, and IG Script input as part of the output (for options see tabular.IG_SCRIPT_INCLUSION_OPTIONS).
 */
-func generateCSVOutput(statementMap []map[string]string, igScriptInput string, headerCols []string, headerColsNames []string, separator string, filename string, overwrite bool, printHeaders bool, printIgScriptInput string) (string, tree.ParsingError) {
+func generateCSVOutput(statementMap []map[string]string, originalStatement string, igScriptInput string, headerCols []string, headerColsNames []string, separator string, filename string, overwrite bool, printHeaders bool, printOriginalStatement string, printIgScriptInput string) (string, tree.ParsingError) {
 
 	// Linebreak at the end of each entry
 	suffix := "\n"
 
 	// Delegate actual printing
-	return printTabularOutput(statementMap, igScriptInput, headerCols, headerColsNames, "", stmtIdPrefix, suffix, separator, filename, overwrite, printHeaders, printIgScriptInput)
+	return printTabularOutput(statementMap, originalStatement, igScriptInput, headerCols, headerColsNames, "", stmtIdPrefix, suffix, separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
 }
 
 /*
-Generates Google Sheets output from map of categorized statement elements, IG Script input (for consideration in output - parameterized via printIgScriptInput),
+Generates Google Sheets output from map of categorized statement elements, IG Script input (for consideration in output - parameterized via printOriginalStatement and printIgScriptInput),
 as well as header columns (symbols and names) for output generation.
 Further requires column header names for output generation, alongside specification of separator symbol.
 Optionally writes to file (if filename is provided), with option to overwrite existing files,
 as well as options to print header lines, and IG Script input as part of the output (for options see tabular.IG_SCRIPT_INCLUSION_OPTIONS).
 */
-func generateGoogleSheetsOutput(statementMap []map[string]string, igScriptInput string, headerCols []string, headerColsNames []string, separator string, filename string, overwrite bool, printHeaders bool, printIgScriptInput string) (string, tree.ParsingError) {
+func generateGoogleSheetsOutput(statementMap []map[string]string, originalStatement string, igScriptInput string, headerCols []string, headerColsNames []string, separator string, filename string, overwrite bool, printHeaders bool, printOriginalStatement string, printIgScriptInput string) (string, tree.ParsingError) {
 
 	// Quote to terminate input string for Google Sheets interpretation
 	quote := "\""
@@ -854,7 +892,7 @@ func generateGoogleSheetsOutput(statementMap []map[string]string, igScriptInput 
 	suffix := bsuf.String()
 
 	// Delegate actual printing
-	return printTabularOutput(statementMap, igScriptInput, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename, overwrite, printHeaders, printIgScriptInput)
+	return printTabularOutput(statementMap, originalStatement, igScriptInput, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
 }
 
 /*
@@ -935,7 +973,7 @@ func generateLogicalLinkageForExtrapolatedStatements(logicalExpressionString str
 Generates combined tabular output for given statements in node array.
 Uses #GenerateTabularOutputFromParsedStatement function internally.
 */
-func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations interface{}, igScriptInput string, stmtId string, filename string, overwrite bool, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool, printIgScriptInput string) []TabularOutputResult {
+func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations interface{}, originalStatement string, igScriptInput string, stmtId string, filename string, overwrite bool, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool, printOriginalStatement string, printIgScriptInput string) []TabularOutputResult {
 
 	results := []TabularOutputResult{}
 
@@ -961,7 +999,7 @@ func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations i
 			}
 
 			// single node: simply parse node in isolation
-			res = GenerateTabularOutputFromParsedStatement(topLevelStmt, topLevelStmts, igScriptInput, annotations, stmtId, filename, overwriteFile, aggregateImplicitLinkages, separator, outputFormat, printHeadersInFile, printIgScriptInput)
+			res = GenerateTabularOutputFromParsedStatement(topLevelStmt, topLevelStmts, originalStatement, igScriptInput, annotations, stmtId, filename, overwriteFile, aggregateImplicitLinkages, separator, outputFormat, printHeadersInFile, printOriginalStatement, printIgScriptInput)
 			if res.Error.ErrorCode != tree.PARSING_NO_ERROR {
 				Println("Error during output generation for single statement. Statement ignored from output (Statement node: " + stmtNode.String() + ")")
 
@@ -976,6 +1014,7 @@ func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations i
 /*
 Generates Google Sheets tabular output for a given parsed statement, with a given statement ID.
 Generates all substatements and logical combination linkages in specified output format (e.g., Google Sheets, CSV).
+Takes original statement input to potentially include as separate column (parameterized via printOriginalStatement).
 Takes original IG Script input to potentially include as separate column (parameterized via printIgScriptInput).
 Additionally returns array of statement entries, header symbols and corresponding header symbol names wrapped in generic return structure.
 Allows for specification of statement-level annotations passed to output.
@@ -984,9 +1023,10 @@ Allows for specification of output file type (e.g., Google Sheets, CSV) based on
 If filename is provided, the result is printed to the corresponding file.
 It is further necessary to indicate whether files should be overwritten or appended to
 If printHeaders is true, the header row will be included in output.
+printOriginalStatement indicates the inclusion of Original Statement in output (for options see tabular.ORIGINAL_STATEMENT_INCLUSION_OPTIONS).
 printIgScriptInput indicates the inclusion of IG Script in output (for options see tabular.IG_SCRIPT_INCLUSION_OPTIONS).
 */
-func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.Node, igScriptInput string, annotations interface{}, stmtId string, filename string, overwrite bool, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool, printIgScriptInput string) TabularOutputResult {
+func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.Node, originalStatement string, igScriptInput string, annotations interface{}, stmtId string, filename string, overwrite bool, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool, printOriginalStatement string, printIgScriptInput string) TabularOutputResult {
 
 	// Prepopulate derived IDs for uniform access
 	derivedIDs := map[*tree.Node]string{}
@@ -1068,13 +1108,13 @@ func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.
 		return result
 	case OUTPUT_TYPE_GOOGLE_SHEETS:
 		// Create Google Sheets output based on generated map, alongside header names as output
-		result.Output, result.Error = generateGoogleSheetsOutput(result.StatementMap, igScriptInput, result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders, printIgScriptInput)
+		result.Output, result.Error = generateGoogleSheetsOutput(result.StatementMap, originalStatement, igScriptInput, result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return result
 		}
 	case OUTPUT_TYPE_CSV:
 		// Create CSV output based on generated map, alongside header names as output
-		result.Output, result.Error = generateCSVOutput(result.StatementMap, igScriptInput, result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders, printIgScriptInput)
+		result.Output, result.Error = generateCSVOutput(result.StatementMap, originalStatement, igScriptInput, result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return result
 		}

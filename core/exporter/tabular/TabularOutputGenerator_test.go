@@ -236,7 +236,7 @@ func TestSimpleTabularOutput(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -329,7 +329,7 @@ func TestSimpleTabularOutputNoHeaders(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -422,7 +422,7 @@ func TestBasicTabularOutputCombinations(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -516,7 +516,7 @@ func TestBasicTabularOutputCombinationsNoHeaders(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -609,7 +609,7 @@ func TestBasicTabularOutputImplicitAnd(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -703,7 +703,7 @@ func TestTabularOutputCombinationsImplicitAnd(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -798,7 +798,7 @@ func TestTabularOutputWithSharedLeftElements(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -893,7 +893,7 @@ func TestTabularOutputWithSharedRightElements(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -988,7 +988,7 @@ func TestTabularOutputWithSharedLeftAndRightElements(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1084,7 +1084,7 @@ func TestTabularOutputWithTwoLevelNestedComponent(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1183,7 +1183,7 @@ func TestTabularOutputWithCombinationOfSimpleAndTwoLevelNestedComponent(t *testi
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1281,7 +1281,7 @@ func TestTabularOutputWithCombinationOfTwoNestedComponents(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1378,7 +1378,7 @@ func TestTabularOutputWithCombinationOfThreeNestedComponents(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1477,7 +1477,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAnd(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1576,7 +1576,7 @@ func TestTabularOutputWithNestedStatementCombinationsImplicitAndIGCore(t *testin
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1675,7 +1675,7 @@ func TestTabularOutputWithNestedStatementCombinationsXOR(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1775,7 +1775,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinations(t 
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1878,7 +1878,7 @@ func TestTabularOutputWithNestedStatementCombinationsAndComponentCombinationsWit
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -1987,7 +1987,7 @@ func TestTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcrossDiffe
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2096,7 +2096,7 @@ func TestStaticTabularOutputWithMultipleNestedStatementsAndSimpleComponentsAcros
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2196,7 +2196,7 @@ func TestStaticTabularOutputWithMultiLevelNestingAndComponentLevelCombinations(t
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2289,7 +2289,7 @@ func TestStaticTabularOutputOrElseAnnotations(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2414,7 +2414,7 @@ func TestStaticTabularOutputBasicStatement(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2517,7 +2517,7 @@ func TestStaticTabularOutputNestedCombinations(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2622,7 +2622,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAnd(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2727,7 +2727,7 @@ func TestStaticTabularOutputNestedCombinationsImplicitAndIGCore(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2833,7 +2833,7 @@ func TestStaticTabularOutputNestedProperties(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -2932,7 +2932,7 @@ func TestStaticTabularOutputBasicStatementSharedLeftAndRightElements(t *testing.
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3036,7 +3036,7 @@ func TestStaticTabularOutputBasicStatementSharedAndPrivateProperties(t *testing.
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3131,7 +3131,7 @@ func TestStaticTabularOutputBasicStatementPrivatePropertiesOnly(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3226,7 +3226,7 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivatePropertyComponents(t *
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3331,7 +3331,7 @@ func TestStaticTabularOutputBasicStatementMixSharedPrivateAndNestedPrivateProper
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3436,7 +3436,7 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedProperties(t *tes
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3541,7 +3541,7 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3636,7 +3636,7 @@ func TestStaticTabularOutputBasicStatementComponentLevelNestedPrivateAndSharedPr
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3742,7 +3742,7 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsDeactivated(
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3848,7 +3848,7 @@ func TestStaticTabularOutputBasicStatementMixedPropertiesAnnotationsActivated(t 
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -3953,7 +3953,7 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsGoogleSheets(t
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4058,7 +4058,7 @@ func TestStaticTabularOutputBasicStatementEmbeddedQuotationSymbolsCSV(t *testing
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateCSVOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateCSVOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4162,7 +4162,7 @@ func TestStaticTabularOutputNestedStatementsAnnotations(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4267,7 +4267,7 @@ func TestStaticTabularOutputNestedStatementCombinationAnnotations(t *testing.T) 
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4376,7 +4376,7 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsGoogleSh
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4485,7 +4485,7 @@ func TestStaticTabularOutputNestedStatementsAndCombinationMixAnnotationsCSV(t *t
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateCSVOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateCSVOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4579,7 +4579,7 @@ func TestStaticTabularOutputParsingOfWithinComponentLinkages(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4682,7 +4682,7 @@ func TestTabularOutputDefaultExample(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4779,7 +4779,7 @@ func TestTabularOutputComplexMultilevelNesting(t *testing.T) {
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -4837,7 +4837,7 @@ func TestTabularOutputBasicComponentPairs(t *testing.T) {
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -4906,7 +4906,7 @@ func TestTabularOutputBasicComponentPairAndWithinComponentCombinations(t *testin
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -4975,7 +4975,7 @@ func TestTabularOutputBasicComponentPairAndWithinComponentCombinationsAndNestedS
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5051,7 +5051,7 @@ func TestTabularOutputStandardStatementComponentPairs(t *testing.T) {
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5120,7 +5120,7 @@ func TestTabularOutputComplexNestedCombinationsWithoutComponentPairs(t *testing.
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5189,7 +5189,7 @@ func TestTabularOutputComplexNestedCombinationsWithComponentPairs(t *testing.T) 
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5258,7 +5258,7 @@ func TestTabularOutputNestedCombinationsComponentLevelNestingAndComponentPairs(t
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5326,7 +5326,7 @@ func TestTabularOutputLogicalOperatorsNeighbouringStatementsComponentPairs(t *te
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5394,7 +5394,7 @@ func TestTabularOutputComponentPairsInNestedComponents(t *testing.T) {
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5462,7 +5462,7 @@ func TestTabularOutputComponentPairsInNestedComponentsIGCore(t *testing.T) {
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5531,7 +5531,7 @@ func TestTabularOutputExpandComponentCombinationsWithMissingParentheses(t *testi
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5610,7 +5610,7 @@ func TestTabularOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAn
 		t.Fatal("Wrong statement count: ", stmts)
 	}
 
-	results := GenerateTabularOutputFromParsedStatements(stmts, "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), IG_SCRIPT_OUTPUT_NONE)
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error when generating output:", err)
 	}
@@ -5644,7 +5644,7 @@ func TestTabularOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAn
 }
 
 /*
-Tests IG Script output (with single entry) as part of tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+Tests IG Script output (with single entry) as part of Google Sheets tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
 */
 func TestTabularOutputComplexMultilevelNestingWithIgScriptOutputSingleEntry(t *testing.T) {
 
@@ -5718,7 +5718,8 @@ func TestTabularOutputComplexMultilevelNestingWithIgScriptOutputSingleEntry(t *t
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_FIRST_ENTRY)
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_FIRST_ENTRY)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -5741,7 +5742,7 @@ func TestTabularOutputComplexMultilevelNestingWithIgScriptOutputSingleEntry(t *t
 }
 
 /*
-Tests IG Script output (for all entries) as part of tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+Tests IG Script output (for all entries) as part of Google Sheets tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
 */
 func TestTabularOutputComplexMultilevelNestingWithIgScriptOutputAllEntries(t *testing.T) {
 
@@ -5815,7 +5816,8 @@ func TestTabularOutputComplexMultilevelNestingWithIgScriptOutputAllEntries(t *te
 		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
 	}
 
-	output, err := generateGoogleSheetsOutput(statementMap, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
 	}
@@ -5837,4 +5839,810 @@ func TestTabularOutputComplexMultilevelNestingWithIgScriptOutputAllEntries(t *te
 
 }
 
-// test with invalid statement and empty input nodes, unbalanced parentheses, missing ID
+/*
+Tests Original Statement output (with single entry) as part of Google Sheets tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNestingWithOriginalStatementOutputSingleEntry(t *testing.T) {
+
+	// Original statement to be included in output
+	originalStatement := "actor1 aim1 that actor2 aim2 under the condition that actor3 aim3 something or actor4 aim4 something else"
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNestingOriginalStatementOutputSingleRowEntry.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_FIRST_ENTRY, IG_SCRIPT_OUTPUT_NONE)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests Original Statement output (for all entries) as part of Google Sheets tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNestingWithOriginalStatementOutputAllEntries(t *testing.T) {
+
+	// Original statement to be included in output
+	originalStatement := "actor1 aim1 that actor2 aim2 under the condition that actor3 aim3 something or actor4 aim4 something else"
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNestingOriginalStatementOutputAllRowEntries.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_NONE)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests Original Statement and IG Script output (both with single entry) as part of Google Sheets tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNestingWithOriginalStatementAndIgScriptOutputSingleEntry(t *testing.T) {
+
+	// Original statement to be included in output
+	originalStatement := "actor1 aim1 that actor2 aim2 under the condition that actor3 aim3 something or actor4 aim4 something else"
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNestingOriginalStatementOutputSingleRowAndIgScriptSingleRowEntry.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_FIRST_ENTRY, IG_SCRIPT_OUTPUT_FIRST_ENTRY)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests Original Statement and IG Script output (both with single entry) as part of CSV tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNestingWithOriginalStatementAndIgScriptOutputSingleEntryCSV(t *testing.T) {
+
+	// Original statement to be included in output
+	originalStatement := "actor1 aim1 that actor2 aim2 under the condition that actor3 aim3 something or actor4 aim4 something else"
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNestingOriginalStatementOutputSingleRowAndIgScriptSingleRowEntryCSV.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateCSVOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_FIRST_ENTRY, IG_SCRIPT_OUTPUT_FIRST_ENTRY)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests Original Statement and IG Script output (both for all entries) as part of Google Sheets tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNestingWithOriginalStatementAndIgScriptOutputAllEntries(t *testing.T) {
+
+	// Original statement to be included in output
+	originalStatement := "actor1 aim1 that actor2 aim2 under the condition that actor3 aim3 something or actor4 aim4 something else"
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNestingOriginalStatementAndIgScriptOutputAllRowEntries.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests Original Statement and IG Script output (both for all entries) as part of CSV tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNestingWithOriginalStatementAndIgScriptOutputAllEntriesCSV(t *testing.T) {
+
+	// Original statement to be included in output
+	originalStatement := "actor1 aim1 that actor2 aim2 under the condition that actor3 aim3 something or actor4 aim4 something else"
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNestingOriginalStatementAndIgScriptOutputAllRowEntriesCSV.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateCSVOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests Original Statement (in first entry) and IG Script output (for all entries) as part of Google Sheets tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNestingWithOriginalStatementSingleAndIgScriptOutputAllEntry(t *testing.T) {
+
+	// Original statement to be included in output
+	originalStatement := "actor1 aim1 that actor2 aim2 under the condition that actor3 aim3 something or actor4 aim4 something else"
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNestingOriginalStatementSingleRowAndIgScriptOutputAllRowEntries.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_FIRST_ENTRY, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests Original Statement (for all entries) and IG Script output (for first entry) as part of Google Sheets tabular output for complex multi-level nesting (e.g., Cac{{Cac{} [OR] Cac{}}}.
+*/
+func TestTabularOutputComplexMultilevelNestingWithOriginalStatementAllAndIgScriptOutputSingleEntry(t *testing.T) {
+
+	// Original statement to be included in output
+	originalStatement := "actor1 aim1 that actor2 aim2 under the condition that actor3 aim3 something or actor4 aim4 something else"
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac{   Cac{A(actor3) I(aim3) Bdir(something)  }   [OR]   Cac{  A(actor4) I(aim4) Bdir(something else)  }}}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 3 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaComplexMultilevelNestingOriginalStatementAllAndIgScriptOutputSingleRowEntry.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_FIRST_ENTRY)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
