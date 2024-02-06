@@ -6,6 +6,11 @@
 # Clears current instance of IG Parser and redeploys after pulling from git repository.
 # Ensure to run the script with sudo (e.g., 'sudo ./deploy.sh')!
 
+# The script requires the following tools to be installed (see IG Parser README.MD for more details):
+# - docker
+# - docker-compose
+# - git
+
 echo "Initiating (re)deployment of latest version of the IG Parser ..."
 
 # Create logs folder if it does not already exist
@@ -22,7 +27,7 @@ fi
 echo "Undeploying running IG Parser instance ..."
 docker-compose down
 if [ $? -ne 0 ]; then
-  echo "Error when stopping service. Ensure you are running the script with superuser permissions (e.g., sudo)." 
+  echo "Error when stopping service. Ensure that docker-compose is installed (check with 'docker-compose version'), and whether you are running the script with superuser permissions (e.g., sudo)." 
   exit 1
 fi
 
@@ -30,7 +35,7 @@ fi
 echo "Deleting image of undeployed IG Parser instance ..."
 docker image prune --filter label=stage=runner -f
 if [ $? -ne 0 ]; then
-  echo "Error when deleting runner images following undeploying. Ensure you are running the script with superuser permissions (e.g., sudo)."
+  echo "Error when deleting runner images following undeploying. Ensure that docker is properly installed (check with 'docker version'), and whether you are running the script with superuser permissions (e.g., sudo)."
   exit 1
 fi
 
@@ -38,7 +43,7 @@ fi
 echo "Retrieving latest version ..."
 git pull
 if [ $? -ne 0 ]; then
-  echo "Error when pulling latest version of repo. Ensure you are running the script with superuser permissions (e.g., sudo)." 
+  echo "Error when pulling latest version of repo. Ensure that git is properly installed (check with 'git version'), and whether you are running the script with superuser permissions (e.g., sudo)." 
   exit 1
 fi
 
@@ -49,7 +54,7 @@ if [ $? -ne 0 ]; then
   echo "Dedicated docker network does not exist. Creating 'tunnel_network' ..."
   docker network create tunnel_network
   if [ $? -ne 0 ];  then
-    echo "Network creation failed. Ensure you are running the script with superuser permissions (e.g., sudo)."
+    echo "Docker network creation failed. Ensure you are running the script with superuser permissions (e.g., sudo). Check output for error."
     exit 1
   fi
 fi
@@ -58,7 +63,7 @@ fi
 echo "Deploying latest version of IG Parser ..."
 docker-compose up -d --build
 if [ $? -ne 0 ]; then
-  echo "Error during deployment. Ensure you are running the script with superuser permissions (e.g., sudo)." 
+  echo "Error during deployment. Ensure that docker-compose is installed (check with 'docker-compose version'), and whether you are running the script with superuser permissions (e.g., sudo)." 
   exit 1
 fi
 
@@ -66,7 +71,7 @@ fi
 echo "Removing all intermediate images created during build process ..."
 docker image prune --filter label=stage=builder -f
 if [ $? -ne 0 ]; then
-  echo "Error when deleting intermediate images created during build. Ensure you are running the script with superuser permissions (e.g., sudo)."
+  echo "Error when deleting intermediate images created during build. Ensure that docker is properly installed (check with 'docker version'), and whether you are running the script with superuser permissions (e.g., sudo)."
   exit 1
 fi
 
