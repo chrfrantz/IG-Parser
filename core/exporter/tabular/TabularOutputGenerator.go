@@ -975,7 +975,12 @@ Uses #GenerateTabularOutputFromParsedStatement function internally.
 */
 func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations interface{}, originalStatement string, igScriptInput string, stmtId string, filename string, overwrite bool, aggregateImplicitLinkages bool, separator string, outputFormat string, printHeaders bool, printOriginalStatement string, printIgScriptInput string) []TabularOutputResult {
 
+	// Instance holding parsed output
 	results := []TabularOutputResult{}
+
+	// Remove potential line breaks from original and IG Script input
+	originalStatement = parser.CleanInput(originalStatement)
+	igScriptInput = parser.CleanInput(igScriptInput)
 
 	for i, stmtNode := range stmts {
 		Println("Processing output for node entry ", i)

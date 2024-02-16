@@ -351,7 +351,7 @@ func escapeSymbolsForRegex(text string) string {
 }
 
 /*
-Generic function to clean input (e.g., strip line breaks).
+Generic function to clean input (substituting linebreaks).
 */
 func CleanInput(input string) string {
 
