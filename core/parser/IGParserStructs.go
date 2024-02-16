@@ -22,7 +22,7 @@ const RIGHT_BRACKET = "]"
 const LOGICAL_OPERATORS = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
 
 // Special symbols supported in content, suffix and annotations (wide range of special characters, as well as +, -, /, *, %, &, =, currency symbols, periods (.), relative operators (<,>), etc., BUT not braces!)
-const SPECIAL_SYMBOLS = "'’,;.<>+:\\-*/%&=$£€¤§\"#!`\\|"
+const SPECIAL_SYMBOLS = "'’,;.<>+:\\-*/%&=@$£€¤§\"#!`\\|"
 
 // Word pattern for regular expressions (including parentheses, spaces, square brackets, and all symbols contained in SPECIAL_SYMBOLS).
 const WORDS_WITH_PARENTHESES = "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "\\(\\)\\[\\]\\s]+"
