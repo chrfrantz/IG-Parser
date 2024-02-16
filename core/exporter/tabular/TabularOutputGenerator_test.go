@@ -5593,7 +5593,7 @@ func TestTabularOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAn
 	// Include shared elements
 	SetIncludeSharedElementsInTabularOutput(true)
 
-	// Take separator for Google Sheets output
+	// Define separator for output generation
 	separator := ";"
 
 	// Test for correct configuration for static output
@@ -5662,7 +5662,7 @@ func TestTabularOutputWithLinebreaksInIGScriptInput(t *testing.T) {
 	// Include shared elements
 	SetIncludeSharedElementsInTabularOutput(true)
 
-	// Take separator for Google Sheets output
+	// Define separator for output generation
 	separator := ";"
 
 	// Test for correct configuration for static output
@@ -5713,6 +5713,144 @@ func TestTabularOutputWithLinebreaksInIGScriptInput(t *testing.T) {
 }
 
 /*
+Tests generation of tabular output with non-cell separator in IG Script input.
+*/
+func TestTabularOutputWithNonCellSeparatorInIGScriptInput(t *testing.T) {
+
+	// Statement with cell separator
+	text := "A(actor) I(aim) Bdir(object1) Bind(object2)| Cac(condition1)"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Define separator for output generation
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) != 1 {
+		t.Fatal("Wrong statement count: ", stmts)
+	}
+
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating output:", err)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNonCellSeparatorInIgScriptInput.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Aggregate output if multiple results
+	output := ""
+	for _, v := range results {
+		output += v.Output
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests generation of tabular output with cell separator in IG Script input.
+*/
+func TestTabularOutputWithCellSeparatorInIGScriptInput(t *testing.T) {
+
+	// Statement with cell separator
+	text := "A(actor) I(aim) Bdir(object1) Bind(object2)| Cac(condition1)"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Define separator for output generation
+	separator := "|"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) != 1 {
+		t.Fatal("Wrong statement count: ", stmts)
+	}
+
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating output:", err)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaCellSeparatorInIgScriptInput.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Aggregate output if multiple results
+	output := ""
+	for _, v := range results {
+		output += v.Output
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
 Tests generation of tabular output with linebreaks in Original Statement input.
 */
 func TestTabularOutputWithLinebreaksInOriginalStatementInput(t *testing.T) {
@@ -5733,7 +5871,7 @@ func TestTabularOutputWithLinebreaksInOriginalStatementInput(t *testing.T) {
 	// Include shared elements
 	SetIncludeSharedElementsInTabularOutput(true)
 
-	// Take separator for Google Sheets output
+	// Define separator for output generation
 	separator := ";"
 
 	// Test for correct configuration for static output
@@ -5784,6 +5922,148 @@ func TestTabularOutputWithLinebreaksInOriginalStatementInput(t *testing.T) {
 }
 
 /*
+Tests generation of tabular output with non-cell separator in Original Statement input.
+*/
+func TestTabularOutputWithNonCellSeparatorInOriginalStatementInput(t *testing.T) {
+
+	// Original statement (with non-cell separator)
+	originalStatement := "actor aim object1| object2 condition1"
+	// Coded statement (no cell separator)
+	text := "A(actor) I(aim) Bdir(object1) Bind(object2) Cac(condition1)"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Define separator for output generation
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) != 1 {
+		t.Fatal("Wrong statement count: ", stmts)
+	}
+
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", originalStatement, text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating output:", err)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNonCellSeparatorInOriginalStatementInput.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Aggregate output if multiple results
+	output := ""
+	for _, v := range results {
+		output += v.Output
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests generation of tabular output with cell separator in Original Statement input.
+*/
+func TestTabularOutputWithCellSeparatorInOriginalStatementInput(t *testing.T) {
+
+	// Original statement (with cell separator)
+	originalStatement := "actor aim object1| object2 |condition1"
+	// Coded statement (no cell separator)
+	text := "A(actor) I(aim) Bdir(object1) Bind(object2) Cac(condition1)"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Define separator for output generation
+	separator := "|"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) != 1 {
+		t.Fatal("Wrong statement count: ", stmts)
+	}
+
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", originalStatement, text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating output:", err)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaCellSeparatorInOriginalStatementInput.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Aggregate output if multiple results
+	output := ""
+	for _, v := range results {
+		output += v.Output
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
 Tests generation of tabular output with linebreaks in Original Statement and IG Script input.
 */
 func TestTabularOutputWithLinebreaksInOriginalStatementAndIgScriptInput(t *testing.T) {
@@ -5804,7 +6084,7 @@ func TestTabularOutputWithLinebreaksInOriginalStatementAndIgScriptInput(t *testi
 	// Include shared elements
 	SetIncludeSharedElementsInTabularOutput(true)
 
-	// Take separator for Google Sheets output
+	// Define separator for output generation
 	separator := ";"
 
 	// Test for correct configuration for static output
@@ -5828,6 +6108,148 @@ func TestTabularOutputWithLinebreaksInOriginalStatementAndIgScriptInput(t *testi
 
 	// Read reference file
 	content, err2 := os.ReadFile("TestOutputStaticSchemaLinebreakInOriginalStatementAndIgScriptInput.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Aggregate output if multiple results
+	output := ""
+	for _, v := range results {
+		output += v.Output
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests generation of tabular output with non-cell separator in Original Statement and IG Script input.
+*/
+func TestTabularOutputWithNonCellSeparatorInOriginalStatementAndIgScriptInput(t *testing.T) {
+
+	// Original statement
+	originalStatement := "actor |aim |object1| object2 condition1"
+	// Coded statement
+	text := "A(actor) I(aim)| Bdir(object1) Bind(object2)| Cac(condition1)"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Define separator for output generation
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) != 1 {
+		t.Fatal("Wrong statement count: ", stmts)
+	}
+
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", originalStatement, text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating output:", err)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaNonCellSeparatorInOriginalStatementAndIgScriptInput.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Aggregate output if multiple results
+	output := ""
+	for _, v := range results {
+		output += v.Output
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests generation of tabular output with cell separator in Original Statement and IG Script input.
+*/
+func TestTabularOutputWithCellSeparatorInOriginalStatementAndIgScriptInput(t *testing.T) {
+
+	// Original statement
+	originalStatement := "actor |aim |object1| object2 condition1"
+	// Coded statement
+	text := "A(actor) I(aim)| Bdir(object1) Bind(object2)| Cac(condition1)"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Define separator for output generation
+	separator := "|"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) != 1 {
+		t.Fatal("Wrong statement count: ", stmts)
+	}
+
+	results := GenerateTabularOutputFromParsedStatements(stmts, "", originalStatement, text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error when generating output:", err)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputStaticSchemaCellSeparatorInOriginalStatementAndIgScriptInput.test")
 	if err2 != nil {
 		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
 	}

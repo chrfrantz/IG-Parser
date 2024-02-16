@@ -2,6 +2,7 @@ package tabular
 
 import (
 	"IG-Parser/core/tree"
+	"regexp"
 )
 
 /*
@@ -56,4 +57,20 @@ func moveElementToLastPosition(elementToMove string, arrayToModify []string, add
 		arrayToModify = tree.MoveElementToNewPosition(pos, len(arrayToModify)-1, arrayToModify)
 	}
 	return arrayToModify
+}
+
+/*
+Generic function to clean input in preparation for tabular output
+(substituting line breaks, removing cell separator symbols).
+*/
+func CleanInput(input string, separator string) string {
+
+	// Remove line breaks
+	re := regexp.MustCompile(`\r?\n`)
+	input = re.ReplaceAllString(input, " ")
+	// Remove separator symbol used in output
+	re2 := regexp.MustCompile(`\` + separator)
+	input = re2.ReplaceAllString(input, "")
+
+	return input
 }

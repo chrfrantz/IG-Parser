@@ -2,7 +2,6 @@ package parser
 
 import (
 	"IG-Parser/core/tree"
-	"regexp"
 	"strings"
 )
 
@@ -348,16 +347,4 @@ func escapeSymbolsForRegex(text string) string {
 	text = strings.ReplaceAll(text, "|", "\\|")
 
 	return text
-}
-
-/*
-Generic function to clean input (substituting linebreaks).
-*/
-func CleanInput(input string) string {
-
-	// Remove line breaks
-	re := regexp.MustCompile(`\r?\n`)
-	input = re.ReplaceAllString(input, " ")
-
-	return input
 }

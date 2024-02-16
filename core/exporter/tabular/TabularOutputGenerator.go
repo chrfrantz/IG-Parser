@@ -979,8 +979,8 @@ func GenerateTabularOutputFromParsedStatements(stmts []*tree.Node, annotations i
 	results := []TabularOutputResult{}
 
 	// Remove potential line breaks from original and IG Script input
-	originalStatement = parser.CleanInput(originalStatement)
-	igScriptInput = parser.CleanInput(igScriptInput)
+	originalStatement = CleanInput(originalStatement, separator)
+	igScriptInput = CleanInput(igScriptInput, separator)
 
 	for i, stmtNode := range stmts {
 		Println("Processing output for node entry ", i)

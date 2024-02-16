@@ -26,9 +26,6 @@ other context-specific codes are returned.
 */
 func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
-	// Remove line breaks (should have been handled in endpoint, but ensure if directly invoked)
-	text = CleanInput(text)
-
 	s := tree.Statement{}
 
 	Println("INITIATING STATEMENT PARSING ...\nProcessing input statement: ", text)
