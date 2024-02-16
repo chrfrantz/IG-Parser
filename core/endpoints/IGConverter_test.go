@@ -3,6 +3,8 @@ package endpoints
 import (
 	"IG-Parser/core/exporter/tabular"
 	"IG-Parser/core/tree"
+	"fmt"
+	"os"
 	"testing"
 )
 
@@ -46,6 +48,55 @@ func TestValidStatementNestingGoogleSheets(t *testing.T) {
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Statement parsing should not fail")
 	}
+}
+
+/*
+Tests complex statement with embedded cell separator character ('|') to be filtered for CSV output.
+*/
+func TestValidStatementWithCellSeparatorCSV(t *testing.T) {
+
+	originalStatement := "Original |text that doesn't matter for this test."
+
+	text := "A(National Organic |Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance |with the (Act or [XOR] regulations in this part)) " +
+		// some nesting
+		"Cac{A(Program Manager) I(has gained) Bdir(competence)}"
+
+	// Perform the conversion
+	results, err := ConvertIGScriptToTabularOutput(originalStatement, text, "650", tabular.OUTPUT_TYPE_CSV, "", true, true, tabular.ORIGINAL_STATEMENT_OUTPUT_FIRST_ENTRY, tabular.IG_SCRIPT_OUTPUT_FIRST_ENTRY)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Statement parsing should not fail")
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestOutputTabularFilteredCellSeparator.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	// Aggregate output if multiple results
+	output := ""
+	for _, v := range results {
+		output += v.Output
+	}
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := tabular.WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
 }
 
 /*

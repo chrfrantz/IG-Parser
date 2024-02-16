@@ -14,7 +14,7 @@ web applications, console tools, etc.
 */
 
 /*
-Consumes original and coded statements as input and produces outfile.
+Consumes original and coded statements as input and produces tabular outfile.
 Arguments include the IGScript-annotated statement, statement ID based on which substatements are generated,
 the nature of the output type (see TabularOutputGeneratorConfig #OUTPUT_TYPE_CSV, #OUTPUT_TYPE_GOOGLE_SHEETS)
 and a filename for the output. If the filename is empty, no output will be written. The parameter overwrite
@@ -32,6 +32,10 @@ func ConvertIGScriptToTabularOutput(originalStatement string, statement string, 
 	Println(" Step: Parse input statement")
 	// Explicitly activate printing of shared elements
 	tabular.SetIncludeSharedElementsInTabularOutput(true)
+
+	// Clean input from potential cell separator character (separately performed for original statement and
+	// IG Script statement potentially included in output)
+	statement = tabular.CleanInput(statement, separator)
 
 	// Parse IGScript statement into tree
 	stmts, err := parser.ParseStatement(statement)
