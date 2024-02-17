@@ -31,6 +31,40 @@ Default tabular output type.
 var DEFAULT_OUTPUT_TYPES = OUTPUT_TYPE_GOOGLE_SHEETS
 
 /*
+Values for Original Statement inclusion in tabular output
+*/
+const ORIGINAL_STATEMENT_OUTPUT_NONE = "No inclusion of Original Statement in output (i.e., no additional column)"                                            // no Original Statement output (no additional column in output)
+const ORIGINAL_STATEMENT_OUTPUT_FIRST_ENTRY = "Include Original Statement for first atomic statement only (i.e., in first row following optional header row)" // Original Statement output in first atomic entry only (implies additional column, but only single entry on first atomic statement)
+const ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES = "Include Original Statement for each atomic statement (i.e., in each row)"                                      // Original Statement output in all atomic entries (implies additional column, and entry for each atomic statement)
+
+/*
+Original Statement inclusion options
+*/
+var ORIGINAL_STATEMENT_INCLUSION_OPTIONS = []string{ORIGINAL_STATEMENT_OUTPUT_NONE, ORIGINAL_STATEMENT_OUTPUT_FIRST_ENTRY, ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES}
+
+/*
+Default value for Original Statement inclusion in tabular output
+*/
+var DEFAULT_ORIGINAL_STATEMENT_OUTPUT = ORIGINAL_STATEMENT_OUTPUT_NONE
+
+/*
+Values for IG Script inclusion in tabular output
+*/
+const IG_SCRIPT_OUTPUT_NONE = "No inclusion of IG Script coding in output (i.e., no additional column)"                                                       // no IG Script output (no additional column in output)
+const IG_SCRIPT_OUTPUT_FIRST_ENTRY = "Include IG Script-encoded statement for first atomic statement only (i.e., in first row following optional header row)" // IG Script output in first atomic entry only (implies additional column, but only single entry on first atomic statement)
+const IG_SCRIPT_OUTPUT_ALL_ENTRIES = "Include IG Script-encoded statement for each atomic statement (i.e., in each row)"                                      // IG Script output in all atomic entries (implies additional column, and entry for each atomic statement)
+
+/*
+IG Script inclusion options
+*/
+var IG_SCRIPT_INCLUSION_OPTIONS = []string{IG_SCRIPT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_FIRST_ENTRY, IG_SCRIPT_OUTPUT_ALL_ENTRIES}
+
+/*
+Default value for IG Script inclusion in tabular output
+*/
+var DEFAULT_IG_SCRIPT_OUTPUT = IG_SCRIPT_OUTPUT_NONE
+
+/*
 Indicates whether shared elements are included in output
 */
 var include_SHARED_ELEMENTS_IN_TABULAR_OUTPUT = true

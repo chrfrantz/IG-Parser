@@ -10,6 +10,10 @@ import (
 )
 
 /*
+This file contains tests related to visual output generation.
+*/
+
+/*
 Tests the generation of basic tree output for visual output. Suppresses shared
 elements in output.
 */

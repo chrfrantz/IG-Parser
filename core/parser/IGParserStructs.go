@@ -2,9 +2,13 @@ package parser
 
 import (
 	"IG-Parser/core/tree"
-	"regexp"
 	"strings"
 )
+
+/*
+This file contains the main regular expressions used in the statement
+parsing process.
+*/
 
 // Define constants for parentheses and braces
 const LEFT_PARENTHESIS = "("
@@ -18,7 +22,7 @@ const RIGHT_BRACKET = "]"
 const LOGICAL_OPERATORS = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
 
 // Special symbols supported in content, suffix and annotations (wide range of special characters, as well as +, -, /, *, %, &, =, currency symbols, periods (.), relative operators (<,>), etc., BUT not braces!)
-const SPECIAL_SYMBOLS = "'’,;.<>+:\\-*/%&=$£€¤§\"#!`\\|"
+const SPECIAL_SYMBOLS = "'’,;.<>+:\\-*/%&=@$£€¤§\"#!`\\|"
 
 // Word pattern for regular expressions (including parentheses, spaces, square brackets, and all symbols contained in SPECIAL_SYMBOLS).
 const WORDS_WITH_PARENTHESES = "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "\\(\\)\\[\\]\\s]+"
@@ -343,16 +347,4 @@ func escapeSymbolsForRegex(text string) string {
 	text = strings.ReplaceAll(text, "|", "\\|")
 
 	return text
-}
-
-/*
-Generic function to clean input (e.g., strip line breaks).
-*/
-func CleanInput(input string) string {
-
-	// Remove line breaks
-	re := regexp.MustCompile(`\r?\n`)
-	input = re.ReplaceAllString(input, " ")
-
-	return input
 }

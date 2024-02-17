@@ -7,6 +7,59 @@ import (
 )
 
 /*
+Testing basic component syntax, including suffices and annotations,
+with particular focus on special characters.
+*/
+func TestSingleComponentSyntaxSpecialCharacters(t *testing.T) {
+
+	// Implies use of special characters
+	r, err := regexp.Compile(FULL_COMPONENT_SYNTAX)
+	if err != nil {
+		t.Fatal("Error during compilation:", err.Error())
+	}
+
+	text := "(Bklsdjgl#k{sgv sk}lvjds) dalsjglks() Bdir,p1[ruler=gove§rnor](jglkdsjgsiovs) " +
+		"Cac[left=right[anotherLeft,an@otherRight],right=[left,right], key=values]{A(actor) I(aim)} " +
+		"P,p343(ano@ther comp€onent values#$) " +
+		"E1{ A(acto¤§r two) I1(aim1) }" +
+		" text outside"
+
+	res := r.FindAllString(text, -1)
+
+	fmt.Println("Matching component structure (primitive and nested)")
+	fmt.Println(res)
+	fmt.Println("Count:", len(res))
+
+	firstElem := "Bdir,p1[ruler=gove§rnor](jglkdsjgsiovs)"
+
+	if res[0] != firstElem {
+		t.Fatal("Wrong element matched. Should be", firstElem, ", but is "+res[0])
+	}
+
+	secondElem := "Cac[left=right[anotherLeft,an@otherRight],right=[left,right], key=values]{A(actor) I(aim)}"
+
+	if res[1] != secondElem {
+		t.Fatal("Wrong element matched. Should be", secondElem, ", but is "+res[1])
+	}
+
+	thirdElem := "P,p343(ano@ther comp€onent values#$)"
+
+	if res[2] != thirdElem {
+		t.Fatal("Wrong element matched. Should be", thirdElem, ", but is "+res[2])
+	}
+
+	fourthElem := "E1{ A(acto¤§r two) I1(aim1) }"
+
+	if res[3] != fourthElem {
+		t.Fatal("Wrong element matched. Should be", fourthElem, ", but is "+res[3])
+	}
+
+	if len(res) != 4 {
+		t.Fatal("Wrong number of matched elements. Should be 4, but is", len(res))
+	}
+}
+
+/*
 Testing basic component syntax, including suffices and annotations
 */
 func TestSingleComponentSyntax(t *testing.T) {

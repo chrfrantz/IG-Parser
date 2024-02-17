@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-//go:embed d3.v7.min.js ace/ace.js
+//go:embed d3/d3.v7.min.js ace/ace.js
 var libraryFiles embed.FS
 
 // Default file name for error output
@@ -29,7 +29,7 @@ func TestD3LibraryRead(t *testing.T) {
 
 	// Read server information
 	client := http.Client{}
-	res, err := client.Get(server.URL + "/d3.v7.min.js")
+	res, err := client.Get(server.URL + "/d3/d3.v7.min.js")
 	if err != nil {
 		t.Fatal("Error when performing HTTP request. Error:", err.Error())
 	}
@@ -48,7 +48,7 @@ func TestD3LibraryRead(t *testing.T) {
 	outputString := string(output)
 
 	// Read local reference file
-	content, err5 := os.ReadFile("d3.v7.min.js")
+	content, err5 := os.ReadFile("d3/d3.v7.min.js")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}

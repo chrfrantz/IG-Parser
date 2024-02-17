@@ -103,10 +103,43 @@ a:hover {
     margin: auto;
 }
 
+/*
+Formatting for copy-to-clipboard button
+ */
 .button1 {
     width: 50%;
 }
 
+/*
+Formatting for validate button
+ */
+.button2 {
+    width: 100%;
+}
+
+/*
+Formatting for submit button
+ */
+.submit{
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    margin: auto;
+    outline: none;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 16px;
+    color: #ffffff;
+    /*background-color: #;*/
+    line-height: 22px;
+    display: block;
+    /* Important for spinner */
+    position: relative;
+    transition: padding-right .3s ease-out;
+}
+
+/*
+Formatting of error message
+ */
 .error {
     color: red;
 }
@@ -252,6 +285,34 @@ button:hover {
     /*alignment: left;*/
     position: relative;
     left: -44.5%; /* Position field left, relative to center */
+}
+
+/* Formats load animation (spinning wheel) for submit button */
+.button-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    border: 4px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: button-loading-spinner 1s ease infinite;
+}
+
+/* Specifies animation for load animation (spinning wheel) */
+@keyframes button-loading-spinner {
+    from {
+        transform: rotate(0turn);
+    }
+
+    to {
+        transform: rotate(1turn);
+    }
 }
 
 /* Source: https://blog.logrocket.com/creating-beautiful-tooltips-with-only-css/ */

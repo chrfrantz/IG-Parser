@@ -9,6 +9,11 @@ import (
 )
 
 /*
+This file contains the top-level handler to serve built-in
+help functionality.
+*/
+
+/*
 Handler serving help information.
 */
 func HelpHandler(w http.ResponseWriter, r *http.Request) {

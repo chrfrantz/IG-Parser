@@ -14,6 +14,12 @@ import (
 )
 
 /*
+Generic handler for pre-processing of web application input.
+- Invoked by web handlers provided in Handler.go.
+- Invokes output-specific handlers (AppSpecificHandler.go).
+*/
+
+/*
 Second-level general handler that retrieves and preprocesses information from input.
 Delegates to third-order handler for output-specific generation.
 Should be invoked by #ConverterHandlerTabular() and #ConverterHandlerVisual().
@@ -33,6 +39,8 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 	formValueIncludeDoV := r.FormValue(shared.PARAM_DOV)
 	formValueIgExtendedOutput := r.FormValue(shared.PARAM_EXTENDED_OUTPUT)
 	formValueIncludeHeaders := r.FormValue(shared.PARAM_PRINT_HEADERS)
+	formValuePrintOriginalStatement := r.FormValue(shared.PARAM_PRINT_ORIGINAL_STATEMENT)
+	formValuePrintIgScript := r.FormValue(shared.PARAM_PRINT_IG_SCRIPT)
 	formValueOutputType := r.FormValue(shared.PARAM_OUTPUT_TYPE)
 	formValuePropertyTree := r.FormValue(shared.PARAM_PROPERTY_TREE)
 	formValueBinaryTree := r.FormValue(shared.PARAM_BINARY_TREE)
@@ -101,6 +109,20 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		printHeaders = false
 	}
 
+	// Selection for inclusion of Original Statement in output
+	// If not received by POST, set Original Statement output as default setting
+	if formValuePrintOriginalStatement == "" && r.Method != http.MethodPost {
+		formValuePrintOriginalStatement = tabular.DEFAULT_ORIGINAL_STATEMENT_OUTPUT
+	}
+	Println("Form field (tabular) - Include Original Statement in output: ", formValuePrintOriginalStatement)
+
+	// Selection for inclusion of IG Script in output
+	// If not received by POST, set IG Script output as default setting
+	if formValuePrintIgScript == "" && r.Method != http.MethodPost {
+		formValuePrintIgScript = tabular.DEFAULT_IG_SCRIPT_OUTPUT
+	}
+	Println("Form field (tabular) - Include IG Script-encoded Statement in output: ", formValuePrintIgScript)
+
 	// Private property printing in output
 	printFlatProperties := false
 	Println("Form field (visual)  - Private property tree printing: ", formValuePropertyTree)
@@ -138,41 +160,47 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 
 	// Prepare return structure with prepopulated information (to be refined prior to return)
 	retStruct := shared.ReturnStruct{
-		Success:                   false,
-		Error:                     false,
-		Message:                   message,
-		OverrideSavedStmts:        false,
-		RawStmt:                   formValueRawStmt,
-		DefaultRawStmt:            shared.RAW_STATEMENT,
-		CodedStmt:                 formValueCodedStmt,
-		DefaultCodedStmt:          shared.ANNOTATED_STATEMENT,
-		StmtId:                    formValueStmtId,
-		DefaultStmtId:             shared.STATEMENT_ID,
-		DynamicOutput:             formValueDynamicOutput,
-		IGExtendedOutput:          formValueIgExtendedOutput,
-		IncludeAnnotations:        formValueIncludeAnnotations,
-		IncludeDoV:                formValueIncludeDoV,
-		IncludeHeaders:            formValueIncludeHeaders,
-		OutputType:                formValueOutputType,
-		OutputTypes:               tabular.OUTPUT_TYPES,
-		PrintPropertyTree:         formValuePropertyTree,
-		PrintBinaryTree:           formValueBinaryTree,
-		ActivationConditionsOnTop: formValueMoveActivationConditionsToTop,
-		Width:                     shared.WIDTH,
-		DefaultWidth:              shared.WIDTH,
-		Height:                    shared.HEIGHT,
-		DefaultHeight:             shared.HEIGHT,
-		TransactionId:             transactionID,
-		IGScriptLink:              shared.HEADER_SCRIPT_LINK,
-		IGWebsiteLink:             shared.HEADER_IG_LINK,
-		RawStmtHelp:               shared.HELP_RAW_STMT,
-		CodedStmtHelpRef:          shared.HELP_REF,
-		CodedStmtHelp:             template.HTML(strings.Replace(shared.HELP_CODED_STMT, "\n", "<br>", -1)),
-		StmtIdHelp:                shared.HELP_STMT_ID,
-		ParametersHelp:            shared.HELP_PARAMETERS,
-		OutputTypeHelp:            shared.HELP_OUTPUT_TYPE,
-		ReportHelp:                shared.HELP_REPORT,
-		Version:                   config.IG_PARSER_VERSION}
+		Success:                         false,
+		Error:                           false,
+		Message:                         message,
+		OverrideSavedStmts:              false,
+		RawStmt:                         formValueRawStmt,
+		DefaultRawStmt:                  shared.RAW_STATEMENT,
+		CodedStmt:                       formValueCodedStmt,
+		DefaultCodedStmt:                shared.ANNOTATED_STATEMENT,
+		StmtId:                          formValueStmtId,
+		DefaultStmtId:                   shared.STATEMENT_ID,
+		DynamicOutput:                   formValueDynamicOutput,
+		IGExtendedOutput:                formValueIgExtendedOutput,
+		IncludeAnnotations:              formValueIncludeAnnotations,
+		IncludeDoV:                      formValueIncludeDoV,
+		IncludeHeaders:                  formValueIncludeHeaders,
+		PrintOriginalStatement:          formValuePrintOriginalStatement,
+		PrintOriginalStatementSelection: tabular.ORIGINAL_STATEMENT_INCLUSION_OPTIONS,
+		PrintIgScript:                   formValuePrintIgScript,
+		PrintIgScriptSelection:          tabular.IG_SCRIPT_INCLUSION_OPTIONS,
+		OutputType:                      formValueOutputType,
+		OutputTypes:                     tabular.OUTPUT_TYPES,
+		PrintPropertyTree:               formValuePropertyTree,
+		PrintBinaryTree:                 formValueBinaryTree,
+		ActivationConditionsOnTop:       formValueMoveActivationConditionsToTop,
+		Width:                           shared.WIDTH,
+		DefaultWidth:                    shared.WIDTH,
+		Height:                          shared.HEIGHT,
+		DefaultHeight:                   shared.HEIGHT,
+		TransactionId:                   transactionID,
+		IGScriptLink:                    shared.HEADER_SCRIPT_LINK,
+		IGWebsiteLink:                   shared.HEADER_IG_LINK,
+		RawStmtHelp:                     shared.HELP_RAW_STMT,
+		CodedStmtHelpRef:                shared.HELP_REF,
+		CodedStmtHelp:                   template.HTML(strings.Replace(shared.HELP_CODED_STMT, "\n", "<br>", -1)),
+		StmtIdHelp:                      shared.HELP_STMT_ID,
+		ParametersHelp:                  shared.HELP_PARAMETERS,
+		OutputTypeHelp:                  shared.HELP_OUTPUT_TYPE,
+		OriginalStatementInclusionHelp:  shared.HELP_ORIGINAL_STATEMENT_OUTPUT,
+		IgScriptInclusionHelp:           shared.HELP_IG_SCRIPT_OUTPUT,
+		ReportHelp:                      shared.HELP_REPORT,
+		Version:                         config.IG_PARSER_VERSION}
 
 	// Parse UI canvas information (visual parser)
 
@@ -324,6 +352,26 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 				retStruct.IncludeHeaders = shared.CHECKBOX_UNCHECKED
 				printHeaders = false
 			}
+		}
+
+		// Parameter: Original Statement inclusion
+		val, suc = extractUrlParameters(r, shared.PARAM_PRINT_ORIGINAL_STATEMENT)
+		if val != "" {
+			// Read from parameter
+			retStruct.PrintOriginalStatement = val
+		} else {
+			// Use default parameter
+			retStruct.PrintOriginalStatement = tabular.DEFAULT_ORIGINAL_STATEMENT_OUTPUT
+		}
+
+		// Parameter: IG Script inclusion
+		val, suc = extractUrlParameters(r, shared.PARAM_PRINT_IG_SCRIPT)
+		if val != "" {
+			// Read from parameter
+			retStruct.PrintIgScript = val
+		} else {
+			// Use default parameter
+			retStruct.PrintIgScript = tabular.DEFAULT_IG_SCRIPT_OUTPUT
 		}
 
 		// Parameter: Output type
@@ -487,7 +535,7 @@ func converterHandler(w http.ResponseWriter, r *http.Request, templateName strin
 		// Delegate to specific output handlers ...
 		if templateName == TEMPLATE_NAME_PARSER_TABULAR {
 			Println("Tabular output requested")
-			handleTabularOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType, printHeaders)
+			handleTabularOutput(w, retStruct.RawStmt, retStruct.CodedStmt, retStruct.StmtId, retStruct, dynamicOutput, produceIGExtendedOutput, includeAnnotations, retStruct.OutputType, printHeaders, formValuePrintOriginalStatement, formValuePrintIgScript)
 		} else if templateName == TEMPLATE_NAME_PARSER_VISUAL {
 			Println("Visual output requested")
 			handleVisualOutput(w, retStruct.CodedStmt, retStruct.StmtId, retStruct, printFlatProperties, printBinaryTree, printActivationConditionsOnTop, dynamicOutput, produceIGExtendedOutput, includeAnnotations, includeDoV)

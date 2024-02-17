@@ -14,15 +14,17 @@ web applications, console tools, etc.
 */
 
 /*
-Consumes statement as input and produces outfile.
+Consumes original and coded statements as input and produces tabular outfile.
 Arguments include the IGScript-annotated statement, statement ID based on which substatements are generated,
 the nature of the output type (see TabularOutputGeneratorConfig #OUTPUT_TYPE_CSV, #OUTPUT_TYPE_GOOGLE_SHEETS)
 and a filename for the output. If the filename is empty, no output will be written. The parameter overwrite
 indicates whether the target file will be overwritten upon repeated write.
 If printHeaders is set, the output includes the header row.
+printOriginalStatement specifies the inclusion of the original statement input in the generated output (see options in tabular.ORIGINAL_STATEMENT_INCLUSION_OPTIONS).
+printIgScriptInput specifies the inclusion of the original IG Script input in the generated output (see options in tabular.IG_SCRIPT_INCLUSION_OPTIONS).
 Returns tabular output as string, and error (defaults to tree.PARSING_NO_ERROR).
 */
-func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType string, filename string, overwrite bool, printHeaders bool) ([]tabular.TabularOutputResult, tree.ParsingError) {
+func ConvertIGScriptToTabularOutput(originalStatement string, statement string, stmtId string, outputType string, filename string, overwrite bool, printHeaders bool, printOriginalStatement string, printIgScriptInput string) ([]tabular.TabularOutputResult, tree.ParsingError) {
 
 	// Use separator specified by default
 	separator := tabular.CellSeparator
@@ -31,16 +33,22 @@ func ConvertIGScriptToTabularOutput(statement string, stmtId string, outputType 
 	// Explicitly activate printing of shared elements
 	tabular.SetIncludeSharedElementsInTabularOutput(true)
 
+	// Clean input from potential cell separator character (separately performed for original statement and
+	// IG Script statement potentially included in output)
+	statement = tabular.CleanInput(statement, separator)
+
 	// Parse IGScript statement into tree
 	stmts, err := parser.ParseStatement(statement)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return nil, err
 	}
 
-	Println("Parsed statement:", stmts)
+	Println("    - Parsed statement:", stmts)
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	results := tabular.GenerateTabularOutputFromParsedStatements(stmts, "", stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, outputType, printHeaders)
+	results := tabular.GenerateTabularOutputFromParsedStatements(stmts, "",
+		originalStatement, statement, stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES,
+		separator, outputType, printHeaders, printOriginalStatement, printIgScriptInput)
 	for _, res := range results {
 		if res.Error.ErrorCode != tree.PARSING_NO_ERROR {
 			return results, res.Error
@@ -74,13 +82,11 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 		return "", err
 	}
 
-	output := ""
-
-	err2 := tree.NodeError{}
+	Println("    - Parsed statement:", stmts)
 
 	// Prepare visual output for nodes
 	Println(" Step: Generate visual output structure (combined statements)")
-	output, err2 = stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
 		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
 	if err2.ErrorCode != tree.TREE_NO_ERROR {
 		return output, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMBEDDED_NODE_ERROR, ErrorMessage: err2.ErrorMessage}

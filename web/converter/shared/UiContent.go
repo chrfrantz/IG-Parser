@@ -147,6 +147,12 @@ const HELP_STMT_ID = "This entry field should contain a statement ID (consisting
 // Help for parameter fields
 const HELP_PARAMETERS = "This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements."
 
+// Help for Original Statement output inclusion
+const HELP_ORIGINAL_STATEMENT_OUTPUT = "Indicates whether the Original Statement is included in the output by introducing an additional column following the Statement ID. Choices include the exclusion (no additional column), the inclusion for the first atomic statement only (i.e., first row following the header row), or the inclusion for all atomic statements (i.e., each row)."
+
+// Help for IG Script output inclusion
+const HELP_IG_SCRIPT_OUTPUT = "Indicates whether the IG Script-encoded statement is included in the output by introducing an additional column following the Statement ID (or the Original Statement if activated). Choices include the exclusion (no additional column), the inclusion for the first atomic statement only (i.e., first row following the header row), or the inclusion for all atomic statements (i.e., each row)."
+
 // Help for output field
 const HELP_OUTPUT_TYPE = "The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol ('|') as delimiter/separator."
 

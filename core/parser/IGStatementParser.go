@@ -3,7 +3,6 @@ package parser
 import (
 	"IG-Parser/core/tree"
 	"fmt"
-	"log"
 	"math"
 	"regexp"
 	"strconv"
@@ -11,14 +10,21 @@ import (
 )
 
 /*
+This file provides the generic statement parsing functionality and is the
+primary invocation point for the endpoint package.
+The parsing considers all parsing features including basic component parsing,
+component combination, nested statements, nested statement combinations
+as well as component pairs.
+- Invokes functionality contained in IGComponentCombinationParser.go and
+IGComponentParser.go.
+*/
+
+/*
 Parses statement tree from input string. Returns statement tree, and error.
 If parsing is successful, error code tree.PARSING_NO_ERROR is returned, else
 other context-specific codes are returned.
 */
 func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
-
-	// Remove line breaks
-	text = CleanInput(text)
 
 	s := tree.Statement{}
 
@@ -43,7 +49,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 	Println("Identified statement element patterns prior to parsing:\n" +
 		" - individual atomic components (e.g., 'A(actor)') including component combinations (e.g., 'Bdir((left [AND] right))') ( --> element [0]): \n" +
 		" ==> " + fmt.Sprint(compAndNestedStmts[0]) + " --> Count: " + strconv.Itoa(len(compAndNestedStmts[0])) + "\n" +
-		" - nested statements/components (e.g., 'Bdir{ A(nestedA) I(nestedI) }') ( --> element [1]): \n" +
+		" - nested statements/components (e.g., 'Bdir{ A(nestedA) I(nestedI) }'). Note: may also contain invalid component pairs - to be filtered later ( --> element [1]): \n" +
 		" ==> " + fmt.Sprint(compAndNestedStmts[1]) + " --> Count: " + strconv.Itoa(len(compAndNestedStmts[1])) + "\n" +
 		" - nested component combinations (e.g., 'Cac{ Cac{A(leftNestedA) I(leftNestedI)} [XOR] Cac{A(rightNestedA) I(rightNestedI)} }') ( --> element [2]): \n" +
 		" ==> " + fmt.Sprint(compAndNestedStmts[2]) + " --> Count: " + strconv.Itoa(len(compAndNestedStmts[2])) + "\n" +
@@ -53,6 +59,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
 	// Extract component-only statement and override input (e.g., A(content))
 	if len(compAndNestedStmts[0]) > 0 {
+		// Assign array elements as text (for later string parsing)
 		text = compAndNestedStmts[0][0]
 	} else {
 		// else just reset input text (so no basic element is parsed)
@@ -158,6 +165,12 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		}
 	} else {
 		Println("No expansion of statement necessary (no component pair combinations in input)")
+	}
+
+	// Return error indicating that statement is empty
+	if s.IsEmpty() {
+		Println("Statement is empty - returning error " + tree.PARSING_ERROR_EMPTY_STATEMENT)
+		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_STATEMENT}
 	}
 
 	// Else return wrapped statement (no extrapolation included)
@@ -304,8 +317,9 @@ func separateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 					// ... else deem it single nested statement
 
 					// Append extracted nested statements including component prefix (e.g., Cac{ A(stuff) ... })
+					// Note: may be incorrect, since no checking for leading component - will be caught during deep parsing
 					completeNestedStmts = append(completeNestedStmts, v)
-					Println("Added candidate for single nested statement:", v)
+					Println("Added candidate for single nested statement (to be checked during deep parsing):", v)
 
 					// Remove nested statement from overall statement
 					statement = strings.ReplaceAll(statement, v, "")
@@ -371,7 +385,7 @@ func separateComponentsNestedStatementsCombinationsAndComponentPairs(statement s
 }
 
 /*
-Identifies any nested statements for subsequent deep detection.
+Generically identifies any nested statements for subsequent deep detection (component-level, combinations, combination pairs).
 
 Used by #separateComponentsNestedStatementsCombinationsAndComponentPairs.
 */
@@ -386,160 +400,6 @@ func identifyNestedStatements(statement string) ([]string, tree.ParsingError) {
 	Println("Found nested statements: " + fmt.Sprint(nestedStatements))
 
 	return nestedStatements, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-}
-
-/*
-Parse basic statements identified as part of #separateComponentsNestedStatementsCombinationsAndComponentPairs.
-*/
-func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.ParsingError) {
-
-	result, err := parseAttributes(text)
-	outErr := handleParsingError(tree.ATTRIBUTES, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.Attributes = result
-
-	result, err = parseAttributesProperty(text)
-	outErr = handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.AttributesPropertySimple = result
-
-	result, err = parseDeontic(text)
-	outErr = handleParsingError(tree.DEONTIC, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.Deontic = result
-
-	result, err = parseAim(text)
-	outErr = handleParsingError(tree.AIM, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.Aim = result
-
-	result, err = parseDirectObject(text)
-	outErr = handleParsingError(tree.DIRECT_OBJECT, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.DirectObject = result
-
-	result, err = parseDirectObjectProperty(text)
-	outErr = handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.DirectObjectPropertySimple = result
-
-	result, err = parseIndirectObject(text)
-	outErr = handleParsingError(tree.INDIRECT_OBJECT, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.IndirectObject = result
-
-	result, err = parseIndirectObjectProperty(text)
-	outErr = handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.IndirectObjectPropertySimple = result
-
-	result, err = parseActivationCondition(text)
-	outErr = handleParsingError(tree.ACTIVATION_CONDITION, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.ActivationConditionSimple = result
-
-	result, err = parseExecutionConstraint(text)
-	outErr = handleParsingError(tree.EXECUTION_CONSTRAINT, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.ExecutionConstraintSimple = result
-
-	result, err = parseConstitutedEntity(text)
-	outErr = handleParsingError(tree.CONSTITUTED_ENTITY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.ConstitutedEntity = result
-
-	result, err = parseConstitutedEntityProperty(text)
-	outErr = handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.ConstitutedEntityPropertySimple = result
-
-	result, err = parseModal(text)
-	outErr = handleParsingError(tree.MODAL, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.Modal = result
-
-	result, err = parseConstitutingFunction(text)
-	outErr = handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.ConstitutiveFunction = result
-
-	result, err = parseConstitutingProperties(text)
-	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.ConstitutingProperties = result
-
-	result, err = parseConstitutingPropertiesProperty(text)
-	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
-	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
-		// Populate return structure
-		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
-	}
-	s.ConstitutingPropertiesPropertySimple = result
-
-	Println("Basic statement: " + s.String())
-
-	return []tree.Node{tree.Node{Entry: &s}}, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
 /*
@@ -754,7 +614,7 @@ The error code tree.PARSING_ERROR_NIL_ELEMENT indicates inability to extract the
 In this case the violating statement is passed in the string array provided as part of the error object.
 Error tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION and tree.PARSING_ERROR_INVALID_TYPES_IN_NESTED_STATEMENT_COMBINATION
 point to an invalid combination of different component types (e.g., Cac and Bdir)
-Error tree.PARSING_INVALID_COMBINATION points to syntactic issues during combination parsing.
+Error tree.PARSING_ERROR_INVALID_COMBINATION points to syntactic issues during combination parsing.
 */
 func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo string) tree.ParsingError {
 
@@ -783,7 +643,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 		Println("Entry to parse for component type: " + entry)
 		// Extract prefix (i.e., component type) for node, but check whether it contains nested statement
 		if strings.Index(entry, LEFT_BRACE) == -1 {
-			return tree.ParsingError{ErrorCode: tree.PARSING_INVALID_COMBINATION, ErrorMessage: "Element in combination of nested statement does not contain nested statement. Element of concern: " + entry}
+			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMBINATION, ErrorMessage: "Element in combination of nested statement does not contain nested statement. Element of concern: " + entry}
 		}
 		prefix, prop, err := extractComponentType(entry[:strings.Index(entry, LEFT_BRACE)])
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -1064,6 +924,14 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 
 		// Extract leaves for conversion
 		leaves := idvStmt.GetLeafNodes(true)
+		// Test for unsuccessful extraction of leaves - this results in empty array with "nil" entry.
+		// This is caused by lack of logical operator on component pair level, but logical operators contained in components in either pair
+		// Example: '{ I(action1 [XOR] action2) Bdir(object1) and I(action3) Bdir(object2) }' <-- note the missing logical operator between pairs
+		if len(leaves) == 0 || (len(leaves) == 1 && len(leaves[0]) == 1 && leaves[0][0].Entry == nil) {
+			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_PAIR, ErrorMessage: "Invalid component pair found (Missing logical operator?). " +
+				"Please review expression '" + v + "'."}
+		}
+		// More leaf elements in component pair than expected
 		if len(leaves) > 1 {
 			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_TOO_MANY_NODES, ErrorMessage: "Too many nodes generated for atomic statement."}
 		}
@@ -1075,7 +943,7 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 			// Parse content of tree
 			tpNode, err := ParseStatement(v2.Entry.(string))
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
-				Println("Error when parsing statement: ", err)
+				Println("Error when parsing statement: ", err, "; expression for which parsing failed:", v2.Entry)
 				return nil, err
 			}
 
@@ -1102,70 +970,6 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 	Println("Number of elements: ", len(extrapolatedPairStmts))
 
 	return extrapolatedPairStmts, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-}
-
-func parseAttributes(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.ATTRIBUTES, false, text)
-}
-
-func parseAttributesProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.ATTRIBUTES_PROPERTY, true, text)
-}
-
-func parseDeontic(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.DEONTIC, false, text)
-}
-
-func parseAim(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.AIM, false, text)
-}
-
-func parseDirectObject(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.DIRECT_OBJECT, false, text)
-}
-
-func parseDirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.DIRECT_OBJECT_PROPERTY, true, text)
-}
-
-func parseIndirectObject(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.INDIRECT_OBJECT, false, text)
-}
-
-func parseIndirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.INDIRECT_OBJECT_PROPERTY, true, text)
-}
-
-func parseConstitutedEntity(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY, false, text)
-}
-
-func parseConstitutedEntityProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY_PROPERTY, true, text)
-}
-
-func parseModal(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.MODAL, false, text)
-}
-
-func parseConstitutingFunction(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTIVE_FUNCTION, false, text)
-}
-
-func parseConstitutingProperties(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES, false, text)
-}
-
-func parseConstitutingPropertiesProperty(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES_PROPERTY, true, text)
-}
-
-func parseActivationCondition(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.ACTIVATION_CONDITION, false, text)
-}
-
-func parseExecutionConstraint(text string) (*tree.Node, tree.ParsingError) {
-	return parseComponentWithParentheses(tree.EXECUTION_CONSTRAINT, false, text)
 }
 
 /*
@@ -1223,489 +1027,4 @@ func validateInput(text string, leftPar string, rightPar string) tree.ParsingErr
 	}
 
 	return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-}
-
-/*
-Extracts a component content from string based on component signature (e.g., A, I, etc.)
-and balanced parentheses/braces. Tolerates presence of suffices and annotations and includes those
-in output (e.g., A1[type=animate](content)).
-Allows for indication whether parsed component is actually a property.
-If no component content is found, an empty string is returned.
-Tests against mistaken parsing of property variant of a component (e.g., A,p() instead of A()).
-*/
-func extractComponentContent(component string, propertyComponent bool, input string, leftPar string, rightPar string) ([]string, tree.ParsingError) {
-
-	// Strings for given component
-	componentStrings := []string{}
-
-	// Copy string for truncating
-	processedString := input
-
-	Println("Looking for component: ", component, "in", input, "(Property:", propertyComponent, ")")
-
-	// Assume that parentheses/braces are checked beforehand
-
-	// Switch indicating nested statement structure
-	nestedStatement := false
-
-	// Start position
-	startPos := -1
-
-	// General component syntax (inclusive of ,p)
-	r, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
-	if err != nil {
-		Println("Error in regex compilation: ", err.Error())
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation. Error: " + err.Error()}
-	}
-	// Component syntax to test for suffix-embedded property syntax (e.g., A1,p)
-	rProp, err := regexp.Compile(component + COMPONENT_SUFFIX_SYNTAX + tree.PROPERTY_SYNTAX_SUFFIX + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
-	if err != nil {
-		Println("Error in regex compilation: ", err.Error())
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation. Error: " + err.Error()}
-	}
-
-	if propertyComponent {
-		Println("Identified as component", component, "as property:", propertyComponent)
-		// If component is a property, extract root symbol to allow for intermediate index/suffix (e.g., A1,p)
-		leadIdx := strings.Index(component, tree.PROPERTY_SYNTAX_SUFFIX)
-		if leadIdx != -1 {
-			// If property element is indeed found, strip it for regex generation
-			componentRoot := component[:leadIdx]
-
-			r, err = regexp.Compile(componentRoot + COMPONENT_SUFFIX_SYNTAX + tree.PROPERTY_SYNTAX_SUFFIX + COMPONENT_SUFFIX_SYNTAX + COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
-			if err != nil {
-				return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Error in Regular Expression compilation."}
-			}
-
-		}
-	}
-
-	for { // infinite loop - needs to break out
-
-		// Return index of found element
-		result := r.FindAllStringIndex(processedString, 1)
-		// Return content of found element
-		resultContent := r.FindString(processedString)
-
-		if nestedStatement && len(resultContent) > 0 {
-			component = resultContent[:len(resultContent)-1]
-			Println("Identified nested component", component)
-		}
-
-		if len(result) > 0 {
-			// Start search after potential suffix and annotation elements
-			startPos = result[0][0] + len(resultContent) - len(leftPar)
-			Println("Component: ", resultContent)
-			Println("Search start position: ", startPos)
-		} else {
-			// Returns component strings once opening parenthesis symbol is no longer found
-			return componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-		}
-
-		// Parentheses count to check for balance
-		parCount := 0
-
-		// Switch to stop parsing
-		stop := false
-
-		for i, letter := range processedString[startPos:] {
-
-			//Println("Letter to iterate over in parentheses/braces search: " + string(letter))
-
-			switch string(letter) {
-			case leftPar:
-				parCount++
-			case rightPar:
-				parCount--
-				if parCount == 0 {
-					// Lead string including component identifier, suffices and annotations
-					leadString := resultContent[:len(resultContent)-len(leftPar)]
-					// String containing content only (including parentheses)
-					contentString := processedString[startPos : startPos+i+1]
-					Println("Identified component content: " + contentString)
-					// Store candidate string before cutting off potential leading component identifier (if nested statement)
-					candidateString := leadString + contentString
-					if !strings.HasSuffix(component, tree.PROPERTY_SYNTAX_SUFFIX) && !propertyComponent &&
-						// Test whether property is accidentally embedded but it is actually non-property component search
-						rProp.MatchString(candidateString) {
-						// Don't consider if properties component is found (e.g., A,p(...) or A1,p(...)), but main component is sought (e.g., A(...)).
-						Println("Ignoring found element due to ambiguous matching with property of component (Match: " +
-							component + tree.PROPERTY_SYNTAX_SUFFIX + ", Component: " + component + ")")
-					} else {
-						componentStrings = append(componentStrings, candidateString)
-						Println("Added string " + candidateString)
-					}
-					// String to be processed in next round is beyond identified component
-					idx := strings.Index(processedString, candidateString)
-					if idx == -1 {
-						return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR,
-							ErrorMessage: "Extracted expression cannot be found in processed string (Search string: " + candidateString + ")"}
-					}
-					// Cut found string and leave remainder for further processing
-					processedString = processedString[idx+len(candidateString):]
-					stop = true
-				}
-			}
-			if stop {
-				break
-			}
-		}
-		if !stop {
-			// Could not find terminating parenthesis/brace if stop is not set but input string exhausted
-			// Common issue: they may have passed parentheses count as part of initial validation, but may not be in correct order.
-			// Example: Bdir,p(left [AND] right)) Bdir((left [AND] right)
-			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNABLE_TO_EXTRACT_COMPONENT_CONTENT,
-				ErrorMessage: "Could not determine component content of component '" + resultContent + "'. " +
-					"Please review parentheses/braces in input '" + processedString + "'."}
-		}
-	}
-}
-
-/*
-Attempts to extract the component type of a given prefix, and indicates whether it has detected a
-properties component. Assumes 0 index for component type symbol.
-Note: Only the prefix part of the component should be provided as input (e.g., Cac1[annotation], not Cac1[annotation]{A(actor) I(...) ...}).
-Returns identified component type or error if not found.
-*/
-func extractComponentType(input string) (string, bool, tree.ParsingError) {
-
-	Println("Input:", input)
-
-	ret := ""
-	prop := false
-
-	// Filter potential annotations
-	if strings.Contains(input, LEFT_BRACKET) {
-		input = input[:strings.Index(input, LEFT_BRACKET)]
-	}
-
-	for _, v := range tree.IGComponentSymbols {
-		// Check whether component is contained - introduces tolerance to excess text (as opposed to exact matching)
-		if strings.Contains(input, v) {
-			if ret != "" {
-				return ret, prop, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_MULTIPLE_COMPONENTS_FOUND, ErrorMessage: "Multiple component specifications found (" + ret + " and " + v + ") " +
-					"when parsing component specification '" + input + "'."}
-			}
-			// Assign identified label
-			ret = v
-			// Test whether component of concern is a property
-			if strings.Contains(input, tree.PROPERTY_SYNTAX_SUFFIX) {
-				ret += tree.PROPERTY_SYNTAX_SUFFIX
-				prop = true
-			}
-			// continue iteration to check whether conflicting identification of component (i.e., multiple component labels)
-		}
-	}
-	if ret == "" {
-		return "", prop, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
-			ErrorMessage: "Component specification could not be found in input phrase '" + input + "'."}
-	}
-
-	return ret, prop, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-}
-
-/*
-Extracts suffix (e.g., ,p1) and annotations (e.g., [ctx=time]), and content from IG-Script-coded input.
-It takes component identifier and raw coded information as input, as well as left and right parenthesis symbols (e.g., (,) or {,}).
-Returns suffix as first element, annotations string as second, and component content (including identifier, but without suffix and annotations) as third element.
-IMPORTANT:
-- This function will only extract the suffix and annotation for the first element of a given component type found in the input string.
-- This function will not prevent wrongful extraction of property components instead of first-order components. This is handled in #extractComponentContent.
-TODO: Make this more efficient
-*/
-func extractSuffixAndAnnotations(component string, propertyComponent bool, input string, leftPar string, rightPar string) (string, string, string, tree.ParsingError) {
-
-	Println("Component:", component)
-	Println("Input:", input)
-	Println("Property:", propertyComponent)
-	strippedInput := input // leave input unchanged
-
-	// Component annotation pattern
-	r, err := regexp.Compile(COMPONENT_ANNOTATION_SYNTAX + "\\" + leftPar)
-	// + escapeSymbolsForRegex(input)
-	if err != nil {
-		log.Fatal("Error", err.Error())
-	}
-	// Search for annotation pattern on input (without leading component identifier)
-	result := r.FindAllStringSubmatch(strippedInput, 1)
-
-	// The result will find the leftPar as a minimum (e.g., "(" or "{"). The processing needs to account for this
-
-	if len(result) > 0 && result[0][0] != leftPar {
-		// If annotations are found ...
-		res := result[0][0]
-		Println("Found annotation in component:", res)
-		// Extract semantic annotation string
-		res = res[:len(res)-1]
-		pos := strings.Index(strippedInput, res)
-		suffix := ""
-
-		if propertyComponent {
-			// If component is property, find first position of property indicator
-			propIdx := strings.Index(strippedInput[:pos], tree.PROPERTY_SYNTAX_SUFFIX)
-			if propIdx == -1 {
-				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
-					tree.PROPERTY_SYNTAX_SUFFIX + " (under consideration of potential suffix (e.g., A1,p)) could not be found in input " + strippedInput}
-			}
-			// Find original component identifier
-			leadIdx := strings.Index(component, tree.PROPERTY_SYNTAX_SUFFIX)
-			if leadIdx == -1 {
-				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
-					tree.PROPERTY_SYNTAX_SUFFIX + " (e.g., A,p) could not be found in input " + strippedInput}
-			}
-			if propIdx > leadIdx {
-				// Extract difference between index in original component and new identifier
-				suffix = strippedInput[leadIdx : leadIdx+(propIdx-leadIdx)]
-			}
-		} else {
-			// Component identifier is suppressed if suffix is found
-			// Extract suffix (e.g., 1), but remove component identifier
-			suffix = strippedInput[len(component):pos]
-		}
-
-		// Replace annotations
-		extractedContent := strings.ReplaceAll(strippedInput, res, "")
-		// Replace suffices
-		extractedContent = strings.ReplaceAll(extractedContent, suffix, "")
-		Println("Extracted content:", extractedContent)
-		// Return suffix and annotations
-		return suffix, res, extractedContent, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-	} else {
-		Println("No annotations found ...")
-		// ... if no annotations are found ...
-		// Identifier start position for content
-		contentStartPos := strings.Index(strippedInput, leftPar)
-		suffix := ""
-
-		if propertyComponent {
-			// If component is property, find first position of property indicator
-			propIdx := strings.Index(strippedInput[:contentStartPos], tree.PROPERTY_SYNTAX_SUFFIX)
-			if propIdx == -1 {
-				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
-					tree.PROPERTY_SYNTAX_SUFFIX + " (under consideration of potential suffix (e.g., A1,p)) could not be found in input " + strippedInput}
-			}
-			// Find original component identifier
-			leadIdx := strings.Index(component, tree.PROPERTY_SYNTAX_SUFFIX)
-			if leadIdx == -1 {
-				return "", "", "", tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNEXPECTED_ERROR, ErrorMessage: "Property syntax " +
-					tree.PROPERTY_SYNTAX_SUFFIX + " (e.g., A,p) could not be found in input " + strippedInput}
-			}
-			if propIdx > leadIdx {
-				// Extract difference between index in original component and new identifier
-				suffix = strippedInput[leadIdx : leadIdx+(propIdx-leadIdx)]
-			}
-		} else {
-			// Component identifier is suppressed if suffix is found
-			// Extract suffix (e.g., 1), but remove component identifier
-			suffix = strippedInput[len(component):contentStartPos]
-		}
-		// Does not guard against mistaken choice of property variants of components (e.g., A,p instead of A) - is handled in #extractComponentContent.
-		reconstructedComponent := strings.Replace(strippedInput, suffix, "", 1)
-		Println("Reconstructed statement:", reconstructedComponent)
-		// Return only suffix
-		return suffix, "", reconstructedComponent, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
-	}
-}
-
-/*
-Parses component based on surrounding parentheses.
-*/
-func parseComponentWithParentheses(component string, propertyComponent bool, input string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(component, propertyComponent, input, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
-}
-
-/*
-Parses component based on surrounding braces
-*/
-func parseComponentWithBraces(component string, propertyComponent bool, input string) (*tree.Node, tree.ParsingError) {
-	return parseComponent(component, propertyComponent, input, LEFT_BRACE, RIGHT_BRACE)
-}
-
-/*
-Generic entry point to parse individual components of a given statement.
-Input is component symbol of interest, full statements, as well as delimiting parentheses signaling parsing for atomic
-or nested components. Additionally, the parameter propertyComponent indicates whether the parsed component is a property
-Returns the parsed node.
-*/
-func parseComponent(component string, propertyComponent bool, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
-
-	Println("Parsing:", component)
-
-	// TODO: For property variants, identify root property and search as to whether embedded midfix exists
-
-	// Extract component (one or multiple occurrences) from input string based on provided component identifier
-	componentStrings, err := extractComponentContent(component, propertyComponent, text, leftPar, rightPar)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return nil, err
-	}
-
-	Println("Components (Count:", len(componentStrings), "):", fmt.Sprint(componentStrings))
-
-	// Initialize output string for parsing
-	componentString := ""
-
-	// Node to be populated as return node
-	node := &tree.Node{}
-
-	// Synthetically linked ([sAND]) components (if multiple occur in input string)
-	if len(componentStrings) > 1 {
-		Println("Component combination for component", component)
-		Println("Component content", componentStrings)
-		r, err := regexp.Compile(COMBINATION_PATTERN_PARENTHESES)
-		if err != nil {
-			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
-				ErrorMessage: "Error during pattern extraction in combination expression."}
-		}
-
-		for i, v := range componentStrings {
-			Println("Round: " + strconv.Itoa(i) + ": " + v)
-
-			// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
-			componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, propertyComponent, v, leftPar, rightPar)
-			if err.ErrorCode != tree.PARSING_NO_ERROR {
-				return nil, err
-			}
-
-			Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
-			Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
-			Println("Content:", componentContent)
-
-			// Extract and concatenate individual component values but cut leading component identifier
-			componentWithoutIdentifier := componentContent[len(component):]
-			// Identify whether combination embedded in input string element
-			result := r.FindAllStringSubmatch(componentWithoutIdentifier, -1)
-			Println("Result of component match:", result)
-			Println("Length:", len(result))
-			Println("Component string before:", componentWithoutIdentifier)
-			if len(result) == 0 {
-				leadStripIdx := strings.Index(componentWithoutIdentifier, leftPar)
-				if leadStripIdx != -1 {
-					// If no combination embedded in combination component, strip leading and trailing parentheses prior to combining
-					componentWithoutIdentifier = componentWithoutIdentifier[leadStripIdx+1 : len(componentWithoutIdentifier)-1]
-				}
-			} // else don't touch, i.e., leave parentheses in string
-			Println("Component string after:", componentWithoutIdentifier)
-
-			// Parse first component into node
-			if node.IsEmptyOrNilNode() {
-				node1, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
-				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
-					log.Println("Error when parsing synthetically linked element. Error:", err)
-					return nil, err
-				}
-				// Assign to main node if not populated and new node not nil
-				if !node1.IsEmptyOrNilNode() {
-					node = node1
-					// Attach component name to element (will be accessible to children via GetComponentName())
-					node.ComponentType = component
-					// Attach node-specific suffix
-					if componentSuffix != "" {
-						node.Suffix = componentSuffix
-					}
-					// Attach node-specific annotations
-					if componentAnnotation != "" {
-						node.Annotations = componentAnnotation
-					}
-				}
-			} else {
-				// Parse any additional components into node and combine
-				// If cached node is already populated, create separate node and link afterwards
-				node2, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
-				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
-					log.Println("Error when parsing synthetically linked element. Error:", err)
-					return nil, err
-				}
-				if !node2.IsEmptyOrNilNode() {
-					// Attach component name to element (will be accessible to children via GetComponentName())
-					node2.ComponentType = component
-					// Attach node-specific suffix
-					if componentSuffix != "" {
-						node2.Suffix = componentSuffix
-					}
-					// Attach node-specific annotations
-					if componentAnnotation != "" {
-						node2.Annotations = componentAnnotation
-					}
-					// Combine existing node with newly created one based on synthetic AND
-					nodeComb, nodeCombinationError := tree.Combine(node, node2, tree.SAND_BETWEEN_COMPONENTS)
-					// Check if combination error has been picked up
-					if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
-						return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
-							ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
-					}
-					// Explicitly assign component type to top-level node (for completeness) - should be done from within combine function
-					nodeComb.ComponentType = component
-					// Assign to return node
-					node = nodeComb
-				}
-			}
-		}
-	} else if len(componentStrings) == 1 {
-
-		Println("Component strings:", componentStrings)
-
-		// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
-		componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, propertyComponent, componentStrings[0], leftPar, rightPar)
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return nil, err
-		}
-
-		Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
-		// Store suffices
-		Println("Annotations:", componentAnnotation, "(Length:", len(componentAnnotation), ")")
-		// Store annotations
-		Println("Content:", componentContent)
-
-		// Single entry (cut prefix)
-		componentString = componentContent[strings.Index(componentContent, leftPar):]
-		Println("Single component for component", component)
-		Println("Component content", componentString)
-		// Remove prefix including leading and trailing parenthesis (e.g., Bdir(, )) to extract inner string if not combined
-		componentString = componentString[1 : len(componentString)-1]
-
-		node1, _, err2 := ParseIntoNodeTree(componentString, false, leftPar, rightPar)
-		if err2.ErrorCode == tree.PARSING_ERROR_LOGICAL_OPERATOR_OUTSIDE_COMBINATION {
-			// Means that there is logical operator, but probably missing outer parentheses.
-			// Try again by augmenting with parentheses, before return error if it still fails.
-			node1, _, err2 = ParseIntoNodeTree(leftPar+componentString+rightPar, false, leftPar, rightPar)
-		}
-		if err2.ErrorCode != tree.PARSING_NO_ERROR && err2.ErrorCode != tree.PARSING_NO_COMBINATIONS {
-			log.Println("Error when parsing synthetically linked element. Error:", err2)
-			return nil, err2
-		}
-		// Attach component name to top-level element (will be accessible to children via GetComponentName())
-		if !node1.IsEmptyOrNilNode() {
-			node1.ComponentType = component
-			// Attach node-specific suffix
-			if componentSuffix != "" {
-				node1.Suffix = componentSuffix
-			}
-			// Attach node-specific annotations
-			if componentAnnotation != "" {
-				node1.Annotations = componentAnnotation
-			}
-			// Overwrite main node
-			node = node1
-		}
-	} else {
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
-			ErrorMessage: "Component " + component + " was not found in input string"}
-	}
-
-	Println("Component Identifier: " + component)
-	Println("Full string: " + componentString)
-
-	// Some error check and override
-	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_NO_COMBINATIONS {
-		err.ErrorMessage = "Error when parsing component " + component + ": " + err.ErrorMessage
-		log.Println("Error during component parsing:", err.Error())
-	}
-
-	// Override missing combination error, since it is not relevant at this level
-	if err.ErrorCode == tree.PARSING_NO_COMBINATIONS {
-		err.ErrorCode = tree.PARSING_NO_ERROR
-		err.ErrorMessage = ""
-	}
-
-	return node, err
 }

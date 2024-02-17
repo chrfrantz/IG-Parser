@@ -14,7 +14,19 @@
 <!--<input id="dynamicSchema" name="dynamicSchema" type="checkbox" {{.DynamicOutput}} /><label for="dynamicSchema">Dynamic output schema (primarily for human readability; not suitable for computational processing) (default: off)</label>-->
 <input id="igExtended" name="igExtended" type="checkbox" {{.IGExtendedOutput}} /><label for="igExtended">Produce IG Extended output (component-level nesting) (default: off)</label>
 <input id="annotations" name="annotations" type="checkbox" {{.IncludeAnnotations}} /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
-<input id="includeHeaders" name="includeHeaders" type="checkbox" {{.IncludeHeaders}} /><label for="includeHeaders">Include header row in output (default: on)</label><br />
+<input id="includeHeaders" name="includeHeaders" type="checkbox" {{.IncludeHeaders}} /><label for="includeHeaders">Include header row in output (default: on)</label>
+<span data-text="{{.OriginalStatementInclusionHelp}}" class="tooltip">Inclusion of Original Statement in generated output:</span>
+<select id="printOriginalStatement" name="printOriginalStatement" type="select">
+    {{ range $type := .PrintOriginalStatementSelection }}
+    <option value="{{ $type }}" {{ if eq $.PrintOriginalStatement $type }}selected="selected"{{ end }}>{{ $type }}</option>
+    {{ end }}
+</select>
+<span data-text="{{.IgScriptInclusionHelp}}" class="tooltip">Inclusion of IG Script-encoded statement in generated output:</span>
+<select id="printIgScript" name="printIgScript" type="select">
+    {{ range $type := .PrintIgScriptSelection }}
+    <option value="{{ $type }}" {{ if eq $.PrintIgScript $type }}selected="selected"{{ end }}>{{ $type }}</option>
+    {{ end }}
+</select>
 
 <!-- Output type -->
 <span data-text="{{.OutputTypeHelp}}" class="tooltip" id="outputLabel">Output format:</span>
@@ -24,25 +36,8 @@
 {{ end }}
 </select>
 
-<input value="Generate tabular output" onclick="saveFormContent()" type="submit">
-{{if .Error}}
-<div class="error">
-    Error: {{.Message}}
-</div>
-{{end}}
-{{if ne .TransactionId ""}}
-<div class="transactionId">
-    Request ID: {{.TransactionId}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <a class="tooltip"
-           href="mailto:ig-parser@newinstitutionalgrammar.org?subject=%5BIG-Parser%5D%20%5BRequest%20ID%3A%20{{.TransactionId}}%5D&body=Please%20replace%20the%20body%20text%20with%20the%20observations%2C%20questions%2C%20or%20suggestions%20you%20have%20based%20on%20your%20experience%20with%20IG-Parser.%20%20If%20you%20observed%20errors%2C%20please%20provide%20a%20description%20(e.g.%2C%20specifying%20what%20you%20expected%20to%20see%2C%20and%20what%20you%20observed%3B%20error%20messages%20you%20received%2C%20etc.).%20%20Please%20also%20feel%20free%20to%20provide%20open%20feedback%20or%20suggestions%20for%20further%20improvement."
-           data-text="{{.ReportHelp}}">Report error, observations, or suggestions</a>
-</div>
-{{end}}
-{{if ne .Version ""}}
-<p>Version: {{.Version}}</p>
-{{end}}
-</form>
-</div>
+<button id="generate" class="submit" value="Generate tabular output" onclick="saveFormContent()" type="submit">Generate tabular output</button>
+{{template "result-interface.html" . }}
 {{if .Success}}
     <div class="output">
         <h3>{{.OutputType}} Output:</h3><br />

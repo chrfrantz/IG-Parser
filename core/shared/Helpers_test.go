@@ -100,3 +100,28 @@ func TestStringifySlices(t *testing.T) {
 	}
 
 }
+
+/*
+Tests detection of duplicate items in string array.
+*/
+func TestDuplicateElement(t *testing.T) {
+
+	// Test with duplicate present
+	slc := []string{"first", "second", "first", "fourth"}
+
+	out := DuplicateElement(slc)
+
+	if out == "" {
+		t.Fatal("Test did not pick up on duplicate items. Result: " + out)
+	}
+
+	// Test without duplicate present
+	slc2 := []string{"first", "second", "third", "fourth"}
+
+	out2 := DuplicateElement(slc2)
+
+	if out2 != "" {
+		t.Fatal("Test did not pick up on duplicate items. Result: " + out2)
+	}
+
+}

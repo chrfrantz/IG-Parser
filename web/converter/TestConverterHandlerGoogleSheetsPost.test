@@ -41,6 +41,7 @@
         target.style.height = 'auto';
         target.style.height = target.scrollHeight + offset + 'px';
     }
+
 </script>
 
 <p>&nbsp;</p>
@@ -53,7 +54,83 @@
     <form method="POST">
         
         <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea>
+        
+        <div class="error" id="validateError"></div>
+        
+        <button class="button2" type="button" id="buttonValidate" switch="validate" onclick="checkRawStatementContent()">
+            Validate 'Original Statement' input (checks for imbalanced parentheses)
+            and copy validated content into 'Encoded Statement' field</button></br></br>
+        <script>
+            
+
+            function checkRawStatementContent() {
+
+                
+                let buttonType = document.getElementById("buttonValidate").getAttribute("switch");
+
+                if (buttonType === "overwrite") {
+                    
+
+                    
+                    let rawContent = document.getElementById("rawStmt").value;
+                    
+                    let editor = ace.edit("editor");
+                    editor.setValue(rawContent);
+                    
+                    copyEditorContentToTextArea();
+
+                    
+                    document.getElementById("buttonValidate").setAttribute("switch", "validate");
+                    document.getElementById("buttonValidate").innerText =
+                        "Validate 'Original Statement' input (checks for imbalanced parentheses) and " +
+                        "copy validated content into 'Encoded Statement' field";
+                    
+                    let validateError = document.getElementById("validateError");
+                    validateError.innerHTML = "";
+
+                } else if (buttonType === "validate") {
+                    
+
+                    
+                    let rawContent = document.getElementById("rawStmt").value;
+                    
+                    let leftParCount = (rawContent.match(/\(/g) || []).length;
+                    
+                    let rightParCount = (rawContent.match(/\)/g) || []).length;
+                    
+                    if (leftParCount !== rightParCount) {
+                        
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "Found imbalanced parentheses in raw input (" +
+                            leftParCount + " opening and " + rightParCount + " closing parentheses).\n" +
+                            "Please remove or balance parentheses to before encoding the statement.";
+                    } else {
+                        
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "";
+                        
+                        let editor = ace.edit("editor");
+                        
+                        if (editor.getValue().length === 0) {
+                            editor.setValue(rawContent);
+                            
+                        } else if (editor.getValue() !== rawContent) {
+                            
+                            let validateError = document.getElementById("validateError");
+                            validateError.innerHTML = "The 'Original Statement' content is valid, but has not been copied into the 'Encoded Statement' field, " +
+                                "since this field already contains content (to prevent accidental overwriting of encoded statement).\<br/\>" +
+                                "Confirm if you indeed want to overwrite the 'Encoded Statement' content with the 'Original Statement' content.";
+
+                            
+                            document.getElementById("buttonValidate").setAttribute("switch", "overwrite");
+                            document.getElementById("buttonValidate").innerText = "Confirm overwriting of 'Encoded Statement' entry with 'Original Statement' entry";
+
+                        } 
+                    }
+                } 
+            }
+        </script>
         
         <span data-text="Click to open a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         
@@ -92,7 +169,7 @@
                 
 
                 
-                saveValue("rawStmt")
+                saveValue("rawStmt");
 
                 
                 
@@ -100,39 +177,45 @@
                 
 
                 
-                saveValue("stmtId")
+                saveValue("stmtId");
 
                 
-                saveCheckbox("igExtended")
+                saveCheckbox("igExtended");
 
                 
-                saveCheckbox("annotations")
+                saveCheckbox("annotations");
 
                 
-                saveCheckbox("includeHeaders")
+                saveCheckbox("includeHeaders");
 
                 
-                saveValue("outputType")
+                saveValue("outputType");
+
+                
+                saveValue("printOriginalStatement");
+
+                
+                saveValue("printIgScript");
 
                 
 
                 
-                saveCheckbox("dov")
+                saveCheckbox("dov");
 
                 
-                saveCheckbox("propertyTree")
+                saveCheckbox("propertyTree");
 
                 
-                saveCheckbox("binaryTree")
+                saveCheckbox("binaryTree");
 
                 
-                saveCheckbox("actCondTop")
+                saveCheckbox("actCondTop");
 
                 
-                saveValue("canvasHeight")
+                saveValue("canvasHeight");
 
                 
-                saveValue("canvasWidth")
+                saveValue("canvasWidth");
 
             }
 
@@ -178,39 +261,45 @@
                 
 
                 
-                loadValue("stmtId")
+                loadValue("stmtId");
 
                 
-                loadCheckbox("igExtended")
+                loadCheckbox("igExtended");
 
                 
-                loadCheckbox("annotations")
+                loadCheckbox("annotations");
 
                 
-                loadCheckbox("includeHeaders")
+                loadCheckbox("includeHeaders");
 
                 
-                loadValue("outputType")
+                loadValue("outputType");
+
+                
+                loadValue("printOriginalStatement");
+
+                
+                loadValue("printIgScript");
 
                 
 
                 
-                loadCheckbox("dov")
+                loadCheckbox("dov");
 
                 
-                loadCheckbox("propertyTree")
+                loadCheckbox("propertyTree");
 
                 
-                loadCheckbox("binaryTree")
+                loadCheckbox("binaryTree");
 
                 
-                loadCheckbox("actCondTop")
+                loadCheckbox("actCondTop");
 
                 
-                loadValue("canvasHeight")
+                loadValue("canvasHeight");
 
                 
-                loadValue("canvasWidth")
+                loadValue("canvasWidth");
 
             }
 
@@ -321,7 +410,27 @@
 
 <input id="igExtended" name="igExtended" type="checkbox" checked /><label for="igExtended">Produce IG Extended output (component-level nesting) (default: off)</label>
 <input id="annotations" name="annotations" type="checkbox" unchecked /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
-<input id="includeHeaders" name="includeHeaders" type="checkbox" unchecked /><label for="includeHeaders">Include header row in output (default: on)</label><br />
+<input id="includeHeaders" name="includeHeaders" type="checkbox" unchecked /><label for="includeHeaders">Include header row in output (default: on)</label>
+<span data-text="Indicates whether the Original Statement is included in the output by introducing an additional column following the Statement ID. Choices include the exclusion (no additional column), the inclusion for the first atomic statement only (i.e., first row following the header row), or the inclusion for all atomic statements (i.e., each row)." class="tooltip">Inclusion of Original Statement in generated output:</span>
+<select id="printOriginalStatement" name="printOriginalStatement" type="select">
+    
+    <option value="No inclusion of Original Statement in output (i.e., no additional column)" >No inclusion of Original Statement in output (i.e., no additional column)</option>
+    
+    <option value="Include Original Statement for first atomic statement only (i.e., in first row following optional header row)" >Include Original Statement for first atomic statement only (i.e., in first row following optional header row)</option>
+    
+    <option value="Include Original Statement for each atomic statement (i.e., in each row)" >Include Original Statement for each atomic statement (i.e., in each row)</option>
+    
+</select>
+<span data-text="Indicates whether the IG Script-encoded statement is included in the output by introducing an additional column following the Statement ID (or the Original Statement if activated). Choices include the exclusion (no additional column), the inclusion for the first atomic statement only (i.e., first row following the header row), or the inclusion for all atomic statements (i.e., each row)." class="tooltip">Inclusion of IG Script-encoded statement in generated output:</span>
+<select id="printIgScript" name="printIgScript" type="select">
+    
+    <option value="No inclusion of IG Script coding in output (i.e., no additional column)" >No inclusion of IG Script coding in output (i.e., no additional column)</option>
+    
+    <option value="Include IG Script-encoded statement for first atomic statement only (i.e., in first row following optional header row)" >Include IG Script-encoded statement for first atomic statement only (i.e., in first row following optional header row)</option>
+    
+    <option value="Include IG Script-encoded statement for each atomic statement (i.e., in each row)" >Include IG Script-encoded statement for each atomic statement (i.e., in each row)</option>
+    
+</select>
 
 
 <span data-text="The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol (&#39;|&#39;) as delimiter/separator." class="tooltip">Output format:</span>
@@ -333,11 +442,21 @@
 
 </select>
 
-<input value="Generate tabular output" onclick="saveFormContent()" type="submit">
+<button id="generate" class="submit" value="Generate tabular output" onclick="saveFormContent()" type="submit">Generate tabular output</button>
+<script>
+    
+
+    const submitButton = document.getElementById("generate");
+
+    submitButton.addEventListener("click", () => {
+        submitButton.classList.add("button-loading");
+    });
+</script>
 
 
 
-<p>Version: 0.2</p>
+
+<p>Version: 0.5</p>
 
 </form>
 </div>

@@ -44,6 +44,19 @@ type Statement struct {
 }
 
 /*
+Indicates whether a statement is empty, i.e., has no initialized components.
+Returns false if at least one component value is provided,
+else true (indicating empty statement).
+*/
+func (s *Statement) IsEmpty() bool {
+	if s.String() == "" {
+		return true
+	} else {
+		return false
+	}
+}
+
+/*
 Returns statement as formatted string that reflects tree structure (vertical orientation, with indentation of nested elements).
 */
 func (s *Statement) String() string {

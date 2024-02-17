@@ -35,12 +35,13 @@
 
     /*
     Auto-adjusts height of target entry field based on content.
-     */
+    */
     function check(target) {
         let offset = 0
         target.style.height = 'auto';
         target.style.height = target.scrollHeight + offset + 'px';
     }
+
 </script>
 
 <p>&nbsp;</p>
@@ -53,7 +54,86 @@
     <form method="POST">
         <!-- Original Statement entry field -->
         <span data-text="{{.RawStmtHelp}}" class="tooltip" id="rawStmtLabel">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()" aria-labelledby="rawStmtLabel">{{.RawStmt}}</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()" aria-labelledby="rawStmtLabel">{{.RawStmt}}</textarea><br />
+        <!-- Validation error message field -->
+        <div class="error" id="validateError"></div>
+        <!-- Validate button -->
+        <button class="button2" type="button" id="buttonValidate" switch="validate" onclick="checkRawStatementContent()">
+            Validate 'Original Statement' input (checks for imbalanced parentheses)
+            and copy validated content into 'Encoded Statement' field</button></br></br>
+        <script>
+            /*
+            Validates content of 'Original Statement' field by testing for imbalanced parentheses
+            and provides feedback based on error field. Copies successfully validated input
+            into 'Encoded Statement' field.
+             */
+            function checkRawStatementContent() {
+
+                // Button 'switch' field can have values 'overwrite' or 'validate'
+                let buttonType = document.getElementById("buttonValidate").getAttribute("switch");
+
+                if (buttonType === "overwrite") {
+                    // OVERWRITE MODE
+
+                    // Read value from raw statement
+                    let rawContent = document.getElementById("rawStmt").value;
+                    // Populate editor
+                    let editor = ace.edit("editor");
+                    editor.setValue(rawContent);
+                    // Ensure that content in hidden text area is synchronized
+                    copyEditorContentToTextArea();
+
+                    // Reset button to validate mode
+                    document.getElementById("buttonValidate").setAttribute("switch", "validate");
+                    document.getElementById("buttonValidate").innerText =
+                        "Validate 'Original Statement' input (checks for imbalanced parentheses) and " +
+                        "copy validated content into 'Encoded Statement' field";
+                    // Empty the error message
+                    let validateError = document.getElementById("validateError");
+                    validateError.innerHTML = "";
+
+                } else if (buttonType === "validate") {
+                    // VALIDATE MODE
+
+                    // Retrieve raw content field value
+                    let rawContent = document.getElementById("rawStmt").value;
+                    // Count left parentheses
+                    let leftParCount = (rawContent.match(/\(/g) || []).length;
+                    // Count right parentheses
+                    let rightParCount = (rawContent.match(/\)/g) || []).length;
+                    // ... if parenthesis count differs, show error
+                    if (leftParCount !== rightParCount) {
+                        // Populate error message
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "Found imbalanced parentheses in raw input (" +
+                            leftParCount + " opening and " + rightParCount + " closing parentheses).\n" +
+                            "Please remove or balance parentheses to before encoding the statement.";
+                    } else {
+                        // Reset error message
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "";
+                        // Copy into 'Encoded Statement' textarea ...
+                        let editor = ace.edit("editor");
+                        // ... but only if editor field is empty
+                        if (editor.getValue().length === 0) {
+                            editor.setValue(rawContent);
+                            // ... and if content has not already been copied
+                        } else if (editor.getValue() !== rawContent) {
+                            // ... else print error
+                            let validateError = document.getElementById("validateError");
+                            validateError.innerHTML = "The 'Original Statement' content is valid, but has not been copied into the 'Encoded Statement' field, " +
+                                "since this field already contains content (to prevent accidental overwriting of encoded statement).\<br/\>" +
+                                "Confirm if you indeed want to overwrite the 'Encoded Statement' content with the 'Original Statement' content.";
+
+                            // Switch button to overwrite mode
+                            document.getElementById("buttonValidate").setAttribute("switch", "overwrite");
+                            document.getElementById("buttonValidate").innerText = "Confirm overwriting of 'Encoded Statement' entry with 'Original Statement' entry";
+
+                        } // do nothing if raw statement content is already in editor
+                    }
+                } // no other button switch value supported as of now
+            }
+        </script>
         <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip" id="editorLabel"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         <!-- Editor buttons -->
@@ -129,7 +209,7 @@
                 //console.log("Storing content " + content)
 
                 // Store raw statement
-                saveValue("rawStmt")
+                saveValue("rawStmt");
 
                 // Elements specific to distinctive versions;
                 // require checks for presence prior to saving
@@ -137,39 +217,45 @@
                 // Tabular-specific fields
 
                 // Statement ID
-                saveValue("stmtId")
+                saveValue("stmtId");
 
                 // Extended output
-                saveCheckbox("igExtended")
+                saveCheckbox("igExtended");
 
                 // Logico output (both for tabular and visual)
-                saveCheckbox("annotations")
+                saveCheckbox("annotations");
 
                 // Include headers
-                saveCheckbox("includeHeaders")
+                saveCheckbox("includeHeaders");
 
                 // Tabular output format
-                saveValue("outputType")
+                saveValue("outputType");
+
+                // Original Statement inclusion
+                saveValue("printOriginalStatement");
+
+                // IG Script inclusion
+                saveValue("printIgScript");
 
                 // Visual-specific fields
 
                 // Dov
-                saveCheckbox("dov")
+                saveCheckbox("dov");
 
                 // Include Property tree
-                saveCheckbox("propertyTree")
+                saveCheckbox("propertyTree");
 
                 // Include Binary tree
-                saveCheckbox("binaryTree")
+                saveCheckbox("binaryTree");
 
                 // Activation condition
-                saveCheckbox("actCondTop")
+                saveCheckbox("actCondTop");
 
                 // Canvas height
-                saveValue("canvasHeight")
+                saveValue("canvasHeight");
 
                 // Canvas width
-                saveValue("canvasWidth")
+                saveValue("canvasWidth");
 
             }
 
@@ -452,39 +538,45 @@
                 // Tabular-specific fields
 
                 // Load statement ID
-                loadValue("stmtId")
+                loadValue("stmtId");
 
                 // Load IG Extended
-                loadCheckbox("igExtended")
+                loadCheckbox("igExtended");
 
                 // Load IG Logico (Tabular and Visual)
-                loadCheckbox("annotations")
+                loadCheckbox("annotations");
 
                 // Load Header setting
-                loadCheckbox("includeHeaders")
+                loadCheckbox("includeHeaders");
 
                 // Load Tabular output format
-                loadValue("outputType")
+                loadValue("outputType");
+
+                // Load Original Statement inclusion choice
+                loadValue("printOriginalStatement");
+
+                // Load IG Script inclusion choice
+                loadValue("printIgScript");
 
                 // Visual-specific fields
 
                 // Load Dov
-                loadCheckbox("dov")
+                loadCheckbox("dov");
 
                 // Load Property tree
-                loadCheckbox("propertyTree")
+                loadCheckbox("propertyTree");
 
                 // Load Binary tree
-                loadCheckbox("binaryTree")
+                loadCheckbox("binaryTree");
 
                 // Load Activation conditions
-                loadCheckbox("actCondTop")
+                loadCheckbox("actCondTop");
 
                 // Load canvas height
-                loadValue("canvasHeight")
+                loadValue("canvasHeight");
 
                 // Load canvas width
-                loadValue("canvasWidth")
+                loadValue("canvasWidth");
 
             }
 
@@ -583,7 +675,6 @@
                     event.target.click();
                     return
                 }
-
                 if (editor.getReadOnly()) {
                     // Enable undo and redo
                     if (event.ctrlKey || event.cmdKey) {
