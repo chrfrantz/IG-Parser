@@ -54,7 +54,7 @@
     <form method="POST">
         <!-- Original Statement entry field -->
         <span data-text="{{.RawStmtHelp}}" class="tooltip" id="rawStmtLabel">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()" aria-labelledby="rawStmtLabel">{{.RawStmt}}</textarea><br />
+        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()" aria-labelledby="rawStmtLabel">{{.RawStmt}}</textarea>
         <!-- Validation error message field -->
         <div class="error" id="validateError"></div>
         <!-- Validate button -->
@@ -137,7 +137,7 @@
         <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip" id="editorLabel"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         <!-- Editor buttons -->
-        <div id="buttons">
+        <div class="buttons">
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="undo">Undo</div>
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="redo">Redo</div>
             <span data-text="Toggles between text and edit mode. Text mode allows for free text editing. Edit mode allows for keybindings to add symbols." class="tooltip">
@@ -290,6 +290,46 @@
                 }
                 
             });
+
+            // Toggle button for visualization
+            function visualToggle() {
+                visual = localStorage.getItem("visual")
+                console.log(localStorage.getItem("visual"))
+                buttons = document.getElementsByClassName("buttons")
+                if (visual == "false")
+                    // Toggle the editor buttons' visibility
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.remove('hidden')
+                        editor.session.setMode("ace/mode/igscriptnotation")
+                        localStorage.setItem("visual", "true")
+                    }
+                else 
+                    // Toggle the editor buttons' visibility
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.add('hidden')
+                        editor.session.setMode("ace/mode/text");
+                        localStorage.setItem("visual", "false")
+                    }  
+            };
+
+            // loading for visualization
+            function loadVisual() {
+                visual = localStorage.getItem("visual")
+                console.log(localStorage.getItem("visual"))
+                buttons = document.getElementsByClassName("buttons")
+                if (visual != "false")
+                    // Toggle the editor buttons' visibility
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.remove('hidden')
+                        editor.session.setMode("ace/mode/igscriptnotation")
+                    }
+                else 
+                    // Toggle the editor buttons' visibility
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.add('hidden')
+                        editor.session.setMode("ace/mode/text");
+                    }  
+            };
 
             // Toggle for nested symbols
             let nested = false
@@ -653,6 +693,7 @@
             // Loads form contents from local storage upon window load and prepopulate examples
             window.onload = (event) => {
                 loadFormContent();
+                loadVisual();
 
                 // Generate URLs for examples
                 generateUrl("example2", "Example Statement 2 (moderately complex)",
@@ -735,9 +776,9 @@
         </script>
 
         <!-- Buttons for selecting symbols below the editor  -->
-        <div id="buttons">
+        <div class="buttons">
             Regulative:
-            <div class="button" role="button" aria-pressed="false" id="A" tabindex="0" onclick="symbolButtonHandler('A')">Attribute</div>
+            <div class="button" role="button" aria-pressed="false" id="A"      tabindex="0" onclick="symbolButtonHandler('A')">Attribute</div>
             <div class="button" role="button" aria-pressed="false" id="A,p"    tabindex="0" onclick="symbolButtonHandler('A,p')">A. Property</div>
             <div class="button" role="button" aria-pressed="false" id="I"      tabindex="0" onclick="symbolButtonHandler('I')">Aim</div>
             <div class="button" role="button" aria-pressed="false" id="D"      tabindex="0" onclick="symbolButtonHandler('D')">Deontic</div>

@@ -512,13 +512,28 @@ Ace.js annotation highlighting:
     padding: 0 2px 0 2px;
 }
 
-#buttons {
+.buttons {
     display: inline-block;
     background: #E9E9ED;
     border: 1px solid #ccc;
     width: calc(100% - 12px);
     padding: 0 4px 0 4px;
     border-radius: 3px;
+}
+
+.hidden {
+   display: none;
+}
+
+#visualToggle {
+   color: #666;
+   text-decoration: underline;
+   display: inline-block;
+}
+
+#visualToggle:hover {
+   color: blue;
+   cursor: pointer;
 }
 
 /* For the selection buttons */
