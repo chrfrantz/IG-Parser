@@ -137,7 +137,7 @@
         <!-- Encoded Statement entry field -->
         <span data-text="{{.CodedStmtHelpRef}}" class="tooltip" id="editorLabel"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         <!-- Editor buttons -->
-        <div class="buttons">
+        <div class="buttons hidden">
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="undo">Undo</div>
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="redo">Redo</div>
             <span data-text="Toggles between text and edit mode. Text mode allows for free text editing. Edit mode allows for keybindings to add symbols." class="tooltip">
@@ -157,7 +157,8 @@
         <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()" aria-labelledby="editorLabel">{{.CodedStmt}}</div>
         <script>
             let editor = ace.edit("editor");
-            editor.session.setMode("ace/mode/igscriptnotation"); // IG Script Notation Syntax
+            editor.session.setMode("ace/mode/text"); // Text mode default, changed in visualToggle
+            // and in loadVisual
             // Option documentation: https://github.com/ajaxorg/ace/wiki/Configuring-Ace
             editor.setOption("showLineNumbers", true); // show line numbers
             editor.setOption("wrap", true); // activate text wrapping
@@ -434,9 +435,15 @@
 
                 outputText += symbols[symbol].bracket[bracketStart+1];
 
-
+                // Add augmented text into editor
                 editor.session.replace(new ace.Range(selectionRange.start.row, selectionRange.start.column, 
                     selectionRange.end.row, selectionRange.end.column), outputText);
+
+                // Copy content of form to hidden text area (which is used for actual parsing)
+                copyEditorContentToTextArea();
+                // Save content to storage
+                saveFormContent();
+
                 // If the selection is empty move the cursor and activate the editor
                 if (selectionText == ""){
                 cursorLocation.column += outputText.length-1
@@ -776,7 +783,7 @@
         </script>
 
         <!-- Buttons for selecting symbols below the editor  -->
-        <div class="buttons">
+        <div class="buttons hidden">
             Regulative:
             <div class="button" role="button" aria-pressed="false" id="A"      tabindex="0" onclick="symbolButtonHandler('A')">Attribute</div>
             <div class="button" role="button" aria-pressed="false" id="A,p"    tabindex="0" onclick="symbolButtonHandler('A,p')">A. Property</div>
