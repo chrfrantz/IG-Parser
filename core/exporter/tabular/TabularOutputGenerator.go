@@ -1362,7 +1362,7 @@ func WriteToFile(filename string, content string, overwrite bool) error {
 	var err error
 	if overwrite {
 		// Open file in overwrite mode
-		f, err = os.Create(filename)
+		f, err = os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	} else {
 		// Open file in append mode
 		f, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -1373,10 +1373,10 @@ func WriteToFile(filename string, content string, overwrite bool) error {
 
 	// Defer closing of file
 	defer func() error {
-		err := f.Close()
-		if err != nil {
-			log.Println("Error when writing file", filename, "Error:", err.Error())
-			return err
+		errClose := f.Close()
+		if errClose != nil {
+			log.Println("Error when writing file", filename, "Error:", errClose.Error())
+			return errClose
 		}
 		return nil
 	}()
@@ -1385,9 +1385,9 @@ func WriteToFile(filename string, content string, overwrite bool) error {
 	data := []byte(content)
 
 	// Write data
-	_, err2 := f.Write(data)
-	if err2 != nil {
-		return err2
+	_, errWrite := f.Write(data)
+	if errWrite != nil {
+		return errWrite
 	}
 	log.Println("Wrote to file " + filename)
 
