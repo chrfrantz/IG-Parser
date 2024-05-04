@@ -18,219 +18,297 @@ parser.IGStatementParser_test.go.
 
 /*
 Parse basic statements identified as part of #separateComponentsNestedStatementsCombinationsAndComponentPairs.
+Takes plain string and statement reference as input. Generates statement if no statement reference (i.e., nil) is passed.
+Returns statement embedded in node, as well as remaining part of original input string that has not been parsed.
+Note: If returning an error, the identified part of the text associated with the last parsed component is returned (to simplify diagnostics).
 */
-func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, tree.ParsingError) {
+func parseBasicStatement(text string, s *tree.Statement) ([]tree.Node, string, tree.ParsingError) {
 
-	result, err := parseAttributes(text)
+	// Check whether statement is passed, else create new one
+	if s == nil {
+		s = &tree.Statement{}
+	}
+	// Initial full string content: keeps track of remaining string content
+	remainingString := text
+
+	result, componentText, err := parseAttributes(text)
 	outErr := handleParsingError(tree.ATTRIBUTES, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.Attributes = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseAttributesProperty(text)
+	result, componentText, err = parseAttributesProperty(text)
 	outErr = handleParsingError(tree.ATTRIBUTES_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.AttributesPropertySimple = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseDeontic(text)
+	result, componentText, err = parseDeontic(text)
 	outErr = handleParsingError(tree.DEONTIC, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.Deontic = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseAim(text)
+	result, componentText, err = parseAim(text)
 	outErr = handleParsingError(tree.AIM, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.Aim = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseDirectObject(text)
+	result, componentText, err = parseDirectObject(text)
 	outErr = handleParsingError(tree.DIRECT_OBJECT, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.DirectObject = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseDirectObjectProperty(text)
+	result, componentText, err = parseDirectObjectProperty(text)
 	outErr = handleParsingError(tree.DIRECT_OBJECT_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.DirectObjectPropertySimple = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseIndirectObject(text)
+	result, componentText, err = parseIndirectObject(text)
 	outErr = handleParsingError(tree.INDIRECT_OBJECT, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.IndirectObject = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseIndirectObjectProperty(text)
+	result, componentText, err = parseIndirectObjectProperty(text)
 	outErr = handleParsingError(tree.INDIRECT_OBJECT_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.IndirectObjectPropertySimple = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseActivationCondition(text)
+	result, componentText, err = parseActivationCondition(text)
 	outErr = handleParsingError(tree.ACTIVATION_CONDITION, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.ActivationConditionSimple = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseExecutionConstraint(text)
+	result, componentText, err = parseExecutionConstraint(text)
 	outErr = handleParsingError(tree.EXECUTION_CONSTRAINT, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.ExecutionConstraintSimple = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseConstitutedEntity(text)
+	result, componentText, err = parseConstitutedEntity(text)
 	outErr = handleParsingError(tree.CONSTITUTED_ENTITY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.ConstitutedEntity = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseConstitutedEntityProperty(text)
+	result, componentText, err = parseConstitutedEntityProperty(text)
 	outErr = handleParsingError(tree.CONSTITUTED_ENTITY_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.ConstitutedEntityPropertySimple = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseModal(text)
+	result, componentText, err = parseModal(text)
 	outErr = handleParsingError(tree.MODAL, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.Modal = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseConstitutingFunction(text)
+	result, componentText, err = parseConstitutingFunction(text)
 	outErr = handleParsingError(tree.CONSTITUTIVE_FUNCTION, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.ConstitutiveFunction = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseConstitutingProperties(text)
+	result, componentText, err = parseConstitutingProperties(text)
 	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.ConstitutingProperties = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
-	result, err = parseConstitutingPropertiesProperty(text)
+	result, componentText, err = parseConstitutingPropertiesProperty(text)
 	outErr = handleParsingError(tree.CONSTITUTING_PROPERTIES_PROPERTY, err)
 	if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 		// Populate return structure
 		ret := []tree.Node{tree.Node{Entry: &s}}
-		return ret, outErr
+		return ret, strings.Join(componentText, " "), outErr
 	}
 	s.ConstitutingPropertiesPropertySimple = result
+	// Remove elements parsed as part of the component parsing
+	for _, v := range componentText {
+		remainingString = strings.ReplaceAll(remainingString, v, "")
+	}
 
 	Println("Basic statement: " + s.String())
-
-	return []tree.Node{tree.Node{Entry: &s}}, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	if !s.IsEmpty() {
+		// Returns generated node, alongside remaining input string content for further parsing
+		return []tree.Node{tree.Node{Entry: s}}, remainingString, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	}
+	// else return empty array
+	return []tree.Node{}, remainingString, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
-func parseAttributes(text string) (*tree.Node, tree.ParsingError) {
+func parseAttributes(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.ATTRIBUTES, false, text)
 }
 
-func parseAttributesProperty(text string) (*tree.Node, tree.ParsingError) {
+func parseAttributesProperty(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.ATTRIBUTES_PROPERTY, true, text)
 }
 
-func parseDeontic(text string) (*tree.Node, tree.ParsingError) {
+func parseDeontic(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.DEONTIC, false, text)
 }
 
-func parseAim(text string) (*tree.Node, tree.ParsingError) {
+func parseAim(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.AIM, false, text)
 }
 
-func parseDirectObject(text string) (*tree.Node, tree.ParsingError) {
+func parseDirectObject(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.DIRECT_OBJECT, false, text)
 }
 
-func parseDirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
+func parseDirectObjectProperty(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.DIRECT_OBJECT_PROPERTY, true, text)
 }
 
-func parseIndirectObject(text string) (*tree.Node, tree.ParsingError) {
+func parseIndirectObject(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.INDIRECT_OBJECT, false, text)
 }
 
-func parseIndirectObjectProperty(text string) (*tree.Node, tree.ParsingError) {
+func parseIndirectObjectProperty(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.INDIRECT_OBJECT_PROPERTY, true, text)
 }
 
-func parseConstitutedEntity(text string) (*tree.Node, tree.ParsingError) {
+func parseConstitutedEntity(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY, false, text)
 }
 
-func parseConstitutedEntityProperty(text string) (*tree.Node, tree.ParsingError) {
+func parseConstitutedEntityProperty(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.CONSTITUTED_ENTITY_PROPERTY, true, text)
 }
 
-func parseModal(text string) (*tree.Node, tree.ParsingError) {
+func parseModal(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.MODAL, false, text)
 }
 
-func parseConstitutingFunction(text string) (*tree.Node, tree.ParsingError) {
+func parseConstitutingFunction(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.CONSTITUTIVE_FUNCTION, false, text)
 }
 
-func parseConstitutingProperties(text string) (*tree.Node, tree.ParsingError) {
+func parseConstitutingProperties(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES, false, text)
 }
 
-func parseConstitutingPropertiesProperty(text string) (*tree.Node, tree.ParsingError) {
+func parseConstitutingPropertiesProperty(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.CONSTITUTING_PROPERTIES_PROPERTY, true, text)
 }
 
-func parseActivationCondition(text string) (*tree.Node, tree.ParsingError) {
+func parseActivationCondition(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.ACTIVATION_CONDITION, false, text)
 }
 
-func parseExecutionConstraint(text string) (*tree.Node, tree.ParsingError) {
+func parseExecutionConstraint(text string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponentWithParentheses(tree.EXECUTION_CONSTRAINT, false, text)
 }
 
@@ -518,8 +596,9 @@ func extractSuffixAndAnnotations(component string, propertyComponent bool, input
 
 /*
 Parses component based on surrounding parentheses.
+Returns parsed node, as well as substring of input text identified as component content (including annotation and suffix).
 */
-func parseComponentWithParentheses(component string, propertyComponent bool, input string) (*tree.Node, tree.ParsingError) {
+func parseComponentWithParentheses(component string, propertyComponent bool, input string) (*tree.Node, []string, tree.ParsingError) {
 	return parseComponent(component, propertyComponent, input, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
 }
 
@@ -527,9 +606,9 @@ func parseComponentWithParentheses(component string, propertyComponent bool, inp
 Generic entry point to parse individual components of a given statement.
 Input is component symbol of interest, full statements, as well as delimiting parentheses signaling parsing for atomic
 or nested components. Additionally, the parameter propertyComponent indicates whether the parsed component is a property
-Returns the parsed node.
+Returns the parsed node as well as a string array containing all relevant substrings of the input text that have been parsed.
 */
-func parseComponent(component string, propertyComponent bool, text string, leftPar string, rightPar string) (*tree.Node, tree.ParsingError) {
+func parseComponent(component string, propertyComponent bool, text string, leftPar string, rightPar string) (*tree.Node, []string, tree.ParsingError) {
 
 	Println("Parsing:", component)
 
@@ -538,7 +617,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 	// Extract component (one or multiple occurrences) from input string based on provided component identifier
 	componentStrings, err := extractComponentContent(component, propertyComponent, text, leftPar, rightPar)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		return nil, err
+		return nil, componentStrings, err
 	}
 
 	Println("Components (Count:", len(componentStrings), "):", fmt.Sprint(componentStrings))
@@ -547,7 +626,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 	duplicateChk := shared.DuplicateElement(componentStrings)
 	if duplicateChk != "" {
 		// If duplicate is found, return contextualized error
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_DUPLICATE_COMPONENT_ENTRIES,
+		return nil, componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_DUPLICATE_COMPONENT_ENTRIES,
 			ErrorMessage: "Duplicate component entry '" + duplicateChk + "' found in input statement. " +
 				"Check for duplicate components and statements.",
 			ErrorIgnoredElements: []string{duplicateChk}}
@@ -565,7 +644,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 		Println("Component content", componentStrings)
 		r, err := regexp.Compile(COMBINATION_PATTERN_PARENTHESES)
 		if err != nil {
-			return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
+			return nil, componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_PATTERN_EXTRACTION,
 				ErrorMessage: "Error during pattern extraction in combination expression."}
 		}
 
@@ -575,7 +654,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 			// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
 			componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, propertyComponent, v, leftPar, rightPar)
 			if err.ErrorCode != tree.PARSING_NO_ERROR {
-				return nil, err
+				return nil, componentStrings, err
 			}
 
 			Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
@@ -603,7 +682,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 				node1, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
 				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 					log.Println("Error when parsing synthetically linked element. Error:", err)
-					return nil, err
+					return nil, componentStrings, err
 				}
 				// Assign to main node if not populated and new node not nil
 				if !node1.IsEmptyOrNilNode() {
@@ -625,7 +704,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 				node2, _, err := ParseIntoNodeTree(componentWithoutIdentifier, false, leftPar, rightPar)
 				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 					log.Println("Error when parsing synthetically linked element. Error:", err)
-					return nil, err
+					return nil, componentStrings, err
 				}
 				if !node2.IsEmptyOrNilNode() {
 					// Attach component name to element (will be accessible to children via GetComponentName())
@@ -642,7 +721,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 					nodeComb, nodeCombinationError := tree.Combine(node, node2, tree.SAND_BETWEEN_COMPONENTS)
 					// Check if combination error has been picked up
 					if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
-						return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
+						return nil, componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 							ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 					}
 					// Explicitly assign component type to top-level node (for completeness) - should be done from within combine function
@@ -659,7 +738,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 		// Extracts suffix and/or annotation for individual component instance -- must only be used with single component instance!
 		componentSuffix, componentAnnotation, componentContent, err := extractSuffixAndAnnotations(component, propertyComponent, componentStrings[0], leftPar, rightPar)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return nil, err
+			return nil, componentStrings, err
 		}
 
 		Println("Suffix:", componentSuffix, "(Length:", len(componentSuffix), ")")
@@ -683,7 +762,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 		}
 		if err2.ErrorCode != tree.PARSING_NO_ERROR && err2.ErrorCode != tree.PARSING_ERROR_NO_COMBINATIONS {
 			log.Println("Error when parsing synthetically linked element. Error:", err2)
-			return nil, err2
+			return nil, componentStrings, err2
 		}
 		// Attach component name to top-level element (will be accessible to children via GetComponentName())
 		if !node1.IsEmptyOrNilNode() {
@@ -700,7 +779,7 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 			node = node1
 		}
 	} else {
-		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
+		return nil, componentStrings, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_COMPONENT_NOT_FOUND,
 			ErrorMessage: "Component " + component + " was not found in input string"}
 	}
 
@@ -719,5 +798,5 @@ func parseComponent(component string, propertyComponent bool, text string, leftP
 		err.ErrorMessage = ""
 	}
 
-	return node, err
+	return node, componentStrings, err
 }

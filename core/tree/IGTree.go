@@ -44,7 +44,7 @@ Returns parents' left shared elements in order of hierarchical (top first).
 */
 func (n *Node) getParentsLeftSharedElements() []string {
 
-	if n.Parent != nil {
+	if n != nil && n.Parent != nil {
 		// Only allows for shared elements that are truly not-empty (including preventing "" as first element)
 		if n.Parent.SharedLeft != nil && len(n.Parent.SharedLeft) != 0 && n.Parent.SharedLeft[0] != "" {
 			// Recursively return parents' shared elements, followed by respective children ones
@@ -63,7 +63,7 @@ Returns parents' right shared elements in order of hierarchical (top first).
 */
 func (n *Node) getParentsRightSharedElements() []string {
 
-	if n.Parent != nil {
+	if n != nil && n.Parent != nil {
 		// Only allows for shared elements that are truly not-empty (including preventing "" as first element)
 		if n.Parent.SharedRight != nil && len(n.Parent.SharedRight) != 0 && n.Parent.SharedRight[0] != "" {
 			// Recursively return parents' shared elements, followed by respective children ones
@@ -81,6 +81,9 @@ func (n *Node) getParentsRightSharedElements() []string {
 Returns left shared elements under consideration of SHARED_ELEMENT_INHERITANCE_MODE
 */
 func (n *Node) GetSharedLeft() []string {
+	if n == nil {
+		return nil
+	}
 	switch SHARED_ELEMENT_INHERITANCE_MODE {
 	case SHARED_ELEMENT_INHERIT_OVERRIDE:
 		// Overwrite child with parent shared element values
@@ -94,13 +97,13 @@ func (n *Node) GetSharedLeft() []string {
 		return n.getParentsLeftSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedLeft := n.getParentsLeftSharedElements()
-		if n.SharedLeft != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
+		if n != nil && n.SharedLeft != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedLeft, n.SharedLeft...)
-		} else if len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" {
+		} else if n != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" {
 			// Return own node information
 			return n.SharedLeft
-		} else if n.Parent != nil {
+		} else if n != nil && n.Parent != nil {
 			// Return parent node information
 			return n.getParentsLeftSharedElements()
 		}
@@ -127,6 +130,9 @@ func (n *Node) GetSharedLeft() []string {
 Returns right shared elements under consideration of SHARED_ELEMENT_INHERITANCE_MODE
 */
 func (n *Node) GetSharedRight() []string {
+	if n == nil {
+		return nil
+	}
 	switch SHARED_ELEMENT_INHERITANCE_MODE {
 	case SHARED_ELEMENT_INHERIT_OVERRIDE:
 		// Overwrite child with parent shared element values
@@ -140,13 +146,13 @@ func (n *Node) GetSharedRight() []string {
 		return n.getParentsRightSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedRight := n.getParentsRightSharedElements()
-		if n.SharedRight != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
+		if n != nil && n.SharedRight != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedRight, n.SharedRight...)
-		} else if len(n.SharedRight) != 0 && n.SharedRight[0] != "" {
+		} else if n != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" {
 			// Return own node information
 			return n.SharedRight
-		} else if n.Parent != nil {
+		} else if n != nil && n.Parent != nil {
 			// Return parent node information
 			return n.getParentsRightSharedElements()
 		}
@@ -363,6 +369,14 @@ func (n *Node) String() string {
 	return n.string(0)
 }
 
+/*
+Prints node content in human-readable form (for printing on console).
+For parseable version, look at Stringify().
+*/
+func (n *Node) StringLevel(level int) string {
+	return n.string(level)
+}
+
 // Indentation unit for statement tree printing
 const MinimumIndentPrefix = "===="
 
@@ -476,10 +490,22 @@ func (n *Node) string(level int) string {
 
 		// Higher-level nesting of combinations - indentation from current level
 		retPrep := "\n" + prefix + "(\n" + //out +
-			prefix + "Left: \n" + n.Left.string(level+1) + "\n" +
-			prefix + "Operator: " + n.LogicalOperator + "\n" +
-			prefix + "Right: \n" + n.Right.string(level+1) + "\n" +
-			prefix + ")"
+			prefix + "Left: \n" + n.Left.string(level+1) + "\n"
+		if n.Left.GetSharedLeft() != nil {
+			retPrep += prefix + " - Left shared (left): " + fmt.Sprint(n.Left.GetSharedLeft()) + "\n"
+		}
+		if n.Left.GetSharedRight() != nil {
+			retPrep += prefix + " - Left shared (right): " + fmt.Sprint(n.Left.GetSharedRight()) + "\n"
+		}
+		retPrep += prefix + "Operator: " + n.LogicalOperator + "\n" +
+			prefix + "Right: \n" + n.Right.string(level+1) + "\n"
+		if n.Right.GetSharedLeft() != nil {
+			retPrep += prefix + " - Right shared (left): " + fmt.Sprint(n.Right.GetSharedLeft()) + "\n"
+		}
+		if n.Right.GetSharedRight() != nil {
+			retPrep += prefix + " - Right shared (right): " + fmt.Sprint(n.Right.GetSharedRight()) + "\n"
+		}
+		retPrep += prefix + ")"
 
 		// Assumes that suffix and annotations are in string format for nodes that have nested statements
 		// TODO: see whether that needs to be adjusted
@@ -1377,6 +1403,74 @@ func aggregateNodes(aggregationType int, leftNodes [][]*Node, rightNodes [][]*No
 }
 
 /*
+Substitutes node references within a tree structure for given start node (tree) based on *downward* search
+of branches (left, right).
+Allows for indication whether new node should be linked to parent, and whether children from original node should be inherited.
+*/
+func substituteNodeReferenceInTree(originalNode *Node, newNode *Node, tree *Node, linkNewNodeToParent bool, inheritChildren bool) NodeError {
+	if originalNode == nil {
+		return NodeError{ErrorCode: TREE_ERROR_NIL_NODE, ErrorMessage: "Node to be substituted is nil."}
+	}
+	if newNode == nil {
+		return NodeError{ErrorCode: TREE_ERROR_NIL_NODE, ErrorMessage: "Node to substitute existing node is nil."}
+	}
+	if tree == nil {
+		return NodeError{ErrorCode: TREE_ERROR_NIL_NODE, ErrorMessage: "Node tree to perform substitution on is nil."}
+	}
+
+	// Search downwards
+	if tree.Left != nil {
+		if tree.Left == originalNode {
+			if inheritChildren {
+				// Inherit children on left side and relink parent
+				if tree.Left.Left != nil {
+					newNode.Left = tree.Left.Left
+					tree.Left.Left.Parent = newNode
+				}
+				if tree.Left.Right != nil {
+					newNode.Right = tree.Left.Right
+					tree.Left.Right.Parent = newNode
+				}
+			}
+			if linkNewNodeToParent {
+				// Link to original node's parent
+				newNode.Parent = tree
+			}
+			// Replace left child
+			tree.Left = newNode
+		} else {
+			// if not nil, but left element, delegate down
+			substituteNodeReferenceInTree(originalNode, newNode, tree.Left, linkNewNodeToParent, inheritChildren)
+		}
+	}
+	if tree.Right != nil {
+		if tree.Right == originalNode {
+			if inheritChildren {
+				// Inherit children on right side and relink parent
+				if tree.Right.Left != nil {
+					newNode.Left = tree.Right.Left
+					tree.Right.Left.Parent = newNode
+				}
+				if tree.Right.Right != nil {
+					newNode.Right = tree.Right.Right
+					tree.Right.Right.Parent = newNode
+				}
+			}
+			if linkNewNodeToParent {
+				// Link to original node's parent
+				newNode.Parent = tree
+			}
+			// Replace right child
+			tree.Right = newNode
+		} else {
+			// if not nil, but right element, delegate down
+			substituteNodeReferenceInTree(originalNode, newNode, tree.Right, linkNewNodeToParent, inheritChildren)
+		}
+	}
+	return NodeError{ErrorCode: TREE_NO_ERROR}
+}
+
+/*
 Calculate depth of node tree
 */
 func (n *Node) CalculateDepth() int {
@@ -1472,6 +1566,7 @@ func (n *Node) ParseAllEntries(function func(string) (*Statement, ParsingError))
 		n.Entry = newEntry
 	}
 	if !n.Left.IsNil() {
+		// Parse left child of combination
 		err := n.Left.ParseAllEntries(function)
 		if err.ErrorCode != PARSING_NO_ERROR {
 			Println("Received error when parsing left-hand nested statement.")
@@ -1479,6 +1574,7 @@ func (n *Node) ParseAllEntries(function func(string) (*Statement, ParsingError))
 		}
 	}
 	if !n.Right.IsNil() {
+		// Parse right child of combination
 		err := n.Right.ParseAllEntries(function)
 		if err.ErrorCode != PARSING_NO_ERROR {
 			Println("Received error when parsing right-hand nested statement.")

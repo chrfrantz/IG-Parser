@@ -164,8 +164,10 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 				left := input[combinations[level][idx].Left:combinations[level][idx].Operator]
 				right := input[combinations[level][idx].Operator+len(combinations[level][idx].OperatorVal)+2 : combinations[level][idx].Right]
 				Println("==Raw Left value: " + left)
+				Println("==Left shared value: ", node.GetSharedLeft())
 				Println("==Raw Operator: " + combinations[level][idx].OperatorVal)
 				Println("==Raw Right value: " + right)
+				Println("==Right shared value: ", node.GetSharedRight())
 
 				// Assign logical operator
 				node.LogicalOperator = combinations[level][idx].OperatorVal
@@ -329,6 +331,8 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					// return node outright if nested
 					return &node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 				}
+			} else {
+				Println("Combination candidate is incomplete and ignored in processing: ", combinations[level][idx])
 			}
 
 			Println("==Finished parsing index " + strconv.Itoa(idx) + " on level " + strconv.Itoa(level))

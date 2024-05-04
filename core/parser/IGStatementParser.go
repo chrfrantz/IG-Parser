@@ -65,7 +65,8 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		// else just reset input text (so no basic element is parsed)
 		text = ""
 	}
-	// Extract potential nested statements (e.g., Cac{ content }
+	// Note: text variable is used to extract logical operators (if present) for multiple component-level nested statements!
+	// Extract potential nested statements (e.g., Cac{ content } )
 	nestedStmts := compAndNestedStmts[1]
 	if len(nestedStmts) == 0 {
 		Println("No nested statements found.")
@@ -85,7 +86,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		Println("Text to be parsed: " + text)
 
 		// Now parsing on component level
-		_, outErr := parseBasicStatement(text, &s)
+		_, remainingText, outErr := parseBasicStatement(text, &s)
 		if outErr.ErrorCode != tree.PARSING_NO_ERROR {
 			// Populate return structure
 			ret := []*tree.Node{&tree.Node{Entry: &s}}
@@ -96,6 +97,10 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		ProcessPrivateComponentLinkages(&s, false)
 
 		Println("Basic statement: " + s.String())
+
+		// Substitute text with remaining parts (the one that have not been parsed as part of the basic component parsing)
+		text = remainingText
+		Println("Remaining text after basic component parsing: " + text)
 	}
 
 	Println("Testing for nested combinations in " + fmt.Sprint(nestedCombos))
@@ -124,7 +129,36 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 	// Process nested statements
 	if len(nestedStmts) > 0 {
 		Println("Found nested statements ... (Nested statements: ", nestedStmts, ")")
-		err = parseNestedStatements(&s, nestedStmts)
+
+		// Will be populated if statement itself contains logical operator (uses 'pure' versions of logical operators and
+		// defaults to tree.AND if none is found)
+		detectedLogicalOperator := ""
+		if len(nestedStmts) > 1 {
+			// Check whether explicit logical operators are specified and in inject those.
+			Println("Found more than one nested statements in ", nestedStmts, " - testing for logical linkage "+
+				"of nested statements in input '"+text+"'.")
+			if strings.Contains(text, tree.AND_BRACKETS) {
+				detectedLogicalOperator = tree.AND
+			}
+			if strings.Contains(text, tree.XOR_BRACKETS) {
+				if detectedLogicalOperator != "" {
+					return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS,
+						ErrorMessage: "Detected multiple logical operators (" + detectedLogicalOperator + " and " + tree.XOR +
+							") on given parsing level. Please revise your coding with respect to indication of precedence."}
+				}
+				detectedLogicalOperator = tree.XOR
+			}
+			if strings.Contains(text, tree.OR_BRACKETS) {
+				if detectedLogicalOperator != "" {
+					return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS,
+						ErrorMessage: "Detected multiple logical operators (" + detectedLogicalOperator + " and " + tree.OR +
+							") on given parsing level. Please revise your coding with respect to indication of precedence."}
+				}
+				detectedLogicalOperator = tree.OR
+			}
+		}
+
+		err = parseNestedStatements(&s, nestedStmts, detectedLogicalOperator)
 		// Check whether nested statements have been ignored entirely
 		if err.ErrorCode == tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
 			// Populate return structure
@@ -417,13 +451,14 @@ func handleParsingError(component string, err tree.ParsingError) tree.ParsingErr
 
 /*
 Parses nested statements (but not combinations) and attaches those to the top-level statement.
+Uses given logical operator to link to existing statements (takes only tree.OR, tree.AND, and tree.XOR - no brackets).
 Returns an error other than tree.PARSING_NO_ERROR if issues during parsing.
 Specific errors:
 Returns err tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS if parsing did not pose problems per se,
 but elements have been ignored during parsing (warranting syntax review). In this case, the statements of concern
 are returned in a string array contained in the error object.
 */
-func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string) tree.ParsingError {
+func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string, logicalOperator string) tree.ParsingError {
 
 	// Copy reference statement for comparison (to check whether modification took place based on parsed element)
 	cachedStmtPriorToNestedParsing := stmtToAttachTo.String()
@@ -539,51 +574,51 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string)
 		case tree.ATTRIBUTES_PROPERTY:
 			Println("Attaching nested attributes property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.AttributesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, stmtNode)
+			stmtToAttachTo.AttributesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, stmtNode, logicalOperator)
 		case tree.DIRECT_OBJECT_PROPERTY:
 			Println("Attaching nested direct object property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.DirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, stmtNode)
+			stmtToAttachTo.DirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, stmtNode, logicalOperator)
 		case tree.DIRECT_OBJECT:
 			Println("Attaching nested direct object to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.DirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, stmtNode)
+			stmtToAttachTo.DirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, stmtNode, logicalOperator)
 		case tree.INDIRECT_OBJECT_PROPERTY:
 			Println("Attaching nested indirect object property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.IndirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, stmtNode)
+			stmtToAttachTo.IndirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, stmtNode, logicalOperator)
 		case tree.INDIRECT_OBJECT:
 			Println("Attaching nested indirect object to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.IndirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, stmtNode)
+			stmtToAttachTo.IndirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, stmtNode, logicalOperator)
 		case tree.ACTIVATION_CONDITION:
 			Println("Attaching nested activation condition to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ActivationConditionComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, stmtNode)
+			stmtToAttachTo.ActivationConditionComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, stmtNode, logicalOperator)
 		case tree.EXECUTION_CONSTRAINT:
 			Println("Attaching nested execution constraint to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ExecutionConstraintComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, stmtNode)
+			stmtToAttachTo.ExecutionConstraintComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, stmtNode, logicalOperator)
 		case tree.CONSTITUTED_ENTITY_PROPERTY:
 			Println("Attaching nested constituted entity property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutedEntityPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, stmtNode)
+			stmtToAttachTo.ConstitutedEntityPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, stmtNode, logicalOperator)
 		case tree.CONSTITUTING_PROPERTIES_PROPERTY:
 			Println("Attaching nested constituting properties property to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutingPropertiesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, stmtNode)
+			stmtToAttachTo.ConstitutingPropertiesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, stmtNode, logicalOperator)
 		case tree.CONSTITUTING_PROPERTIES:
 			Println("Attaching nested constituting properties to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.ConstitutingPropertiesComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, stmtNode)
+			stmtToAttachTo.ConstitutingPropertiesComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, stmtNode, logicalOperator)
 		case tree.OR_ELSE:
 			Println("Attaching nested or else to higher-level statement")
 			// Assign nested statement to higher-level statement
-			stmtToAttachTo.OrElse, nodeCombinationError = attachComplexComponent(stmtToAttachTo.OrElse, stmtNode)
+			stmtToAttachTo.OrElse, nodeCombinationError = attachComplexComponent(stmtToAttachTo.OrElse, stmtNode, logicalOperator)
 		}
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
-			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
-				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
+			return tree.ParsingError{ErrorCode: nodeCombinationError.ErrorCode, ErrorMessage: "Error when merging substatements into statement. Error: " +
+				nodeCombinationError.ErrorMessage}
 		}
 
 		// Check if the iterated nested statement has been ignored entirely --> indicates failed detection as nested (as opposed to mere parsing problem)
@@ -713,7 +748,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 
 	//TODO: Check whether combinations are actually filled, or just empty nodes (e.g., { Cac{ A(), I(), Cex() } [AND] Cac{ A(), I(), Cex() } })
 
-	Println("Assigning nested tree structure", combo)
+	Println("Assigning nested tree structure", combo.String())
 
 	// Assign component type name to combination (for proper retrieval and identification as correct type)
 	combo.ComponentType = sharedPrefix
@@ -724,7 +759,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.ATTRIBUTES_PROPERTY) {
 		Println("Attaching nested attributes property to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.AttributesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, combo)
+		stmtToAttachTo.AttributesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.AttributesPropertyComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -736,7 +771,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.DIRECT_OBJECT_PROPERTY) {
 		Println("Attaching nested direct object property to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.DirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, combo)
+		stmtToAttachTo.DirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectPropertyComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -748,7 +783,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.DIRECT_OBJECT) {
 		Println("Attaching nested direct object to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.DirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, combo)
+		stmtToAttachTo.DirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.DirectObjectComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -760,7 +795,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.INDIRECT_OBJECT_PROPERTY) {
 		Println("Attaching nested indirect object property to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.IndirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, combo)
+		stmtToAttachTo.IndirectObjectPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectPropertyComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -772,7 +807,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.INDIRECT_OBJECT) {
 		Println("Attaching nested indirect object to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.IndirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, combo)
+		stmtToAttachTo.IndirectObjectComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.IndirectObjectComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -784,7 +819,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.ACTIVATION_CONDITION) {
 		Println("Attaching nested activation condition to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.ActivationConditionComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, combo)
+		stmtToAttachTo.ActivationConditionComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ActivationConditionComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -796,7 +831,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.EXECUTION_CONSTRAINT) {
 		Println("Attaching nested execution constraint to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.ExecutionConstraintComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, combo)
+		stmtToAttachTo.ExecutionConstraintComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ExecutionConstraintComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -808,7 +843,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.CONSTITUTED_ENTITY_PROPERTY) {
 		Println("Attaching nested constituted entity property to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.ConstitutedEntityPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, combo)
+		stmtToAttachTo.ConstitutedEntityPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutedEntityPropertyComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -820,7 +855,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.CONSTITUTING_PROPERTIES_PROPERTY) {
 		Println("Attaching nested constituting properties property to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.ConstitutingPropertiesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, combo)
+		stmtToAttachTo.ConstitutingPropertiesPropertyComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesPropertyComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -832,7 +867,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.CONSTITUTING_PROPERTIES) {
 		Println("Attaching nested constituting properties to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.ConstitutingPropertiesComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, combo)
+		stmtToAttachTo.ConstitutingPropertiesComplex, nodeCombinationError = attachComplexComponent(stmtToAttachTo.ConstitutingPropertiesComplex, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -844,7 +879,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	if strings.HasPrefix(sharedPrefix, tree.OR_ELSE) {
 		Println("Attaching nested or else to higher-level statement")
 		// Assign nested statement to higher-level statement
-		stmtToAttachTo.OrElse, nodeCombinationError = attachComplexComponent(stmtToAttachTo.OrElse, combo)
+		stmtToAttachTo.OrElse, nodeCombinationError = attachComplexComponent(stmtToAttachTo.OrElse, combo, "")
 		// Process error and return
 		if nodeCombinationError.ErrorCode != tree.TREE_NO_ERROR {
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
@@ -863,17 +898,37 @@ Attach complex component to tree structure under consideration of existing nodes
 Input:
 - Node of the parent tree to attach to
 - Node to attach
+- Logical operator with which node should be added if a node already exists. Only takes tree.AND, tree.XOR and tree.OR (no brackets).
 
 Used by #parseNestedStatementCombination.
 */
-func attachComplexComponent(nodeToAttachTo *tree.Node, nodeToAttach *tree.Node) (*tree.Node, tree.NodeError) {
-	Println("Attaching nested activation condition to higher-level statement")
+func attachComplexComponent(nodeToAttachTo *tree.Node, nodeToAttach *tree.Node, logicalOperator string) (*tree.Node, tree.NodeError) {
+
+	Println("Attaching nested complex component to higher-level statement (with logical linkage '" + logicalOperator + "')")
+
+	// Identify correct logical operator and check for proper version
+	if logicalOperator == "" {
+		logicalOperator = tree.AND
+	} else {
+		switch logicalOperator {
+		case tree.AND:
+			logicalOperator = tree.AND
+		case tree.XOR:
+			logicalOperator = tree.XOR
+		case tree.OR:
+			logicalOperator = tree.OR
+		default:
+			return nil, tree.NodeError{ErrorCode: tree.PARSING_ERROR_UNKNOWN_LOGICAL_OPERATOR, ErrorMessage: "Detected unknown logical operator during processing: " + logicalOperator +
+				" - please review your coding accordingly. Note that the use of the bracket versions (" + tree.AND_BRACKETS + ", " + tree.XOR_BRACKETS + ", " + tree.OR_BRACKETS + " is not supported)."}
+		}
+	}
+
 	// Assign nested statement to higher-level statement
 
 	// If already a statement assignment to complex element, ...
 	if nodeToAttachTo != nil {
 		// ... combine both
-		newNode, err := tree.Combine(nodeToAttachTo, nodeToAttach, tree.AND)
+		newNode, err := tree.Combine(nodeToAttachTo, nodeToAttach, logicalOperator)
 		if err.ErrorCode != tree.TREE_NO_ERROR {
 			return nil, err
 		}

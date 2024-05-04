@@ -1342,7 +1342,6 @@ Tests calculation of state complexity
 func TestNode_CalculateStateComplexity(t *testing.T) {
 
 	left := Node{Entry: "Left", ComponentType: "leftComp"}
-	// No suffix
 	rightLeft := Node{Entry: "rightLeft"}
 	rightRight := Node{Entry: "rightRight"}
 	right := Node{LogicalOperator: AND, ComponentType: "rightComp"}
@@ -1384,6 +1383,255 @@ func TestNode_CalculateStateComplexity(t *testing.T) {
 	}
 	if complexity != 3 {
 		t.Error("Test returning wrong state complexity. Value:", complexity)
+	}
+
+}
+
+/*
+Tests substitution of node in tree structure on intermediate level.
+*/
+func TestNode_SubstituteNodeReferenceIntermediateNode(t *testing.T) {
+
+	left := Node{LogicalOperator: XOR, Suffix: "1"}
+	leftLeft := Node{Entry: "leftLeft"}
+	leftRight := Node{Entry: "leftRight"}
+	rightLeft := Node{Entry: "rightLeft"}
+	rightRight := Node{Entry: "rightRight", Suffix: "24"}
+	right := Node{LogicalOperator: AND}
+	res, err := right.InsertLeftNode(&rightLeft)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = right.InsertRightNode(&rightRight)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	root := Node{LogicalOperator: OR, Suffix: "17"}
+	res, err = root.InsertLeftNode(&left)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	// Add to left node after adding to root
+	res, err = left.InsertLeftNode(&leftLeft)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	// Add to left node after adding to root
+	res, err = left.InsertRightNode(&leftRight)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = root.InsertRightNode(&right)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+
+	// Create new node
+	newNode := Node{Parent: nil, Entry: "newNode"}
+
+	// Substitute intermediate node on left side
+	err2 := substituteNodeReferenceInTree(&left, &newNode, &root, true, true)
+	if err2.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when substituting node in tree. Error:", err2)
+	}
+
+	if root.Left != &newNode {
+		t.Fatal("Failed to substitute new node on left side.")
+	}
+
+	if newNode.Left != &leftLeft {
+		t.Fatal("Failed to connect left child following substitution.")
+	}
+
+	if newNode.Right != &leftRight {
+		t.Fatal("Failed to connect right child following substitution.")
+	}
+
+	if newNode.Parent != &root {
+		t.Fatal("Failed to connect root as new parent following substitution.")
+	}
+
+	// Create another new node
+	anotherNewNode := Node{Parent: nil, Entry: "anotherNewNode"}
+
+	// Substitute intermediate node on right side, but with different parameters (no parent and children linkage)
+	err3 := substituteNodeReferenceInTree(&right, &anotherNewNode, &root, false, false)
+	if err3.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when substituting node in tree. Error:", err3)
+	}
+
+	if root.Right != &anotherNewNode {
+		t.Fatal("Failed to substitute new node on left side.")
+	}
+
+	if anotherNewNode.Left != nil {
+		t.Fatal("Should not have left child following substitution, but have child ", anotherNewNode.Left)
+	}
+
+	if anotherNewNode.Right != nil {
+		t.Fatal("Should not have right child following substitution, but have child ", anotherNewNode.Right)
+	}
+
+	if anotherNewNode.Parent != nil {
+		t.Fatal("Should not have parent following substitution, but have parent ", anotherNewNode.Parent)
+	}
+
+}
+
+/*
+Tests substitution of node in tree structure on leaf level. This assesses recursive calls as well as nil values.
+*/
+func TestNode_SubstituteNodeReferenceLeafNode(t *testing.T) {
+
+	left := Node{LogicalOperator: XOR, Suffix: "1"}
+	leftLeft := Node{Entry: "leftLeft"}
+	leftRight := Node{Entry: "leftRight"}
+	rightLeft := Node{Entry: "rightLeft"}
+	rightRight := Node{Entry: "rightRight", Suffix: "24"}
+	right := Node{LogicalOperator: AND}
+	res, err := right.InsertLeftNode(&rightLeft)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = right.InsertRightNode(&rightRight)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	root := Node{LogicalOperator: OR, Suffix: "17"}
+	res, err = root.InsertLeftNode(&left)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	// Add to left node after adding to root
+	res, err = left.InsertLeftNode(&leftLeft)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	// Add to left node after adding to root
+	res, err = left.InsertRightNode(&leftRight)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+	res, err = root.InsertRightNode(&right)
+	if err.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when populating tree. Error:", err)
+	}
+	if !res {
+		t.Fatal("Error when populating tree. Error:", res)
+	}
+
+	// Create new node
+	newNode := Node{Parent: nil, Entry: "newNode"}
+
+	// Substitute intermediate node on left side
+	err2 := substituteNodeReferenceInTree(&leftLeft, &newNode, &root, true, true)
+	if err2.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when substituting node in tree. Error:", err2)
+	}
+
+	if root.Left.Left != &newNode {
+		t.Fatal("Failed to substitute new node on left side.")
+	}
+
+	if newNode.Left != nil {
+		t.Fatal("Should not have left child following substitution, but have child ", newNode.Left)
+	}
+
+	if newNode.Right != nil {
+		t.Fatal("Should not have right child following substitution, but have child ", newNode.Right)
+	}
+
+	if newNode.Parent != &left {
+		t.Fatal("Failed to connect root as new parent following substitution.")
+	}
+
+	// Create another new node
+	anotherNewNode := Node{Parent: nil, Entry: "anotherNewNode"}
+
+	// Substitute intermediate node on right side, including parent and children linkage
+	err3 := substituteNodeReferenceInTree(&rightRight, &anotherNewNode, &root, true, true)
+	if err3.ErrorCode != TREE_NO_ERROR {
+		t.Fatal("Error when substituting node in tree. Error:", err3)
+	}
+
+	if root.Right.Right != &anotherNewNode {
+		t.Fatal("Failed to substitute new node on left side.")
+	}
+
+	if anotherNewNode.Left != nil {
+		t.Fatal("Should not have left child following substitution, but have child ", anotherNewNode.Left)
+	}
+
+	if anotherNewNode.Right != nil {
+		t.Fatal("Should not have right child following substitution, but have child ", anotherNewNode.Right)
+	}
+
+	if anotherNewNode.Parent != root.Right {
+		t.Fatal("Should have different parent following substitution, but have parent ", anotherNewNode.Parent)
+	}
+
+}
+
+/*
+Tests substitution of node in tree structure with nil input.
+*/
+func TestNode_SubstituteNodeReferenceNilInput(t *testing.T) {
+
+	// Create another new node
+	anotherNewNode := Node{Parent: nil, Entry: "anotherNewNode"}
+
+	// Substitute intermediate node on right side, including parent and children linkage
+	err := substituteNodeReferenceInTree(&anotherNewNode, nil, nil, true, true)
+
+	if err.ErrorCode != TREE_ERROR_NIL_NODE {
+		t.Fatal("Substitution should have thrown nil node error, but returned ", err.ErrorCode)
+	}
+
+	// Substitute intermediate node on right side, including parent and children linkage
+	err = substituteNodeReferenceInTree(nil, &anotherNewNode, nil, true, true)
+
+	if err.ErrorCode != TREE_ERROR_NIL_NODE {
+		t.Fatal("Substitution should have thrown nil node error, but returned ", err.ErrorCode)
+	}
+
+	// Substitute intermediate node on right side, including parent and children linkage
+	err = substituteNodeReferenceInTree(nil, nil, &anotherNewNode, true, true)
+
+	if err.ErrorCode != TREE_ERROR_NIL_NODE {
+		t.Fatal("Substitution should have thrown nil node error, but returned ", err.ErrorCode)
 	}
 
 }

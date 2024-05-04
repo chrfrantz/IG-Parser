@@ -7279,3 +7279,200 @@ func TestTabularOutputComplexMultilevelNestingWithOriginalStatementAllAndIgScrip
 	}
 
 }
+
+/*
+Tests complex combination of component-level nesting with embedded combinations with respect to correct logical linkages
+*/
+func TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOperatorInference(t *testing.T) {
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "Cac{ Cac{ A(actor1) I(aim1) } [OR] Cac{ Cac{ A(actor2) I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5) Cac{ A(actor6) I(aim6) } } }}"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 1 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOperatorInference.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests complex combination of component-level nesting with embedded combinations with respect to correct logical linkages,
+including the inference of an implicit AND.
+*/
+func TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOperatorInferenceImplicitAnd(t *testing.T) {
+
+	// Statement with multi-level nesting with embedded nested statement combinations (erratic spacing is intentional)
+	text := "Cac{ Cac{ A(actor6) I(actor6) } [XOR] Cac{ A(actor7) I(actor7) }} Cac{ Cac{ A(actor1) I(aim1) } [OR] Cac{ A(actor0) I(aim0) Cac{ A(actor2) I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5)} }}\n"
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 1 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOperatorInferenceImplicitAnd.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateGoogleSheetsOutput(statementMap, "", text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}

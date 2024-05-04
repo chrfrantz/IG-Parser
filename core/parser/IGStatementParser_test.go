@@ -991,7 +991,7 @@ Tests parsing of special characters in regular and nested components
 */
 func TestSpecialCharacters(t *testing.T) {
 
-	input := "A(A&dsisgj=) I(=#) Bdir((l$.ef% [AND] Ri@,g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg£jd*s)) Cac{A(/sd<-g$s%d) D(s%k£g=>js) I(s§d€k+l/g#j!ds)}"
+	input := "A(A&dsisgj=) I(=#) Bdir((l$.ef% [AND] Ri@,g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg~£jd*s)) Cac{A(/sd<-g$s%d) D(s%k£g=>js) I(s§d€k+l/g#j!ds)}"
 
 	stmt, err := ParseStatement(input)
 
@@ -1026,7 +1026,7 @@ func TestSpecialCharacters(t *testing.T) {
 		t.Fatal("Failed to detect Indirect object left")
 	}
 
-	if s.IndirectObject.Right.Entry != "(dg/sg) !sdg£jd*s" {
+	if s.IndirectObject.Right.Entry != "(dg/sg) !sdg~£jd*s" {
 		t.Fatal("Failed to detect Indirect object right")
 	}
 
