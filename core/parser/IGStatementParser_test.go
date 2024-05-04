@@ -952,7 +952,7 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 	}
 
 	// Parse all entries in tree from string to statement
-	err := combo.ParseAllEntries(func(oldValue string) (*tree.Statement, tree.ParsingError) {
+	err := combo.ParseAllEntries("", func(oldValue string) (*tree.Statement, tree.ParsingError) {
 		stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1 : strings.LastIndex(oldValue, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
 			return stmt[0].Entry.(*tree.Statement), errStmt
@@ -991,7 +991,7 @@ Tests parsing of special characters in regular and nested components
 */
 func TestSpecialCharacters(t *testing.T) {
 
-	input := "A(A&dsisgj=) I(=#) Bdir((l$.ef% [AND] Ri@,g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg£jd*s)) Cac{A(/sd<-g$s%d) D(s%k£g=>js) I(s§d€k+l/g#j!ds)}"
+	input := "A(A&dsisgj=) I(=#) Bdir((l$.ef% [AND] Ri@,g¤#)) Bind((`?a€v [XOR] (dg/sg) !sdg~£jd*s)) Cac{A(/sd<-g$s%d) D(s%k£g=>js) I(s§d€k+l/g#j!ds)}"
 
 	stmt, err := ParseStatement(input)
 
@@ -1026,7 +1026,7 @@ func TestSpecialCharacters(t *testing.T) {
 		t.Fatal("Failed to detect Indirect object left")
 	}
 
-	if s.IndirectObject.Right.Entry != "(dg/sg) !sdg£jd*s" {
+	if s.IndirectObject.Right.Entry != "(dg/sg) !sdg~£jd*s" {
 		t.Fatal("Failed to detect Indirect object right")
 	}
 

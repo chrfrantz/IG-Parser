@@ -164,16 +164,19 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 				left := input[combinations[level][idx].Left:combinations[level][idx].Operator]
 				right := input[combinations[level][idx].Operator+len(combinations[level][idx].OperatorVal)+2 : combinations[level][idx].Right]
 				Println("==Raw Left value: " + left)
+				Println("==Left shared value: ", node.GetSharedLeft())
 				Println("==Raw Operator: " + combinations[level][idx].OperatorVal)
 				Println("==Raw Right value: " + right)
+				Println("==Right shared value: ", node.GetSharedRight())
 
 				// Assign logical operator
 				node.LogicalOperator = combinations[level][idx].OperatorVal
 
-				Println("Tree before deep parsing: " + node.String())
+				Println("Tree before deep parsing: " + node.StringLevel(1))
 
 				// Left side (potentially modifying input string)
 				leftCombos, leftNonShared, left, err := detectCombinations(left, leftPar, rightPar)
+				fmt.Println("Left node after combination detection: " + left)
 				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING {
 					log.Println("Error when parsing left side: " + err.ErrorMessage)
 					return &node, input, err
@@ -192,6 +195,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 						if !res {
 							return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
 						}
+						Println("Node after adding leaf on left side: ", node.StringLevel(1))
 					} else {
 						msg := "Empty leaf value on left side: " + left +
 							" (Corresponding right value and operator: " + right + "; " + node.LogicalOperator +
@@ -242,11 +246,12 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 						//inheritSharedElements(leftNode)
 					}
 
-					Println("Tree after processing left deep: " + node.String())
+					Println("Tree after processing left deep: " + node.StringLevel(1))
 				}
 
 				// Right side (potentially modifying input string)
 				rightCombos, rightNonShared, right, err := detectCombinations(right, leftPar, rightPar)
+				fmt.Println("Right node after combination detection: " + right)
 				if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING {
 					log.Println("Error when parsing right side: " + err.ErrorMessage)
 					return &node, input, err
@@ -265,6 +270,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 						if !res {
 							return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
 						}
+						Println("Node after adding leaf on right side: ", node.StringLevel(1))
 					} else {
 						msg := "Empty leaf value on right side: " + right + " (Corresponding left value and operator: " + left + "; " + node.LogicalOperator +
 							");\n processed expression: " + input
@@ -314,7 +320,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 						//inheritSharedElements(rightNode)
 					}
 
-					Println("Tree after processing right deep: " + node.String())
+					Println("Tree after processing right deep: " + node.StringLevel(1))
 				}
 
 				// Store node for further preparation of return
@@ -329,6 +335,8 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					// return node outright if nested
 					return &node, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 				}
+			} else {
+				Println("Combination candidate is incomplete and ignored in processing: ", combinations[level][idx])
 			}
 
 			Println("==Finished parsing index " + strconv.Itoa(idx) + " on level " + strconv.Itoa(level))
@@ -356,7 +364,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 	if len(orderMap) > 1 {
 		for ct < len(input) {
 			if _, ok := orderMap[ct]; ok {
-				Println("Final tree before adding element:", ct, ":", nodeTree.String())
+				Println("Final tree before adding element:", ct, ":", nodeTree.StringLevel(1))
 				// ... then synthetically link elements
 				nodeTree, nodeCombinationError = tree.Combine(nodeTree, orderMap[ct], tree.SAND_WITHIN_COMPONENTS)
 				// Check if combination error has been picked up - here and in the beginning of loop
@@ -365,7 +373,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 						ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 				}
 				Println("Added to tree: " + fmt.Sprint(orderMap[ct]))
-				Println("Final tree after adding element:", ct, ":", nodeTree.String())
+				Println("Final tree after adding element:", ct, ":", nodeTree.StringLevel(1))
 			}
 			ct++
 		}
@@ -377,7 +385,7 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 		Println("Simple assignment of single node...")
 	}
 
-	Println("RETURNING FINAL NODE: " + nodeTree.String())
+	Println("RETURNING FINAL NODE: " + nodeTree.StringLevel(1))
 	return nodeTree, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 }
 
@@ -491,6 +499,7 @@ func detectCombinations(expression string, leftPar string, rightPar string) (map
 			//Test of existing entries
 			if _, ok := levelMap[level]; ok {
 				Println(strconv.Itoa(len(levelMap[level])) + " key(s) already defined - increasing count")
+				Println("Existing map: ", levelMap[level])
 				levelMap[level][len(levelMap[level])] = tree.Boundaries{Left: i + 1, Complete: false}
 			} else {
 				// Store index reference and create internal map (incremented with 1 to avoid left parenthesis - balanced)

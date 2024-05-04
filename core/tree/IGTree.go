@@ -44,7 +44,7 @@ Returns parents' left shared elements in order of hierarchical (top first).
 */
 func (n *Node) getParentsLeftSharedElements() []string {
 
-	if n.Parent != nil {
+	if n != nil && n.Parent != nil {
 		// Only allows for shared elements that are truly not-empty (including preventing "" as first element)
 		if n.Parent.SharedLeft != nil && len(n.Parent.SharedLeft) != 0 && n.Parent.SharedLeft[0] != "" {
 			// Recursively return parents' shared elements, followed by respective children ones
@@ -63,7 +63,7 @@ Returns parents' right shared elements in order of hierarchical (top first).
 */
 func (n *Node) getParentsRightSharedElements() []string {
 
-	if n.Parent != nil {
+	if n != nil && n.Parent != nil {
 		// Only allows for shared elements that are truly not-empty (including preventing "" as first element)
 		if n.Parent.SharedRight != nil && len(n.Parent.SharedRight) != 0 && n.Parent.SharedRight[0] != "" {
 			// Recursively return parents' shared elements, followed by respective children ones
@@ -81,6 +81,9 @@ func (n *Node) getParentsRightSharedElements() []string {
 Returns left shared elements under consideration of SHARED_ELEMENT_INHERITANCE_MODE
 */
 func (n *Node) GetSharedLeft() []string {
+	if n == nil {
+		return nil
+	}
 	switch SHARED_ELEMENT_INHERITANCE_MODE {
 	case SHARED_ELEMENT_INHERIT_OVERRIDE:
 		// Overwrite child with parent shared element values
@@ -94,13 +97,13 @@ func (n *Node) GetSharedLeft() []string {
 		return n.getParentsLeftSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedLeft := n.getParentsLeftSharedElements()
-		if n.SharedLeft != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
+		if n != nil && n.SharedLeft != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" && len(parentsSharedLeft) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedLeft, n.SharedLeft...)
-		} else if len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" {
+		} else if n != nil && len(n.SharedLeft) != 0 && n.SharedLeft[0] != "" {
 			// Return own node information
 			return n.SharedLeft
-		} else if n.Parent != nil {
+		} else if n != nil && n.Parent != nil {
 			// Return parent node information
 			return n.getParentsLeftSharedElements()
 		}
@@ -127,6 +130,9 @@ func (n *Node) GetSharedLeft() []string {
 Returns right shared elements under consideration of SHARED_ELEMENT_INHERITANCE_MODE
 */
 func (n *Node) GetSharedRight() []string {
+	if n == nil {
+		return nil
+	}
 	switch SHARED_ELEMENT_INHERITANCE_MODE {
 	case SHARED_ELEMENT_INHERIT_OVERRIDE:
 		// Overwrite child with parent shared element values
@@ -140,13 +146,13 @@ func (n *Node) GetSharedRight() []string {
 		return n.getParentsRightSharedElements()
 	case SHARED_ELEMENT_INHERIT_APPEND:
 		parentsSharedRight := n.getParentsRightSharedElements()
-		if n.SharedRight != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
+		if n != nil && n.SharedRight != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" && len(parentsSharedRight) != 0 {
 			// Append child's to parents' elements
 			return append(parentsSharedRight, n.SharedRight...)
-		} else if len(n.SharedRight) != 0 && n.SharedRight[0] != "" {
+		} else if n != nil && len(n.SharedRight) != 0 && n.SharedRight[0] != "" {
 			// Return own node information
 			return n.SharedRight
-		} else if n.Parent != nil {
+		} else if n != nil && n.Parent != nil {
 			// Return parent node information
 			return n.getParentsRightSharedElements()
 		}
@@ -363,6 +369,14 @@ func (n *Node) String() string {
 	return n.string(0)
 }
 
+/*
+Prints node content in human-readable form (for printing on console).
+For parseable version, look at Stringify().
+*/
+func (n *Node) StringLevel(level int) string {
+	return n.string(level)
+}
+
 // Indentation unit for statement tree printing
 const MinimumIndentPrefix = "===="
 
@@ -437,9 +451,14 @@ func (n *Node) string(level int) string {
 					val := n.Entry.(Statement)
 					retVal = retVal + val.string(level+1)
 				} else {
+					//tp1 := &Statement{}
+					//if reflect.TypeOf(n.Entry) == reflect.TypeOf(tp1) {
 					// Assume entry is statement reference
 					val := n.Entry.(*Statement)
 					retVal = retVal + val.string(level+1)
+					/*} else {
+						Println("Found unknown node entry type '", reflect.TypeOf(n.Entry), "'.")
+					}*/
 				}
 			}
 		}
@@ -476,10 +495,22 @@ func (n *Node) string(level int) string {
 
 		// Higher-level nesting of combinations - indentation from current level
 		retPrep := "\n" + prefix + "(\n" + //out +
-			prefix + "Left: \n" + n.Left.string(level+1) + "\n" +
-			prefix + "Operator: " + n.LogicalOperator + "\n" +
-			prefix + "Right: \n" + n.Right.string(level+1) + "\n" +
-			prefix + ")"
+			prefix + "Left: \n" + n.Left.string(level+1) + "\n"
+		if n.Left.GetSharedLeft() != nil {
+			retPrep += prefix + " - Left shared (left): " + fmt.Sprint(n.Left.GetSharedLeft()) + "\n"
+		}
+		if n.Left.GetSharedRight() != nil {
+			retPrep += prefix + " - Left shared (right): " + fmt.Sprint(n.Left.GetSharedRight()) + "\n"
+		}
+		retPrep += prefix + "Operator: " + n.LogicalOperator + "\n" +
+			prefix + "Right: \n" + n.Right.string(level+1) + "\n"
+		if n.Right.GetSharedLeft() != nil {
+			retPrep += prefix + " - Right shared (left): " + fmt.Sprint(n.Right.GetSharedLeft()) + "\n"
+		}
+		if n.Right.GetSharedRight() != nil {
+			retPrep += prefix + " - Right shared (right): " + fmt.Sprint(n.Right.GetSharedRight()) + "\n"
+		}
+		retPrep += prefix + ")"
 
 		// Assumes that suffix and annotations are in string format for nodes that have nested statements
 		// TODO: see whether that needs to be adjusted
@@ -1377,6 +1408,74 @@ func aggregateNodes(aggregationType int, leftNodes [][]*Node, rightNodes [][]*No
 }
 
 /*
+Substitutes node references within a tree structure for given start node (tree) based on *downward* search
+of branches (left, right).
+Allows for indication whether new node should be linked to parent, and whether children from original node should be inherited.
+*/
+func substituteNodeReferenceInTree(originalNode *Node, newNode *Node, tree *Node, linkNewNodeToParent bool, inheritChildren bool) NodeError {
+	if originalNode == nil {
+		return NodeError{ErrorCode: TREE_ERROR_NIL_NODE, ErrorMessage: "Node to be substituted is nil."}
+	}
+	if newNode == nil {
+		return NodeError{ErrorCode: TREE_ERROR_NIL_NODE, ErrorMessage: "Node to substitute existing node is nil."}
+	}
+	if tree == nil {
+		return NodeError{ErrorCode: TREE_ERROR_NIL_NODE, ErrorMessage: "Node tree to perform substitution on is nil."}
+	}
+
+	// Search downwards
+	if tree.Left != nil {
+		if tree.Left == originalNode {
+			if inheritChildren {
+				// Inherit children on left side and relink parent
+				if tree.Left.Left != nil {
+					newNode.Left = tree.Left.Left
+					tree.Left.Left.Parent = newNode
+				}
+				if tree.Left.Right != nil {
+					newNode.Right = tree.Left.Right
+					tree.Left.Right.Parent = newNode
+				}
+			}
+			if linkNewNodeToParent {
+				// Link to original node's parent
+				newNode.Parent = tree
+			}
+			// Replace left child
+			tree.Left = newNode
+		} else {
+			// if not nil, but left element, delegate down
+			substituteNodeReferenceInTree(originalNode, newNode, tree.Left, linkNewNodeToParent, inheritChildren)
+		}
+	}
+	if tree.Right != nil {
+		if tree.Right == originalNode {
+			if inheritChildren {
+				// Inherit children on right side and relink parent
+				if tree.Right.Left != nil {
+					newNode.Left = tree.Right.Left
+					tree.Right.Left.Parent = newNode
+				}
+				if tree.Right.Right != nil {
+					newNode.Right = tree.Right.Right
+					tree.Right.Right.Parent = newNode
+				}
+			}
+			if linkNewNodeToParent {
+				// Link to original node's parent
+				newNode.Parent = tree
+			}
+			// Replace right child
+			tree.Right = newNode
+		} else {
+			// if not nil, but right element, delegate down
+			substituteNodeReferenceInTree(originalNode, newNode, tree.Right, linkNewNodeToParent, inheritChildren)
+		}
+	}
+	return NodeError{ErrorCode: TREE_NO_ERROR}
+}
+
+/*
 Calculate depth of node tree
 */
 func (n *Node) CalculateDepth() int {
@@ -1455,37 +1554,261 @@ func (n *Node) IsNil() bool {
 
 /*
 Applies statement parsing function to all entries below a given node.
+Takes string containing component information, as well as parsing function as parameters.
 */
-func (n *Node) ParseAllEntries(function func(string) (*Statement, ParsingError)) ParsingError {
+func (n *Node) ParseAllEntries(componentType string, function func(string) (*Statement, ParsingError)) ParsingError {
 	if n.IsNil() {
 		return ParsingError{ErrorCode: PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Attempted to parse nil element."}
 	}
-	if !n.IsEmptyOrNilNode() && n.Entry != nil {
+	if !n.IsEmptyOrNilNode() && n.Entry != nil && reflect.TypeOf(n.Entry) == reflect.TypeOf("") {
 
-		// Execute actual function
-		newEntry, err := function(n.Entry.(string))
-		if err.ErrorCode != PARSING_NO_ERROR {
-			Println("Received error when parsing nested string to statement.")
-			return err
+		// Check whether complex nested structure to be attached as subtree on given component
+		/*
+				The case is if a combination contains also includes component-level nesting (e.g., 'Cac{ Cac{ A1 I1 C1 } [OR] Cac{ A2 I2 Cac2{ A3 I3 C3 } } }')
+				This would be a combination of component combinations and component-level nesting on intermediate levels.
+				This requires:
+					- Copying entry element (which contains the unparsed component information (here: Cac{ A2 I2 })) into new node and generate statement
+				    - Link new node to hierarchy
+				    - Parse embedded combinations (left and right branch) and attach to component on intermediate node that it nests on (here: Cac)
+			        - Substitute reference from parent to original child node (parent will know whether left or right) to new intermediate node
+			        - Reassign new intermediate node to n, so that it will be used in further downstream processing
+			    Check for string entry at the beginning prevents reiteration into this branch.
+		*/
+		if !n.Left.IsNil() && !n.Right.IsNil() {
+			// Create new node and only copy entry field
+			newIntermediateNode := Node{}
+			newIntermediateNode.Entry = n.Entry
+
+			// Execute actual parsing function for entry content (e.g., Cac{ A2 I2 }), i.e., transform from string to Statement
+			newEntry, err := function(newIntermediateNode.Entry.(string))
+			if err.ErrorCode != PARSING_NO_ERROR {
+				Println("Received error when parsing nested string to statement.")
+				return err
+			}
+			// Assigned parsed statement as new Entry element (now Statement) to intermediate node
+			newIntermediateNode.Entry = newEntry
+			// Reassign parent of intermediate node to the same as the original node's parent
+			newIntermediateNode.Parent = n.Parent
+			// Reset entry in original node to prevent reparsing during recursion
+			n.Entry = nil
+
+			// Attach the contents of the original node (the combination) to complex component node of newly generated
+			// intermediate node and parse its elements
+			_, err2 := attachAndParseGivenComplexComponent(componentType, &newIntermediateNode, n, function)
+			if err2.ErrorCode != PARSING_NO_ERROR {
+				return err2
+			}
+
+			// Adjust reference in parent of original node (identifies whether left or right child)
+			substituteNodeReferenceInTree(n, &newIntermediateNode, newIntermediateNode.Parent, false, false)
+			// Shift reference in combination structure to new intermediate node
+			// (now containing intermediate element and nested combination)
+			n = &newIntermediateNode
+
+			return ParsingError{ErrorCode: PARSING_NO_ERROR}
+		} else {
+			// ... if only entry element exists (i.e., leaf), parse it
+
+			// Parse leaf entry ...
+			leafEntry, err := function(n.Entry.(string))
+			if err.ErrorCode != PARSING_NO_ERROR {
+				Println("Received error when parsing nested string to statement.")
+				return err
+			}
+			// ... and reassign parsed element (i.e., substitute previous string element with node representation of statement)
+			n.Entry = leafEntry
 		}
-		// and reassign parsed element (i.e., substitute previous string element with node representation of statement)
-		n.Entry = newEntry
 	}
 	if !n.Left.IsNil() {
-		err := n.Left.ParseAllEntries(function)
+		// Parse left child of combination
+		err := n.Left.ParseAllEntries(componentType, function)
 		if err.ErrorCode != PARSING_NO_ERROR {
 			Println("Received error when parsing left-hand nested statement.")
 			return err
 		}
 	}
 	if !n.Right.IsNil() {
-		err := n.Right.ParseAllEntries(function)
+		// Parse right child of combination
+		err := n.Right.ParseAllEntries(componentType, function)
 		if err.ErrorCode != PARSING_NO_ERROR {
 			Println("Received error when parsing right-hand nested statement.")
 			return err
 		}
 	}
 	return ParsingError{ErrorCode: PARSING_NO_ERROR}
+}
+
+/*
+Embeds a given node (nodeToAttach) in a new embedding node (nodeToAttachTo) under a given complex component field (specified via componentType),
+and run parsing of newly added node element using a given function (function).
+Returns embedding node including parsed embedded component.
+Used for parsing combinations embedded in component-level nesting (i.e., detection of component-level nesting in combinations) in function #ParseAllEntries().
+*/
+func attachAndParseGivenComplexComponent(componentType string, nodeToAttachTo *Node, nodeToAttach *Node, function func(string) (*Statement, ParsingError)) (*Node, ParsingError) {
+
+	// Perform component-type-specific parsing for nested combinations
+	// NOTE: Ensure alignment with support for nesting (e.g., visible in #printComponent() and #generateLeafArrays() in IGStatement.go).
+	switch componentType {
+	case ATTRIBUTES_PROPERTY:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).AttributesPropertyComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).AttributesPropertyComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).AttributesPropertyComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case DIRECT_OBJECT:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).DirectObjectComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).DirectObjectComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).DirectObjectComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case DIRECT_OBJECT_PROPERTY:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).DirectObjectPropertyComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).DirectObjectPropertyComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).DirectObjectPropertyComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case INDIRECT_OBJECT:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).IndirectObjectComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).IndirectObjectComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).IndirectObjectComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case INDIRECT_OBJECT_PROPERTY:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).IndirectObjectPropertyComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).IndirectObjectPropertyComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).IndirectObjectPropertyComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case ACTIVATION_CONDITION:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).ActivationConditionComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).ActivationConditionComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).ActivationConditionComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case EXECUTION_CONSTRAINT:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).ExecutionConstraintComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).ExecutionConstraintComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).ExecutionConstraintComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case CONSTITUTED_ENTITY_PROPERTY:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).ConstitutedEntityPropertyComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).ConstitutedEntityPropertyComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).ConstitutedEntityPropertyComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case CONSTITUTING_PROPERTIES:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).ConstitutingPropertiesComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).ConstitutingPropertiesComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).ConstitutingPropertiesComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case CONSTITUTING_PROPERTIES_PROPERTY:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).ConstitutingPropertiesPropertyComplex = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).ConstitutingPropertiesPropertyComplex.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).ConstitutingPropertiesPropertyComplex.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	case OR_ELSE:
+		// Assign original node to corresponding component in newly generated Statement structure
+		nodeToAttachTo.Entry.(*Statement).OrElse = nodeToAttach
+
+		// Remove parent reference in newly allocated node
+		// to detach from higher-level combination for later substitution of original node
+		nodeToAttachTo.Entry.(*Statement).OrElse.Parent = nil
+
+		// Parse string entries embedded in component
+		err := nodeToAttachTo.Entry.(*Statement).OrElse.ParseAllEntries(componentType, function)
+		if err.ErrorCode != PARSING_NO_ERROR {
+			Println("Received error when parsing nested string to statement.")
+			return nil, err
+		}
+	default:
+		return nil, ParsingError{ErrorCode: PARSING_ERROR_COMPONENT_DOES_NOT_SUPPORT_NESTING, ErrorMessage: "Component '" + componentType + "' does not support nesting (in the context of parsing component-level " +
+			"nesting with embedded combinations."}
+	}
+
+	return nodeToAttachTo, ParsingError{ErrorCode: PARSING_NO_ERROR}
 }
 
 /*

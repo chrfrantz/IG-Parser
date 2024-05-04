@@ -452,6 +452,9 @@ const PARSING_ERROR_INVALID_OPERATOR_COMBINATIONS = "INVALID_LOGICAL_OPERATOR_CO
 // Signals the detection of a logical operator outside a combination (i.e., no left or right side)
 const PARSING_ERROR_LOGICAL_OPERATOR_OUTSIDE_COMBINATION = "LOGICAL_OPERATOR_OUTSIDE_COMBINATION"
 
+// Signals the occurrence of an unknown logical operator - used in #parser.attachComplexComponent()
+const PARSING_ERROR_UNKNOWN_LOGICAL_OPERATOR = "UNKNOWN_LOGICAL_OPERATOR"
+
 // Indicates nested statements ignored during coding (relevant when parsing nested statements) - in contrast to #PARSING_ERROR_IGNORED_ELEMENTS_DURING_NODE_PARSING
 const PARSING_ERROR_IGNORED_NESTED_ELEMENTS = "IGNORED_ELEMENTS_NESTED_STATEMENT_PARSING"
 
@@ -478,6 +481,11 @@ const PARSING_ERROR_UNABLE_TO_EXTRACT_COMPONENT_CONTENT = "UNABLE_TO_EXTRACT_COM
 
 // Indicates that component was not found during preprocessing
 const PARSING_ERROR_COMPONENT_NOT_FOUND = "COMPONENT_NOT_FOUND"
+
+// Indicates that component does not support nesting (used as part of reassignment for intermediately nested component
+// information in shared element during combination parsing)
+// Used by #attachAndParseGivenComplexComponent(), which is used by #ParseAllEntries()
+const PARSING_ERROR_COMPONENT_DOES_NOT_SUPPORT_NESTING = "COMPONENT_DOES_NOT_SUPPORT_NESTING"
 
 // Indicates that multiple component symbols have been found in component specification -- points to incorrect coding
 const PARSING_ERROR_MULTIPLE_COMPONENTS_FOUND = "MULTIPLE_COMPONENTS_FOUND"
@@ -586,6 +594,9 @@ const TREE_INPUT_VALIDATION = "INPUT_VALIDATION"
 
 // Indicates that a NodeError embeds a ParsingError
 const TREE_ERROR_EMBEDDED_PARSING_ERROR = "TREE_EMBEDDED_PARSING_ERROR"
+
+// Indicates that a node is nil (used by #substituteNodeReferenceInTree)
+const TREE_ERROR_NIL_NODE = "TREE_ERROR_NIL_NODE"
 
 /*
 StateComplexity struct containing number of individual options per component,
