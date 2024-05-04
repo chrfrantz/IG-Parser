@@ -1,5 +1,6 @@
 # IG Parser Revisions
 
+* Version 0.6   - Fixed inference of logical operators for component combinations when combined with nested components. Added support for tilde ('~') in input. Added convenience function for node substitution.
 * Version 0.5   - Added Original Statement inclusion option for output. Fixed bug related to inclusion of IG Script output. 
 * Version 0.4.1 - Added validation button to test raw statement input for imbalanced parentheses (and copies content into 'Encoded Statement' field following successful valiation).
 * Version 0.4   - Added contributor information and licensing. Reorganized dependencies and code base, including file commenting. Bugfix: Prevent crash when parsing pair combinations without logical operators.
