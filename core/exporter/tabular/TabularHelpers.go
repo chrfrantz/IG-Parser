@@ -1,6 +1,7 @@
 package tabular
 
 import (
+	"IG-Parser/core/shared"
 	"IG-Parser/core/tree"
 	"regexp"
 )
@@ -73,4 +74,27 @@ func CleanInput(input string, separator string) string {
 	input = re2.ReplaceAllString(input, "")
 
 	return input
+}
+
+/*
+Performs output-specific modification of value prior to inclusion in output.
+Returns modified value to be used in corresponding output.
+Takes input value (value), as well as indication of output type (outputType)
+to administer output-specific adjustments. If outputType is empty (""), no
+output-specific modification (other than general substitutions) are performed.
+*/
+func performOutputSpecificAdjustments(value string, outputType string) string {
+
+	// Substitute specific symbols relevant for output generation (e.g. quotation marks).
+	value = shared.EscapeSymbolsForExport(value)
+
+	// Perform Google-specific adjustment
+	if outputType == OUTPUT_TYPE_GOOGLE_SHEETS {
+		// Duplicate leading ' for proper Google Sheets parsing
+		if len(value) > 0 && value[0:1] == "'" {
+			value = "'" + value
+		}
+	}
+
+	return value
 }

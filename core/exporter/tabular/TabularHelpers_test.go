@@ -124,3 +124,24 @@ func TestCleanInput(t *testing.T) {
 		t.Fatal("Preprocessing did not work according to expectation.")
 	}
 }
+
+/*
+Tests basic processing of text for output generation
+*/
+func TestPerformOutputSpecificAdjustments(t *testing.T) {
+
+	input := "\" Example txt with \" quotation mark embedded \" randomly ..."
+
+	// Google-specific
+	output := performOutputSpecificAdjustments(input, OUTPUT_TYPE_GOOGLE_SHEETS)
+	if output != "'' Example txt with ' quotation mark embedded ' randomly ..." {
+		t.Fatal("Test error: Substitution for characters during export resulted in : " + output)
+	}
+
+	// no Google-specific consideration
+	output = performOutputSpecificAdjustments(input, "")
+	if output != "' Example txt with ' quotation mark embedded ' randomly ..." {
+		t.Fatal("Test error: Substitution for characters during export resulted in : " + output)
+	}
+
+}

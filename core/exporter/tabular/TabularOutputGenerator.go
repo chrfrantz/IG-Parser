@@ -270,18 +270,8 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 
 				// SPECIAL SYMBOLS (APPLICATION-SPECIFIC) --> SYMBOLS THAT REQUIRE SUBSTITUTION
 				// Substitute symbols before producing output (e.g., " with ')
-				// TODO: Review for further symbols
-				entryValStr := shared.EscapeSymbolsForExport(entryVal.String())
-
-				// HANDLE OUTPUT-SPECIFIC MODIFICATIONS
-
-				// TODO: Google Sheets specific - consider adaption to support further formats
-				if outputType == OUTPUT_TYPE_GOOGLE_SHEETS {
-					// Duplicate leading ' for proper Google Sheets parsing
-					if len(entryValStr) > 0 && entryValStr[0:1] == "'" {
-						entryValStr = "'" + entryValStr
-					}
-				}
+				// Perform output-specific adaptations
+				entryValStr := performOutputSpecificAdjustments(entryVal.String(), outputType)
 
 				// ADDING ACTUAL ENTRY
 
@@ -364,8 +354,8 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 										existing += cellValueSeparator
 									}
 
-									// Print flat content
-									existing += v.StringFlat()
+									// Perform application- and output-specific adjustments of private node
+									existing += performOutputSpecificAdjustments(v.StringFlat(), outputType)
 
 									// (Re)Assign to entry to be output
 									entryMap[privateNodeValue.GetComponentName()] = existing
@@ -384,8 +374,8 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 								existing += cellValueSeparator
 							}
 
-							// Add actual primitive value
-							existing += privateNodeValue.Entry.(string)
+							// Modify actual primitive value for output
+							existing += performOutputSpecificAdjustments(privateNodeValue.Entry.(string), outputType)
 
 							// (Re)Assign to entry to be output
 							entryMap[privateNodeValue.GetComponentName()] = existing
@@ -405,8 +395,8 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 						// ... and append if necessary
 						existing += cellValueSeparator
 					}
-					// Add actual value
-					existing += statement[componentIdx].GetAnnotations().(string)
+					// Add actual value after output modification
+					existing += performOutputSpecificAdjustments(statement[componentIdx].GetAnnotations().(string), outputType)
 					// (Re)Assign to entry to be output
 					entryMap[statement[componentIdx].GetComponentName()+tree.ANNOTATION] = existing
 				}
@@ -469,8 +459,9 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 						} else {
 							// IG Core output without nesting
 
-							// Append flat string representation of nested statements
-							entryMap[headerSymbols[componentIdx]] += entryVal.StringFlat()
+							// Append flat string representation of nested statements following output-specific treatment
+							actualEntry := performOutputSpecificAdjustments(entryVal.StringFlat(), outputType)
+							entryMap[headerSymbols[componentIdx]] += actualEntry
 
 							// Add logical operator if not last entry (and parent not empty otherwise)
 							if !last && entryVal.Parent != nil {
@@ -504,8 +495,12 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 						} else {
 							// IG Core output without nesting
 
+							// Perform output and application-specific modifications of output values
+							// Note: No Google-specific adaptation, since nested components are combined as part of output generation
+							actualEntry := performOutputSpecificAdjustments(entryVal.StringFlat(), "")
+
 							// Append flat string representation of nested statements
-							entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] += entryVal.StringFlat()
+							entryMap[statement[componentIdx].GetComponentName()+tree.REF_SUFFIX] += actualEntry
 
 							// Add logical operator if not last entry (and parent not empty otherwise)
 							if !last && entryVal.Parent != nil {
@@ -857,6 +852,10 @@ as well as options to print header lines, and IG Script input as part of the out
 */
 func generateCSVOutput(statementMap []map[string]string, originalStatement string, igScriptInput string, headerCols []string, headerColsNames []string, separator string, filename string, overwrite bool, printHeaders bool, printOriginalStatement string, printIgScriptInput string) (string, tree.ParsingError) {
 
+	// Perform necessary symbol substitution for output generation
+	originalStatement = performOutputSpecificAdjustments(originalStatement, OUTPUT_TYPE_CSV)
+	igScriptInput = performOutputSpecificAdjustments(igScriptInput, OUTPUT_TYPE_CSV)
+
 	// Linebreak at the end of each entry
 	suffix := "\n"
 
@@ -872,6 +871,10 @@ Optionally writes to file (if filename is provided), with option to overwrite ex
 as well as options to print header lines, and IG Script input as part of the output (for options see tabular.IG_SCRIPT_INCLUSION_OPTIONS).
 */
 func generateGoogleSheetsOutput(statementMap []map[string]string, originalStatement string, igScriptInput string, headerCols []string, headerColsNames []string, separator string, filename string, overwrite bool, printHeaders bool, printOriginalStatement string, printIgScriptInput string) (string, tree.ParsingError) {
+
+	// Perform necessary symbol substitution for output generation
+	originalStatement = performOutputSpecificAdjustments(originalStatement, OUTPUT_TYPE_GOOGLE_SHEETS)
+	igScriptInput = performOutputSpecificAdjustments(igScriptInput, OUTPUT_TYPE_GOOGLE_SHEETS)
 
 	// Quote to terminate input string for Google Sheets interpretation
 	quote := "\""
@@ -1113,13 +1116,17 @@ func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.
 		return result
 	case OUTPUT_TYPE_GOOGLE_SHEETS:
 		// Create Google Sheets output based on generated map, alongside header names as output
-		result.Output, result.Error = generateGoogleSheetsOutput(result.StatementMap, originalStatement, igScriptInput, result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
+		result.Output, result.Error = generateGoogleSheetsOutput(result.StatementMap, originalStatement, igScriptInput,
+			result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders,
+			printOriginalStatement, printIgScriptInput)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return result
 		}
 	case OUTPUT_TYPE_CSV:
 		// Create CSV output based on generated map, alongside header names as output
-		result.Output, result.Error = generateCSVOutput(result.StatementMap, originalStatement, igScriptInput, result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
+		result.Output, result.Error = generateCSVOutput(result.StatementMap, originalStatement, igScriptInput,
+			result.HeaderSymbols, result.HeaderNames, separator, filename, overwrite, printHeaders,
+			printOriginalStatement, printIgScriptInput)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			return result
 		}
