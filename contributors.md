@@ -13,5 +13,6 @@ In addition to the contributor name, the mail address may be provided (in pointy
 
 * Contributors to IG Parser codebase:
   * Christopher Frantz (cf@christopherfrantz.org) [@chrfrantz]
+  * Jonas Kjærandsen [@Kjaerandsen] - contributed refined editor with color-coding support
 
 If intending to contribute to the code base, please do so via pull requests (remember update this file as part of the pull request).
