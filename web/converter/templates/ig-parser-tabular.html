@@ -2,11 +2,14 @@
 {{template "coding-interface.html" . }}
 
 <!-- link to switch between parser versions -->
-<span data-text=""><a href="/visual/" onclick="saveFormContent()">Switch to visual version of IG Parser</a></span><br /><br />
+<span data-text=""><a href="/visual/" onclick="saveFormContent()">Switch to visual version of IG Parser</a></span>
+<span data-text="">
+<div id="visualToggle" role="button" aria-pressed="false" onclick="visualToggle()" tabindex="0">Toggle advanced editor features</div>
+</span><br /><br />
 
 <!-- additional entry field -->
-<span data-text="{{.StmtIdHelp}}" class="tooltip">Statement ID:</span>
-<input id="stmtId" name="stmtId" onkeyup="saveFormContent()" type="text" value="{{.StmtId}}"><br />
+<span data-text="{{.StmtIdHelp}}" class="tooltip" id="stmtIdLabel">Statement ID:</span>
+<input id="stmtId" name="stmtId" onkeyup="saveFormContent()" type="text" value="{{.StmtId}}" aria-labelledby="stmtIdLabel"><br />
 
 <!-- Parameters -->
 <span data-text="{{.ParametersHelp}}" class="tooltip">Parameters:</span>
@@ -29,8 +32,8 @@
 </select>
 
 <!-- Output type -->
-<span data-text="{{.OutputTypeHelp}}" class="tooltip">Output format:</span>
-<select id="outputType" name="outputType" type="select">
+<span data-text="{{.OutputTypeHelp}}" class="tooltip" id="outputLabel">Output format:</span>
+<select id="outputType" name="outputType" type="select" aria-labelledby="outputLabel">
 {{ range $type := .OutputTypes }}
 <option value="{{ $type }}" {{ if eq $.OutputType $type }}selected="selected"{{ end }}>{{ $type }}</option>
 {{ end }}
@@ -48,6 +51,17 @@
         </pre>
     </div>
 {{end}}
+
+<script>
+   toggleButton = document.getElementById("visualToggle")
+   toggleButton.addEventListener('keydown', function(event) {
+      if (event.key == "Enter"){
+      event.target.click();
+      return
+      }
+   })
+</script>
+
 </body>
 
 </html>

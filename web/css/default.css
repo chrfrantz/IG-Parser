@@ -34,7 +34,7 @@ h2 {
     line-height: 42px;
     font-family: Roboto, Arial, sans-serif;
     font-size: 16px;
-    color: #8c8787;
+    color: #767474;
     z-index: 2;
     display: block;
     flex-direction: column;
@@ -402,3 +402,176 @@ Modifications to ace.js:
     display: block; padding: 0.2em 0 0.6em 0;
 }
 .classic { padding: 0.8em 1em; }*/
+
+/*
+Ace.js annotation highlighting:
+*/
+
+.ace_Attribute {
+    background-color: #AAE7CC;
+    border-radius: 3px;
+}
+
+.ace_Deontic {
+    background-color: #AAE7CC;
+    border-radius: 3px;
+}
+
+.ace_Aim {
+    background-color: #AAE7CC;
+    border-radius: 3px;
+}
+
+.ace_Direct_Object {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Indirect_Object {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Activation_Condition {
+    background-color: #F292A4;
+    border-radius: 3px;
+}
+
+.ace_Activation_Constraint {
+    background-color: #F292A4;
+    border-radius: 3px;
+}
+
+.ace_Constituted_Entity {
+    background-color: #FCD581;
+    border-radius: 3px;
+}
+
+.ace_Modal {
+    background-color: #FCD581;
+    border-radius: 3px;
+}
+
+.ace_Constitutive_Function {
+    background-color: #FCD581;
+    border-radius: 3px;
+}
+
+.ace_Constituting_Properties {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Or_Else {
+    background-color: #F292A4;
+    border-radius: 3px;
+}
+
+.ace_Logical_Operator {
+    background-color: #F292A4;
+    border-radius: 3px;
+}
+
+.ace_Semantic_Annotation {
+    background-color: #dfd9d9;
+    text-decoration: underline;
+    border-radius: 3px;
+}
+
+.ace_Direct_Object_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Indirect_Object_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Attribute_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Constituting_Properties_Properties {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.ace_Constituted_Entity_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
+.text_tooltip {
+    background:#000;
+    font-size: 13px;
+    color:#fff;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0 2px 0 2px;
+}
+
+.buttons {
+    display: inline-block;
+    background: #E9E9ED;
+    border: 1px solid #ccc;
+    width: calc(100% - 12px);
+    padding: 0 4px 0 4px;
+    border-radius: 3px;
+}
+
+.hidden {
+   display: none;
+}
+
+#visualToggle {
+   color: #666;
+   text-decoration: underline;
+   display: inline-block;
+}
+
+#visualToggle:hover {
+   color: blue;
+   cursor: pointer;
+}
+
+/* For the selection buttons */
+.button {
+    display: inline-block;
+    background: #fff;
+    color: #666;
+    border: 1px solid;
+    padding: 0 3px 0 3px;
+    margin: 3px 0 3px 0;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.ace-tm .ace_marker-layer .ace_selection{
+    border-bottom: 2px rgb(82, 75, 76) dotted;
+}
+
+/*
+Modal styling (dialog html element for displaying information in the editor)
+*/
+::backdrop {
+    background-color: rgba(125, 125, 125, 0.3);
+}
+
+:focus {
+    outline: 2px solid blue;
+}
+
+/* Toggle buttons */
+.toggleActive {
+    background-color: #000;
+    color: #fff;
+}
+
+/* Makes the selection mode unavailable for touch users */
+@media (pointer: coarse) {
+    #selection {
+        display: none;
+    }
+}
