@@ -13,20 +13,25 @@ Note: Either version allows interactive switching to the respective other while 
 
 See [Revision history](changelog.md) for a detailed overview of changes.
 
-See [Contributors](contributors.md) for contributions to the project. We explicitly encourage external contributions. Please feel free to get in touch if you plan to contribute to the repository. Please create an issue to report bugs, or to propose features (alternatively also per mail). 
+See [Contributors](contributors.md) for an overview of contributions to the project. We explicitly encourage external contributions. Please feel free to get in touch if you plan to contribute to the repository. Please create an issue to report bugs, or to propose features (alternatively also per mail). 
 
 ## Overview
 
-IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used locally, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to the user interface, the syntactic principles and essential features of IG Script, followed by a set of examples showcasing all features. As a final aspect, deployment instructions for IG Parser are provided. 
+IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used locally, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to the user interface, followed by a comprehensive introduction to the syntactic principles and essential features of IG Script. This includes a set of examples showcasing all features and various levels of complexity, while highlighting typical mistakes in the encoding. As a final aspect, the deployment instructions for IG Parser are provided. 
 
 The conceptual background of the Institutional Grammar 2.0 is provided in the corresponding [article](https://doi.org/10.1111/padm.12719) and [book](https://newinstitutionalgrammar.org), augmented with supplementary operational [coding guidelines](https://arxiv.org/abs/2008.08937).
 
 ## User Interface Guide
 
-The user interface consists of an entry field for the 'Original Statement'. The purpose of this field is to keep track of the original statement during coding, but also to include it in the output if you choose to do so (see 'Parameters' section in the UI). Prior to coding, it also allows you to vet the statement for obvious challenges in coding (e.g., imbalanced parentheses, non-supported symbol), which you can do by clicking on 'Validate 'Original Statement' input'. This will allow you copy the content to the 'Encoded Statement' field (it warns you if encoded code exists to prevent accidental overwriting of the existing coding).
+The user interface consists of various entry fields, followed by parameters (specific to each version of the parser) and an output section that will contain the generated output. The following subsections highlight the key features of each element.
 
-The 'Encoded Statement' area provides the actual coding editor, but in an 'Advanced Mode' that includes additional input options (see below) as well as color-coding of the encoded statement. Alternatively, you can use the standard mode that does not provide any advanced features, such as alternative inputs and avoids color-coding. But it supports basic bracket matching. 
+### General Entry Fields
 
+The initial entry field holds the 'Original Statement'. The purpose of this field is to keep track of the original statement during coding, but also to include it in the output if you choose to do so (see 'Parameters' section in the UI; discussed below). Prior to coding, it also allows you to vet the statement for obvious challenges in coding (e.g., imbalanced parentheses, non-supported symbol), which you can do by clicking on 'Validate 'Original Statement' input'. This will allow you copy the content to the 'Encoded Statement' field (it warns you if encoded code exists to prevent accidental overwriting of the existing coding).
+
+The 'Encoded Statement' area provides the actual coding editor. It features both an 'Advanced Mode' that includes additional input options (see below) as well as color-coding of the encoded statement. Alternatively, you can use the standard mode that does not provide any advanced features beyond basic bracket matching, and operates by directly encoding in the IG Script syntax (described later). This version is more useful if using mobile devices or facing accessibility issues based on the color-coding.
+
+### Advanced Editor
 The advanced user interface has four main input options available to annotate statements:
 * Firstly the option of simply writing out the symbols manually in the encoded statement field to annotate the text. This means manually typing each symbol and creating the brackets for each symbol. 
 * The second option is to highlight the section or span you want to annotate with a symbol and then click on the button for that specific symbol below the editor. This will then encapsulate that section with the specified symbol.
@@ -37,9 +42,15 @@ In addition to these features there are toggles for nesting, which enables the c
 
 Another feature of the website is keyboard interaction. Where each element can be navigated using the "tab" key or "shift+tab" to navigate in reverse. Additionally, each button can be pressed using the "enter" key and the parameter toggles can be clicked using the "space" key. Further for selecting or highlighting text in the editor the combination of "ctrl+shift" and the arrow keys can be used. This makes the website accessible using a keyboard as the only input.
 
+### Toggling between variants (editors, parser versions)
+
 You can interactively toggle between basic and the advanced mode by clicking on 'Toggle advanced editor features'. You can further interactively switch between the tabular output mode as well as the visual output mode of the parser. In all those cases no coding information is lost.
 
+### Output-specific parameters
+
 Below the editor area you will find output-specific parameters, all of which have a simple help (by hovering over their label; some allow for opening of external pages for more extensive guidance).
+
+#### Tabular output
 
 * For the tabular parser version, the parameters include
   * the 'Statement ID' (which is the ID based on which individual statement IDs are generated),
@@ -50,6 +61,8 @@ Below the editor area you will find output-specific parameters, all of which hav
  
 By clicking on 'Generate tabular output', the input is parsed and output generated, which can be copied into the clipboard for transferral into a tool of your choice.
 
+#### Visual output
+
 * For the visual parser version, the parameters include
   * the inclusion of 'IG Logico' annotations in the output
   * the inclusion of the Degree of Variability (a metric introduced as part of the IG 2.0 - see the conceptual guidance),
@@ -58,11 +71,13 @@ By clicking on 'Generate tabular output', the input is parsed and output generat
   * the choice to print activation conditions on top of the tree (to make statements more readable by reflecting the logical precedence of activation conditions over the rest of the statement),
   * the specification of the canvas dimensions (this is useful to customize the size to your needs and graph scale -- a future feature will be to automate the scaling)
  
-By clicking on 'Generate visual output', the input information is parsed and the tree displayed.
+By clicking on 'Generate visual output', the input information is parsed and the statement tree structure displayed.
 
-To support efficient coding, specifically for complex statements it is often useful to encode and evaluate those in visual mode, before generating the tabular output for downstream processing. 
+### Usage considerations
 
-Note that the UI stores the last entry in your browser. When reopening your browser, it should hence display the statement you have been working on (useful if internet connection is lost, or browser crashes). No information is stored on the server side, but in your browser (the specific one you are using, not across browsers).
+* To support efficient coding, specifically for complex statements it is often useful to encode and evaluate those in visual mode, before generating the tabular output for downstream processing. Use the interactive switching features for this purpose.
+* As indicated before, when hovering of a label on the UI, a short description is displayed highlighting its key function (or variably opens a new tab, where more support is provided, e.g., for the 'Encoded Statement').
+* Note that the UI stores the last entry in *your* browser. When reopening your browser, it should hence display the statement you have been working on (not the history). This feature is useful if internet connection is lost, or if you work with interruptions (so you can continue at a later stage), or if your browser crashes. No information is stored on the server side, but only in your specific browser (not across browsers). To delete this information, you can delete your browser cache.
 
 In the following, you will find an overview of the actual IG Script syntax used for the encoding of institutional statements entered into the 'Encoded Statement' field.
 
