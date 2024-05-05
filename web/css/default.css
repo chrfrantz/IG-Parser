@@ -408,37 +408,37 @@ Ace.js annotation highlighting:
 */
 
 .ace_Attribute {
-    background-color: #AAE7CC;
+    background-color: #8CE8BFFF;
     border-radius: 3px;
 }
 
 .ace_Deontic {
-    background-color: #AAE7CC;
+    background-color: #8CE8BFFF;
     border-radius: 3px;
 }
 
 .ace_Aim {
-    background-color: #AAE7CC;
+    background-color: #8CE8BFFF;
     border-radius: 3px;
 }
 
 .ace_Direct_Object {
-    background-color: #abc8d3;
+    background-color: #8CE8BFFF;
     border-radius: 3px;
 }
 
 .ace_Indirect_Object {
-    background-color: #abc8d3;
+    background-color: #8CE8BFFF;
     border-radius: 3px;
 }
 
 .ace_Activation_Condition {
-    background-color: #F292A4;
+    background-color: #AD85D7FF;
     border-radius: 3px;
 }
 
-.ace_Activation_Constraint {
-    background-color: #F292A4;
+.ace_Execution_Constraint {
+    background-color: #BCAECBFF;
     border-radius: 3px;
 }
 
@@ -458,7 +458,7 @@ Ace.js annotation highlighting:
 }
 
 .ace_Constituting_Properties {
-    background-color: #abc8d3;
+    background-color: #FCD581;
     border-radius: 3px;
 }
 
@@ -478,6 +478,11 @@ Ace.js annotation highlighting:
     border-radius: 3px;
 }
 
+.ace_Attribute_Property {
+    background-color: #abc8d3;
+    border-radius: 3px;
+}
+
 .ace_Direct_Object_Property {
     background-color: #abc8d3;
     border-radius: 3px;
@@ -488,17 +493,12 @@ Ace.js annotation highlighting:
     border-radius: 3px;
 }
 
-.ace_Attribute_Property {
+.ace_Constituted_Entity_Property {
     background-color: #abc8d3;
     border-radius: 3px;
 }
 
 .ace_Constituting_Properties_Properties {
-    background-color: #abc8d3;
-    border-radius: 3px;
-}
-
-.ace_Constituted_Entity_Property {
     background-color: #abc8d3;
     border-radius: 3px;
 }

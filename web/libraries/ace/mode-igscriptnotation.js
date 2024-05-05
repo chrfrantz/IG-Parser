@@ -39,7 +39,7 @@ var IGScriptNotationHighlightRules = function () {
                 token : "Activation_Condition",
                 regex : /Cac(?=[\[|\(|\{])/
             },{
-                token : "Activation_Constraint",
+                token : "Execution_Constraint",
                 regex : /Cex(?=[\[|\(|\{])/
             },{
                 token : "Constituted_Entity",
