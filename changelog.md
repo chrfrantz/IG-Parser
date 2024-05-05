@@ -5,6 +5,8 @@
   * Added support for tilde ('~') in input.
   * Added convenience function for node substitution.
   * Fixed quotation mark handling for tabular output generation to ensure parseable output (both for Google Sheets and CSV).
+  * Added refined web UI editor (based on Jonas Kjærandsen's work).
+  * Fixed handling of diacritics in component content and annotations.
 * Version 0.5
   * Added Original Statement inclusion option for output.
   * Fixed bug related to inclusion of IG Script output. 

@@ -21,11 +21,17 @@ const RIGHT_BRACKET = "]"
 // Logical operators prepared for regular expression
 const LOGICAL_OPERATORS = "(" + tree.AND + "|" + tree.OR + "|" + tree.XOR + ")"
 
+// General alpha-numeric characters including umlaut and diacritics support
+const ALPHA_NUMERIC_CHARACTERS = "a-zA-ZÀ-ž,0-9"
+
+// Alpha-numeric characters without diacritics and umlaut support
+const ALPHA_NUMERIC_CHARACTERS_WITHOUT_DIACRITICS = "a-zA-Z,0-9"
+
 // Special symbols supported in content, suffix and annotations (wide range of special characters, as well as +, -, /, *, %, &, =, currency symbols, periods (.), relative operators (<,>), etc., BUT not braces!)
 const SPECIAL_SYMBOLS = "'’,;.<>+~:\\-*/%&=@$£€¤§\"#!`\\|"
 
 // Word pattern for regular expressions (including parentheses, spaces, square brackets, and all symbols contained in SPECIAL_SYMBOLS).
-const WORDS_WITH_PARENTHESES = "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "\\(\\)\\[\\]\\s]+"
+const WORDS_WITH_PARENTHESES = "[" + ALPHA_NUMERIC_CHARACTERS + SPECIAL_SYMBOLS + "\\(\\)\\[\\]\\s]+"
 
 // Optional use of word pattern
 const OPTIONAL_WORDS_WITH_PARENTHESES = "(" + WORDS_WITH_PARENTHESES + ")?"
@@ -39,7 +45,7 @@ const COMBINATION_PATTERN_BRACES = "\\" + LEFT_BRACE + WORDS_WITH_PARENTHESES + 
 	"\\s+" + "(\\[" + LOGICAL_OPERATORS + "\\]\\s+" + WORDS_WITH_PARENTHESES + ")+\\" + RIGHT_BRACE
 
 // Annotation syntax (e.g., [semanticAnnotations#99])
-const COMPONENT_ANNOTATION_MAIN = "[a-zA-Z,0-9\\s" + SPECIAL_SYMBOLS + "]+"
+const COMPONENT_ANNOTATION_MAIN = "[" + ALPHA_NUMERIC_CHARACTERS + "\\s" + SPECIAL_SYMBOLS + "]+"
 
 // Nested annotation syntax (e.g., [first=[left,right]])
 const COMPONENT_ANNOTATION_OPTIONAL_BRACKET = "(\\[" + COMPONENT_ANNOTATION_MAIN + "\\])*"
@@ -54,8 +60,8 @@ const COMPONENT_ANNOTATION_OPTIONAL = "(" + COMPONENT_ANNOTATION_OPTIONAL_PARENT
 // Complete annotation syntax
 const COMPONENT_ANNOTATION_SYNTAX = "(\\[(" + COMPONENT_ANNOTATION_MAIN + COMPONENT_ANNOTATION_OPTIONAL + ")+\\])?"
 
-// Regex for component suffix (e.g., "1" in "A1")
-const COMPONENT_SUFFIX_SYNTAX = "[a-zA-Z,0-9" + SPECIAL_SYMBOLS + "]*"
+// Regex for component suffix (e.g., "1" in "A1" - no support for diacritics in suffices, only main content and annotations)
+const COMPONENT_SUFFIX_SYNTAX = "[" + ALPHA_NUMERIC_CHARACTERS_WITHOUT_DIACRITICS + SPECIAL_SYMBOLS + "]*"
 
 // Regex for component identifier
 const COMPONENT_IDENTIFIER = "(" +
@@ -147,8 +153,8 @@ const PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS =
 // (e.g., { {Cac{ ... } [AND] Cac{ ... } } [XOR] { {Cac{ ... } [AND] Cac{ ... } }}),
 // but without leading component syntax and/or termination for flexible composition)
 const BRACED_2ND_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS =
-// Optional leading component identifier
-COMPONENT_IDENTIFIER + "?" +
+// Optional leading component identifier (with annotations, etc.)
+"(" + COMPONENT_HEADER_SYNTAX + ")?" +
 	// Leading brace
 	"\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
@@ -164,8 +170,8 @@ COMPONENT_IDENTIFIER + "?" +
 
 // 3rd order combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_3RD_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMPONENTS =
-// Optional leading component identifier
-COMPONENT_IDENTIFIER + "?" +
+// Optional leading component identifier (with annotations, etc.)
+"(" + COMPONENT_HEADER_SYNTAX + ")?" +
 	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
@@ -186,8 +192,8 @@ COMPONENT_IDENTIFIER + "?" +
 
 // 4th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_4TH_ORDER_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS_OF_COMBINATIONS =
-// Optional leading component identifier
-COMPONENT_IDENTIFIER + "?" +
+// Optional leading component identifier (with annotations, etc.)
+"(" + COMPONENT_HEADER_SYNTAX + ")?" +
 	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
@@ -208,8 +214,8 @@ COMPONENT_IDENTIFIER + "?" +
 
 // 5th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_5TH_ORDER_COMBINATIONS =
-// Optional leading component identifier
-COMPONENT_IDENTIFIER + "?" +
+// Optional leading component identifier (with annotations, etc.)
+"(" + COMPONENT_HEADER_SYNTAX + ")?" +
 	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
@@ -230,8 +236,8 @@ COMPONENT_IDENTIFIER + "?" +
 
 // 6th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_6TH_ORDER_COMBINATIONS =
-// Optional leading component identifier
-//COMPONENT_IDENTIFIER + "?" +
+// Optional leading component identifier (with annotations, etc.)
+//"(" + COMPONENT_HEADER_SYNTAX + ")?" +
 "(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
@@ -252,8 +258,8 @@ const BRACED_6TH_ORDER_COMBINATIONS =
 
 // 7th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_7TH_ORDER_COMBINATIONS =
-// Optional leading component identifier
-COMPONENT_IDENTIFIER + "?" +
+// Optional leading component identifier (with annotations, etc.)
+"(" + COMPONENT_HEADER_SYNTAX + ")?" +
 	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
@@ -274,9 +280,9 @@ COMPONENT_IDENTIFIER + "?" +
 
 // 8th order combinations of combinations of combinations of parenthesized or braced combinations, including combinations of combinations as components
 const BRACED_8TH_ORDER_COMBINATIONS =
-// Optional leading component identifier
-//COMPONENT_IDENTIFIER + "?" +
-"(\\" + LEFT_BRACE +
+// Optional leading component identifier (with annotations, etc.)
+"(" + COMPONENT_HEADER_SYNTAX + ")?" +
+	"(\\" + LEFT_BRACE +
 	// Testing of potential excessive words preceding component specification is captured in left component matching
 	"\\s*(" + "(" + PARENTHESIZED_OR_NON_PARENTHESIZED_COMBINATION_OF_COMPONENTS + "|" +
 	BRACED_7TH_ORDER_COMBINATIONS +
@@ -300,8 +306,11 @@ Currently, the nesting level is limited for performance reasons. If higher
 nesting levels are required, adjust the BRACED_6TH_ORDER_COMBINATIONS
 reference to higher order (e.g., BRACED_8TH_ORDER_COMBINATIONS).
 If adjusting the nesting level, ensure that the used level suppresses
-the need for a component identifier (COMPONENT_IDENTIFIER) - as shown for
-BRACED_6TH_ORDER_COMBINATIONS.
+the need for a component identifier ('"(" + COMPONENT_HEADER_SYNTAX + ")?" +') by suppressing it
+on the highest level (i.e., '//"(" + COMPONENT_HEADER_SYNTAX + ")?" +') - which, if following
+the example, should be the case for BRACED_8TH_ORDER_COMBINATIONS.
+For all lower levels (e.g., BRACED_7TH_ORDER_COMBINATIONS, BRACED_6TH_ORDER_COMBINATIONS),
+this should then be uncommented.
 */
 
 // Expression to filter combinations of combinations to distinguish from component-level component-level nesting

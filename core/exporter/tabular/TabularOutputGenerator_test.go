@@ -7779,3 +7779,104 @@ func TestTabularOutputSubstitutionSpecialSymbolsDuringOutputIGExtendedCSV(t *tes
 	}
 
 }
+
+/*
+Tests proper handling of all kinds of diacritics across nesting levels as well as in component content and annotations.
+*/
+func TestTabularOutputDiacriticsHandling(t *testing.T) {
+
+	// Statement with quotation marks all over the place
+	originalStatement := "Test stßatemøÅæent with randÈ, Ì, om diacriäöütics everïiywhere"
+
+	// Statement with multi-level nesting with embedded nested statement combinations as well as annotations, with quotation marks sprinkled across (to test robust substitution)
+	text := "A,p(Regional) A[role=enforcer,type=animate](Manaægers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=perfà, è, ì, ò, ù, À, È, Ì, Òormance](review [AND] (reward [XOR] sanction)) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=aniömate](producütion [opeärations]) and Bdir[role=monžöjřitored,type=animate](handling operations) and Bdir2,p(accrediçted) Bdir2[role=monitor,type=animate](certifying agents) ïtext Cex[ctx=purpose](for compliance with the (Act [XOR] regulations in this part)) under the condition that Cac{Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](wereÅ non-compliant [OR] violated) Bdir[type=inò, ù, À, È, Ì, Ònimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manaò, ù, À, È, Ì, Òer) I[act=terminate](has øconcluded) Bdir[type=activity](investigation)}}."
+
+	// Static output
+	SetDynamicOutput(false)
+	// IG Extended output
+	SetProduceIGExtendedOutput(true)
+	// Indicates whether annotations are included in output.
+	SetIncludeAnnotations(true)
+	// Deactivate DoV
+	SetIncludeDegreeOfVariability(false)
+	// Include shared elements
+	SetIncludeSharedElementsInTabularOutput(true)
+
+	// Take separator for Google Sheets output
+	separator := ";"
+
+	// Test for correct configuration for static output
+	if tree.AGGREGATE_IMPLICIT_LINKAGES != true {
+		t.Fatal("SetDynamicOutput() did not properly configure implicit link aggregation")
+	}
+
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	s := stmts[0].Entry.(*tree.Statement)
+
+	fmt.Println(s.String())
+
+	// This is tested in IGStatementParser_test.go as well as in TestHeaderRowGeneration() (above)
+	leafArrays, componentRefs := s.GenerateLeafArrays(tree.AGGREGATE_IMPLICIT_LINKAGES)
+
+	fmt.Println("Component refs:", componentRefs)
+
+	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Unexpected error during array generation.")
+	}
+
+	fmt.Println("Input arrays: ", res)
+
+	links := tree.GenerateLogicalOperatorLinkagePerCombination(res, true, true)
+
+	fmt.Println("Links: ", links)
+
+	// Content of statement links is tested in ArrayCombinationGenerator_test.go
+	if len(links) != 8 {
+		t.Fatal("Number of statement reference links is incorrect. Value:", len(links), "Links:", links)
+	}
+
+	// Read reference file
+	content, err2 := os.ReadFile("TestTabularOutputDiacriticsHandling.test")
+	if err2 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err2.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	statementMap, statementHeaders, statementHeadersNames, err := generateStatementMatrix(res, nil, "", componentRefs, links, "650", separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader())
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Generating tabular output should not fail. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	// Here is the relevant parameterization of the output
+	output, err := generateCSVOutput(statementMap, originalStatement, text, statementHeaders, statementHeadersNames, separator, "", true, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES, IG_SCRIPT_OUTPUT_ALL_ENTRIES)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during Google Sheets generation. Error: " + fmt.Sprint(err.Error()))
+	}
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if output != expectedOutput {
+		fmt.Println("Statement headers:\n", statementHeaders)
+		fmt.Println("Statement map:\n", statementMap)
+		fmt.Println("Produced output:\n", output)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err3 := WriteToFile("errorOutput.error", output, true)
+		if err3 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}

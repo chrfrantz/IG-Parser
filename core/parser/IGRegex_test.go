@@ -258,7 +258,12 @@ func TestComplexStatementCombinations(t *testing.T) {
 	res := r.FindAllString(text, -1)
 
 	if len(res) != 5 {
-		t.Fatal("Number of statements is not correct. Should be 3, but is", len(res))
+		outString := ""
+		for i, v := range res {
+			item := fmt.Sprint("Item ", i, ": Value: ", v)
+			outString += item + "\n"
+		}
+		t.Fatal("Number of statements is not correct. Should be 5, but is", len(res), "\nStatements:\n"+outString)
 	}
 
 	firstElem := "{  Cac{A(actor1) I(aim1) Bdir(object1)}   [AND]   Cac{A(actor2)  I(aim2) Bdir(object2) }   }"
@@ -287,6 +292,67 @@ func TestComplexStatementCombinations(t *testing.T) {
 
 	// Tests for tolerance toward comma following logical operator, missing separating space, and excessive terms
 	fifthElem := "{blabla ,.Cac{A(actor1) I(aim1) Bdir{A(actor2) I(aim2) Cac(condition2)}}, [OR]Cac{A(actor3) I(aim3) Bdir(object3)}more; text}"
+
+	if res[4] != fifthElem {
+		t.Fatal("Element incorrect. It should read '"+fifthElem+"', but is", res[4])
+	}
+}
+
+/*
+Tests complex statement combinations that reflect nesting characteristics, but also embedded
+diacritics in content as well as annotations.
+*/
+func TestComplexStatementCombinationsWithDiacriticsAndAnnotations(t *testing.T) {
+
+	text := " {  Cac{A[äsdlj](actor1) I[sdgjöñ](aim1) Bdir(objäect1)}   [AND]  ï Cac{A(acřtor2)  I(aim2) Bdir(object2) }   } "
+	text += "{{Cac{ A(actōor1) I[dlksjëjvcls](aimë1) Bdir(object1) }   [XOR]  Cac{ éfgfd A[djösgdē](acåtor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjŏfdsl [AND] lkdsjflksj {Cac{A(actoûr2) I(aiŏm2) Bdir(object2)} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+	text += " A(dfkflslküjfs) Cac[slkÅpså](dlsgjslkdj) ô ö Ü ä" // should not be found
+	text += "{{{Cac{ A(acÜtor1) I(aim1) Bdir(objecät1) } [XOR] Cac[ÅlidsLøØ]{ A(actor1) I(aim1) Bdir(object1) }}   [XOR]  Cac{ fgfd A[randsléø](actor1a) fdhdf I(aéim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {{Cac{A(actor2) I(aim2) Bdir(object2)} dgjsksldgj[XOR] Cac{A(actor2) I(aim2) Bdir(object2)}} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+	text += "{Cac{A(actoşr1) I(aïim1) Bdir[ddlgžöjř]{A(actor2) I(aim2) Cac(condñition2)}} [OR] Cac{A(actáor3) I(aim3) Bdir(object3)}}"
+	text += "{blabla ,.Cac{A(actôor1) I(aim1) Bdir{A(actor2) I(aim2) Cac(coçndition2)}}, [OR]Cac{A(aēctor3) I[dsklfjöçjsdlfö](aim3) Bdir(object3)}more; ïtext}"
+
+	r, err := regexp.Compile(BRACED_6TH_ORDER_COMBINATIONS)
+	if err != nil {
+		t.Fatal("Error during compilation:", err.Error())
+	}
+
+	res := r.FindAllString(text, -1)
+
+	if len(res) != 5 {
+		outString := ""
+		for i, v := range res {
+			item := fmt.Sprint("Item ", i, ": Value: ", v)
+			outString += item + "\n"
+		}
+		t.Fatal("Number of statements is not correct. Should be 5, but is", len(res), "\nStatements:\n"+outString)
+	}
+
+	firstElem := "{  Cac{A[äsdlj](actor1) I[sdgjöñ](aim1) Bdir(objäect1)}   [AND]  ï Cac{A(acřtor2)  I(aim2) Bdir(object2) }   }"
+
+	if res[0] != firstElem {
+		t.Fatal("Element incorrect. It should read '"+firstElem+"', but is", res[0])
+	}
+
+	secondElem := "{{Cac{ A(actōor1) I[dlksjëjvcls](aimë1) Bdir(object1) }   [XOR]  Cac{ éfgfd A[djösgdē](acåtor1a) fdhdf I(aim1a) Bdir(object1a)}} dfsjŏfdsl [AND] lkdsjflksj {Cac{A(actoûr2) I(aiŏm2) Bdir(object2)} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+
+	if res[1] != secondElem {
+		t.Fatal("Element incorrect. It should read '"+secondElem+"', but is", res[1])
+	}
+
+	thirdElem := "{{{Cac{ A(acÜtor1) I(aim1) Bdir(objecät1) } [XOR] Cac[ÅlidsLøØ]{ A(actor1) I(aim1) Bdir(object1) }}   [XOR]  Cac{ fgfd A[randsléø](actor1a) fdhdf I(aéim1a) Bdir(object1a)}} dfsjfdsl [AND] lkdsjflksj {{Cac{A(actor2) I(aim2) Bdir(object2)} dgjsksldgj[XOR] Cac{A(actor2) I(aim2) Bdir(object2)}} [OR] Cac{A(actor3) I(aim3) Bdir(object3)}}}"
+
+	if res[2] != thirdElem {
+		t.Fatal("Element incorrect. It should read '"+thirdElem+"', but is", res[2])
+	}
+
+	fourthElem := "{Cac{A(actoşr1) I(aïim1) Bdir[ddlgžöjř]{A(actor2) I(aim2) Cac(condñition2)}} [OR] Cac{A(actáor3) I(aim3) Bdir(object3)}}"
+
+	if res[3] != fourthElem {
+		t.Fatal("Element incorrect. It should read '"+fourthElem+"', but is", res[3])
+	}
+
+	// Tests for tolerance toward comma following logical operator, missing separating space, and excessive terms
+	fifthElem := "{blabla ,.Cac{A(actôor1) I(aim1) Bdir{A(actor2) I(aim2) Cac(coçndition2)}}, [OR]Cac{A(aēctor3) I[dsklfjöçjsdlfö](aim3) Bdir(object3)}more; ïtext}"
 
 	if res[4] != fifthElem {
 		t.Fatal("Element incorrect. It should read '"+fifthElem+"', but is", res[4])
