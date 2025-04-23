@@ -622,6 +622,47 @@ func TestSharedElementsAndAndCombinationWithMissingCombination(t *testing.T) {
 }
 
 /*
+Tests whether presence of institutional statement compoents in shared elements is picked up.
+*/
+func TestSharedElementsWithParseableComponents(t *testing.T) {
+
+	input := "( A(shared left) (Far left side [AND] Left side information) I(inner right) )"
+
+	tree.SHARED_ELEMENT_INHERITANCE_MODE = tree.SHARED_ELEMENT_INHERIT_APPEND
+
+	// Parse provided expression
+	node, modified, err := ParseIntoNodeTree(input, true, "(", ")")
+
+	fmt.Println(node.String())
+
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parser has produced error. Error: ", err.Error())
+	}
+
+	// Test return information from parsing (strips shared elements)
+	if modified != "(( shared left ( inner left (Far left side [AND] Left side information)) [AND] inner right) [AND] right information)" {
+		t.Fatal("Modified output does not correspond to input (Output: '" + modified + "')")
+	}
+
+	if len(node.GetSharedLeft()) != 0 || fmt.Sprint(node.GetSharedLeft()) != "[]" {
+		t.Fatal("Parsed left shared value is not correct. Node value: " + fmt.Sprint(node.GetSharedLeft()) + ". Expected output: ")
+	}
+
+	if len(node.GetSharedRight()) != 0 {
+		t.Fatal("Parsed right shared value is not correct. Node value: " + fmt.Sprint(node.GetSharedRight()) + ". Expected empty output")
+	}
+
+	if fmt.Sprint(node.Left.Left.GetSharedLeft()) != "[inner left]" {
+		t.Fatal("Left-nested left node did not inherit shared value. Node value: " + fmt.Sprint(node.Left.Left.GetSharedLeft()) + ". Expected output: [inner left]")
+	}
+
+	// Test reconstruction from tree
+	if node.Stringify() != "(((inner left (Far left side [AND] Left side information)) [AND] inner right) [AND] right information)" {
+		t.Fatal("Stringified output does not correspond to input (Output: '" + node.Stringify() + "')")
+	}
+}
+
+/*
 Tests for correct parsing of shared elements as well as decomposition of multiple AND combinations
 */
 func TestSharedElementsAndAndCombinationWithoutInheritance(t *testing.T) {

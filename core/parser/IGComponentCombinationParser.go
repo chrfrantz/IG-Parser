@@ -190,6 +190,9 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					if left != "" {
 						// If no combinations exist, assign as left leaf
 						Println("Found leaf on left side: " + left)
+						// Check whether information in shared elements is parseable (and hence to be copied in the main content)
+						left = conditionallyCopySharedElementsToMainNodeContent(left, node.GetSharedLeft(), node.GetSharedRight())
+						// Assign left leaf
 						res, err := node.InsertLeftLeaf(left)
 						if !res {
 							return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
@@ -263,6 +266,9 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 					if right != "" {
 						// If no combinations exist, assign as right leaf
 						Println("Found leaf on right side: " + right)
+						// Check whether information in shared elements is parseable (and hence to be copied in the main content)
+						right = conditionallyCopySharedElementsToMainNodeContent(right, node.GetSharedLeft(), node.GetSharedRight())
+						// Assign as leaf
 						res, err := node.InsertRightLeaf(right)
 						if !res {
 							return nil, input, tree.ParsingError{ErrorCode: err.ErrorCode, ErrorMessage: err.ErrorMessage}
@@ -383,6 +389,30 @@ func ParseIntoNodeTree(input string, nestedNode bool, leftPar string, rightPar s
 
 	Println("RETURNING FINAL NODE: " + nodeTree.String())
 	return nodeTree, input, tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+}
+
+/*
+Checks for presence of parseable content (i.e., basic institutional statement syntax) in shared elements and if this is the case,
+pre- (left shared element) and/or appends (right shared element) it to the original node content (mainContent).
+Returns amended node content string for further parsing.
+*/
+func conditionallyCopySharedElementsToMainNodeContent(mainContent string, leftSharedElement []string, rightSharedElement []string) string {
+
+	if len(leftSharedElement) > 0 && len(leftSharedElement[0]) > 0 {
+		stmt, _, err := parseBasicStatement(strings.Join(leftSharedElement, " "), nil)
+		if err.ErrorCode == tree.PARSING_NO_ERROR && len(stmt) > 0 && !stmt[0].IsEmptyOrNilNode() {
+			Println("Prepending left shared content ... ")
+			mainContent = strings.Join(leftSharedElement, " ") + " " + mainContent
+		}
+	}
+	if len(rightSharedElement) > 0 && len(rightSharedElement[0]) > 0 {
+		stmt, _, err := parseBasicStatement(strings.Join(rightSharedElement, " "), nil)
+		if err.ErrorCode == tree.PARSING_NO_ERROR && len(stmt) > 0 && !stmt[0].IsEmptyOrNilNode() {
+			Println("Prepending right shared content ... ")
+			mainContent = mainContent + " " + strings.Join(rightSharedElement, " ")
+		}
+	}
+	return mainContent
 }
 
 /*
