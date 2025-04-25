@@ -1,5 +1,7 @@
 # IG Parser Revisions
 
+* Version 0.7
+  * Added support for statement-level annotations in generated tabular output (previously only for nested statements). 
 * Version 0.6
   * Fixed inference of logical operators for component combinations when combined with nested components.
   * Added support for tilde ('~') in input.

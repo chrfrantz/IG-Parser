@@ -595,6 +595,47 @@ func extractSuffixAndAnnotations(component string, propertyComponent bool, input
 }
 
 /*
+Extracts statement-level annotation(s), i.e., not to be called on component, but extracting statement-level annotations.
+Statement-level annotation example: "A(actor) I(aim) [annotation]". Operates only on top-level statement.
+This extraction does not support nested brackets (e.g., [ldjlkdsjg[dskljgsl]jlksg]) or nested parentheses (e.g., [ldfjs(ljdfs)sdflkj]).
+In the case of brackets, only the inner bracket is extracted; in the case of parentheses, the entire annotation is ignored.
+Calls log.Fatal if regex compilation fails (should never happen, since regex is static, and to be caught by runtime environment).
+Returns concatenated annotations including original brackets (e.g., "[annotation1][annotation2]").
+*/
+func parseStatementLevelAnnotations(input string) string {
+	// Component annotation pattern (note: does not support embedded brackets or parentheses)
+	r, err := regexp.Compile("\\[" + COMPONENT_ANNOTATION_MAIN + "\\]")
+	if err != nil {
+		log.Fatal("Error when parsing statement-level annotations:", err.Error())
+	}
+	// Search for annotation patterns on input (pure annotation on statement level)
+	result := r.FindAllStringSubmatch(input, -1)
+
+	annotations := ""
+	// Concatenate all annotations
+	for _, element := range result {
+		for _, element2 := range element {
+
+			// Filter for potential presence of logical operators in input
+			skip := false
+			for _, logOp := range tree.IGLogicalOperators {
+				if "["+logOp+"]" == element2 {
+					skip = true
+					break
+				}
+			}
+			if !skip {
+				// Add to annotations if no logical operator
+				annotations += element2
+			}
+		}
+	}
+	Println("Number of statement-level annotations: ", len(result))
+	Println("Statement annotation: ", annotations)
+	return annotations
+}
+
+/*
 Parses component based on surrounding parentheses.
 Returns parsed node, as well as substring of input text identified as component content (including annotation and suffix).
 */

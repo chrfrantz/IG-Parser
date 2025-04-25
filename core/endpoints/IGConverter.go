@@ -46,7 +46,7 @@ func ConvertIGScriptToTabularOutput(originalStatement string, statement string, 
 	Println("    - Parsed statement:", stmts)
 
 	// Run composite generation and return output and error. Will write file if filename != ""
-	results := tabular.GenerateTabularOutputFromParsedStatements(stmts, "",
+	results := tabular.GenerateTabularOutputFromParsedStatements(stmts, stmts[0].Annotations,
 		originalStatement, statement, stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES,
 		separator, outputType, printHeaders, printOriginalStatement, printIgScriptInput)
 	for _, res := range results {

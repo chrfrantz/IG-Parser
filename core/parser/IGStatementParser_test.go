@@ -3543,3 +3543,122 @@ func TestEmptyStatementAgainstComponentPair(t *testing.T) {
 			tree.PARSING_NO_ERROR+", but returned error ", err)
 	}
 }
+
+/*
+Tests parsing of statement-level annotations for basic statement with nested condition and various positioning and additional characters and component-embedded nested brackets.
+*/
+func TestStatementLevelAnnotationParsing(t *testing.T) {
+
+	// Input text with missing logical operator on component pair level
+	text := "Cac[conditionLevelAnnotation]{Once E(policy) [internalAnnotation] F(comes into force)} A,p(relevant) [annotation0] A(regulators) D([must]) I(monitor [AND] enforce) Bdir(compliance). [annotation1] [annotation2] jdlkgjsdlkg"
+
+	// Test for error during parsing. Should not throw error.
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Test statement-level annotations
+	if stmt[0].Annotations != "[annotation0][annotation1][annotation2]" {
+		t.Fatal("Statement-level annotations are not correct. Should be [annotation0][annotation1][annotation2] but are", stmt[0].Annotations)
+	}
+
+	// Test conditions
+	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+			stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
+	}
+
+}
+
+/*
+Tests parsing of statement-level annotations for basic statement with nested condition and various positioning and additional characters, component-embedded nested brackets,
+as well as nested brackets in statement-level annotation (should lead to extraction of inner bracket only).
+*/
+func TestStatementLevelAnnotationParsingNestedBrackets(t *testing.T) {
+
+	// Input text with missing logical operator on component pair level
+	text := "Cac[conditionLevelAnnotation]{Once E(policy) [internalAnnotation] F(comes into force)} A,p(relevant) [annotation0] A(regulators) D([must]) I(monitor [AND] enforce) Bdir(compliance). [annot[ation]1] [annotation2] jdlkgjsdlkg"
+
+	// Test for error during parsing. Should not throw error.
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Test statement-level annotations
+	if stmt[0].Annotations != "[annotation0][ation][annotation2]" {
+		t.Fatal("Statement-level annotations are not correct. Should be [annotation0][ation][annotation2] but are", stmt[0].Annotations)
+	}
+
+	// Test conditions
+	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+			stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
+	}
+
+}
+
+/*
+Tests parsing of statement-level annotations for basic statement with nested condition and various positioning and additional characters, component-embedded nested brackets,
+as well as nested parentheses in statement-level annotation (should lead to omission of affected annotation).
+*/
+func TestStatementLevelAnnotationParsingNestedParentheses(t *testing.T) {
+
+	// Input text with missing logical operator on component pair level
+	text := "Cac[conditionLevelAnnotation]{Once E(policy) [internalAnnotation] F(comes into force)} A,p(relevant) [annotation0] A(regulators) D([must]) I(monitor [AND] enforce) Bdir(compliance). [annot(ation)1] [annotation2] jdlkgjsdlkg"
+
+	// Test for error during parsing. Should not throw error.
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Test statement-level annotations
+	if stmt[0].Annotations != "[annotation0][annotation2]" {
+		t.Fatal("Statement-level annotations are not correct. Should be [annotation0][annotation2] but are", stmt[0].Annotations)
+	}
+
+	// Test conditions
+	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+			stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
+	}
+
+}
+
+/*
+Tests parsing of statement-level annotations with use of component pairs.
+*/
+func TestStatementLevelAnnotationParsingComponentPairs(t *testing.T) {
+
+	// Input text with missing logical operator on component pair level
+	text := "Cac[conditionLevelAnnotation]{Once E(policy) [internalAnnotation] F(comes into force)} A,p(relevant) A(regulators) D(must) {I(monitor [AND] enforce) Bdir(compliance) [XOR] I(sdlkgls) Bdir(lkdsjg)}. [annotation1] [annotation2]"
+
+	// Test for error during parsing. Should not throw error.
+	stmt, err := ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Parsing should have returned error "+
+			tree.PARSING_NO_ERROR+", but returned error ", err)
+	}
+
+	// Check statement-level annotation
+	if stmt[0].Annotations != "[annotation1][annotation2]" {
+		t.Fatal("Statement-level annotations are not correct. Should be [annotation1][annotation2] but are", stmt[0].Annotations)
+	}
+
+	// Test conditions and ensure they do not have the same annotation
+	if stmt[0].Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+			stmt[0].Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
+	}
+
+	if stmt[0].Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+			stmt[0].Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
+	}
+
+}

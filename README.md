@@ -300,6 +300,12 @@ The syntax (including support for suffices introduced above) is `componentSymbol
 
 This also applies to nested components, e.g., `Cac[condition=violation]{A[entity=actor,animate](actor) I[act=violate](violates) Bdir[entity=target,inanimate](something)}`, as well as for compound components, e.g., `Bdir[type=target](leftObject [XOR] rightObject)`, in which case the annotation `type=target` is attached to both `leftObject` and `rightObject` in the generated output. 
 
+In addition to component-level annotations, the parser also supports statement-level annotations. The syntax for those is simply any bracket-based expression outside parentheses or braces, e.g., `A(actor) I(aim) Cac(condition) [Statement-level Annotation]`, where `[Statement-level Annotation]` is the corresponding annotation. Where multiple statement-level annotations are presented, they are concatenated in the generated output, e.g., `[annotation1][annotation2]`. Positioning of annotations in the encoding is arbitrary (`A(actor) [an annotation here] I(aim) Cac(condition) [and another one here]`), as long as it not embedded in nested components.
+
+To include annotations in the output, the Parameter `Include IG Logico annotations` needs to be activated in the Parameters section of the tabular version of the parser.
+
+Annotations are then generated in the corresponding columns (for statement-level annotations as well as annotations on nested components (e.g., `Cac[Nested Component Annotation]{ ... }`) in the `Statement Annotation` column), and for components, annotations are provided in the corresponding annotation column following the component column (e.g., `A (Annotation)` for Attributes). 
+
 ### Examples
 
 In the following, you will find selected examples that highlight the practical use of the features introduced above. These can be tested and explored using the parser.
@@ -320,6 +326,8 @@ In the following, you will find selected examples that highlight the practical u
   * `A,p(Certified) A(agent) D(must) I(request) Bdir,p(independently) Bdir1,p(authorized) Bdir1(report) and Bdir2,p(audited) Bdir2(financial documents).`
 * Semantic annotations; showcasing the basic use of annotations on arbitrary components:
   * `A,p[property=qualitative](Certified) A[role=responsible](organic farmers) D[stringency=obligation](must) I[type=act](submit) Bdir[type=inanimate](report) to Bind[role=authority](Organic Program Representative) Cac[context=tim](at the end of each year).`
+* Semantic annotation on statement-level (this can of course be combined with component-level annotations, but separated here for clarity):
+  * `A(responsible actor) [statement annotation0] I(action) Cac(condition) [statement annotation1]`
 
  ### Common issues
   * Parentheses/braces need to match. The parser calls out if a mismatch exists. Parentheses are applied when components are specified (or combinations thereof), and braces are used to signal component-level nesting (i.e., statements embedded within components) and statement combinations (i.e., combinations of component-level nested statements).

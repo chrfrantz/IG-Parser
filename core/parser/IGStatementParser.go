@@ -81,6 +81,9 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
 	Println("Parsing basic statement ...")
 
+	// Initialize statement-level annotations
+	stmtLevelAnnotations := ""
+
 	// Process basic components and component combinations
 	if text != "" {
 		Println("Text to be parsed: " + text)
@@ -101,6 +104,8 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		// Substitute text with remaining parts (the one that have not been parsed as part of the basic component parsing)
 		text = remainingText
 		Println("Remaining text after basic component parsing: " + text)
+		// Parse statement-level annotations
+		stmtLevelAnnotations = parseStatementLevelAnnotations(text)
 	}
 
 	Println("Testing for nested combinations in " + fmt.Sprint(nestedCombos))
@@ -118,7 +123,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 				Println("Reclassifying statement as nested statement (as opposed to nested combination) ...")
 			} else if err.ErrorCode != tree.PARSING_NO_ERROR {
 				// Populate return structure
-				ret := []*tree.Node{&tree.Node{Entry: &s}}
+				ret := []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}
 				return ret, err
 			}
 		}
@@ -162,12 +167,12 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		// Check whether nested statements have been ignored entirely
 		if err.ErrorCode == tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
 			// Populate return structure
-			ret := []*tree.Node{&tree.Node{Entry: &s}}
+			ret := []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}
 			return ret, err
 		}
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			// Populate return structure
-			ret := []*tree.Node{&tree.Node{Entry: &s}}
+			ret := []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}
 			return ret, err
 		}
 		// Process potential private nodes for complex components
@@ -194,7 +199,10 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 				return extrapolatedStmts, err2
 			}
 			Println("Final statements (with extrapolation): " + tree.PrintNodes(extrapolatedStmts))
-
+			// Append statement-level annotations to each output
+			for _, stmt := range extrapolatedStmts {
+				stmt.Annotations = stmtLevelAnnotations
+			}
 			return extrapolatedStmts, err2
 		}
 	} else {
@@ -208,7 +216,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 	}
 
 	// Else return wrapped statement (no extrapolation included)
-	return []*tree.Node{&tree.Node{Entry: &s}}, err
+	return []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}, err
 }
 
 /*

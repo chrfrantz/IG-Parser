@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A Parser for Institutional Statements encoded in the IG Script Notation of the Institutional Grammar 2.0">
     <title>IG Parser</title>
     <link rel="icon" type="image/x-icon" href="/css/favicon.ico">
     <link rel="shortcut icon" type="image/x-icon" href="/css/favicon.ico">
@@ -53,8 +54,8 @@
 <div class="form">
     <form method="POST">
         
-        <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip">Original Statement:</span>
-        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea>
+        <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip" id="rawStmtLabel">Original Statement:</span>
+        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()" aria-labelledby="rawStmtLabel">Regional Managers, on behalf of the Secretary, may review, reward, or sanction approved certified production and handling operations and accredited certifying agents for compliance with the Act or regulations in this part, under the condition that Operations were non-compliant or violated organic farming provisions and Manager has concluded investigation.</textarea>
         
         <div class="error" id="validateError"></div>
         
@@ -132,12 +133,30 @@
             }
         </script>
         
-        <span data-text="Click to open a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
+        <span data-text="Click to open a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip" id="editorLabel"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
         
-        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were (non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</div>
+        <div class="buttons hidden">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="undo">Undo</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="redo">Redo</div>
+            <span data-text="Toggles between text and edit mode. Text mode allows for free text editing. Edit mode allows for keybindings to add symbols." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="lock">Text mode</div></span>
+            <span data-text="Toggles nesting, when on symbols which support nesting use the appropriate brackets for nesting on creation." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="nested">Nesting</div></span>
+            <span data-text="Toggles semantic annotation, when on symbols will be created with brackets for semantic annotation." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="semantic">Semantic Annotation</div></span>
+            <span data-text="Toggles selection mode, where annotation is performed through selecting a symbol then marking text to annotate the text with the symbol." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="selection">Selection Mode</div></span>
+            <span data-text="Shows a list of supported symbols and their respective IG 2.0 Components" class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbols">Symbols</div></span>
+            <span data-text="Shows a list of supported keybindings and their respective IG 2.0 Components" class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybinds">Keybinds</div></span>
+        </div>
+        
+        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()" aria-labelledby="editorLabel">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were (non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</div>
         <script>
             let editor = ace.edit("editor");
             editor.session.setMode("ace/mode/text"); 
+            
             
             editor.setOption("showLineNumbers", true); 
             editor.setOption("wrap", true); 
@@ -149,6 +168,24 @@
             editor.setOption("fontSize", 16); 
             editor.setOption("minLines", 5); 
             editor.setOption("maxLines", 30); 
+
+            
+            editor.commands.addCommand({
+                name: "tabNextElement",
+                bindKey: { win: "Tab", mac: "Tab"},
+                exec: function(editor) {
+                    document.GetElementById("A").focus;
+                }
+            })
+
+            
+            editor.commands.addCommand({
+                name: "tabPrevElement",
+                bindKey: { win: "Shift-Tab", mac: "Shift-Tab"},
+                exec: function(editor) {
+                    document.GetElementById("keybinds").focus;
+                }
+            })
 
             
 
@@ -217,6 +254,282 @@
                 
                 saveValue("canvasWidth");
 
+            }
+
+            
+            
+            document.getElementById("undo").addEventListener("click", function() {
+                editor.undo();
+            });
+
+            
+            document.getElementById("redo").addEventListener("click", function() {
+                editor.redo();
+            });
+
+
+            
+            document.getElementById("lock").addEventListener("click", function() {
+                button = document.getElementById("lock")
+                
+                if (editor.getReadOnly()) {
+                    editor.setOption("readOnly", false)
+                    button.textContent = "Text mode"
+                    button.classList.toggle('toggleActive')
+                    
+                    
+                } else {
+                    editor.setOption("readOnly", "nocursor")
+                    button.textContent = "Edit mode"
+                    button.classList.toggle('toggleActive')
+                    
+                    
+                }
+                
+            });
+
+            
+            function visualToggle() {
+                visual = localStorage.getItem("visual")
+                console.log(localStorage.getItem("visual"))
+                buttons = document.getElementsByClassName("buttons")
+                if (visual == "false")
+                    
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.remove('hidden')
+                        editor.session.setMode("ace/mode/igscriptnotation")
+                        localStorage.setItem("visual", "true")
+                    }
+                else 
+                    
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.add('hidden')
+                        editor.session.setMode("ace/mode/text");
+                        localStorage.setItem("visual", "false")
+                    }  
+            };
+
+            
+            function loadVisual() {
+                visual = localStorage.getItem("visual")
+                console.log(localStorage.getItem("visual"))
+                buttons = document.getElementsByClassName("buttons")
+                if (visual != "false")
+                    
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.remove('hidden')
+                        editor.session.setMode("ace/mode/igscriptnotation")
+                    }
+                else 
+                    
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.add('hidden')
+                        editor.session.setMode("ace/mode/text");
+                    }  
+            };
+
+            
+            let nested = false
+            document.getElementById("nested").addEventListener("click", function() {
+                button = document.getElementById("nested")
+                button.classList.toggle('toggleActive')
+                nested = !nested
+            });
+
+            
+            let semanticAnnotation = false
+            document.getElementById("semantic").addEventListener("click", function() {
+                button = document.getElementById("semantic")
+                button.classList.toggle('toggleActive')
+                semanticAnnotation = !semanticAnnotation
+            });
+
+            
+            document.getElementById("symbols").addEventListener("click", function() {
+                document.getElementById("symbolModal").showModal();
+            });
+
+            
+            document.getElementById("keybinds").addEventListener("click", function() {
+                document.getElementById("keybindModal").showModal();
+            });
+
+            
+            function closeModal(modalId){
+                document.getElementById(modalId).close();
+            }
+
+            function linkIntercept(event) {
+                event.preventDefault();
+                href = event.target.href;
+                
+                if (confirm("Showing an example overwrites the current work done.\nAre you sure you want to overwrite your current work?")){
+                    
+                    window.location.href=href;
+                }
+            }
+
+            
+            var symbols = {
+                "A":{"symbol": "A", "bracket":["(",")"]},
+                "A,p":{"symbol": "A,p", "bracket":["(",")","{","}"], "nested": true},
+                "I":{"symbol": "I", "bracket":["(",")"]},
+                "D":{"symbol": "D", "bracket":["(",")"]},
+                "Bdir":{"symbol": "Bdir", "bracket":["(",")","{","}"], "nested": true},
+                "Bdir,p":{"symbol": "Bdir,p", "bracket":["(",")","{","}"], "nested": true},
+                "Bind":{"symbol": "Bind", "bracket":["(",")","{","}"], "nested": true},
+                "Bind,p":{"symbol": "Bind,p", "bracket":["(",")","{","}"], "nested": true},
+                "Cac":{"symbol": "Cac", "bracket":["(",")","{","}"], "nested": true},
+                "Cex":{"symbol": "Cex", "bracket":["(",")","{","}"], "nested": true},
+                "O":{"symbol": "O", "bracket":["{","}"]},
+                "E":{"symbol": "E", "bracket":["(",")"]},
+                "E,p":{"symbol": "E,p", "bracket":["(",")","{","}"], "nested": true},
+                "F":{"symbol": "F", "bracket":["(",")"]},
+                "M":{"symbol": "M", "bracket":["(",")"]},
+                "P":{"symbol": "P", "bracket":["(",")","{","}"], "nested": true},
+                "P,p":{"symbol": "P,p", "bracket":["(",")","{","}"], "nested": true},
+            }
+
+            
+
+            function annotateSelection(symbol) {
+                
+                let selectionText = editor.getSelectedText();
+                let selectionRange = editor.getSelectionRange();
+                
+                
+                
+                cursorLocation = editor.selection.getCursor();
+
+                
+                if (symbol == "L") {
+                    editor.session.replace(new ace.Range(selectionRange.start.row, selectionRange.start.column, 
+                        selectionRange.end.row, selectionRange.end.column), "["+selectionText.toUpperCase()+"]");
+                    
+                    
+                    if (selectionText == "") {
+                        cursorLocation.column += 1;
+                        editor.moveCursorToPosition(cursorLocation);
+                        editor.clearSelection();
+                        editor.focus(); 
+                    }
+                    return
+                }
+
+                
+                let outputText = symbols[symbol].symbol;
+                
+                outputText += semanticAnnotation ? "[]" : "";
+                let bracketStart = 0
+                if (nested && symbols[symbol]["nested"]){
+                    bracketStart += 2
+                }
+                outputText += symbols[symbol].bracket[bracketStart];
+                outputText += selectionText;
+
+                outputText += symbols[symbol].bracket[bracketStart+1];
+
+                
+                editor.session.replace(new ace.Range(selectionRange.start.row, selectionRange.start.column, 
+                    selectionRange.end.row, selectionRange.end.column), outputText);
+
+                
+                copyEditorContentToTextArea();
+                
+                saveFormContent();
+
+                
+                if (selectionText == ""){
+                cursorLocation.column += outputText.length-1
+                editor.moveCursorToPosition(cursorLocation);
+                editor.clearSelection();
+                editor.focus(); 
+                }
+            }
+
+            
+
+            
+            var prevToken = ""
+            var tooltip
+            editor.on('mousemove', function(e) {
+                
+                var position = e.getDocumentPosition();
+                var token = editor.session.getTokenAt(position.row, position.column);
+                if (token && token !=prevToken)  {
+                    if (prevToken != "") {
+                        document.body.removeChild(tooltip);
+                        prevToken = ""
+                    }
+                    if (token.type != 'text') {
+                        prevToken = token;
+                        
+                        
+                        let pos = editor.renderer.textToScreenCoordinates(position.row, position.column);
+                        
+                        tooltip = document.createElement('div');
+                        
+                        tooltip.innerHTML = token.type.replaceAll("_"," ");
+                        tooltip.setAttribute("class", "text_tooltip")
+                        tooltip.style.position = 'absolute';
+                        tooltip.style.top = pos.pageY-25 + 'px';
+                        tooltip.style.left = pos.pageX + 'px';
+                        document.body.appendChild(tooltip);
+                    }
+                }
+            });
+
+            
+
+
+            let selectedSymbol = "A"   
+            let selectionMode = false  
+            let mouseDown = false      
+            
+            document.getElementById("selection").addEventListener("click", function() {
+                button = document.getElementById("selection")
+                button.classList.toggle('toggleActive')
+                button = document.getElementById(selectedSymbol)
+                button.classList.toggle('toggleActive')
+                selectionMode = !selectionMode
+            });
+
+            
+            editor.on("mousedown", function() {
+                
+                mouseDown = true
+            })
+
+            
+            
+            editor.on("mouseup", function() {
+                if (mouseDown) {
+                    if (selectionMode) {
+                        selection = editor.getSelectedText()
+                        
+
+                        if (selection !== "") {
+                            annotateSelection(selectedSymbol)
+                        }
+                    }
+                    mouseDown = false
+                }
+            })
+
+            
+            function symbolButtonHandler(symbol) {
+                
+                
+                if (selectionMode) {
+                    button = document.getElementById(selectedSymbol)
+                    button.classList.toggle('toggleActive')
+                    button = document.getElementById(symbol)
+                    button.classList.toggle('toggleActive')
+                    selectedSymbol = symbol
+                } else {
+                    
+                    annotateSelection(symbol)
+                }
             }
 
             
@@ -372,6 +685,7 @@
             
             window.onload = (event) => {
                 loadFormContent();
+                loadVisual();
 
                 
                 generateUrl("example2", "Example Statement 2 (moderately complex)",
@@ -387,22 +701,172 @@
                 link.href = window.location.pathname + linkParameter;
             }
 
+            
+            document.addEventListener("keydown", function(event) {
+                
+                if (event.key == "Enter" && event.target.classList.contains("button")) {
+                    event.target.click();
+                    return
+                }
+                if (editor.getReadOnly()) {
+                    
+                    if (event.ctrlKey || event.cmdKey) {
+                        if (event.key == "z") {
+                            editor.undo();
+                            return
+                        } else if (event.key == "y") {
+                            editor.redo();
+                            return
+                        }
+                    }
+
+                    
+                    switch (event.key.toLowerCase()) {
+                        case "q": 
+                            if (event.shiftKey) {
+                                annotateSelection('A,p');
+                            } else {
+                                annotateSelection('A');}
+                        break
+                        case "w": annotateSelection('D'); break
+                        case "e": annotateSelection('I'); break
+                        case "r": 
+                            if (event.shiftKey) {
+                                annotateSelection('Bdir,p');
+                            } else {
+                                annotateSelection('Bdir');}
+                        break
+                        case "t": 
+                            if (event.shiftKey) {
+                                annotateSelection('Bind,p');
+                            } else {
+                                annotateSelection('Bind');}
+                        break
+                        case "a": annotateSelection('Cac'); break
+                        case "s": annotateSelection('Cex'); break
+                        case "d": 
+                            if (event.shiftKey) {
+                                annotateSelection('E,p');
+                            } else {
+                                annotateSelection('E');}
+                        break
+                        case "f": annotateSelection('M'); break
+                        case "1": annotateSelection('O'); break
+                        case "2": annotateSelection('L'); break
+                        case "3": annotateSelection('F'); break
+                        case "4": 
+                            annotateSelection('P');
+                        break
+                        case "¤":
+                            annotateSelection('P,p');
+                        break
+                        case "|":; break
+                    }
+                }
+            });
+
         </script>
+
+        
+        <div class="buttons hidden">
+            Regulative:
+            <div class="button" role="button" aria-pressed="false" id="A"      tabindex="0" onclick="symbolButtonHandler('A')">Attribute</div>
+            <div class="button" role="button" aria-pressed="false" id="A,p"    tabindex="0" onclick="symbolButtonHandler('A,p')">A. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="I"      tabindex="0" onclick="symbolButtonHandler('I')">Aim</div>
+            <div class="button" role="button" aria-pressed="false" id="D"      tabindex="0" onclick="symbolButtonHandler('D')">Deontic</div>
+            <div class="button" role="button" aria-pressed="false" id="Bdir"   tabindex="0" onclick="symbolButtonHandler('Bdir')">Direct Object</div>
+            <div class="button" role="button" aria-pressed="false" id="Bdir,p" tabindex="0" onclick="symbolButtonHandler('Bdir,p')">D.O. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="Bind"   tabindex="0" onclick="symbolButtonHandler('Bind')">Indirect Object</div>
+            <div class="button" role="button" aria-pressed="false" id="Bind,p" tabindex="0" onclick="symbolButtonHandler('Bind,p')">I.O. Property</div>
+            <br>
+            Constitutive:
+            <div class="button" role="button" aria-pressed="false" id="E"      tabindex="0" onclick="symbolButtonHandler('E')">Constituted Entity</div>
+            <div class="button" role="button" aria-pressed="false" id="E,p"    tabindex="0" onclick="symbolButtonHandler('E,p')">C.E. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="F"      tabindex="0" onclick="symbolButtonHandler('F')">Constitutive Function</div>
+            <div class="button" role="button" aria-pressed="false" id="M"      tabindex="0" onclick="symbolButtonHandler('M')">Modal</div>
+            <div class="button" role="button" aria-pressed="false" id="P"      tabindex="0" onclick="symbolButtonHandler('P')">Constituting Properties</div>
+            <div class="button" role="button" aria-pressed="false" id="P,p"    tabindex="0" onclick="symbolButtonHandler('P,p')">C.P. Properties</div>
+            <br>
+            Other:
+            <div class="button" role="button" aria-pressed="false" id="O"      tabindex="0" onclick="symbolButtonHandler('O')">Or Else</div>
+            <div class="button" role="button" aria-pressed="false" id="L"      tabindex="0" onclick="symbolButtonHandler('L')">Logical Operator</div>
+            <div class="button" role="button" aria-pressed="false" id="Cac"    tabindex="0" onclick="symbolButtonHandler('Cac')">Activation Condition</div>
+            <div class="button" role="button" aria-pressed="false" id="Cex"    tabindex="0" onclick="symbolButtonHandler('Cex')">Execution Constraint</div>
+        </div>
+
+        
+        <dialog id="symbolModal">
+            <table>
+                <tr><th>IG Script Symbol</th><th>Corresponding IG 2.0 Component</th></tr>
+                <tr><td><b>A</b></td><td>Attributes</td></tr>
+                <tr><td><b>A,p</b></td><td>Attributes Property*</td></tr>
+                <tr><td><b>D</b></td><td>Deontic</td></tr>
+                <tr><td><b>I</b></td><td>Aim</td></tr>
+                <tr><td><b>Bdir</b></td><td>Direct Object*</td></tr>
+                <tr><td><b>Bdir,p</b></td><td>Direct Object Property*</td></tr>
+                <tr><td><b>Bind</b></td><td>Indirect Object*</td></tr>
+                <tr><td><b>Bind,p</b></td><td>Indirect Object Property*</td></tr>
+                <tr><td><b>Cac</b></td><td>Activation Condition*</td></tr>
+                <tr><td><b>Cex</b></td><td>Execution Constraint*</td></tr>
+                <tr><td><b>E</b></td><td>Constituted Entity</td></tr>
+                <tr><td><b>E,p</b></td><td>Constituted Entity Property</td></tr>
+                <tr><td><b>M</b></td><td>Modal</td></tr>
+                <tr><td><b>F</b></td><td>Constitutive Function</td></tr>
+                <tr><td><b>P</b></td><td>Constituting Properties*</td></tr>
+                <tr><td><b>P,p</b></td><td>Constituting Properties Properties*</td></tr>
+                <tr><td><b>O</b></td><td>Or Else**</td></tr>
+            </table>
+            * In addition to component annotation, these components support component-level nesting, <br>
+            with braces scoping the nested statements (e.g., " + <b> + "Bdir{ ... }" + </b>, <b>Bdir,p{ ... }</b>, etc.).<br>
+            ** The Or else component only allows component-level nesting (i.e., substitution by an entire statement).<br>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbolModalClose" style="float:right" autofocus onclick="closeModal('symbolModal')">Close</div>
+        </dialog>
+
+        
+        <dialog id="keybindModal">
+            <table>
+                <tr><th>Keybinding</th><th>IG 2.0 Component</th></tr>
+                <tr><td><b>q</b></td><td>Attributes</td></tr>
+                <tr><td><b>shift-q</b></td><td>Attributes Property</td></tr>
+                <tr><td><b>w</b></td><td>Deontic</td></tr>
+                <tr><td><b>e</b></td><td>Aim</td></tr>
+                <tr><td><b>r</b></td><td>Direct Object</td></tr>
+                <tr><td><b>Shift-r</b></td><td>Direct Object Property</td></tr>
+                <tr><td><b>t</b></td><td>Indirect Object</td></tr>
+                <tr><td><b>Shift-t</b></td><td>Indirect Object Property</td></tr>
+                <tr><td><b>a</b></td><td>Activation Condition</td></tr>
+                <tr><td><b>s</b></td><td>Execution Constraint</td></tr>
+                <tr><td><b>d</b></td><td>Constituted Entity</td></tr>
+                <tr><td><b>shift-D</b></td><td>Constituted Entity Property</td></tr>
+                <tr><td><b>f</b></td><td>Modal</td></tr>
+                <tr><td><b>3</b></td><td>Constitutive Function</td></tr>
+                <tr><td><b>4</b></td><td>Constituting Properties</td></tr>
+                <tr><td><b>Shift-4</b></td><td>Constituting Properties Properties</td></tr>
+                <tr><td><b>1</b></td><td>Or Else</td></tr>
+                <tr><td><b>2</b></td><td>Logical Operator*</td></tr>
+            </table>
+            * If the selection is not a logical operator it will be marked as a semantic annotation instead.<br>
+            Other Keybindings are also supported. Such as copying and pasting in the editor and default undo and redo. <br>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybindModalClose" style="float:right" autofocus onclick="closeModal('keybindModal')">Close</div>
+        </dialog>
 
         
         <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">A,p(Regional) A[role=enforcer,type=animate](Managers), Cex(on behalf of the Secretary), D[stringency=permissive](may) I[act=performance]((review [AND] (reward [XOR] sanction))) Bdir,p(approved) Bdir1,p(certified) Bdir1[role=monitored,type=animate](production [operations]) and Bdir[role=monitored,type=animate](handling operations) and Bdir2,p(accredited) Bdir2[role=monitor,type=animate](certifying agents) Cex[ctx=purpose](for compliance with the (Act or [XOR] regulations in this part)) under the condition that {Cac[state]{A[role=monitored,type=animate](Operations) I[act=violate](were (non-compliant [OR] violated)) Bdir[type=inanimate](organic farming provisions)} [AND] Cac[state]{A[role=enforcer,type=animate](Manager) I[act=terminate](has concluded) Bdir[type=activity](investigation)}}.</textarea><br />
         
         <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example1" href="#" onclick="resetContent()">Reset to default statement example</a></span>
-        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations." class="tooltip"><a id="example2" href="#">Example Statement 2 (moderately complex)</a></span>
-        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a complex example statement showcasing combinations of nested activation conditions in addition to the features showcased in the second example." class="tooltip"><a id="example3" href="#">Example Statement 3 (complex)</a></span><br /><br />
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example2" href="#" onclick="linkIntercept(event)">Example Statement 2 (moderately complex)</a></span>
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a complex example statement showcasing combinations of nested activation conditions in addition to the features showcased in the second example. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example3" href="#" onclick="linkIntercept(event)">Example Statement 3 (complex)</a></span><br /><br />
 
 
 
-<span data-text=""><a href="/visual/" onclick="saveFormContent()">Switch to visual version of IG Parser</a></span><br /><br />
+<span data-text=""><a href="/visual/" onclick="saveFormContent()">Switch to visual version of IG Parser</a></span>
+<span data-text="">
+<div id="visualToggle" role="button" aria-pressed="false" onclick="visualToggle()" tabindex="0">Toggle advanced editor features</div>
+</span><br /><br />
 
 
-<span data-text="This entry field should contain a statement ID (consisting of numbers and/or letters) that is the basis for generating substatement IDs." class="tooltip">Statement ID:</span>
-<input id="stmtId" name="stmtId" onkeyup="saveFormContent()" type="text" value="123"><br />
+<span data-text="This entry field should contain a statement ID (consisting of numbers and/or letters) that is the basis for generating substatement IDs." class="tooltip" id="stmtIdLabel">Statement ID:</span>
+<input id="stmtId" name="stmtId" onkeyup="saveFormContent()" type="text" value="123" aria-labelledby="stmtIdLabel"><br />
 
 
 <span data-text="This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements." class="tooltip">Parameters:</span>
@@ -433,8 +897,8 @@
 </select>
 
 
-<span data-text="The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol (&#39;|&#39;) as delimiter/separator." class="tooltip">Output format:</span>
-<select id="outputType" name="outputType" type="select">
+<span data-text="The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol (&#39;|&#39;) as delimiter/separator." class="tooltip" id="outputLabel">Output format:</span>
+<select id="outputType" name="outputType" type="select" aria-labelledby="outputLabel">
 
 <option value="Google Sheets" >Google Sheets</option>
 
@@ -456,7 +920,7 @@
 
 
 
-<p>Version: 0.5</p>
+<p>Version: 0.7</p>
 
 </form>
 </div>
@@ -526,6 +990,17 @@
 </div>
         </pre>
     </div>
+
+
+<script>
+   toggleButton = document.getElementById("visualToggle")
+   toggleButton.addEventListener('keydown', function(event) {
+      if (event.key == "Enter"){
+      event.target.click();
+      return
+      }
+   })
+</script>
 
 </body>
 
