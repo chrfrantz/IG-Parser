@@ -115,6 +115,11 @@ var HELP_CODED_STMT = "The <em>'Encoded Statement'</em> field in the IG Parser U
 	"Such annotations apply to any component and can be combined with suffixes indicating private component relationships (e.g., " + HTML_EM_START + "A1,p[prop=qualitative](personal) A1[type=animate](agent)" + HTML_EM_STOP + ")." +
 	"They can further be used to annotate nested components (e.g., " + HTML_EM_START + "Cac[event=violation]{ A(actor) I(violates) ... }" + HTML_EM_STOP + "), as well as combinations thereof " +
 	"(e.g., " + HTML_EM_START + "Cac[state=condition]{Cac[event=violation]{ A(actor) I(violates) ... } [OR] Cac[event=non-compliance]{ A(actor) I(does not comply) ... }}" + HTML_EM_STOP + ")." +
+	LINEBREAK +
+	"Annotations can finally apply on entire statements to facilitate statement-level annotations. The syntax for this simply relies on the presence of an annotation not directly associated with a component and further " +
+	"supports the presence of multiple annotations (which are concatenated in the generated output). Their positioning in the statement is arbitrary." +
+	LINEBREAK + LINEBREAK +
+	"Example (for multiple statement-level annotations): " + HTML_EM_START + "A(actor) [statement-level annotation] I(aim) Bdir(direct object) [yet another statement level annotation]" + HTML_EM_STOP +
 	LINEBREAK + LINEBREAK +
 	"Supported " + HTML_EM_START + "IG Script symbols" + HTML_EM_STOP + " for the encoding of components include (with indication of support for component-level nesting where applicable):" +
 	LINEBREAK + LINEBREAK +
