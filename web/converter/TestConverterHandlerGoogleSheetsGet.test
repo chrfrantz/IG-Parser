@@ -61,7 +61,7 @@
         
         <button class="button2" type="button" id="buttonValidate" switch="validate" onclick="checkRawStatementContent()">
             Validate 'Original Statement' input (checks for imbalanced parentheses)
-            and copy validated content into 'Encoded Statement' field</button></br></br>
+            and copy validated content into 'Encoded Statement' field</button><br><br>
         <script>
             
 
@@ -138,18 +138,18 @@
         <div class="buttons hidden">
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="undo">Undo</div>
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="redo">Redo</div>
-            <span data-text="Toggles between text and edit mode. Text mode allows for free text editing. Edit mode allows for keybindings to add symbols." class="tooltip">
-            <div class="button" role="button" aria-pressed="false" tabindex="0" id="lock">Text mode</div></span>
-            <span data-text="Toggles nesting, when on symbols which support nesting use the appropriate brackets for nesting on creation." class="tooltip">
+            <span data-text="Activates nesting syntax when using button- or keybinding-based encoding (i.e., for symbols that support nesting, the corresponding braces are inserted during encoding)." class="tooltip">
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="nested">Nesting</div></span>
-            <span data-text="Toggles semantic annotation, when on symbols will be created with brackets for semantic annotation." class="tooltip">
+            <span data-text="Activates semantic annotation syntax when using button- or keybinding-based encoding (i.e., semantic annotation brackets will be provided in addition to component symbol and parentheses)." class="tooltip">
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="semantic">Semantic Annotation</div></span>
-            <span data-text="Toggles selection mode, where annotation is performed through selecting a symbol then marking text to annotate the text with the symbol." class="tooltip">
-            <div class="button" role="button" aria-pressed="false" tabindex="0" id="selection">Selection Mode</div></span>
+            <span data-text="Toggles mouse selection mode, in which encoding is performed through symbol selection, followed by text highlighting to encode the highlighted text. Useful for screen- or mouse-based input." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="selection">Mouse Selection Mode</div></span>
             <span data-text="Shows a list of supported symbols and their respective IG 2.0 Components" class="tooltip">
-            <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbols">Symbols</div></span>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbols">Show Symbols</div></span>
+            <span data-text="Toggles between free-text and keybinding mode. Free-text mode allows for free text editing. Keybinding mode activates keybindings to support encoding." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="lock">Free-text mode</div></span>
             <span data-text="Shows a list of supported keybindings and their respective IG 2.0 Components" class="tooltip">
-            <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybinds">Keybinds</div></span>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybinds">Show Keybindings</div></span>
         </div>
         
         <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()" aria-labelledby="editorLabel">Cac{Once E(policy) F(comes into force)} A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance).</div>
@@ -162,7 +162,7 @@
             editor.setOption("wrap", true); 
             editor.setOption("showGutter", true); 
             editor.setOption("showPrintMargin", false); 
-            editor.setOption("behavioursEnabled", false);
+            editor.setOption("behavioursEnabled", false); 
             editor.setOption("cursorStyle", "ace");
             editor.setOption("fontFamily", "monospace"); 
             editor.setOption("fontSize", 16); 
@@ -186,6 +186,8 @@
                     document.GetElementById("keybinds").focus;
                 }
             })
+
+            
 
             
 
@@ -274,13 +276,13 @@
                 
                 if (editor.getReadOnly()) {
                     editor.setOption("readOnly", false)
-                    button.textContent = "Text mode"
+                    button.textContent = "Free-text mode"
                     button.classList.toggle('toggleActive')
                     
                     
                 } else {
                     editor.setOption("readOnly", "nocursor")
-                    button.textContent = "Edit mode"
+                    button.textContent = "Keybinding mode"
                     button.classList.toggle('toggleActive')
                     
                     
@@ -290,10 +292,10 @@
 
             
             function visualToggle() {
-                visual = localStorage.getItem("visual")
+                let visual = localStorage.getItem("visual")
                 console.log(localStorage.getItem("visual"))
-                buttons = document.getElementsByClassName("buttons")
-                if (visual == "false")
+                let buttons = document.getElementsByClassName("buttons")
+                if (visual === "false")
                     
                     for (let i = 0; i < buttons.length; i++) {
                         buttons[i].classList.remove('hidden')
@@ -306,15 +308,15 @@
                         buttons[i].classList.add('hidden')
                         editor.session.setMode("ace/mode/text");
                         localStorage.setItem("visual", "false")
-                    }  
+                    }
             };
 
             
             function loadVisual() {
-                visual = localStorage.getItem("visual")
+                let visual = localStorage.getItem("visual")
                 console.log(localStorage.getItem("visual"))
-                buttons = document.getElementsByClassName("buttons")
-                if (visual != "false")
+                let buttons = document.getElementsByClassName("buttons")
+                if (visual !== "false")
                     
                     for (let i = 0; i < buttons.length; i++) {
                         buttons[i].classList.remove('hidden')
@@ -331,7 +333,7 @@
             
             let nested = false
             document.getElementById("nested").addEventListener("click", function() {
-                button = document.getElementById("nested")
+                let button = document.getElementById("nested")
                 button.classList.toggle('toggleActive')
                 nested = !nested
             });
@@ -339,7 +341,7 @@
             
             let semanticAnnotation = false
             document.getElementById("semantic").addEventListener("click", function() {
-                button = document.getElementById("semantic")
+                let button = document.getElementById("semantic")
                 button.classList.toggle('toggleActive')
                 semanticAnnotation = !semanticAnnotation
             });
@@ -361,11 +363,11 @@
 
             function linkIntercept(event) {
                 event.preventDefault();
-                href = event.target.href;
+                let href = event.target.href;
                 
                 if (confirm("Showing an example overwrites the current work done.\nAre you sure you want to overwrite your current work?")){
                     
-                    window.location.href=href;
+                    window.location.href = href;
                 }
             }
 
@@ -439,7 +441,7 @@
                 saveFormContent();
 
                 
-                if (selectionText == ""){
+                if (selectionText === ""){
                 cursorLocation.column += outputText.length-1
                 editor.moveCursorToPosition(cursorLocation);
                 editor.clearSelection();
@@ -456,12 +458,12 @@
                 
                 var position = e.getDocumentPosition();
                 var token = editor.session.getTokenAt(position.row, position.column);
-                if (token && token !=prevToken)  {
-                    if (prevToken != "") {
+                if (token && token !== prevToken) {
+                    if (prevToken !== "") {
                         document.body.removeChild(tooltip);
                         prevToken = ""
                     }
-                    if (token.type != 'text') {
+                    if (token.type !== 'text') {
                         prevToken = token;
                         
                         
@@ -704,17 +706,17 @@
             
             document.addEventListener("keydown", function(event) {
                 
-                if (event.key == "Enter" && event.target.classList.contains("button")) {
+                if (event.key === "Enter" && event.target.classList.contains("button")) {
                     event.target.click();
                     return
                 }
                 if (editor.getReadOnly()) {
                     
                     if (event.ctrlKey || event.cmdKey) {
-                        if (event.key == "z") {
+                        if (event.key === "q") {
                             editor.undo();
                             return
-                        } else if (event.key == "y") {
+                        } else if (event.key === "w") {
                             editor.redo();
                             return
                         }
@@ -722,45 +724,45 @@
 
                     
                     switch (event.key.toLowerCase()) {
-                        case "q": 
+                        case "a":
                             if (event.shiftKey) {
                                 annotateSelection('A,p');
                             } else {
                                 annotateSelection('A');}
                         break
-                        case "w": annotateSelection('D'); break
-                        case "e": annotateSelection('I'); break
-                        case "r": 
+                        case "d": annotateSelection('D'); break
+                        case "i": annotateSelection('I'); break
+                        case "b":
                             if (event.shiftKey) {
                                 annotateSelection('Bdir,p');
                             } else {
                                 annotateSelection('Bdir');}
                         break
-                        case "t": 
+                        case "n":
                             if (event.shiftKey) {
                                 annotateSelection('Bind,p');
                             } else {
                                 annotateSelection('Bind');}
                         break
-                        case "a": annotateSelection('Cac'); break
-                        case "s": annotateSelection('Cex'); break
-                        case "d": 
+                        case "c": annotateSelection('Cac'); break
+                        case "v": annotateSelection('Cex'); break
+                        case "e":
                             if (event.shiftKey) {
                                 annotateSelection('E,p');
                             } else {
                                 annotateSelection('E');}
                         break
-                        case "f": annotateSelection('M'); break
-                        case "1": annotateSelection('O'); break
-                        case "2": annotateSelection('L'); break
-                        case "3": annotateSelection('F'); break
-                        case "4": 
-                            annotateSelection('P');
-                        break
-                        case "¤":
-                            annotateSelection('P,p');
-                        break
-                        case "|":; break
+                        case "m": annotateSelection('M'); break
+                        case "o": annotateSelection('O'); break
+                        case "l": annotateSelection('L'); break
+                        case "f": annotateSelection('F'); break
+                        case "p":
+                            if (event.shiftKey) {
+                                annotateSelection('P,p');
+                            } else {
+                                annotateSelection('P');}
+                            break
+                        case "|": break
                     }
                 }
             });
@@ -817,36 +819,38 @@
                 <tr><td><b>O</b></td><td>Or Else**</td></tr>
             </table>
             * In addition to component annotation, these components support component-level nesting, <br>
-            with braces scoping the nested statements (e.g., " + <b> + "Bdir{ ... }" + </b>, <b>Bdir,p{ ... }</b>, etc.).<br>
+            with braces scoping the nested statements (e.g., <b>Bdir{ ... }</b>, <b>Bdir,p{ ... }</b>, etc.).<br>
             ** The Or else component only allows component-level nesting (i.e., substitution by an entire statement).<br>
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbolModalClose" style="float:right" autofocus onclick="closeModal('symbolModal')">Close</div>
         </dialog>
 
         
         <dialog id="keybindModal">
+            The following table shows the keys associated with particular IG 2.0 component symbols if 'Keybinding mode' is activated.<br>
+            Keybindings are deactivated in 'Free-text mode' (i.e., manual annotation mode).<br>
             <table>
                 <tr><th>Keybinding</th><th>IG 2.0 Component</th></tr>
-                <tr><td><b>q</b></td><td>Attributes</td></tr>
-                <tr><td><b>shift-q</b></td><td>Attributes Property</td></tr>
-                <tr><td><b>w</b></td><td>Deontic</td></tr>
-                <tr><td><b>e</b></td><td>Aim</td></tr>
-                <tr><td><b>r</b></td><td>Direct Object</td></tr>
-                <tr><td><b>Shift-r</b></td><td>Direct Object Property</td></tr>
-                <tr><td><b>t</b></td><td>Indirect Object</td></tr>
-                <tr><td><b>Shift-t</b></td><td>Indirect Object Property</td></tr>
-                <tr><td><b>a</b></td><td>Activation Condition</td></tr>
-                <tr><td><b>s</b></td><td>Execution Constraint</td></tr>
-                <tr><td><b>d</b></td><td>Constituted Entity</td></tr>
-                <tr><td><b>shift-D</b></td><td>Constituted Entity Property</td></tr>
-                <tr><td><b>f</b></td><td>Modal</td></tr>
-                <tr><td><b>3</b></td><td>Constitutive Function</td></tr>
-                <tr><td><b>4</b></td><td>Constituting Properties</td></tr>
-                <tr><td><b>Shift-4</b></td><td>Constituting Properties Properties</td></tr>
-                <tr><td><b>1</b></td><td>Or Else</td></tr>
-                <tr><td><b>2</b></td><td>Logical Operator*</td></tr>
+                <tr><td><b>a</b></td><td>Attributes</td></tr>
+                <tr><td><b>Shift-a</b></td><td>Attributes Property</td></tr>
+                <tr><td><b>d</b></td><td>Deontic</td></tr>
+                <tr><td><b>i</b></td><td>Aim</td></tr>
+                <tr><td><b>b</b></td><td>Direct Object</td></tr>
+                <tr><td><b>Shift-b</b></td><td>Direct Object Property</td></tr>
+                <tr><td><b>n</b></td><td>Indirect Object</td></tr>
+                <tr><td><b>Shift-n</b></td><td>Indirect Object Property</td></tr>
+                <tr><td><b>c</b></td><td>Activation Condition</td></tr>
+                <tr><td><b>v</b></td><td>Execution Constraint</td></tr>
+                <tr><td><b>e</b></td><td>Constituted Entity</td></tr>
+                <tr><td><b>shift-e</b></td><td>Constituted Entity Property</td></tr>
+                <tr><td><b>m</b></td><td>Modal</td></tr>
+                <tr><td><b>f</b></td><td>Constitutive Function</td></tr>
+                <tr><td><b>p</b></td><td>Constituting Properties</td></tr>
+                <tr><td><b>Shift-p</b></td><td>Constituting Properties Properties</td></tr>
+                <tr><td><b>o</b></td><td>Or Else</td></tr>
+                <tr><td><b>l</b></td><td>Logical Operator*</td></tr>
             </table>
-            * If the selection is not a logical operator it will be marked as a semantic annotation instead.<br>
-            Other Keybindings are also supported. Such as copying and pasting in the editor and default undo and redo. <br>
+            * If the selection is not a logical operator, the text will nevertheless be capitalized and held in square brackets.<br>
+            Other keybindings include standard copying and pasting in the editor and undo ('q') and redo ('w'). <br>
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybindModalClose" style="float:right" autofocus onclick="closeModal('keybindModal')">Close</div>
         </dialog>
 

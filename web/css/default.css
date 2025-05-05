@@ -367,7 +367,7 @@ button:hover {
 }
 
 /*
-Modifications to ace.js:
+Modifications to ace.js (in previous versions, such as 1.14; now exclusively in CSS -- see below):
 
 // Cursor color (to blue)
 .ace_cursor {\n  color: blue;\n}\n
@@ -375,6 +375,19 @@ Modifications to ace.js:
 .ace_bracket {\n  margin: -1px 0 0 -1px;\n  border: 2px solid rgb(255, 0, 0);\n}\n
 
  */
+
+/* Colored cursor */
+.ace_cursor {
+    color: blue !important;             /* Cursor color */
+    width: 2px;                         /* Line width */
+}
+
+/* Colored bracket matching */
+.ace_bracket {
+    color: black !important;            /* Bracket text color */
+    margin: -1px 0 0 -1px;
+    outline: 2px solid red !important;  /* Color of caret (square around symbol) */
+}
 
 /*
 .tooltip {
