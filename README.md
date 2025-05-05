@@ -61,6 +61,8 @@ Below the editor area you will find output-specific parameters, all of which hav
  
 By clicking on 'Generate tabular output', the input is parsed and output generated, which can be copied into the clipboard for transferral into a tool of your choice.
 
+* NOTE: When using Google Sheets output, pasting this into Google Sheets, and exporting the result to Excel, please note that seemingly empty cells actually contain the function `=IFERROR(@__xludf.DUMMYFUNCTION("""COMPUTED_VALUE""");" ")`, which is automatically generated upon export by Google.  To remove these contents in order to arrive at empty cells, please use the Find & Replace feature in Excel (`Ctrl + F`): Put the function in the `Search` field, leave the `Replace` field empty, and click `Replace all`. Afterward, all seemingly empty cells should be actually empty. Please note that this aspect is specific to Google Sheets output; it does not apply to CSV output.
+
 #### Visual output
 
 * For the visual parser version, the parameters include
