@@ -728,6 +728,7 @@ header names (ordered and associated with header symbols),
 row prefix (prefix for each row - to accommodate specific output formats),
 stmtIdPrefix (prefix for statement ID to ensure parsing of output as text),
 row suffix (suffix for each row - to accommodate specific output formats),
+empty cell symbol (symbol used for empty cell, e.g., whitespace as placeholder needed for Google Sheets to prevent collapsing repeated delimiters),
 separator used to separate individual cells per row,
 filename the output should be printed to (should be "" if no output is to be printed),
 printHeaders to indicate whether the header row is to be included in output,
@@ -736,7 +737,7 @@ printIgScript to indicate the inclusion of the original IG Script input in the g
 
 Returns string containing flat output as well as potential parsing error
 */
-func printTabularOutput(statementMap []map[string]string, originalStatement string, igScriptInput string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, separator string, filename string, overwrite bool, printHeaders bool, printOriginalStatement string, printIgScript string) (string, tree.ParsingError) {
+func printTabularOutput(statementMap []map[string]string, originalStatement string, igScriptInput string, headerCols []string, headerColsNames []string, rowPrefix string, stmtIdPrefix string, rowSuffix string, emptyCellSymbol string, separator string, filename string, overwrite bool, printHeaders bool, printOriginalStatement string, printIgScript string) (string, tree.ParsingError) {
 
 	// Prepare builder
 	builder := strings.Builder{}
@@ -775,8 +776,8 @@ func printTabularOutput(statementMap []map[string]string, originalStatement stri
 		// Reconstruct based on header column order
 		for _, header := range headerCols {
 			if entry[header] == "" {
-				// if entry for given header is empty, add space
-				builder.WriteString(" ")
+				// if entry for given header is empty, add empty cell symbol
+				builder.WriteString(emptyCellSymbol)
 				builder.WriteString(separator)
 			} else {
 				// else add entry value
@@ -793,8 +794,8 @@ func printTabularOutput(statementMap []map[string]string, originalStatement stri
 						builder.WriteString(originalStatement)
 						builder.WriteString(separator)
 					} else {
-						// ... else just add whitespace and separator
-						builder.WriteString(" ")
+						// ... else just add empty cell symbol and separator
+						builder.WriteString(emptyCellSymbol)
 						builder.WriteString(separator)
 					}
 				case ORIGINAL_STATEMENT_OUTPUT_ALL_ENTRIES:
@@ -815,8 +816,8 @@ func printTabularOutput(statementMap []map[string]string, originalStatement stri
 						builder.WriteString(igScriptInput)
 						builder.WriteString(separator)
 					} else {
-						// ... else just add whitespace and separator
-						builder.WriteString(" ")
+						// ... else just add empty cell symbol and separator
+						builder.WriteString(emptyCellSymbol)
 						builder.WriteString(separator)
 					}
 				case IG_SCRIPT_OUTPUT_ALL_ENTRIES:
@@ -860,7 +861,7 @@ func generateCSVOutput(statementMap []map[string]string, originalStatement strin
 	suffix := "\n"
 
 	// Delegate actual printing
-	return printTabularOutput(statementMap, originalStatement, igScriptInput, headerCols, headerColsNames, "", stmtIdPrefix, suffix, separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
+	return printTabularOutput(statementMap, originalStatement, igScriptInput, headerCols, headerColsNames, "", stmtIdPrefix, suffix, "", separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
 }
 
 /*
@@ -895,7 +896,7 @@ func generateGoogleSheetsOutput(statementMap []map[string]string, originalStatem
 	suffix := bsuf.String()
 
 	// Delegate actual printing
-	return printTabularOutput(statementMap, originalStatement, igScriptInput, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
+	return printTabularOutput(statementMap, originalStatement, igScriptInput, headerCols, headerColsNames, prefix, stmtIdPrefix, suffix, " ", separator, filename, overwrite, printHeaders, printOriginalStatement, printIgScriptInput)
 }
 
 /*
