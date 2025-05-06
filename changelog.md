@@ -1,7 +1,9 @@
 # IG Parser Revisions
 
 * Version 0.7
-  * Added support for statement-level annotations in generated tabular output (previously only for nested statements). 
+  * Added support for statement-level annotations in generated tabular output (previously only for nested statements).
+  * Revised GUI layout and adjusted keybindings. Various minor code refinements.
+  * Removed default whitespace for empty cells in CSV output (still necessary for Google Sheets).
 * Version 0.6
   * Fixed inference of logical operators for component combinations when combined with nested components.
   * Added support for tilde ('~') in input.
