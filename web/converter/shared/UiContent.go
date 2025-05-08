@@ -159,7 +159,7 @@ const HELP_ORIGINAL_STATEMENT_OUTPUT = "Indicates whether the Original Statement
 const HELP_IG_SCRIPT_OUTPUT = "Indicates whether the IG Script-encoded statement is included in the output by introducing an additional column following the Statement ID (or the Original Statement if activated). Choices include the exclusion (no additional column), the inclusion for the first atomic statement only (i.e., first row following the header row), or the inclusion for all atomic statements (i.e., each row)."
 
 // Help for output field
-const HELP_OUTPUT_TYPE = "The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol ('|') as delimiter/separator."
+const HELP_OUTPUT_TYPE = "The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Both output variants use the pipe symbol ('|') as delimiter/separator. Please click on the label to see additional considerations specific to Google Sheets output processing."
 
 // Help for report error field
 const HELP_REPORT = "Clicking on this link should open your mail client with a pre-populated mail." + LINEBREAK +

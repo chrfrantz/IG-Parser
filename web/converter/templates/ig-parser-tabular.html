@@ -32,7 +32,7 @@
 </select>
 
 <!-- Output type -->
-<span data-text="{{.OutputTypeHelp}}" class="tooltip" id="outputLabel">Output format:</span>
+<span data-text="{{.OutputTypeHelp}}" class="tooltip" id="outputLabel"><a href="https://github.com/chrfrantz/IG-Parser#note-on-google-sheets" target="_blank">Output format:</a></span>
 <select id="outputType" name="outputType" type="select" aria-labelledby="outputLabel">
 {{ range $type := .OutputTypes }}
 <option value="{{ $type }}" {{ if eq $.OutputType $type }}selected="selected"{{ end }}>{{ $type }}</option>
