@@ -281,6 +281,27 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
               // ensures that text is wrapped if too long (see function)
             }).call(wrap, 300, 0, 0);
 
+        // Annotation on root node
+        nodeEnter.filter(d => d.depth === 0).append("text")
+            // Italicize annotations
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                // Add annotation text if it exists
+                if (d.data.anno != null) {
+                    return d.data.anno;
+                } else {
+                    return "";
+                }
+            })
+            .attr("x", function(d) {
+                // Maintain closer to node
+                return 25;
+            })
+            .attr("y", function(d) {
+                // Move up annotations if properties are printed (shouldn't be any on root node)
+                return d.data.prop != null ? -25 : -12;
+            });
+
         // UPDATE
         var nodeUpdate = nodeEnter.merge(node);
 
@@ -426,7 +447,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 
 
         // Add state option information
-        gGiven.append("text")
+        /*gGiven.append("text")
             // Italicize annotations
             .style("font", "italic 12px Arial")
             .text(function (d){
@@ -438,7 +459,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
                 }
             })
             .attr("x", 40)
-            .attr("y", 55);
+            .attr("y", 55);*/
 
 
         // Add complexity information
@@ -540,7 +561,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 <script>
    toggleButton = document.getElementById("visualToggle")
    toggleButton.addEventListener('keydown', function(event) {
-      if (event.key == "Enter"){
+      if (event.key === "Enter"){
       event.target.click();
       return
       }

@@ -324,7 +324,7 @@
             
             function visualToggle() {
                 let visual = localStorage.getItem("visual")
-                console.log(localStorage.getItem("visual"))
+                
                 let buttons = document.getElementsByClassName("buttons")
                 if (visual === "false")
                     
@@ -345,7 +345,7 @@
             
             function loadVisual() {
                 let visual = localStorage.getItem("visual")
-                console.log(localStorage.getItem("visual"))
+                
                 let buttons = document.getElementsByClassName("buttons")
                 if (visual !== "false")
                     
@@ -1159,6 +1159,27 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
             }).call(wrap, 300, 0, 0);
 
         
+        nodeEnter.filter(d => d.depth === 0).append("text")
+            
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                
+                if (d.data.anno != null) {
+                    return d.data.anno;
+                } else {
+                    return "";
+                }
+            })
+            .attr("x", function(d) {
+                
+                return 25;
+            })
+            .attr("y", function(d) {
+                
+                return d.data.prop != null ? -25 : -12;
+            });
+
+        
         var nodeUpdate = nodeEnter.merge(node);
 
         
@@ -1303,19 +1324,8 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 
 
         
-        gGiven.append("text")
-            
-            .style("font", "italic 12px Arial")
-            .text(function (d){
-                
-                if (d.data.options != null) {
-                    return "Options: " + d.data.options;
-                } else {
-                    return "";
-                }
-            })
-            .attr("x", 40)
-            .attr("y", 55);
+        
+
 
 
         
@@ -1400,7 +1410,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 <script>
    toggleButton = document.getElementById("visualToggle")
    toggleButton.addEventListener('keydown', function(event) {
-      if (event.key == "Enter"){
+      if (event.key === "Enter"){
       event.target.click();
       return
       }

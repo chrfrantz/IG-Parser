@@ -294,10 +294,10 @@
                 
             });
 
-            // Toggle button for visualization
+            // Toggle button for advanced notation in UI
             function visualToggle() {
                 let visual = localStorage.getItem("visual")
-                console.log(localStorage.getItem("visual"))
+                //console.log("Toggling advanced visual editor. Current setting: " + localStorage.getItem("visual"))
                 let buttons = document.getElementsByClassName("buttons")
                 if (visual === "false")
                     // Toggle the editor buttons' visibility
@@ -315,10 +315,10 @@
                     }
             };
 
-            // loading for visualization
+            // Load function for editor configuration upon page load
             function loadVisual() {
                 let visual = localStorage.getItem("visual")
-                console.log(localStorage.getItem("visual"))
+                //console.log("Loading advanced visual editor. Current setting: " + localStorage.getItem("visual"))
                 let buttons = document.getElementsByClassName("buttons")
                 if (visual !== "false")
                     // Toggle the editor buttons' visibility

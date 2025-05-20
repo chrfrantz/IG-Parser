@@ -324,7 +324,7 @@
             
             function visualToggle() {
                 let visual = localStorage.getItem("visual")
-                console.log(localStorage.getItem("visual"))
+                
                 let buttons = document.getElementsByClassName("buttons")
                 if (visual === "false")
                     
@@ -345,7 +345,7 @@
             
             function loadVisual() {
                 let visual = localStorage.getItem("visual")
-                console.log(localStorage.getItem("visual"))
+                
                 let buttons = document.getElementsByClassName("buttons")
                 if (visual !== "false")
                     
@@ -934,7 +934,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 <script>
    toggleButton = document.getElementById("visualToggle")
    toggleButton.addEventListener('keydown', function(event) {
-      if (event.key == "Enter"){
+      if (event.key === "Enter"){
       event.target.click();
       return
       }

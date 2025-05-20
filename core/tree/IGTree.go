@@ -1630,24 +1630,48 @@ func (n *Node) HasAnnotations() bool {
 
 /*
 Returns annotations for specific node. If non-synthetic parent nodes hold annotations,
-those are inherited.
+those are inherited; if both parent and child annotations exist, both are combined (parent + child).
 */
 func (n *Node) GetAnnotations() interface{} {
 
-	// If annotations of nodes are empty
-	if n != nil && n.Parent != nil && (n.Annotations == nil || len(n.Annotations.(string)) == 0) {
-		// Check for parent entries
-		if n.Parent != nil && n.Parent.LogicalOperator != SAND_BETWEEN_COMPONENTS {
-			// Delegate to parent component
-			return n.Parent.GetAnnotations()
-		} else {
-			// Return empty entry
-			return nil
-		}
-	} else {
-		// Return own value if existing
-		return n.Annotations
+	// Return nil if node is nil
+	if n == nil {
+		return nil
 	}
+
+	// Otherwise, retrieve annotations
+
+	// Retrieve parent annotations
+	var parentAnnotations interface{}
+	if n.Parent != nil && n.Parent.LogicalOperator != SAND_BETWEEN_COMPONENTS {
+		// Delegate to parent component
+		parentAnnotations = n.Parent.GetAnnotations()
+	}
+	// Retrieve child annotations
+	var childAnnotations interface{}
+	if n.Entry != nil && reflect.TypeOf(n.Entry) == reflect.TypeOf([]*Node{}) && len(n.Entry.([]*Node)) > 0 {
+		childAnnotations = n.Entry.([]*Node)[0].GetAnnotations()
+	}
+
+	// If child annotations are populated, return only those
+	if childAnnotations != nil {
+		// Return child annotations (including recursively inherited annotations) only
+		return childAnnotations
+	}
+
+	// else process all other variations ...
+
+	// Return combined parent and child annotations if existing, ...
+	if parentAnnotations != nil && n.Annotations != nil {
+		return parentAnnotations.(string) + n.Annotations.(string)
+	} else if n.Annotations != nil {
+		// ... else only child annotations, ...
+		return n.Annotations.(string)
+	} else if parentAnnotations != nil {
+		// ... or only parent annotations
+		return parentAnnotations.(string)
+	}
+	return nil
 }
 
 /*
@@ -1657,6 +1681,7 @@ func PrintNodes(nodes []*Node) string {
 	outString := "\n"
 	for i, v := range nodes {
 		outString += "Node " + strconv.Itoa(i) + ": \n"
+		outString += "Annotations: " + fmt.Sprintf("%v", v.Annotations) + "\n"
 		outString += v.String() + "\n"
 	}
 	return outString

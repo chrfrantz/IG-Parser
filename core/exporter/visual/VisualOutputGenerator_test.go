@@ -2405,3 +2405,219 @@ func TestVisualOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAnd
 	}
 
 }
+
+/*
+Tests statement- and component-level annotations in nested statements for visual output.
+*/
+func TestVisualOutputNestedStatementLevelAnnotations(t *testing.T) {
+
+	// Statement with multi-level nesting and nested combinations with annotations
+	text := "[statement-level annotation0] A[actor1](actor) I(act) [statement-level annotation1] " +
+		"Bdir[object1Annotation](object) Cac[condition]{ { {[inner statement2] A(actor2) I(act2) " +
+		"Bdir[object2Annotation](object2) [XOR] A(actor3) I(act3)[inner statement3] Bdir[object3Annotation](object3)} " +
+		"[AND] A(actor4) I(act4) Bdir[object4Annotation](object4) [inner statement4] } } [statement-level annotation2]"
+
+	// Deactivate annotations
+	tabular.SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	tabular.SetIncludeDegreeOfVariability(false)
+	// Activate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(true)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
+		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err2.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating node tree:", err2)
+	}
+
+	outputString := output
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err3 := os.ReadFile("TestVisualOutputNestedStatementLevelAnnotations.test")
+	if err3 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err4 := tabular.WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests statement- and component-level annotations in nested statements for visual output, alongside additional implicitly
+nested component.
+*/
+func TestVisualOutputNestedStatementLevelAnnotationsImplicitAndNestedComponent(t *testing.T) {
+
+	// Statement with statement-level annotations on top and nested levels, annotated conditions, component-level embedded brackets,
+	// as well as implicitly linked condition with nested annotations
+	text := "[statement-level annotation0] A[actor1](actor) I(act) [statement-level annotation1] " +
+		"Bdir[object1Annotation](object) Cac[condition]{ { {[inner statement2] A(actor2) I(act2) " +
+		"Bdir[object2Annotation](object2) [XOR] A(actor3) I(act3)[inner statement3] Bdir[object3Annotation](object3)} " +
+		"[AND] A(actor4) I(act4) Bdir[object4Annotation](object4) [inner statement4] } } " +
+		"[statement-level annotation2] " +
+		// implicitly AND-linked component (note: [inner statement5] is not extracted)
+		"Cac[condition1]{ A(actor5) I(act5) [inner statement5] Bdir(object5) }"
+
+	// Deactivate annotations
+	tabular.SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	tabular.SetIncludeDegreeOfVariability(false)
+	// Activate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(true)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
+		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err2.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating node tree:", err2)
+	}
+
+	outputString := output
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err3 := os.ReadFile("TestVisualOutputNestedStatementLevelAnnotationsImplicitAndNestedComponent.test")
+	if err3 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err4 := tabular.WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}
+
+/*
+Tests statement- and component-level annotations in nested statements for visual output, alongside additional implicitly
+nested component, as well as nested combination in Or else.
+*/
+func TestVisualOutputNestedStatementLevelAnnotationsImplicitAndNestedComponentAndOrElse(t *testing.T) {
+
+	// Statement with statement-level annotations on top and nested levels, annotated conditions, component-level embedded brackets,
+	// as well as implicitly linked condition with nested annotations, and nested or else combination
+	text := "[statement-level annotation0] A[actor1](actor) I(act) [statement-level annotation1] " +
+		"Bdir[object1Annotation](object) Cac[condition]{ { {[inner statement2] A(actor2) I(act2) " +
+		"Bdir[object2Annotation](object2) [XOR] A(actor3) I(act3)[inner statement3] Bdir[object3Annotation](object3)} " +
+		"[AND] A(actor4) I(act4) Bdir[object4Annotation](object4) [inner statement4] } } " +
+		"[statement-level annotation2] " +
+		// implicitly AND-linked component (note: [inner statement5] is not extracted)
+		"Cac[condition1]{ A(actor5) I(act5) [inner statement5] Bdir(object5) } " +
+		// separate Or else with nested combination
+		"O[orElse1]{{ A(actor6) [orElse2] I(act6) Bdir(object6) [XOR] A(actor7) I(act7) Bdir(object7) [orElse3]}}"
+
+	// Deactivate annotations
+	tabular.SetIncludeAnnotations(false)
+	// Deactivate flat printing
+	tree.SetFlatPrinting(false)
+	// Deactivate binary tree printing
+	tree.SetBinaryPrinting(false)
+	// Deactivate moving of activation conditions
+	tree.SetMoveActivationConditionsToFront(false)
+	// Deactivate DoV
+	tabular.SetIncludeDegreeOfVariability(false)
+	// Activate shared elements
+	tree.SetIncludeSharedElementsInVisualOutput(true)
+
+	// Parse statement
+	stmts, err := parser.ParseStatement(text)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		t.Fatal("Error during parsing of statement", err.Error())
+	}
+
+	if len(stmts) > 1 {
+		t.Fatal("Too many statements identified: ", stmts)
+	}
+
+	output, err2 := stmts[0].PrintNodeTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(),
+		tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
+	if err2.ErrorCode != tree.TREE_NO_ERROR {
+		t.Fatal("Error when generating node tree:", err2)
+	}
+
+	outputString := output
+
+	fmt.Println("Generated output: " + outputString)
+
+	// Read reference file
+	content, err3 := os.ReadFile("TestVisualOutputNestedStatementLevelAnnotationsImplicitAndNestedComponentAndOrElse.test")
+	if err3 != nil {
+		t.Fatal("Error attempting to read test text input. Error: ", err3.Error())
+	}
+
+	// Extract expected output
+	expectedOutput := string(content)
+
+	fmt.Println("Output:", output)
+
+	// Compare to actual output
+	if outputString != expectedOutput {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err4 := tabular.WriteToFile("errorOutput.error", outputString, true)
+		if err4 != nil {
+			t.Fatal("Error attempting to read test text input. Error: ", err4.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to 'errorOutput.error'")
+	}
+
+}

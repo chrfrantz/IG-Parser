@@ -293,7 +293,7 @@
             
             function visualToggle() {
                 let visual = localStorage.getItem("visual")
-                console.log(localStorage.getItem("visual"))
+                
                 let buttons = document.getElementsByClassName("buttons")
                 if (visual === "false")
                     
@@ -314,7 +314,7 @@
             
             function loadVisual() {
                 let visual = localStorage.getItem("visual")
-                console.log(localStorage.getItem("visual"))
+                
                 let buttons = document.getElementsByClassName("buttons")
                 if (visual !== "false")
                     
@@ -901,7 +901,7 @@
 </select>
 
 
-<span data-text="The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Note that the CSV variant uses the pipe symbol (&#39;|&#39;) as delimiter/separator." class="tooltip" id="outputLabel">Output format:</span>
+<span data-text="The application currently supports two output types, either Google Sheets output, which can be directly copied into any Google sheet in your browser, or CSV format, which can be used for further processing in Excel or by scripts. Both output variants use the pipe symbol (&#39;|&#39;) as delimiter/separator. Please click on the label to see additional considerations specific to Google Sheets output processing." class="tooltip" id="outputLabel"><a href="https://github.com/chrfrantz/IG-Parser#note-on-google-sheets" target="_blank">Output format:</a></span>
 <select id="outputType" name="outputType" type="select" aria-labelledby="outputLabel">
 
 <option value="Google Sheets" >Google Sheets</option>
@@ -999,7 +999,7 @@
 <script>
    toggleButton = document.getElementById("visualToggle")
    toggleButton.addEventListener('keydown', function(event) {
-      if (event.key == "Enter"){
+      if (event.key === "Enter"){
       event.target.click();
       return
       }

@@ -24,7 +24,7 @@ type Statement struct {
 	IndirectObjectPropertySimple  *Node
 	IndirectObjectPropertyComplex *Node
 
-	//Constitutive Statement
+	// Constitutive Statement
 	ConstitutedEntity                     *Node
 	ConstitutedEntityPropertySimple       *Node
 	ConstitutedEntityPropertyComplex      *Node

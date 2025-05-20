@@ -406,7 +406,7 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 				// Nested statements are stored for later processing, but assigned IDs and references added to calling row
 				Println("Found complex entry (nested statement) in component: " + fmt.Sprint(statement[componentIdx].GetComponentName()))
 				Println("Complex entry (nested statement):" + fmt.Sprint(statement[componentIdx]))
-				Println("Complex entry's annotations:" + fmt.Sprint(statement[componentIdx].Annotations))
+				Println("Complex entry's annotations:" + fmt.Sprint(statement[componentIdx].GetAnnotations()))
 				// Check for statement combination (i.e., node combination)
 
 				// Add entry to array (assuming single nested statement)
@@ -551,11 +551,11 @@ func generateStatementMatrix(stmts [][]*tree.Node, annotations interface{}, stmt
 	Println("Component-level nested statements to be decomposed: " + fmt.Sprint(componentNestedStmts))
 	for _, val := range componentNestedStmts {
 
-		Println("Nested Statement to parse, ID:", val.ID, ", Annotations:", val.NestedStmt.Annotations, ", Stmt:", val.NestedStmt)
+		Println("Nested Statement to parse, ID:", val.ID, ", Annotations:", val.NestedStmt.GetAnnotations(), ", Stmt:", val.NestedStmt)
 
 		Println("Parsing nested statement ...")
 		// Parse individual nested statements on component level in order to attach those to main output
-		nestedTabularResult := GenerateTabularOutputFromParsedStatement(val.NestedStmt, nil, "", "", val.NestedStmt.Annotations, val.ID, "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders, ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
+		nestedTabularResult := GenerateTabularOutputFromParsedStatement(val.NestedStmt, nil, "", "", val.NestedStmt.GetAnnotations(), val.ID, "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, headerSeparator, outputType, printHeaders, ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
 		if nestedTabularResult.Error.ErrorCode != tree.PARSING_NO_ERROR {
 			return nil, nil, nil, nestedTabularResult.Error
 		}
@@ -1070,6 +1070,8 @@ func GenerateTabularOutputFromParsedStatement(node *tree.Node, allStmts []*tree.
 	case reflect.TypeOf([]*tree.Node{}):
 		// component-level nested pair combination
 		stmt = node.Entry.([]*tree.Node)[0].Entry.(*tree.Statement)
+		// Extract combination-level statement annotations (e.g., '{ [leftStmt] A(actor1) I(act1) [OR] [rightStmt] A(actor2) I(act2) }') if existing
+		annotations = node.Entry.([]*tree.Node)[0].GetAnnotations()
 	default:
 		result := TabularOutputResult{}
 		result.Error = tree.ParsingError{ErrorCode: tree.PARSING_ERROR_UNKNOWN_INPUT_TYPE, ErrorMessage: "Parsing failed for unknown input type " + reflect.TypeOf(node.Entry).String() +

@@ -580,17 +580,22 @@ func (n *Node) appendAnnotations(stringToPrepend string, prependSeparator bool, 
 	stringToAppendTo.WriteString(stringToPrepend)
 
 	// Append potential annotations (while replacing specific conflicting symbols)
-	if n != nil && n.GetAnnotations() != nil {
-		if prependSeparator {
-			stringToAppendTo.WriteString(", ")
-		}
-		stringToAppendTo.WriteString(TREE_PRINTER_KEY_ANNOTATIONS)
-		stringToAppendTo.WriteString(TREE_PRINTER_EQUALS)
-		stringToAppendTo.WriteString("\"")
-		stringToAppendTo.WriteString(shared.EscapeSymbolsForExport(n.GetAnnotations().(string)))
-		stringToAppendTo.WriteString("\"")
-		if appendSeparator {
-			stringToAppendTo.WriteString(", ")
+	if n != nil {
+		// Separate retrieval for performance reasons (recursively called)
+		annotations := n.GetAnnotations()
+		// Check both for nil and empty annotation
+		if annotations != nil && annotations != "" {
+			if prependSeparator {
+				stringToAppendTo.WriteString(", ")
+			}
+			stringToAppendTo.WriteString(TREE_PRINTER_KEY_ANNOTATIONS)
+			stringToAppendTo.WriteString(TREE_PRINTER_EQUALS)
+			stringToAppendTo.WriteString("\"")
+			stringToAppendTo.WriteString(shared.EscapeSymbolsForExport(n.GetAnnotations().(string)))
+			stringToAppendTo.WriteString("\"")
+			if appendSeparator {
+				stringToAppendTo.WriteString(", ")
+			}
 		}
 	}
 	// Return potentially extended string

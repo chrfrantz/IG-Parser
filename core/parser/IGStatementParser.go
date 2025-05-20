@@ -180,7 +180,8 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
 	}
 
-	Println("Statement (after assigning nested elements, before expanding statement with paired components):\n" + s.String())
+	Println("Statement (after assigning nested elements, before expanding statement with paired components):\n" + s.String() +
+		"Statement-level annotations (not yet assigned to statement): " + fmt.Sprint(stmtLevelAnnotations))
 
 	// Process component pair combinations and extrapolate into multiple statements
 	if len(compAndNestedStmts[3]) > 0 {
@@ -209,7 +210,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		Println("No expansion of statement necessary (no component pair combinations in input)")
 	}
 
-	// Return error indicating that statement is empty
+	// Return error indicating that the statement is empty
 	if s.IsEmpty() {
 		Println("Statement is empty - returning error " + tree.PARSING_ERROR_EMPTY_STATEMENT)
 		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_STATEMENT}

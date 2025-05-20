@@ -1,0 +1,65 @@
+{
+"name": "",
+"level": 1, 
+"children": [
+{"name": "actor", "comp": "A", "level": 1},
+{"name": "act", "comp": "I", "level": 1},
+{"name": "object", "comp": "Bdir", "level": 1},
+{"name": "AND",
+"children": [{"name": "XOR",
+"children": [{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor2", "comp": "A", "level": 2},
+{"name": "act2", "comp": "I", "level": 2},
+{"name": "object2", "comp": "Bdir", "level": 2}
+]
+},
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor3", "comp": "A", "level": 2},
+{"name": "act3", "comp": "I", "level": 2},
+{"name": "object3", "comp": "Bdir", "level": 2}
+]
+}], "comp": "Cac", "level": 1}, {
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor4", "comp": "A", "level": 2},
+{"name": "act4", "comp": "I", "level": 2},
+{"name": "object4", "comp": "Bdir", "level": 2}
+]
+},
+{
+"name": "Cac",
+"level": 2, 
+"children": [
+{"name": "actor5", "comp": "A", "level": 2},
+{"name": "act5", "comp": "I", "level": 2},
+{"name": "object5", "comp": "Bdir", "level": 2}
+]
+}], "comp": "Cac", "level": 1},
+{"name": "XOR",
+"children": [{
+"name": "O",
+"level": 2, 
+"children": [
+{"name": "actor6", "comp": "A", "level": 2},
+{"name": "act6", "comp": "I", "level": 2},
+{"name": "object6", "comp": "Bdir", "level": 2}
+]
+},
+{
+"name": "O",
+"level": 2, 
+"children": [
+{"name": "actor7", "comp": "A", "level": 2},
+{"name": "act7", "comp": "I", "level": 2},
+{"name": "object7", "comp": "Bdir", "level": 2}
+]
+}], "comp": "O", "level": 1}
+]
+}
