@@ -307,15 +307,25 @@ Note that the extended syntax that supports Object-Property Relationships is fur
 
 In addition to the parsing of component annotations and combinations of various kinds, the parser further supports semantic annotations of components according to the taxonomies outlined in the [Institutional Grammar 2.0 Codebook](https://arxiv.org/abs/2008.08937).
 
-The syntax (including support for suffices introduced above) is `componentSymbolSuffix[semanticAnnotation](component content)`, i.e., any component can be augmented with `[semantic annotation content]`, e.g., `Cac[context=state](Upon certification)`. 
+Semantic annotations can be applied to components, statements, as well as substatements (e.g., as part of combinations). 
 
-This also applies to nested components, e.g., `Cac[condition=violation]{A[entity=actor,animate](actor) I[act=violate](violates) Bdir[entity=target,inanimate](something)}`, as well as for compound components, e.g., `Bdir[type=target](leftObject [XOR] rightObject)`, in which case the annotation `type=target` is attached to both `leftObject` and `rightObject` in the generated output. 
+##### Component-level Annotations
 
-In addition to component-level annotations, the parser also supports statement-level annotations. The syntax for those is simply any bracket-based expression outside parentheses or braces, e.g., `A(actor) I(aim) Cac(condition) [Statement-level Annotation]`, where `[Statement-level Annotation]` is the corresponding annotation. Where multiple statement-level annotations are presented, they are concatenated in the generated output, e.g., `[annotation1][annotation2]`. Positioning of annotations in the encoding is arbitrary (`A(actor) [an annotation here] I(aim) Cac(condition) [and another one here]`), as long as it not embedded in nested components.
+The basic syntax for component-level annotations `componentSymbol[semanticAnnotation](component content)` and can be applied to any component by adding the corresponding annotation `[semantic annotation content]`, e.g., `Cac[context=state](Upon certification)`. The syntax also applies for components using suffices (relevant for unambiguous association of properties and first-order components as introduced above). The syntax for this is `componentSymbolSuffix[semanticAnnotation](component content)` (e.g., `Bdir1[annotation](object)`, where `1` is the suffix). 
 
-To include annotations in the output, the Parameter `Include IG Logico annotations` needs to be activated in the Parameters section of the tabular version of the parser.
+Component-level annotations also apply to nested components, e.g., `Cac[condition=violation]{A[entity=actor,animate](actor) I[act=violate](violates) Bdir[entity=target,inanimate](something)}`, as well as for compound components, e.g., `Bdir[type=target](leftObject [XOR] rightObject)`, in which case the annotation `[type=target]` is attached to both `leftObject` and `rightObject` in the generated output. Note that the output for nested components will appear in the output column `Statement Annotation`, since it applies to the entire nested component, not just the individual embedded components (their annotations will appear in the column adjacent to the respective component -- see below).
 
-Annotations are then generated in the corresponding columns (for statement-level annotations as well as annotations on nested components (e.g., `Cac[Nested Component Annotation]{ ... }`) in the `Statement Annotation` column), and for components, annotations are provided in the corresponding annotation column following the component column (e.g., `A (Annotation)` for Attributes). 
+To include annotations in the output, the Parameter `Include IG Logico annotations` needs to be activated in the Parameters section of the tabular version of the parser. This will expand the output schema to include an annotations column adjacent to each column holding the component values, e.g., a column `A (Annotation)` following the `Attributes` column. Note that the schema expansion applies to all components if activated, irrespective of whether annotations are present or not (to ensure a consistent output format for further processing). 
+
+##### Statement-level Annotations
+
+In addition to component-level annotations, the parser also supports statement-level annotations. The syntax for those is simply any bracket-based expression outside of components at same nesting level as the components in the statement it annotates. An example is `A(actor) I(aim) Cac(condition) [Statement-level Annotation]`, where `[Statement-level Annotation]` is the annotation associated with the statement `A(actor) I(aim) Cac(condition)` in the generated output. Where multiple statement-level annotations are presented, they are concatenated in the generated output (e.g., `[annotation1][annotation2]`). Positioning of annotations in the encoding is arbitrary (e.g., `A(actor) [an annotation here] I(aim) Cac(condition) [and another one here]` would yield two concatenated annotations for that statement). Brackets within components (e.g., A([actor])) are ignored and treated as text (e.g., used in coding practice to indicate inferred or reconstructed component content).
+
+To include annotations in the output, the Parameter `Include IG Logico annotations` needs to be activated in the Parameters section of the tabular version of the parser. As with component-level annotations, this will lead to the generation of an expanded schema including a `Statement Annotation` column that holds statement-level annotations for leading statements (e.g., `A(actor) I(act) Bdir(object) [annotation]`) and annotations on nested components (e.g., `Cac[annotation]{ A(actor) I(act) }`). 
+
+Annotations further apply to nested component combinations (e.g., `O[orElseAnnotation]{{ [left annotation] A(actor1) I(act1) [AND] [right annotation] A(actor2) I(act2) }}`, with nested component annotation (`[orElseAnnotation]`) and annotations specific to branches concatenated for the respective row in the output, i.e., `[orElseAnnotation][left annotation]` for the left side, and `[orElseAnnotation][right annotation]` for the right side).
+
+Finally, component-pair combinations are also supported (e.g., `{ [left annotation] A(leftActor) I(leftAct) [XOR] [right annotation] A(rightActor) [another annotation] I(rightAct) }`, where the `[left annotation]` would be associated with the left statement, and `[right annotation]` and `[another annotation]` with the right statement, concatenated as `[right annotation][another annotation]` in the output).
 
 ### Examples
 
@@ -335,10 +345,16 @@ In the following, you will find selected examples that highlight the practical u
   * `A,p(National Organic Program's) A(Program Manager), Cex(on behalf of the Secretary), D(must) I(inform), I(review [AND] (recertify [XOR] sanction)) Bdir(approved (certified production [AND] handling operations [AND] accredited certifying agents)) Cex(according to the guidelines provided in the (Act [XOR] regulations in this part)) if Cac{Cac{A(Program Manager) I(suspects [OR] establishes) Bdir(violations)} [AND] Cac{E(Program Manager) F(is authorized) for the P,p(relevant) P(region)}}, or else O{O{A,p(Manager's) A(supervisor) D(may) I(suspend [XOR] revoke) Bdir,p(Program Manager's) Bdir(authority)} [XOR] O{A(regional board) D(may) I(warn [OR] fine) Bdir,p(violating) Bdir(Program Manager)}}`
 * Object-Property Relationships; showcasing linkage of private nodes with specific component instances (especially where implicit component-level combinations occur), alongside a shared property that apply to both objects (note that for this example, the AND-linkage between the different direct objects is implicit):
   * `A,p(Certified) A(agent) D(must) I(request) Bdir,p(independently) Bdir1,p(authorized) Bdir1(report) and Bdir2,p(audited) Bdir2(financial documents).`
-* Semantic annotations; showcasing the basic use of annotations on arbitrary components:
+* Semantic annotations on component level (showcasing the basic use of annotations on arbitrary components):
   * `A,p[property=qualitative](Certified) A[role=responsible](organic farmers) D[stringency=obligation](must) I[type=act](submit) Bdir[type=inanimate](report) to Bind[role=authority](Organic Program Representative) Cac[context=tim](at the end of each year).`
 * Semantic annotation on statement-level (this can of course be combined with component-level annotations, but separated here for clarity):
   * `A(responsible actor) [statement annotation0] I(action) Cac(condition) [statement annotation1]`
+* Semantic annotation on nested component:
+  * `Cac[annotation]{ A(actor) I(act) }`
+* Semantic annotation on component pair combination/combined statements (with each side having distinctive components):
+  * `{ [left annotation] A(leftActor) I(leftAct) [XOR] [right annotation] A(rightActor) [another annotation] I(rightAct) }`
+* Semantic annotation on component pair combination within nested component (output concatenates leading annotation with branch-specific ones):
+  * `Cac[leadingAnnotation]{ [left annotation] A(leftActor) [another annotation] I(leftAct) [XOR] [right annotation] A(rightActor) I(rightAct) }`   
 
  ### Common issues
   * Parentheses/braces need to match. The parser calls out if a mismatch exists. Parentheses are applied when components are specified (or combinations thereof), and braces are used to signal component-level nesting (i.e., statements embedded within components) and statement combinations (i.e., combinations of component-level nested statements).
