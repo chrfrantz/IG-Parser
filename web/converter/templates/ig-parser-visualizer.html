@@ -183,7 +183,9 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
         // Add circles around nodes
         nodeEnter.append('circle')
             .attr('class', 'node')
-            .attr('r', 1e-6)
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', '3px')
+            .attr('r', 16)
             .style("stroke", function(d) {
                 // Draw property nodes in different stroke color
                 if (d.data.comp && d.data.comp.endsWith(",p")) {

@@ -1060,7 +1060,9 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
         
         nodeEnter.append('circle')
             .attr('class', 'node')
-            .attr('r', 1e-6)
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', '3px')
+            .attr('r', 16)
             .style("stroke", function(d) {
                 
                 if (d.data.comp && d.data.comp.endsWith(",p")) {
