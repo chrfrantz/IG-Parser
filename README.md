@@ -100,13 +100,13 @@ IG Script is a notation introduced in the context of the [Institutional Grammar 
 
 IG Script centers around a set of fundamental primitives that can be combined to parse statements comprehensively, including:
 
-* Basic component coding
-* Component combinations
-* Nested statements
-* Nested statement combinations
-* Component pair combinations
-* Object-Property relationships
-* Semantic Annotations
+* [Basic component coding](#component-coding)
+* [Component combinations](#component-combinations)
+* [Nested statements](#nested-statements)
+* [Nested statement combinations](#nested-statement-combinations)
+* [Component pair combinations](#component-pair-combinations)
+* [Object-Property relationships](#object-property-relationships)
+* [Semantic Annotations](#statement-level-annotations)
 
 #### Component Coding
 
