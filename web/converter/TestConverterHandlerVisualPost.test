@@ -930,6 +930,9 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 </form>
 </div>
 
+<div class="outputDownload">
+    <button id="download" class="button1" onclick="download()">Download Statement Visualization as Image</button>
+</div>
 
 
 <script src="/libraries/d3/d3.v7.min.js"></script>
@@ -1191,7 +1194,8 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 
         
         nodeUpdate.select('circle.node')
-            .attr('r', 10)
+            .attr('r', 16)
+            .attr('stroke-width', '3px')
             .style("stroke", function(d) {
                 
                 if (d.data.comp && d.data.comp.endsWith(",p")) {
@@ -1263,6 +1267,9 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
         
         var linkEnter = link.enter().insert('path', "g")
             .attr("class", "link")
+            .attr("fill", "none")
+            .attr("stroke", "#ccc")
+            .attr("stroke-width", "2px")
             .attr('d', function(d){
                 var o = {x: source.x0, y: source.y0}
                 return diagonal(o, o)
@@ -1402,6 +1409,29 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
             }
             update(d);
         }
+    }
+
+    
+    function download() {
+        const svgElement = document.querySelector("svg");
+        const serializer = new XMLSerializer();
+        const source = serializer.serializeToString(svgElement);
+
+        const image = new Image();
+        image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
+        image.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext("2d");
+            context.fillStyle = "#fff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0);
+            const a = document.createElement("a");
+            a.download = "IG_Parser_Generated_Visual_Statement.png";
+            a.href = canvas.toDataURL("image/png");
+            a.click();
+        };
     }
 
 </script>
