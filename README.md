@@ -17,7 +17,7 @@ See [Contributors](contributors.md) for an overview of contributions to the proj
 
 ## Overview
 
-IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used locally, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to the user interface, followed by a comprehensive introduction to the syntactic principles and essential features of IG Script. This includes a set of examples showcasing all features and various levels of complexity, while highlighting typical mistakes in the encoding. As a final aspect, the deployment instructions for IG Parser are provided. 
+IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used locally, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to the user interface, followed by a comprehensive introduction to the syntactic principles and essential features of [IG Script](#ig-script). This includes a set of [examples](#examples) showcasing all features and various levels of complexity, while highlighting [typical mistakes](#common-issues) in the encoding. As a final aspect, the [deployment](#deployment) instructions for IG Parser are provided. 
 
 The conceptual background of the Institutional Grammar 2.0 is provided in the corresponding [article](https://doi.org/10.1111/padm.12719) and [book](https://newinstitutionalgrammar.org), augmented with supplementary operational [coding guidelines](https://arxiv.org/abs/2008.08937).
 
@@ -106,7 +106,7 @@ IG Script centers around a set of fundamental primitives that can be combined to
 * [Nested statement combinations](#nested-statement-combinations)
 * [Component pair combinations](#component-pair-combinations)
 * [Object-Property relationships](#object-property-relationships)
-* [Semantic Annotations](#statement-level-annotations)
+* [Semantic Annotations](#semantic-annotations)
 
 #### Component Coding
 
