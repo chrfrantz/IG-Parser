@@ -17,7 +17,7 @@ See [Contributors](contributors.md) for an overview of contributions to the proj
 
 ## Overview
 
-IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used locally, as well as via a web interface that produces tabular output of parsed statements (currently supporting Google Sheets format). In the following, you will find a brief introduction to the user interface, followed by a comprehensive introduction to the syntactic principles and essential features of [IG Script](#ig-script). This includes a set of [examples](#examples) showcasing all features and various levels of complexity, while highlighting [typical mistakes](#common-issues) in the encoding. As a final aspect, the [deployment](#deployment) instructions for IG Parser are provided. 
+IG Parser is a parser for IG Script, a formal notation for the representation institutional statements (e.g., policy statements) used in the Institutional Grammar 2.0. The parser can be used locally, as well as via a web interface that produces tabular output of parsed statements (currently supporting CSV and Google Sheets format). In the following, you will find a brief introduction to the user interface, followed by a comprehensive introduction to the syntactic principles and essential features of [IG Script](#ig-script). This includes a set of [examples](#examples) showcasing all features and various levels of complexity, while highlighting [typical mistakes](#common-issues) in the encoding. As a final aspect, the [deployment](#deployment) instructions for IG Parser are provided. 
 
 The conceptual background of the Institutional Grammar 2.0 is provided in the corresponding [article](https://doi.org/10.1111/padm.12719) and [book](https://newinstitutionalgrammar.org), augmented with supplementary operational [coding guidelines](https://arxiv.org/abs/2008.08937).
 
@@ -57,7 +57,7 @@ Below the editor area you will find output-specific parameters, all of which hav
   * options to generate output based on the different levels of expressiveness (IG Core, IG Extended, IG Logico),
   * the selective inclusion of a header row in the generated output,
   * the option to include the original statement (from the field 'Original Statement') as well as the IG-Script-encoded statement (Field 'Encoded Statement') in the output (either only in the first content line, or for all generated output lines),
-  * the selection of the output format, which currently includes Google Sheets-parseable output (you can paste it directly into Google Sheets spreadsheets), or as CSV (which can be used in statistical programming tools, or in Excel, etc.)
+  * the selection of the output format, which currently includes Google Sheets-parseable output (you can paste it directly into Google Sheets spreadsheets), or as CSV (which can be used in statistical programming platforms, tools or languages, such as R or Python, or in conventional spreadsheet tools such as Excel, LibreOffice, etc.)
  
 By clicking on 'Generate tabular output', the input is parsed and output generated, which can be copied into the clipboard for transferral into a tool of your choice.
 
@@ -83,6 +83,8 @@ As an alternative strategy (e.g., where copying and pasting is not an option), y
   * the specification of the canvas dimensions (this is useful to customize the size to your needs and graph scale -- a future feature will be to automate the scaling)
  
 By clicking on 'Generate visual output', the input information is parsed and the statement tree structure displayed.
+
+The generated tree structure can further be exported as an image.
 
 ### Usage considerations
 
