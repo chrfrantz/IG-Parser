@@ -13,7 +13,7 @@ Note: Either version allows interactive switching to the respective other while 
 
 See [Revision history](changelog.md) for a detailed overview of changes.
 
-See [Contributors](contributors.md) for an overview of contributions to the project. We explicitly encourage external contributions. Please feel free to get in touch if you plan to contribute to the repository. Please create an issue to report bugs, or to propose features (alternatively also per mail). 
+See [Contributors](contributors.md) for an overview of contributions to the project. We explicitly encourage contributions in the form of code, tests, or documentation refinements. Please feel free to get in touch if you plan to contribute to the repository. If you spot potential software bugs, want to suggest particular features, or wish to comment on existing issues/discussions, please use the issue tracker (alternatively, you can get in touch by mail). 
 
 ## Overview
 
