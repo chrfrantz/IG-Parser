@@ -4,7 +4,6 @@ import (
 	"IG-Parser/core/exporter/tabular"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -374,7 +373,7 @@ func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
 	responseHead := outputString[:endIdx]
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerGoogleSheetsPost.test")
+	content, err5 := os.ReadFile("TestConverterHandlerGoogleSheetsPost.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
@@ -473,7 +472,7 @@ func TestConverterHandlerGoogleSheetsPostWarning(t *testing.T) {
 	responseHead := outputString[:endIdx]
 
 	// Read reference file
-	content, err5 := ioutil.ReadFile("TestConverterHandlerGoogleSheetsPostWarn.test")
+	content, err5 := os.ReadFile("TestConverterHandlerGoogleSheetsPostWarn.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}
