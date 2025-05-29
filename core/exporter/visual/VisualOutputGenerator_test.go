@@ -6,6 +6,7 @@ import (
 	"IG-Parser/core/tree"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -599,12 +600,12 @@ func TestVisualOutputComplexNonBinaryTree(t *testing.T) {
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != "which    — (A) the  , the  , (C) the  , (D)   , (E)   , (F)  , (G)  , (H) , (I) , (J)    " {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {
-		t.Fatal("Too many statements identified: ", stmts)
+		t.Fatal("Too many statements identified:", stmts)
 	}
 
 	s := stmts[0].Entry.(*tree.Statement)
@@ -1322,20 +1323,20 @@ func TestVisualOutput2ndOrderNestedStatementCombinationsWithProperties(t *testin
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_NO_ERROR && (err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != " [AND] ") {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {
-		t.Fatal("Too many statements identified: ", stmts)
+		t.Fatal("Too many statements identified:", stmts)
 	}
 
 	s := stmts[0].Entry.(*tree.Statement)
 
 	// Generate tree output
 	output, err1 := s.PrintTree(nil, tree.FlatPrinting(), tree.BinaryPrinting(), tabular.IncludeAnnotations(), tabular.IncludeDegreeOfVariability(), tree.MoveActivationConditionsToFront(), 0)
-	if err1.ErrorCode != tree.TREE_NO_ERROR {
-		t.Fatal("Error when generating visual tree output. Error: ", err1.Error())
+	if err1.ErrorCode != tree.TREE_NO_ERROR && (err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != " [AND] ") {
+		t.Fatal("Error when generating visual tree output:", err1)
 	}
 
 	outputString := output.String()
@@ -2287,8 +2288,8 @@ func TestVisualOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAnd
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_NO_ERROR && (err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != "Such   : (1) A ; (2) The ; and (3) The    .") {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {
@@ -2364,8 +2365,8 @@ func TestVisualOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAnd
 
 	// Parse statement
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_NO_ERROR && (err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != "Such   : (1) A ; (2) The ; and (3) The    .") {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {

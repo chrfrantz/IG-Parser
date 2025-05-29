@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<style>
+
+    .node circle {
+        fill: #fff;
+        stroke: steelblue;
+        stroke-width: 3px;
+        r: 16;
+    }
+
+    .node text {
+        font: 12px sans-serif;
+        font-weight: bold;
+    }
+
+    .link {
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 2px;
+    }
+
+    .link text {
+        font: 12px sans-serif;
+    }
+
+    .link.text2 {
+        font: 20px sans-serif;
+    }
+
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A Parser for Institutional Statements encoded in the IG Script Notation of the Institutional Grammar 2.0">
+    <title>IG Parser</title>
+    <link rel="icon" type="image/x-icon" href="/css/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/css/favicon.ico">
+    <link rel="stylesheet" href="/css/default.css">
+    
+    <script src="/libraries/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+<script>
+
+    
+
+    function CopyToClipboard(containerid) {
+        if (document.selection) {
+            let range = document.body.createTextRange();
+            range.moveToElementText(document.getElementById(containerid));
+            range.select().createTextRange();
+            document.execCommand("copy");
+        } else if (window.getSelection) {
+            let range = document.createRange();
+            range.selectNode(document.getElementById(containerid));
+            window.getSelection().addRange(range);
+            let res = document.execCommand("copy");
+            if (res !== true) {
+                alert("Text-to-Clipboard copying failed. Please select output manually and copy via keyboard.")
+            }
+        }
+    }
+
+    
+
+    function check(target) {
+        let offset = 0
+        target.style.height = 'auto';
+        target.style.height = target.scrollHeight + offset + 'px';
+    }
+
+</script>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h1><a style="text-decoration:none" href="https://github.com/chrfrantz/IG-Parser" target="_blank">IG Parser</a></h1>
+<h2>A Parser for Institutional Statements encoded in the <a href="/help/" target="_blank">IG Script Notation</a> of the <a href="https://newinstitutionalgrammar.org" target="_blank">Institutional Grammar 2.0</a></h2>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div class="form">
+    <form method="POST">
+        
+        <span data-text="This entry field is for optional use. You can paste the original statement here as a reference while encoding it in the &#39;Encoded Statement&#39; field." class="tooltip" id="rawStmtLabel">Original Statement:</span>
+        <textarea id="rawStmt" name="rawStmt" onload="check(this)" onfocusin="check(this)" onkeyup="check(this);saveFormContent()" onpaste="check(this);saveFormContent()" aria-labelledby="rawStmtLabel"></textarea>
+        
+        <div class="error" id="validateError"></div>
+        
+        <button class="button2" type="button" id="buttonValidate" switch="validate" onclick="checkRawStatementContent()">
+            Validate 'Original Statement' input (checks for imbalanced parentheses)
+            and copy validated content into 'Encoded Statement' field</button><br><br>
+        <script>
+            
+
+            function checkRawStatementContent() {
+
+                
+                let buttonType = document.getElementById("buttonValidate").getAttribute("switch");
+
+                if (buttonType === "overwrite") {
+                    
+
+                    
+                    let rawContent = document.getElementById("rawStmt").value;
+                    
+                    let editor = ace.edit("editor");
+                    editor.setValue(rawContent);
+                    
+                    copyEditorContentToTextArea();
+
+                    
+                    document.getElementById("buttonValidate").setAttribute("switch", "validate");
+                    document.getElementById("buttonValidate").innerText =
+                        "Validate 'Original Statement' input (checks for imbalanced parentheses) and " +
+                        "copy validated content into 'Encoded Statement' field";
+                    
+                    let validateError = document.getElementById("validateError");
+                    validateError.innerHTML = "";
+
+                } else if (buttonType === "validate") {
+                    
+
+                    
+                    let rawContent = document.getElementById("rawStmt").value;
+                    
+                    let leftParCount = (rawContent.match(/\(/g) || []).length;
+                    
+                    let rightParCount = (rawContent.match(/\)/g) || []).length;
+                    
+                    if (leftParCount !== rightParCount) {
+                        
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "Found imbalanced parentheses in raw input (" +
+                            leftParCount + " opening and " + rightParCount + " closing parentheses).\n" +
+                            "Please remove or balance parentheses to before encoding the statement.";
+                    } else {
+                        
+                        let validateError = document.getElementById("validateError");
+                        validateError.innerHTML = "";
+                        
+                        let editor = ace.edit("editor");
+                        
+                        if (editor.getValue().length === 0) {
+                            editor.setValue(rawContent);
+                            
+                        } else if (editor.getValue() !== rawContent) {
+                            
+                            let validateError = document.getElementById("validateError");
+                            validateError.innerHTML = "The 'Original Statement' content is valid, but has not been copied into the 'Encoded Statement' field, " +
+                                "since this field already contains content (to prevent accidental overwriting of encoded statement).\<br/\>" +
+                                "Confirm if you indeed want to overwrite the 'Encoded Statement' content with the 'Original Statement' content.";
+
+                            
+                            document.getElementById("buttonValidate").setAttribute("switch", "overwrite");
+                            document.getElementById("buttonValidate").innerText = "Confirm overwriting of 'Encoded Statement' entry with 'Original Statement' entry";
+
+                        } 
+                    }
+                } 
+            }
+        </script>
+        
+        <span data-text="Click to open a separate help page explaining the IG Script syntax (opens new tab)." class="tooltip" id="editorLabel"><a href="/help/" target="_blank">Encoded Statement: (?)</a></span>
+        
+        <div class="buttons hidden">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="undo">Undo</div>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="redo">Redo</div>
+            <span data-text="Activates nesting syntax when using button- or keybinding-based encoding (i.e., for symbols that support nesting, the corresponding braces are inserted during encoding)." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="nested">Nesting</div></span>
+            <span data-text="Activates semantic annotation syntax when using button- or keybinding-based encoding (i.e., semantic annotation brackets will be provided in addition to component symbol and parentheses)." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="semantic">Semantic Annotation</div></span>
+            <span data-text="Toggles mouse selection mode, in which encoding is performed through symbol selection, followed by text highlighting to encode the highlighted text. Useful for screen- or mouse-based input." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="selection">Mouse Selection Mode</div></span>
+            <span data-text="Shows a list of supported symbols and their respective IG 2.0 Components" class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbols">Show Symbols</div></span>
+            <span data-text="Toggles between free-text and keybinding mode. Free-text mode allows for free text editing. Keybinding mode activates keybindings to support encoding." class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="lock">Free-text mode</div></span>
+            <span data-text="Shows a list of supported keybindings and their respective IG 2.0 Components" class="tooltip">
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybinds">Show Keybindings</div></span>
+        </div>
+        
+        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()" aria-labelledby="editorLabel">Cac{ Cac{ A(actor6) I(actor6) } [XOR] Cac{ A(actor7) I(actor7) }} Cac{ Cac{ A(actor1) I(aim1) } [OR] Cac{ A(actor0) I(aim0) Cac{ A(actor2) I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5)} }}</div>
+        <script>
+            let editor = ace.edit("editor");
+            editor.session.setMode("ace/mode/text"); 
+            
+            
+            editor.setOption("showLineNumbers", true); 
+            editor.setOption("wrap", true); 
+            editor.setOption("showGutter", true); 
+            editor.setOption("showPrintMargin", false); 
+            editor.setOption("behavioursEnabled", false); 
+            editor.setOption("cursorStyle", "ace");
+            editor.setOption("fontFamily", "monospace"); 
+            editor.setOption("fontSize", 16); 
+            editor.setOption("minLines", 5); 
+            editor.setOption("maxLines", 30); 
+
+            
+            editor.commands.addCommand({
+                name: "tabNextElement",
+                bindKey: { win: "Tab", mac: "Tab"},
+                exec: function(editor) {
+                    document.GetElementById("A").focus;
+                }
+            })
+
+            
+            editor.commands.addCommand({
+                name: "tabPrevElement",
+                bindKey: { win: "Shift-Tab", mac: "Shift-Tab"},
+                exec: function(editor) {
+                    document.GetElementById("keybinds").focus;
+                }
+            })
+
+            
+
+            
+
+            function copyEditorContentToTextArea() {
+                let ta = document.getElementById("codedStmt");
+                
+                ta.value = editor.getValue();
+            }
+
+            
+
+            
+
+            function saveFormContent() {
+                
+                let content = editor.getValue();
+                localStorage.setItem("codedStmt", content);
+                
+
+                
+                saveValue("rawStmt");
+
+                
+                
+
+                
+
+                
+                saveValue("stmtId");
+
+                
+                saveCheckbox("igExtended");
+
+                
+                saveCheckbox("annotations");
+
+                
+                saveCheckbox("includeHeaders");
+
+                
+                saveValue("outputType");
+
+                
+                saveValue("printOriginalStatement");
+
+                
+                saveValue("printIgScript");
+
+                
+
+                
+                saveCheckbox("dov");
+
+                
+                saveCheckbox("propertyTree");
+
+                
+                saveCheckbox("binaryTree");
+
+                
+                saveCheckbox("actCondTop");
+
+                
+                saveValue("canvasHeight");
+
+                
+                saveValue("canvasWidth");
+
+            }
+
+            
+            
+            document.getElementById("undo").addEventListener("click", function() {
+                editor.undo();
+            });
+
+            
+            document.getElementById("redo").addEventListener("click", function() {
+                editor.redo();
+            });
+
+
+            
+            document.getElementById("lock").addEventListener("click", function() {
+                button = document.getElementById("lock")
+                
+                if (editor.getReadOnly()) {
+                    editor.setOption("readOnly", false)
+                    button.textContent = "Free-text mode"
+                    button.classList.toggle('toggleActive')
+                    
+                    
+                } else {
+                    editor.setOption("readOnly", "nocursor")
+                    button.textContent = "Keybinding mode"
+                    button.classList.toggle('toggleActive')
+                    
+                    
+                }
+                
+            });
+
+            
+            function visualToggle() {
+                let visual = localStorage.getItem("visual")
+                
+                let buttons = document.getElementsByClassName("buttons")
+                if (visual === "false")
+                    
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.remove('hidden')
+                        editor.session.setMode("ace/mode/igscriptnotation")
+                        localStorage.setItem("visual", "true")
+                    }
+                else 
+                    
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.add('hidden')
+                        editor.session.setMode("ace/mode/text");
+                        localStorage.setItem("visual", "false")
+                    }
+            };
+
+            
+            function loadVisual() {
+                let visual = localStorage.getItem("visual")
+                
+                let buttons = document.getElementsByClassName("buttons")
+                if (visual !== "false")
+                    
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.remove('hidden')
+                        editor.session.setMode("ace/mode/igscriptnotation")
+                    }
+                else 
+                    
+                    for (let i = 0; i < buttons.length; i++) {
+                        buttons[i].classList.add('hidden')
+                        editor.session.setMode("ace/mode/text");
+                    }  
+            };
+
+            
+            let nested = false
+            document.getElementById("nested").addEventListener("click", function() {
+                let button = document.getElementById("nested")
+                button.classList.toggle('toggleActive')
+                nested = !nested
+            });
+
+            
+            let semanticAnnotation = false
+            document.getElementById("semantic").addEventListener("click", function() {
+                let button = document.getElementById("semantic")
+                button.classList.toggle('toggleActive')
+                semanticAnnotation = !semanticAnnotation
+            });
+
+            
+            document.getElementById("symbols").addEventListener("click", function() {
+                document.getElementById("symbolModal").showModal();
+            });
+
+            
+            document.getElementById("keybinds").addEventListener("click", function() {
+                document.getElementById("keybindModal").showModal();
+            });
+
+            
+            function closeModal(modalId){
+                document.getElementById(modalId).close();
+            }
+
+            function linkIntercept(event) {
+                event.preventDefault();
+                let href = event.target.href;
+                
+                if (confirm("Showing an example overwrites the current work done.\nAre you sure you want to overwrite your current work?")){
+                    
+                    window.location.href = href;
+                }
+            }
+
+            
+            var symbols = {
+                "A":{"symbol": "A", "bracket":["(",")"]},
+                "A,p":{"symbol": "A,p", "bracket":["(",")","{","}"], "nested": true},
+                "I":{"symbol": "I", "bracket":["(",")"]},
+                "D":{"symbol": "D", "bracket":["(",")"]},
+                "Bdir":{"symbol": "Bdir", "bracket":["(",")","{","}"], "nested": true},
+                "Bdir,p":{"symbol": "Bdir,p", "bracket":["(",")","{","}"], "nested": true},
+                "Bind":{"symbol": "Bind", "bracket":["(",")","{","}"], "nested": true},
+                "Bind,p":{"symbol": "Bind,p", "bracket":["(",")","{","}"], "nested": true},
+                "Cac":{"symbol": "Cac", "bracket":["(",")","{","}"], "nested": true},
+                "Cex":{"symbol": "Cex", "bracket":["(",")","{","}"], "nested": true},
+                "O":{"symbol": "O", "bracket":["{","}"]},
+                "E":{"symbol": "E", "bracket":["(",")"]},
+                "E,p":{"symbol": "E,p", "bracket":["(",")","{","}"], "nested": true},
+                "F":{"symbol": "F", "bracket":["(",")"]},
+                "M":{"symbol": "M", "bracket":["(",")"]},
+                "P":{"symbol": "P", "bracket":["(",")","{","}"], "nested": true},
+                "P,p":{"symbol": "P,p", "bracket":["(",")","{","}"], "nested": true},
+            }
+
+            
+
+            function annotateSelection(symbol) {
+                
+                let selectionText = editor.getSelectedText();
+                let selectionRange = editor.getSelectionRange();
+                
+                
+                
+                cursorLocation = editor.selection.getCursor();
+
+                
+                if (symbol == "L") {
+                    editor.session.replace(new ace.Range(selectionRange.start.row, selectionRange.start.column, 
+                        selectionRange.end.row, selectionRange.end.column), "["+selectionText.toUpperCase()+"]");
+                    
+                    
+                    if (selectionText == "") {
+                        cursorLocation.column += 1;
+                        editor.moveCursorToPosition(cursorLocation);
+                        editor.clearSelection();
+                        editor.focus(); 
+                    }
+                    return
+                }
+
+                
+                let outputText = symbols[symbol].symbol;
+                
+                outputText += semanticAnnotation ? "[]" : "";
+                let bracketStart = 0
+                if (nested && symbols[symbol]["nested"]){
+                    bracketStart += 2
+                }
+                outputText += symbols[symbol].bracket[bracketStart];
+                outputText += selectionText;
+
+                outputText += symbols[symbol].bracket[bracketStart+1];
+
+                
+                editor.session.replace(new ace.Range(selectionRange.start.row, selectionRange.start.column, 
+                    selectionRange.end.row, selectionRange.end.column), outputText);
+
+                
+                copyEditorContentToTextArea();
+                
+                saveFormContent();
+
+                
+                if (selectionText === ""){
+                cursorLocation.column += outputText.length-1
+                editor.moveCursorToPosition(cursorLocation);
+                editor.clearSelection();
+                editor.focus(); 
+                }
+            }
+
+            
+
+            
+            var prevToken = ""
+            var tooltip
+            editor.on('mousemove', function(e) {
+                
+                var position = e.getDocumentPosition();
+                var token = editor.session.getTokenAt(position.row, position.column);
+                if (token && token !== prevToken) {
+                    if (prevToken !== "") {
+                        document.body.removeChild(tooltip);
+                        prevToken = ""
+                    }
+                    if (token.type !== 'text') {
+                        prevToken = token;
+                        
+                        
+                        let pos = editor.renderer.textToScreenCoordinates(position.row, position.column);
+                        
+                        tooltip = document.createElement('div');
+                        
+                        tooltip.innerHTML = token.type.replaceAll("_"," ");
+                        tooltip.setAttribute("class", "text_tooltip")
+                        tooltip.style.position = 'absolute';
+                        tooltip.style.top = pos.pageY-25 + 'px';
+                        tooltip.style.left = pos.pageX + 'px';
+                        document.body.appendChild(tooltip);
+                    }
+                }
+            });
+
+            
+
+
+            let selectedSymbol = "A"   
+            let selectionMode = false  
+            let mouseDown = false      
+            
+            document.getElementById("selection").addEventListener("click", function() {
+                button = document.getElementById("selection")
+                button.classList.toggle('toggleActive')
+                button = document.getElementById(selectedSymbol)
+                button.classList.toggle('toggleActive')
+                selectionMode = !selectionMode
+            });
+
+            
+            editor.on("mousedown", function() {
+                
+                mouseDown = true
+            })
+
+            
+            
+            editor.on("mouseup", function() {
+                if (mouseDown) {
+                    if (selectionMode) {
+                        selection = editor.getSelectedText()
+                        
+
+                        if (selection !== "") {
+                            annotateSelection(selectedSymbol)
+                        }
+                    }
+                    mouseDown = false
+                }
+            })
+
+            
+            function symbolButtonHandler(symbol) {
+                
+                
+                if (selectionMode) {
+                    button = document.getElementById(selectedSymbol)
+                    button.classList.toggle('toggleActive')
+                    button = document.getElementById(symbol)
+                    button.classList.toggle('toggleActive')
+                    selectedSymbol = symbol
+                } else {
+                    
+                    annotateSelection(symbol)
+                }
+            }
+
+            
+
+            function saveCheckbox(fieldId) {
+                let tmpField = document.getElementById(fieldId);
+                if(tmpField != null) {
+                    localStorage.setItem(fieldId, tmpField.checked);
+                    
+                }
+            }
+
+            
+
+            function saveValue(fieldId) {
+                let tmpField = document.getElementById(fieldId);
+                if(tmpField != null) {
+                    localStorage.setItem(fieldId, tmpField.value);
+                    
+                }
+            }
+
+            
+
+            function loadFormContent() {
+                
+                if ( false  === false) {
+                    
+                    if (localStorage.getItem("codedStmt") != null) {
+                        
+                        let content = localStorage.getItem("codedStmt");
+                        editor.setValue(content);
+                        
+                        copyEditorContentToTextArea();
+                        
+                    }
+
+                    
+                    loadValue("rawStmt")
+
+                }
+                
+
+                
+                loadValue("stmtId");
+
+                
+                loadCheckbox("igExtended");
+
+                
+                loadCheckbox("annotations");
+
+                
+                loadCheckbox("includeHeaders");
+
+                
+                loadValue("outputType");
+
+                
+                loadValue("printOriginalStatement");
+
+                
+                loadValue("printIgScript");
+
+                
+
+                
+                loadCheckbox("dov");
+
+                
+                loadCheckbox("propertyTree");
+
+                
+                loadCheckbox("binaryTree");
+
+                
+                loadCheckbox("actCondTop");
+
+                
+                loadValue("canvasHeight");
+
+                
+                loadValue("canvasWidth");
+
+            }
+
+            
+
+            function loadValue(fieldId) {
+                if(localStorage.getItem(fieldId) != null && document.getElementById(fieldId) != null) {
+                    document.getElementById(fieldId).value = localStorage.getItem(fieldId);
+                }
+            }
+
+            
+
+            function loadCheckbox(fieldId) {
+                if(localStorage.getItem(fieldId) != null && document.getElementById(fieldId) != null) {
+                    let content = localStorage.getItem(fieldId);
+                    if(content === "true") {
+                        document.getElementById(fieldId).checked = true;
+                        
+                    }
+                    if(content === "false") {
+                        document.getElementById(fieldId).checked = false;
+                        
+                    }
+                    
+                }
+            }
+
+            
+
+            function resetContent() {
+                
+                editor.setValue("Cac{Once E(policy) F(comes into force)} A,p(relevant) A(regulators) D(must) I(monitor [AND] enforce) Bdir(compliance).")
+                
+                copyEditorContentToTextArea();
+
+                
+                document.getElementById("rawStmt").value = "Once policy comes into force, relevant regulators must monitor and enforce compliance.";
+
+                
+                if(document.getElementById("stmtId") != null) {
+                    document.getElementById("stmtId").value = "123";
+                }
+
+                
+                
+                localStorage.setItem("stmtId", "123");
+                
+                saveFormContent();
+            }
+
+            
+
+            function resetCanvas() {
+
+                
+                if(document.getElementById("canvasHeight") != null) {
+                    document.getElementById("canvasHeight").value =  2000 ;
+                }
+
+                
+                if(document.getElementById("canvasWidth") != null) {
+                    document.getElementById("canvasWidth").value =  4000 ;
+                }
+
+                
+                saveFormContent();
+            }
+
+            
+            window.onload = (event) => {
+                loadFormContent();
+                loadVisual();
+
+                
+                generateUrl("example2", "Example Statement 2 (moderately complex)",
+                    "?rawStmt=When%20an%20inspection,%20review,%20or%20investigation%20of%20an%20accredited%20certifying%20agent%20by%20the%20Program%20Manager%20reveals%20any%20non-compliance%20with%20the%20Act%20or%20regulations%20in%20this%20part,%20a%20written%20notification%20of%20non-compliance%20shall%20be%20sent%20to%20the%20certifying%20agent.&codedStmt=Cac%7BWhen%20A(Program%20Manager)%20I[act=detect%20non-compliance](reveals)%20Bdir%7BA,p(accredited)%20A(certifying%20agent)%20I[act=non-compliant]([is%20not%20in%20compliance])%20with%20the%20Bdir(Act%20[OR]%20regulations%20in%20this%20part)%20Cac%7BWhen%20A(Program%20Manager)%20I[act=monitors](([inspects]%20[OR]%20[reviews])%20[OR]%20[investigates])%20Bdir,p(accredited)%20Bdir(certifying%20agent)%7D%7D%7D%20A([Program%20Manager])%20D(shall)%20I[act=sanction]([send])%20Bdir(notification)%20Bdir,p(of%20non-compliance)%20to%20the%20Bind,p(accredited)%20Bind(certifying%20agent).")
+                generateUrl("example3", "Example Statement 3 (complex)",
+                    "?rawStmt=Regional%20Managers,%20on%20behalf%20of%20the%20Secretary,%20may%20review,%20and%20reward%20or%20sanction,%20approved%20certified%20production%20and%20handling%20operations%20and%20accredited%20certifying%20agents%20for%20compliance%20with%20the%20Act%20or%20regulations%20in%20this%20part,%20under%20the%20condition%20that%20Operations%20were%20non-compliant%20or%20violated%20organic%20farming%20provisions%20and%20Manager%20has%20concluded%20investigation.&codedStmt=A,p(Regional)%20A[role=enforcer,type=animate](Managers),%20Cex(on%20behalf%20of%20the%20Secretary),%20D[stringency=permissive](may)%20I[act=performance](review%20[AND]%20(reward%20[XOR]%20sanction))%20Bdir,p(approved)%20Bdir1,p(certified)%20Bdir1[role=monitored,type=animate](production%20[operations])%20and%20Bdir[role=monitored,type=animate](handling%20operations)%20and%20Bdir2,p(accredited)%20Bdir2[role=monitor,type=animate](certifying%20agents)%20Cex[ctx=purpose](for%20compliance%20with%20the%20(Act%20[XOR]%20regulations%20in%20this%20part))%20under%20the%20condition%20that%20Cac%7BCac[state]%7BA[role=monitored,type=animate](Operations)%20I[act=violate](were%20non-compliant%20[OR]%20violated)%20Bdir[type=inanimate](organic%20farming%20provisions)%7D%20[AND]%20Cac[state]%7BA[role=enforcer,type=animate](Manager)%20I[act=terminate](has%20concluded)%20Bdir[type=activity](investigation)%7D%7D.");
+            };
+
+            
+            function generateUrl(exampleId, linkText, linkParameter) {
+                let link = document.getElementById(exampleId);
+                link.textContent = linkText;
+                link.href = window.location.pathname + linkParameter;
+            }
+
+            
+            document.addEventListener("keydown", function(event) {
+                
+                if (event.key === "Enter" && event.target.classList.contains("button")) {
+                    event.target.click();
+                    return
+                }
+                if (editor.getReadOnly()) {
+                    
+                    if (event.ctrlKey || event.cmdKey) {
+                        if (event.key === "q") {
+                            editor.undo();
+                            return
+                        } else if (event.key === "w") {
+                            editor.redo();
+                            return
+                        }
+                    }
+
+                    
+                    switch (event.key.toLowerCase()) {
+                        case "a":
+                            if (event.shiftKey) {
+                                annotateSelection('A,p');
+                            } else {
+                                annotateSelection('A');}
+                        break
+                        case "d": annotateSelection('D'); break
+                        case "i": annotateSelection('I'); break
+                        case "b":
+                            if (event.shiftKey) {
+                                annotateSelection('Bdir,p');
+                            } else {
+                                annotateSelection('Bdir');}
+                        break
+                        case "n":
+                            if (event.shiftKey) {
+                                annotateSelection('Bind,p');
+                            } else {
+                                annotateSelection('Bind');}
+                        break
+                        case "c": annotateSelection('Cac'); break
+                        case "v": annotateSelection('Cex'); break
+                        case "e":
+                            if (event.shiftKey) {
+                                annotateSelection('E,p');
+                            } else {
+                                annotateSelection('E');}
+                        break
+                        case "m": annotateSelection('M'); break
+                        case "o": annotateSelection('O'); break
+                        case "l": annotateSelection('L'); break
+                        case "f": annotateSelection('F'); break
+                        case "p":
+                            if (event.shiftKey) {
+                                annotateSelection('P,p');
+                            } else {
+                                annotateSelection('P');}
+                            break
+                        case "|": break
+                    }
+                }
+            });
+
+        </script>
+
+        
+        <div class="buttons hidden">
+            Regulative:
+            <div class="button" role="button" aria-pressed="false" id="A"      tabindex="0" onclick="symbolButtonHandler('A')">Attribute</div>
+            <div class="button" role="button" aria-pressed="false" id="A,p"    tabindex="0" onclick="symbolButtonHandler('A,p')">A. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="I"      tabindex="0" onclick="symbolButtonHandler('I')">Aim</div>
+            <div class="button" role="button" aria-pressed="false" id="D"      tabindex="0" onclick="symbolButtonHandler('D')">Deontic</div>
+            <div class="button" role="button" aria-pressed="false" id="Bdir"   tabindex="0" onclick="symbolButtonHandler('Bdir')">Direct Object</div>
+            <div class="button" role="button" aria-pressed="false" id="Bdir,p" tabindex="0" onclick="symbolButtonHandler('Bdir,p')">D.O. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="Bind"   tabindex="0" onclick="symbolButtonHandler('Bind')">Indirect Object</div>
+            <div class="button" role="button" aria-pressed="false" id="Bind,p" tabindex="0" onclick="symbolButtonHandler('Bind,p')">I.O. Property</div>
+            <br>
+            Constitutive:
+            <div class="button" role="button" aria-pressed="false" id="E"      tabindex="0" onclick="symbolButtonHandler('E')">Constituted Entity</div>
+            <div class="button" role="button" aria-pressed="false" id="E,p"    tabindex="0" onclick="symbolButtonHandler('E,p')">C.E. Property</div>
+            <div class="button" role="button" aria-pressed="false" id="F"      tabindex="0" onclick="symbolButtonHandler('F')">Constitutive Function</div>
+            <div class="button" role="button" aria-pressed="false" id="M"      tabindex="0" onclick="symbolButtonHandler('M')">Modal</div>
+            <div class="button" role="button" aria-pressed="false" id="P"      tabindex="0" onclick="symbolButtonHandler('P')">Constituting Properties</div>
+            <div class="button" role="button" aria-pressed="false" id="P,p"    tabindex="0" onclick="symbolButtonHandler('P,p')">C.P. Properties</div>
+            <br>
+            Other:
+            <div class="button" role="button" aria-pressed="false" id="O"      tabindex="0" onclick="symbolButtonHandler('O')">Or Else</div>
+            <div class="button" role="button" aria-pressed="false" id="L"      tabindex="0" onclick="symbolButtonHandler('L')">Logical Operator</div>
+            <div class="button" role="button" aria-pressed="false" id="Cac"    tabindex="0" onclick="symbolButtonHandler('Cac')">Activation Condition</div>
+            <div class="button" role="button" aria-pressed="false" id="Cex"    tabindex="0" onclick="symbolButtonHandler('Cex')">Execution Constraint</div>
+        </div>
+
+        
+        <dialog id="symbolModal">
+            <table>
+                <tr><th>IG Script Symbol</th><th>Corresponding IG 2.0 Component</th></tr>
+                <tr><td><b>A</b></td><td>Attributes</td></tr>
+                <tr><td><b>A,p</b></td><td>Attributes Property*</td></tr>
+                <tr><td><b>D</b></td><td>Deontic</td></tr>
+                <tr><td><b>I</b></td><td>Aim</td></tr>
+                <tr><td><b>Bdir</b></td><td>Direct Object*</td></tr>
+                <tr><td><b>Bdir,p</b></td><td>Direct Object Property*</td></tr>
+                <tr><td><b>Bind</b></td><td>Indirect Object*</td></tr>
+                <tr><td><b>Bind,p</b></td><td>Indirect Object Property*</td></tr>
+                <tr><td><b>Cac</b></td><td>Activation Condition*</td></tr>
+                <tr><td><b>Cex</b></td><td>Execution Constraint*</td></tr>
+                <tr><td><b>E</b></td><td>Constituted Entity</td></tr>
+                <tr><td><b>E,p</b></td><td>Constituted Entity Property</td></tr>
+                <tr><td><b>M</b></td><td>Modal</td></tr>
+                <tr><td><b>F</b></td><td>Constitutive Function</td></tr>
+                <tr><td><b>P</b></td><td>Constituting Properties*</td></tr>
+                <tr><td><b>P,p</b></td><td>Constituting Properties Properties*</td></tr>
+                <tr><td><b>O</b></td><td>Or Else**</td></tr>
+            </table>
+            * In addition to component annotation, these components support component-level nesting, <br>
+            with braces scoping the nested statements (e.g., <b>Bdir{ ... }</b>, <b>Bdir,p{ ... }</b>, etc.).<br>
+            ** The Or else component only allows component-level nesting (i.e., substitution by an entire statement).<br>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="symbolModalClose" style="float:right" autofocus onclick="closeModal('symbolModal')">Close</div>
+        </dialog>
+
+        
+        <dialog id="keybindModal">
+            The following table shows the keys associated with particular IG 2.0 component symbols if 'Keybinding mode' is activated.<br>
+            Keybindings are deactivated in 'Free-text mode' (i.e., manual annotation mode).<br>
+            <table>
+                <tr><th>Keybinding</th><th>IG 2.0 Component</th></tr>
+                <tr><td><b>a</b></td><td>Attributes</td></tr>
+                <tr><td><b>Shift-a</b></td><td>Attributes Property</td></tr>
+                <tr><td><b>d</b></td><td>Deontic</td></tr>
+                <tr><td><b>i</b></td><td>Aim</td></tr>
+                <tr><td><b>b</b></td><td>Direct Object</td></tr>
+                <tr><td><b>Shift-b</b></td><td>Direct Object Property</td></tr>
+                <tr><td><b>n</b></td><td>Indirect Object</td></tr>
+                <tr><td><b>Shift-n</b></td><td>Indirect Object Property</td></tr>
+                <tr><td><b>c</b></td><td>Activation Condition</td></tr>
+                <tr><td><b>v</b></td><td>Execution Constraint</td></tr>
+                <tr><td><b>e</b></td><td>Constituted Entity</td></tr>
+                <tr><td><b>shift-e</b></td><td>Constituted Entity Property</td></tr>
+                <tr><td><b>m</b></td><td>Modal</td></tr>
+                <tr><td><b>f</b></td><td>Constitutive Function</td></tr>
+                <tr><td><b>p</b></td><td>Constituting Properties</td></tr>
+                <tr><td><b>Shift-p</b></td><td>Constituting Properties Properties</td></tr>
+                <tr><td><b>o</b></td><td>Or Else</td></tr>
+                <tr><td><b>l</b></td><td>Logical Operator*</td></tr>
+            </table>
+            * If the selection is not a logical operator, the text will nevertheless be capitalized and held in square brackets.<br>
+            Other keybindings include standard copying and pasting in the editor and undo ('q') and redo ('w'). <br>
+            <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybindModalClose" style="float:right" autofocus onclick="closeModal('keybindModal')">Close</div>
+        </dialog>
+
+        
+        <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">Cac{ Cac{ A(actor6) I(actor6) } [XOR] Cac{ A(actor7) I(actor7) }} Cac{ Cac{ A(actor1) I(aim1) } [OR] Cac{ A(actor0) I(aim0) Cac{ A(actor2) I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5)} }}</textarea><br />
+        
+        <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example1" href="#" onclick="resetContent()">Reset to default statement example</a></span>
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example2" href="#" onclick="linkIntercept(event)">Example Statement 2 (moderately complex)</a></span>
+        &nbsp;&nbsp;&nbsp;<span data-text="Switches to a complex example statement showcasing combinations of nested activation conditions in addition to the features showcased in the second example. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example3" href="#" onclick="linkIntercept(event)">Example Statement 3 (complex)</a></span><br /><br />
+
+
+
+<span data-text=""><a href="/" onclick="saveFormContent()">Switch to tabular version of IG Parser</a></span>
+<span data-text="">
+<div id="visualToggle" role="button" aria-pressed="false" onclick="visualToggle()"  tabindex="0">Toggle advanced editor features</div>
+</span><br /><br />
+
+<span data-text="This section includes specific customizations for the output generation, which affect the generated output. Where larger numbers of statements are encoded for analytical purposes, ensure the consistent parameterization for all generated statements." class="tooltip">Parameters:</span>
+
+<input id="annotations" name="annotations" type="checkbox" unchecked /><label for="annotations">Include IG Logico annotations in output (default: off)</label>
+<input id="dov" name="dov" type="checkbox" unchecked /><label for="dov">Include Degree of Variability (accumulated toward root node) in output (default: off)</label>
+<input id="propertyTree" name="propertyTree" type="checkbox" checked /><label for="propertyTree">Embed component properties in tree structure (as opposed to capturing those in labels associated with component) (default: on)</label>
+<input id="binaryTree" name="binaryTree" type="checkbox" unchecked /><label for="binaryTree">Print binary logical tree structure (decompose all logical linkages for given components in binary form) (default: off)</label>
+<input id="actCondTop" name="actCondTop" type="checkbox" unchecked /><label for="actCondTop">Print activation conditions node (if present) as first node in output (default: off)</label>
+Height of output canvas (in pixels): <input id="canvasHeight" name="canvasHeight" type="number" value="2000">
+Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" type="number" value="4000">
+
+<span data-text="Resets canvas height and width to default values." class="tooltip"><a href="" onclick="resetCanvas()">Reset canvas dimensions</a></span><br /><br />
+
+<button id="generate" class="submit" value="Generate visual output" onclick="saveFormContent()" type="submit">Generate visual output</button>
+<script>
+    
+
+    const submitButton = document.getElementById("generate");
+
+    submitButton.addEventListener("click", () => {
+        submitButton.classList.add("button-loading");
+    });
+</script>
+
+
+<div class="error">
+    Warning: The input text might have contained IG Script text fragments that have not been parsed (e.g., annotation parts, nested statements). If you believe the following text, or parts of it, should have been parsed, please review your coding accordingly (else ignore this message): &#34;    [OR]  &#34;
+</div>
+
+
+
+<p>Version: 0.7</p>
+
+</form>
+</div>
+
+<div class="outputDownload">
+    <button id="download" class="button1" onclick="download()">Download Statement Visualization as Image</button>
+</div>
+
+
+<script src="/libraries/d3/d3.v7.min.js"></script>
+<script>
+    
+    var colorPropertyNodes = "lightgreen";
+
+    
+    var colorCollapsedNestedNodes = "lightsalmon";
+
+    
+    var colorCollapsedNonNestedNodes = "lightsteelblue";
+
+    
+    var colorFillLeafNodes = "#fff";
+
+    
+    var colorFirstLevel = "sienna";
+    var colorSecondLevel = "sandybrown";
+    var colorThirdLevel = "tan";
+    var colorFourthLevel = "peachpuff";
+    var colorFifthLevel = "wheat";
+    var colorHigherLevel = "linen";
+
+    
+    var treeData = JSON.parse("{\n\"name\": \"\",\n\"level\": 1, \n\"children\": [\n{\"name\": \"AND\",\n\"children\": [{\"name\": \"XOR\",\n\"children\": [{\n\"name\": \"Cac\",\n\"level\": 2, \n\"children\": [\n{\"name\": \"actor6\", \"comp\": \"A\", \"level\": 2},\n{\"name\": \"actor6\", \"comp\": \"I\", \"level\": 2}\n]\n},\n{\n\"name\": \"Cac\",\n\"level\": 2, \n\"children\": [\n{\"name\": \"actor7\", \"comp\": \"A\", \"level\": 2},\n{\"name\": \"actor7\", \"comp\": \"I\", \"level\": 2}\n]\n}], \"comp\": \"Cac\", \"level\": 1},\n{\n\"name\": \"Cac\",\n\"level\": 2, \n\"children\": [\n{\"name\": \"OR\",\n\"children\": [{\n\"name\": \"Cac\",\n\"level\": 3, \n\"children\": [\n{\"name\": \"actor1\", \"comp\": \"A\", \"level\": 3},\n{\"name\": \"aim1\", \"comp\": \"I\", \"level\": 3}\n]\n},\n{\n\"name\": \"Cac\",\n\"level\": 3, \n\"children\": [\n{\"name\": \"actor0\", \"comp\": \"A\", \"level\": 3},\n{\"name\": \"aim0\", \"comp\": \"I\", \"level\": 3},\n{\"name\": \"OR\",\n\"children\": [{\n\"name\": \"Cac\",\n\"level\": 4, \n\"children\": [\n{\"name\": \"actor2\", \"comp\": \"A\", \"level\": 4},\n{\"name\": \"aim2\", \"comp\": \"I\", \"level\": 4},\n{\"name\": \"object2\", \"comp\": \"Bdir\", \"level\": 4},\n{\"name\": \"OR\",\n\"children\": [{\n\"name\": \"Cac\",\n\"level\": 5, \n\"children\": [\n{\"name\": \"actor3\", \"comp\": \"A\", \"level\": 5},\n{\"name\": \"aim3\", \"comp\": \"I\", \"level\": 5}\n]\n},\n{\n\"name\": \"Cac\",\n\"level\": 5, \n\"children\": [\n{\"name\": \"actor4\", \"comp\": \"A\", \"level\": 5},\n{\"name\": \"aim4\", \"comp\": \"I\", \"level\": 5}\n]\n}], \"comp\": \"Cac\", \"level\": 4}\n]\n},\n{\n\"name\": \"Cac\",\n\"level\": 4, \n\"children\": [\n{\"name\": \"actor5\", \"comp\": \"A\", \"level\": 4},\n{\"name\": \"aim5\", \"comp\": \"I\", \"level\": 4}\n]\n}], \"comp\": \"Cac\", \"level\": 3}\n]\n}], \"comp\": \"Cac\", \"level\": 2}\n]\n}], \"comp\": \"Cac\", \"level\": 1}\n]\n}");
+
+    
+    var margin = {top: 20, right: 90, bottom: 30, left: 90},
+        width =  4000  - margin.left - margin.right,
+        height =  2000  - margin.top - margin.bottom;
+
+    
+    
+    
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.right + margin.left)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate("
+            + margin.left + "," + margin.top + ")");
+
+    var i = 0,
+        duration = 750,
+        root;
+
+    
+    var treemap = d3.tree().size([height, width]);
+
+    
+    root = d3.hierarchy(treeData, function(d) { return d.children; });
+    root.x0 = height / 2;
+    root.y0 = 0;
+
+    
+    
+
+    update(root);
+
+    
+    function collapse(d) {
+        if(d.children) {
+            d._children = d.children
+            d._children.forEach(collapse)
+            d.children = null
+        }
+    }
+
+    
+    
+    function wrap(text, width, x, y) {
+        text.each(function() {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, 
+                x = text.attr("x"),
+                y = text.attr("y"),
+                tspan = text.text(null).append("tspan").attr("x", x).attr("y", y);
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", x).attr("y", ++lineNumber * lineHeight + y + "em").text(word);
+                }
+            }
+        });
+    }
+
+    function update(source) {
+
+        
+        var treeData = treemap(root);
+
+        
+        var nodes = treeData.descendants(),
+            links = treeData.descendants().slice(1);
+
+        
+        
+        
+        
+        nodes.forEach(function(d){ d.y = (d.depth === 0 ? d.depth * 50 : d.depth * 380) });
+        
+
+        
+
+        
+        var node = svg.selectAll('g.node')
+            .data(nodes, function(d) {return d.id || (d.id = ++i); });
+
+        
+        var nodeEnter = node.enter().append('g')
+            .attr('class', 'node')
+            .attr("transform", function(d) {
+                return "translate(" + source.y0 + "," + source.x0 + ")";
+            })
+            .on('click', click);
+
+        
+        nodeEnter.append('circle')
+            .attr('class', 'node')
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', '3px')
+            .attr('r', 16)
+            .style("stroke", function(d) {
+                
+                if (d.data.comp && d.data.comp.endsWith(",p")) {
+                    return colorPropertyNodes;
+                }
+                
+                if (d.data.level > 0) {
+                    
+                    switch (d.data.level) {
+                        case 1:
+                            
+                            return colorFirstLevel;
+                        case 2:
+                            
+                            return colorSecondLevel;
+                        case 3:
+                            
+                            return colorThirdLevel;
+                        case 4:
+                            
+                            return colorFourthLevel;
+                        case 5:
+                            
+                            return colorFifthLevel;
+                        default:
+                            
+                            return colorHigherLevel;
+                    }
+                }
+            })
+            .style("fill", function(d) {
+                if (d._children) {
+                    if (d.data.level > 0) {
+                        
+                        return colorCollapsedNestedNodes;
+                    }
+                    
+                    return colorCollapsedNonNestedNodes;
+                } else {
+                    
+                    return colorFillLeafNodes;
+                }
+            });
+
+        
+
+        
+        nodeEnter.append('text')
+            .attr("x", function(d) {
+                
+                if (d.data.pos === "b") {
+                    return -30;
+                }
+                
+                return d.children || d._children ? 12 : 25;
+            })
+            .attr("y", function (d) {
+                
+                if (d.data.pos === "b" && d.data.dov != null) {
+                    
+                    return 45;
+                } else if (d.data.pos === "b") {
+                    
+                    return 35;
+                } else {
+                    
+                    return 0;
+                }
+            })
+            .style("font", function(d) {
+                
+                if (d.data.name === "bAND" || d.data.name === "wAND") {
+                    return "italic 12px Arial";
+                } else {
+                    
+                    if (d.data.pos === "b") {
+                        return "bold 12px Arial";
+                    }
+                    
+                    return d.children || d._children ? "normal 12px Arial" : "bold 12px Arial";
+                }
+            })
+            .style("dominant-baseline", "central")
+            .attr("text-anchor", function(d) {
+                
+                if (d.data.pos === "b") {
+                    return "begin";
+                }
+                return d.children || d._children ? "end" : "begin";
+            })
+            
+            .text(function(d) {
+                if (d.data.name === "bAND" || d.data.name === "wAND") {
+                    return "AND";
+                } else {
+                    return d.data.name;
+                }
+              
+            }).call(wrap, 300, 0, 0);
+
+        
+        nodeEnter.filter(d => d.depth === 0).append("text")
+            
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                
+                if (d.data.anno != null) {
+                    return d.data.anno;
+                } else {
+                    return "";
+                }
+            })
+            .attr("x", function(d) {
+                
+                return 25;
+            })
+            .attr("y", function(d) {
+                
+                return d.data.prop != null ? -25 : -12;
+            });
+
+        
+        var nodeUpdate = nodeEnter.merge(node);
+
+        
+        nodeUpdate.transition()
+            .duration(duration)
+            .attr("transform", function(d) {
+                return "translate(" + d.y + "," + d.x + ")";
+            });
+
+        
+        nodeUpdate.select('circle.node')
+            .attr('r', 16)
+            .attr('stroke-width', '3px')
+            .style("stroke", function(d) {
+                
+                if (d.data.comp && d.data.comp.endsWith(",p")) {
+                    return colorPropertyNodes;
+                }
+                
+                if (d.data.level > 0) {
+                    
+                    switch (d.data.level) {
+                        case 1:
+                            
+                            return colorFirstLevel;
+                        case 2:
+                            
+                            return colorSecondLevel;
+                        case 3:
+                            
+                            return colorThirdLevel;
+                        case 4:
+                            
+                            return colorFourthLevel;
+                        case 5:
+                            
+                            return colorFifthLevel;
+                        default:
+                            
+                            return colorHigherLevel;
+                    }
+                }
+            })
+            .style("fill", function(d) {
+                if (d._children) {
+                    if (d.data.level > 0) {
+                        
+                        return colorCollapsedNestedNodes;
+                    }
+                    
+                    return colorCollapsedNonNestedNodes;
+                } else {
+                    
+                    return colorFillLeafNodes;
+                }
+            })
+            .attr('cursor', 'pointer');
+
+
+        
+        var nodeExit = node.exit().transition()
+            .duration(duration)
+            .attr("transform", function(d) {
+                return "translate(" + source.y + "," + source.x + ")";
+            })
+            .remove();
+
+        
+        nodeExit.select('circle')
+            .attr('r', 1e-6);
+
+        
+        nodeExit.select('text')
+            .style('fill-opacity', 1e-6);
+
+        
+
+        
+        var link = svg.selectAll('path.link')
+            .data(links, function(d) { return d.id; });
+
+        
+        var linkEnter = link.enter().insert('path', "g")
+            .attr("class", "link")
+            .attr("fill", "none")
+            .attr("stroke", "#ccc")
+            .attr("stroke-width", "2px")
+            .attr('d', function(d){
+                var o = {x: source.x0, y: source.y0}
+                return diagonal(o, o)
+            });
+
+        var gGiven = nodeEnter.filter(function (d){
+            return d.depth !== 0;
+            })
+            .append("g")
+            .attr("transform","translate(-50)");
+
+
+        
+        gGiven.append("text")
+            .attr("dy", ".4em")
+            .style("font", "normal 12px Arial")
+            .text(function (d) {
+                return d.data.comp;
+            })
+            .attr("text-anchor", function(d) {
+                
+                return "end";
+            })
+            .attr("x", "25");
+
+
+        
+        gGiven.append("text")
+            .text(function (d){
+                if (d.data.prop != null) {
+                    return "(" + d.data.prop + ")";
+                } else {
+                    return "";
+                }
+            })
+            .attr("x", "75")
+            .attr("y", "-10");
+
+
+        
+        gGiven.append("text")
+            
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                
+                if (d.data.anno != null) {
+                    return d.data.anno;
+                } else {
+                    return "";
+                }
+            })
+            .attr("x", function(d) {
+                return 75;
+            })
+            .attr("y", function(d) {
+                
+                return d.data.prop != null ? -25 : -12;
+            });
+
+
+        
+        
+
+
+
+        
+        gGiven.append("text")
+            
+            .style("font", "italic 12px Arial")
+            .text(function (d){
+                
+                if (d.data.dov != null) {
+                    return "DoV: " + d.data.dov;
+                } else {
+                    return "";
+                }
+            })
+            
+            .attr("x", 20)
+            .attr("y", 30);
+
+        
+        
+        
+        
+        
+        
+
+        
+
+
+        
+
+
+        
+        var linkUpdate = linkEnter.merge(link);
+
+        
+        linkUpdate.transition()
+            .duration(duration)
+            .attr('d', function(d){ return diagonal(d, d.parent) });
+
+        
+        var linkExit = link.exit().transition()
+            .duration(duration)
+            .attr('d', function(d) {
+                let o = {x: source.x, y: source.y}
+                return diagonal(o, o)
+            })
+            .remove();
+
+        
+        nodes.forEach(function(d){
+            d.x0 = d.x;
+            d.y0 = d.y;
+        });
+
+        
+        function diagonal(s, d) {
+
+            path = `M ${s.y} ${s.x}
+            C ${(s.y + d.y) / 2} ${s.x},
+              ${(s.y + d.y) / 2} ${d.x},
+              ${d.y} ${d.x}`
+
+            return path
+        }
+
+        
+        function click(event, d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            } else {
+                d.children = d._children;
+                d._children = null;
+            }
+            update(d);
+        }
+    }
+
+    
+    function download() {
+        const svgElement = document.querySelector("svg");
+        const serializer = new XMLSerializer();
+        const source = serializer.serializeToString(svgElement);
+
+        const image = new Image();
+        image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
+        image.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext("2d");
+            context.fillStyle = "#fff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0);
+            const a = document.createElement("a");
+            a.download = "IG_Parser_Generated_Visual_Statement.png";
+            a.href = canvas.toDataURL("image/png");
+            a.click();
+        };
+    }
+
+</script>
+
+
+<script>
+   toggleButton = document.getElementById("visualToggle")
+   toggleButton.addEventListener('keydown', function(event) {
+      if (event.key === "Enter"){
+      event.target.click();
+      return
+      }
+   })
+</script>
+
+</body>
+</html>

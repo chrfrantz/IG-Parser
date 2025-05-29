@@ -516,6 +516,9 @@ const PARSING_ERROR_EMPTY_STATEMENT = "EMPTY STATEMENT"
 // Indicates an unexpected parsing error - can be diverse
 const PARSING_ERROR_UNEXPECTED_ERROR = "UNEXPECTED_ERROR"
 
+// Indicates potential presence of not-parsed content (which should have been parsed) based on presence of parentheses, braces or brackets -- only used as warning, not as error
+const PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT = "POSSIBLY_MISSING_NON_PARSED_CONTENT"
+
 // Indicates nesting on invalid component (no component-level nesting)
 const PARSING_ERROR_NESTING_ON_UNSUPPORTED_COMPONENT = "NESTING_ON_NON-NESTED_COMPONENT"
 

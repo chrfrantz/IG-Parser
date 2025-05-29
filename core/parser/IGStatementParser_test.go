@@ -3565,8 +3565,8 @@ func TestStatementLevelAnnotationParsing(t *testing.T) {
 	}
 
 	// Test conditions
-	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
-		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation][internalAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation][internalAnnotation] but is",
 			stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
 	}
 
@@ -3583,9 +3583,9 @@ func TestStatementLevelAnnotationParsingNestedBrackets(t *testing.T) {
 
 	// Test for error during parsing. Should not throw error.
 	stmt, err := ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != "      . [annot1]  jdlkgjsdlkg" {
 		t.Fatal("Parsing should have returned error "+
-			tree.PARSING_NO_ERROR+", but returned error ", err)
+			tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT+", but returned error ", err)
 	}
 
 	// Test statement-level annotations
@@ -3594,8 +3594,8 @@ func TestStatementLevelAnnotationParsingNestedBrackets(t *testing.T) {
 	}
 
 	// Test conditions
-	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
-		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation][internalAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation][internalAnnotation] but is",
 			stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
 	}
 
@@ -3603,7 +3603,8 @@ func TestStatementLevelAnnotationParsingNestedBrackets(t *testing.T) {
 
 /*
 Tests parsing of statement-level annotations for basic statement with nested condition and various positioning and additional characters, component-embedded nested brackets,
-as well as nested parentheses in statement-level annotation (should lead to omission of affected annotation).
+as well as nested parentheses in statement-level annotation (nested parentheses should be tolerated in affected annotation, and nested annotation should be concatenated
+with annotation on nesting component).
 */
 func TestStatementLevelAnnotationParsingNestedParentheses(t *testing.T) {
 
@@ -3618,13 +3619,13 @@ func TestStatementLevelAnnotationParsingNestedParentheses(t *testing.T) {
 	}
 
 	// Test statement-level annotations
-	if stmt[0].Annotations != "[annotation0][annotation2]" {
-		t.Fatal("Statement-level annotations are not correct. Should be [annotation0][annotation2] but are", stmt[0].Annotations)
+	if stmt[0].Annotations != "[annotation0][annot(ation)1][annotation2]" {
+		t.Fatal("Statement-level annotations are not correct. Should be [annotation0][annot(ation)1][annotation2] but are", stmt[0].Annotations)
 	}
 
-	// Test conditions
-	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
-		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+	// Condition-level annotation (with inherited annotation)
+	if stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation][internalAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation][internalAnnotation] but is",
 			stmt[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
 	}
 
@@ -3651,13 +3652,13 @@ func TestStatementLevelAnnotationParsingComponentPairs(t *testing.T) {
 	}
 
 	// Test conditions and ensure they do not have the same annotation
-	if stmt[0].Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
-		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+	if stmt[0].Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation][internalAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation][internalAnnotation] but is",
 			stmt[0].Left.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
 	}
 
-	if stmt[0].Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation]" {
-		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation] but is",
+	if stmt[0].Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations != "[conditionLevelAnnotation][internalAnnotation]" {
+		t.Fatal("Condition-level annotation is not correct. Should be [conditionLevelAnnotation][internalAnnotation] but is",
 			stmt[0].Right.Entry.([]*tree.Node)[0].Entry.(*tree.Statement).ActivationConditionComplex.Annotations)
 	}
 

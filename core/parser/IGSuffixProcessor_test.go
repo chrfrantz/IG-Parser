@@ -3,6 +3,7 @@ package parser
 import (
 	"IG-Parser/core/tree"
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -177,7 +178,7 @@ func TestNestedPrivatePropertyPrimitiveAndNestedComponentPair(t *testing.T) {
 		"I(submit) Bdir,p(supporting) Bdir(documentation) of Bdir,p(each such correction) Cac(when correction is possible)}} P1,p(private component)"
 
 	s, err := ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") == "Such   : (1) A ; (2) The ; and (3) The   " {
 		t.Fatal("Parsing should not have returned error, but returned error ", err)
 	}
 
@@ -303,7 +304,7 @@ func TestNestedPrivatePropertyPrimitiveAndNestedComponentPairAndAdditionalSingle
 		"P1,p{where E(date) F(is defined) in the P(Gregorian calendar)}."
 
 	s, err := ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") == "Such   : (1) A ; (2) The ; and (3) The    ." {
 		t.Fatal("Parsing should not have returned error, but returned error ", err)
 	}
 

@@ -47,12 +47,17 @@ Indicates folder to save log files in
 var LoggingPath = ""
 
 /*
-Success suffix
+Success suffix (Filename suffix for successful processing)
 */
 const SUCCESS_SUFFIX = ".success"
 
 /*
-Error suffix
+Warning suffix (Filename suffix for successful processing, but with warning output)
+*/
+const WARNING_SUFFIX = ".warning"
+
+/*
+Error suffix (Filename suffix for failed processing)
 */
 const ERROR_SUFFIX = ".error"
 

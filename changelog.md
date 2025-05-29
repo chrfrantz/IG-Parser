@@ -1,9 +1,12 @@
 # IG Parser Revisions
 
 * Version 0.7
-  * Added support for statement-level annotations in generated tabular output (previously only for nested statements).
-  * Revised GUI layout and adjusted keybindings. Various minor code refinements.
+  * Added support for statement-level annotations in generated tabular output (previously only for nested statements). Support also includes statement-level annotations in nested components. This includes a breaking change on use of brackets in annotations (now leads to warning; only parentheses are permitted).
+  * Revised GUI layout and associate help, adjusted keybindings (complete remapping). Various minor code refinements.
   * Removed default whitespace for empty cells in CSV output (still necessary for Google Sheets).
+  * Updated dependencies to latest versions (Ace.js, D3.js).
+  * Added ability to download image of generated statement tree.
+  * Added warnings to UI when detecting potentially relevant but unparsed content of input.
 * Version 0.6
   * Fixed inference of logical operators for component combinations when combined with nested components.
   * Added support for tilde ('~') in input.

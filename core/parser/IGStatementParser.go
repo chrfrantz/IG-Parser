@@ -30,13 +30,21 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 
 	Println("INITIATING STATEMENT PARSING ...\nProcessing input statement: ", text)
 
-	// Validate input string first with respect to parentheses ...
+	// Empty warning - can be overwritten during execution and returned as a result ...
+	warn := tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+
+	// Validate input string first with respect to parentheses, ...
 	err := validateInput(text, LEFT_PARENTHESIS, RIGHT_PARENTHESIS)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return []*tree.Node{}, err
 	}
-	// ... and braces
+	// ... braces
 	err = validateInput(text, LEFT_BRACE, RIGHT_BRACE)
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
+		return []*tree.Node{}, err
+	}
+	// ... and brackets
+	err = validateInput(text, LEFT_BRACKET, RIGHT_BRACKET)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		return []*tree.Node{}, err
 	}
@@ -105,7 +113,25 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		text = remainingText
 		Println("Remaining text after basic component parsing: " + text)
 		// Parse statement-level annotations
-		stmtLevelAnnotations = parseStatementLevelAnnotations(text)
+		stmtLevelAnnotationsArr, remainingText := parseStatementLevelAnnotations(text)
+
+		// Join remaining annotations into single string
+		stmtLevelAnnotations = strings.Join(stmtLevelAnnotationsArr, "")
+
+		Println("Remaining text after parsing statement-level annotations: " + remainingText)
+
+		// Check whether the remaining text contains potentially non-parsed content
+		// (e.g., parentheses, brackets and braces) in order to output it as a warning to the user
+		if strings.ContainsAny(remainingText, "(){}[]") {
+			// Create a warning to user in case of important content or unintended parsing
+			warn.ErrorCode = tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT
+			// Error message for internal use; will be overwritten with UI error message
+			warn.ErrorMessage = "The following text is potentially non-parsed IG Script content. " +
+				"Please consider reviewing your coding in case it should have been parsed as part of the output."
+			// Pass fragments of concern along
+			warn.ErrorIgnoredElements = []string{remainingText}
+			// Let the final return command handle the actual return ...
+		}
 	}
 
 	Println("Testing for nested combinations in " + fmt.Sprint(nestedCombos))
@@ -168,6 +194,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		if err.ErrorCode == tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS {
 			// Populate return structure
 			ret := []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}
+			Println("Returning error "+tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+" with ignored elements: ", err)
 			return ret, err
 		}
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
@@ -216,8 +243,8 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_STATEMENT}
 	}
 
-	// Else return wrapped statement (no extrapolation included)
-	return []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}, err
+	// Else return wrapped statement (no extrapolation included), attach potential warning
+	return []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}, warn
 }
 
 /*
@@ -475,6 +502,11 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string,
 	// Array to keep track of ignored statements
 	nestedStmtsNotConsideredDuringParsing := make([]string, 0)
 
+	// Default return error
+	defaultError := tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+
+	Println("Nested statements to process: ", nestedStmts)
+
 	for _, v := range nestedStmts {
 
 		Println("Processing nested statement: ", v)
@@ -550,9 +582,18 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string,
 
 		// Parse actual content wrapped in nested component (e.g., content inside Cac{ ... })
 		stmt, errStmt := ParseStatement(v[strings.Index(v, LEFT_BRACE)+1 : strings.LastIndex(v, RIGHT_BRACE)])
-		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
-			fmt.Println("Error when parsing nested statements: ", errStmt.Error())
+		if errStmt.ErrorCode != tree.PARSING_NO_ERROR && errStmt.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+			fmt.Println("Error when parsing nested statements: ", errStmt)
+			if errStmt.ErrorCode == tree.PARSING_ERROR_EMPTY_STATEMENT {
+				// Override error code for empty nested statements, since braces were evidently present
+				Println("Skipping processing of empty nested statement '", v, "' based on embedded '"+v[strings.Index(v, LEFT_BRACE)+1:strings.LastIndex(v, RIGHT_BRACE)], "'")
+				errStmt.ErrorCode = tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS
+				errStmt.ErrorIgnoredElements = append(errStmt.ErrorIgnoredElements, v)
+			}
 			return errStmt
+		} else if errStmt.ErrorCode == tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+			fmt.Println("Missing text fragments when parsing nested statements: ", errStmt)
+			defaultError = errStmt
 		}
 		if len(stmt) > 1 {
 			fmt.Println("Unhandled case: Multiple decomposed statements in nested component ...", stmt)
@@ -569,9 +610,15 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string,
 			stmtNode.Suffix = suffix
 		}
 
-		// Attach annotation if it exists
+		// Combine newly extracted annotations with existing node-level annotations
 		if annotation != "" {
-			stmtNode.Annotations = annotation
+			if stmtNode.GetAnnotations() != nil {
+				// Concatenate
+				stmtNode.Annotations = annotation + stmtNode.GetAnnotations().(string)
+			} else {
+				// Overwrite
+				stmtNode.Annotations = annotation
+			}
 		}
 
 		// Default error for node combination - can generally only be overridden by detected invalid component combinations
@@ -648,7 +695,7 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string,
 			ErrorIgnoredElements: nestedStmtsNotConsideredDuringParsing}
 	}
 	// if parsing worked out and if no elements have been ignored
-	return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+	return defaultError
 }
 
 /*
@@ -668,8 +715,8 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 	Println("Found nested statement combination candidate", nestedCombo)
 
 	combo, _, errStmt := ParseIntoNodeTree(nestedCombo, false, LEFT_BRACE, RIGHT_BRACE)
-	if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
-		fmt.Print("Error when parsing nested statements: " + errStmt.ErrorCode)
+	if errStmt.ErrorCode != tree.PARSING_NO_ERROR && errStmt.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+		fmt.Print("Error when parsing nested statement combinations into node:", errStmt)
 		return errStmt
 	}
 
@@ -1037,9 +1084,13 @@ func extrapolateStatementWithPairedComponents(s *tree.Statement, pairs []string)
 }
 
 /*
-Validates input with respect to parentheses/braces balance.
-Input is text to be tested, as well as left and right parenthesis/braces symbols ((,{, and ),}).
+Validates input with respect to parentheses, braces, bracket balance.
+Input is text to be tested, as well as left and right parenthesis/braces/bracket symbols (( and ), or { and }, or [ and ]).
 Parentheses symbols must be consistent, i.e., either both parentheses or braces.
+Returns tree.PARSING_NO_ERROR if no error, else returns
+
+	tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION (if invalid input combination as parameter is identified), or
+	tree.PARSING_ERROR_IMBALANCED_PARENTHESES (if imbalance has been detected).
 */
 func validateInput(text string, leftPar string, rightPar string) tree.ParsingError {
 
@@ -1052,6 +1103,9 @@ func validateInput(text string, leftPar string, rightPar string) tree.ParsingErr
 	} else if leftPar == LEFT_PARENTHESIS && rightPar == RIGHT_PARENTHESIS {
 		parTypeSingular = "parenthesis"
 		parTypePlural = "parentheses"
+	} else if leftPar == LEFT_BRACKET && rightPar == RIGHT_BRACKET {
+		parTypeSingular = "bracket"
+		parTypePlural = "brackets"
 	} else {
 		return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_PARENTHESES_COMBINATION,
 			ErrorMessage: "Invalid combination of parentheses/braces during matching (e.g., (}, or {))"}

@@ -596,13 +596,14 @@ func extractSuffixAndAnnotations(component string, propertyComponent bool, input
 
 /*
 Extracts statement-level annotation(s), i.e., not to be called on component, but extracting statement-level annotations.
-Statement-level annotation example: "A(actor) I(aim) [annotation]". Operates only on top-level statement.
+Statement-level annotation example: "A(actor) I(aim) [annotation]". Operates only on a given nesting level.
 This extraction does not support nested brackets (e.g., [ldjlkdsjg[dskljgsl]jlksg]) or nested parentheses (e.g., [ldfjs(ljdfs)sdflkj]).
 In the case of brackets, only the inner bracket is extracted; in the case of parentheses, the entire annotation is ignored.
 Calls log.Fatal if regex compilation fails (should never happen, since regex is static, and to be caught by runtime environment).
-Returns concatenated annotations including original brackets (e.g., "[annotation1][annotation2]").
+Returns annotations as a string array, with values including original brackets (e.g., "[annotation1][annotation2]").
+The second return value is the remaining string, which is the input string with the annotations removed.
 */
-func parseStatementLevelAnnotations(input string) string {
+func parseStatementLevelAnnotations(input string) ([]string, string) {
 	// Component annotation pattern (note: does not support embedded brackets or parentheses)
 	r, err := regexp.Compile("\\[" + COMPONENT_ANNOTATION_MAIN + "\\]")
 	if err != nil {
@@ -611,8 +612,11 @@ func parseStatementLevelAnnotations(input string) string {
 	// Search for annotation patterns on input (pure annotation on statement level)
 	result := r.FindAllStringSubmatch(input, -1)
 
-	annotations := ""
-	// Concatenate all annotations
+	// Copy of input as remainingOutput, which will contain the remaining elements following the extraction of the annotations
+	remainingOutput := input
+	// Array containing individual annotations
+	annotationArray := []string{}
+	// Check all annotations for logical operators and strip from input
 	for _, element := range result {
 		for _, element2 := range element {
 
@@ -625,14 +629,20 @@ func parseStatementLevelAnnotations(input string) string {
 				}
 			}
 			if !skip {
-				// Add to annotations if no logical operator
-				annotations += element2
+				// Remove detected annotation from remainingOutput
+				remainingOutput = strings.ReplaceAll(remainingOutput, element2, "")
+				// Add annotations to output array
+				annotationArray = append(annotationArray, element2)
 			}
 		}
 	}
-	Println("Number of statement-level annotations: ", len(result))
-	Println("Statement annotation: ", annotations)
-	return annotations
+	Println("Number of statement-level annotations: ", len(annotationArray))
+	Println("Statement annotation: ", annotationArray)
+	Println("Remaining string: ", remainingOutput)
+	if len(annotationArray) == 0 {
+		return []string{}, remainingOutput
+	}
+	return annotationArray, remainingOutput
 }
 
 /*

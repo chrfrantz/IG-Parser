@@ -227,6 +227,105 @@ func TestConverterHandlerVisualPost(t *testing.T) {
 }
 
 /*
+Tests POST request with given input for visual output (output includes warning for unparsed elements of input).
+*/
+func TestConverterHandlerVisualPostWarning(t *testing.T) {
+
+	// Initialize templates
+	Init()
+	// Deactivate logging
+	Logging = false
+	// Spin up server
+	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerVisual))
+	// Tear down at the end of the function
+	defer server.Close()
+
+	// Read server information
+	client := http.Client{}
+
+	body := "codedStmt=Cac{%20Cac{%20A(actor6)%20I(actor6)%20}%20[XOR]%20Cac{%20A(actor7)%20I(actor7)%20}}%20Cac{%20Cac{%20A(actor1)%20I(aim1)%20}%20[OR]%20Cac{%20A(actor0)%20I(aim0)%20Cac{%20A(actor2)%20I(aim2)%20Cac{%20Cac{%20A(actor3)%20I(aim3)%20}%20[OR]%20Cac{%20A(actor4)%20I(aim4)%20}%20}%20Bdir(object2)%20}%20[OR]%20Cac{%20A(actor5)%20I(aim5)}%20}}&propertyTree=on&canvasHeight=2000&canvasWidth=4000"
+
+	res, err := client.Post(server.URL, "application/x-www-form-urlencoded", strings.NewReader(body))
+	if err != nil {
+		t.Fatal("Error when performing HTTP request. Error:", err.Error())
+	}
+
+	if res.Status != "200 OK" {
+		t.Fatal("Request returning non-200 status code: " + res.Status)
+	}
+
+	// Extract response body
+	output, err2 := io.ReadAll(res.Body)
+	if err2 != nil {
+		t.Fatal("Error when reading response. Error:", err2.Error())
+	}
+
+	outputString := string(output)
+
+	// Convert output to \n linebreaks only (may contain a mix) - for OS-independent comparison
+	outputString = strings.ReplaceAll(outputString, "\\r\\n", "\\n")
+
+	// Delimiter terminating header information
+	// TODO: Review whenever template changes
+	headDelimiter := "submit"
+
+	// Extract index of transaction ID
+	endIdx := strings.Index(outputString, headDelimiter)
+	// Extract response header part
+	responseHead := outputString[:endIdx]
+
+	// Read reference file
+	content, err5 := os.ReadFile("TestConverterHandlerVisualPostWarn.test")
+	if err5 != nil {
+		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
+	}
+
+	expectedOutput := string(content)
+
+	// Extract expected response header part
+	expEndIdx := strings.Index(expectedOutput, headDelimiter)
+	// Extract expected response header part
+	expectedHead := expectedOutput[:expEndIdx]
+
+	// Compare to actual output
+	if responseHead != expectedHead {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err6 := tabular.WriteToFile(errorFile, outputString, true)
+		if err6 != nil {
+			t.Fatal("Error attempting to write error file. Error:", err6.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to '" + errorFile + "'")
+	}
+
+	// Delimiter to isolate information trailing variable Request ID
+	// TODO: Review whenever template changes
+	tailDelimiter := "<script src=\"/libraries"
+
+	// Identify index of string
+	tailIdx := strings.Index(outputString, tailDelimiter)
+	// Extract Response tail
+	responseTail := outputString[tailIdx:]
+
+	// Extract expected response tail part
+	expTailIdx := strings.Index(expectedOutput, tailDelimiter)
+	// Extract expected response tail part
+	expectedTail := expectedOutput[expTailIdx:]
+
+	// Compare to actual output
+	if responseTail != expectedTail {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err6 := tabular.WriteToFile(errorFile, outputString, true)
+		if err6 != nil {
+			t.Fatal("Error attempting to write error file. Error:", err6.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to '" + errorFile + "'")
+	}
+
+}
+
+/*
 Tests POST request with given input for Google Sheets output without header line
 */
 func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
@@ -276,6 +375,105 @@ func TestConverterHandlerGoogleSheetsPost(t *testing.T) {
 
 	// Read reference file
 	content, err5 := ioutil.ReadFile("TestConverterHandlerGoogleSheetsPost.test")
+	if err5 != nil {
+		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
+	}
+
+	expectedOutput := string(content)
+
+	// Extract expected response header part
+	expEndIdx := strings.Index(expectedOutput, headDelimiter)
+	// Extract expected response header part
+	expectedHead := expectedOutput[:expEndIdx]
+
+	// Compare to actual output
+	if responseHead != expectedHead {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err6 := tabular.WriteToFile(errorFile, outputString, true)
+		if err6 != nil {
+			t.Fatal("Error attempting to write error file. Error:", err6.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to '" + errorFile + "'")
+	}
+
+	// Delimiter to isolate information trailing variable Request ID
+	// TODO: Review whenever template changes
+	tailDelimiter := "<div class=\"output\">"
+
+	// Identify index of string
+	tailIdx := strings.Index(outputString, tailDelimiter)
+	// Extract Response tail
+	responseTail := outputString[tailIdx:]
+
+	// Extract expected response tail part
+	expTailIdx := strings.Index(expectedOutput, tailDelimiter)
+	// Extract expected response tail part
+	expectedTail := expectedOutput[expTailIdx:]
+
+	// Compare to actual output
+	if responseTail != expectedTail {
+		fmt.Println("Produced output:\n", outputString)
+		fmt.Println("Expected output:\n", expectedOutput)
+		err6 := tabular.WriteToFile(errorFile, outputString, true)
+		if err6 != nil {
+			t.Fatal("Error attempting to write error file. Error:", err6.Error())
+		}
+		t.Fatal("Output generation is wrong for given input statement. Wrote output to '" + errorFile + "'")
+	}
+
+}
+
+/*
+Tests POST request with given input for Google Sheets output without header line
+*/
+func TestConverterHandlerGoogleSheetsPostWarning(t *testing.T) {
+
+	// Initialize templates
+	Init()
+	// Deactivate logging
+	Logging = false
+	// Spin up server
+	server := httptest.NewServer(http.HandlerFunc(ConverterHandlerTabular))
+	// Tear down at the end of the function
+	defer server.Close()
+
+	// Read server information
+	client := http.Client{}
+
+	body := "codedStmt=Cac{%20Cac{%20A(actor6)%20I(actor6)%20}%20[XOR]%20Cac{%20A(actor7)%20I(actor7)%20}}%20Cac{%20Cac{%20A(actor1)%20I(aim1)%20}%20[OR]%20Cac{%20A(actor0)%20I(aim0)%20Cac{%20A(actor2)%20I(aim2)%20Cac{%20Cac{%20A(actor3)%20I(aim3)%20}%20[OR]%20Cac{%20A(actor4)%20I(aim4)%20}%20}%20Bdir(object2)%20}%20[OR]%20Cac{%20A(actor5)%20I(aim5)}%20}}&stmtId=123&igExtended=on&outputType=Google+Sheets"
+
+	res, err := client.Post(server.URL, "application/x-www-form-urlencoded", strings.NewReader(body))
+	if err != nil {
+		t.Fatal("Error when performing HTTP request. Error:", err.Error())
+	}
+
+	if res.Status != "200 OK" {
+		t.Fatal("Request returning non-200 status code: " + res.Status)
+	}
+
+	// Extract response body
+	output, err2 := io.ReadAll(res.Body)
+	if err2 != nil {
+		t.Fatal("Error when reading response. Error:", err2.Error())
+	}
+
+	outputString := string(output)
+
+	// Convert output to \n linebreaks only (may contain a mix) - for OS-independent comparison
+	outputString = strings.ReplaceAll(outputString, "\\r\\n", "\\n")
+
+	// Delimiter terminating header information
+	// TODO: Review whenever template changes
+	headDelimiter := "submit"
+
+	// Extract index of transaction ID
+	endIdx := strings.Index(outputString, headDelimiter)
+	// Extract response header part
+	responseHead := outputString[:endIdx]
+
+	// Read reference file
+	content, err5 := ioutil.ReadFile("TestConverterHandlerGoogleSheetsPostWarn.test")
 	if err5 != nil {
 		t.Fatal("Error attempting to read test text input. Error:", err5.Error())
 	}

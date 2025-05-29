@@ -5,6 +5,7 @@ import (
 	"IG-Parser/core/tree"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -3564,10 +3565,11 @@ func TestStaticTabularOutputBasicStatementComponentLevelIndexedPropertiesAnnotat
 
 /*
 Tests parsing of shared and private properties (via index) on component-level nested components.
+NOTE: Test fails as of now; requires revision and fixing.
 */
 func TestStaticTabularOutputBasicStatementComponentLevelNestedPrivateAndSharedProperties(t *testing.T) {
 
-	text := "Bdir{A1,p(first) A,p(shared) (A1(farmer) [OR] A2(citizen))}"
+	text := "Bdir{A1,p(first) A,p(shared) A(A1(farmer) [OR] A2(citizen))}"
 
 	// Static output
 	SetDynamicOutput(false)
@@ -3590,7 +3592,7 @@ func TestStaticTabularOutputBasicStatementComponentLevelNestedPrivateAndSharedPr
 
 	stmts, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+		t.Fatal("Error during parsing of statement", err)
 	}
 
 	if len(stmts) > 1 {
@@ -5602,8 +5604,8 @@ func TestTabularOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAn
 	}
 
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") == "Such   : (1) A ; (2) The ; and (3) The    ." {
+		t.Fatal("Error during parsing of statement", err)
 	}
 
 	if len(stmts) != 1 {
@@ -5611,7 +5613,7 @@ func TestTabularOutputNestedPropertiesIncludingComponentPairsAndNestedPropertyAn
 	}
 
 	results := GenerateTabularOutputFromParsedStatements(stmts, "", "", text, "123", "", true, tree.AGGREGATE_IMPLICIT_LINKAGES, separator, OUTPUT_TYPE_GOOGLE_SHEETS, IncludeHeader(), ORIGINAL_STATEMENT_OUTPUT_NONE, IG_SCRIPT_OUTPUT_NONE)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") == "Such   : (1) A ; (2) The ; and (3) The    ." {
 		t.Fatal("Error when generating output:", err)
 	}
 
@@ -7110,7 +7112,7 @@ func TestTabularOutputComplexMultilevelNestingWithOriginalStatementSingleAndIgSc
 
 	stmts, err := parser.ParseStatement(text)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {
@@ -7308,12 +7310,12 @@ func TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOp
 	}
 
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != "  [OR]  " {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {
-		t.Fatal("Too many statements identified: ", stmts)
+		t.Fatal("Too many statements identified:", stmts)
 	}
 
 	s := stmts[0].Entry.(*tree.Statement)
@@ -7327,7 +7329,7 @@ func TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOp
 
 	res, err := tree.GenerateNodeArrayPermutations(leafArrays...)
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Unexpected error during array generation.")
+		t.Fatal("Unexpected error during array generation. Error:", err)
 	}
 
 	fmt.Println("Input arrays: ", res)
@@ -7407,8 +7409,8 @@ func TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOp
 	}
 
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != "    [OR]  " {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {
@@ -7508,8 +7510,8 @@ func TestTabularOutputSubstitutionSpecialSymbolsDuringOutputIGCore(t *testing.T)
 	}
 
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") == "    [OR]  " {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {
@@ -7609,8 +7611,8 @@ func TestTabularOutputSubstitutionSpecialSymbolsDuringOutputIGExtendedGoogleShee
 	}
 
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") == "    [OR]  " {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {
@@ -7710,8 +7712,8 @@ func TestTabularOutputSubstitutionSpecialSymbolsDuringOutputIGExtendedCSV(t *tes
 	}
 
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Error during parsing of statement", err.Error())
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") == "    [OR]  " {
+		t.Fatal("Error during parsing of statement:", err)
 	}
 
 	if len(stmts) > 1 {

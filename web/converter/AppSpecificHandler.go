@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 )
 
 /*
@@ -40,61 +41,22 @@ func handleTabularOutput(w http.ResponseWriter, originalStatement string, codedS
 	Println("Include IG Script input in generated output:", printIgScriptInput)
 	// Output type
 	Println("Output type:", outputType)
+	// Prepopulate coded statement in return structure
+	retStruct.CodedStmt = codedStmt
 	// Convert input
 	output, err2 := endpoints.ConvertIGScriptToTabularOutput(originalStatement, codedStmt, stmtId, outputType, "", true, tabular.IncludeHeader(), printOriginalStatement, printIgScriptInput)
-	if err2.ErrorCode != tree.PARSING_NO_ERROR {
-		retStruct.Success = false
-		retStruct.Error = true
-		retStruct.RawStmt = originalStatement
-		retStruct.CodedStmt = codedStmt
-		// Deal with potential errors and prepopulate return message
-		switch err2.ErrorCode {
-		case tree.PARSING_ERROR_EMPTY_LEAF:
-			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
-		case tree.PARSING_ERROR_EMPTY_STATEMENT:
-			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
-		default:
-			retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
+	// Stringified output delivered back to client in case of no error or warning
+	finalOutput := ""
+	if err2.ErrorCode == tree.PARSING_NO_ERROR || err2.ErrorCode == tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+		tabularOutput := ""
+		// Decompose array output into string
+		for _, v := range output {
+			tabularOutput += v.Output
 		}
-		// Execute template
-		err3 := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_TABULAR, retStruct)
-		if err3 != nil {
-			log.Println("Error processing tabular template:", err3.Error())
-			http.Error(w, "Could not process request.", http.StatusInternalServerError)
-		}
-
-		// Final comment in log
-		Println("Error: " + fmt.Sprint(err2))
-		// Ensure logging is terminated
-		err := terminateOutput(ERROR_SUFFIX)
-		if err != nil {
-			log.Println("Error when finalizing log file: ", err.Error())
-		}
-		return
+		finalOutput = tabularOutput
 	}
-	// Return success if parsing was successful
-	retStruct.Success = true
-	retStruct.RawStmt = originalStatement
-	retStruct.CodedStmt = codedStmt
-	tabularOutput := ""
-	for _, v := range output {
-		tabularOutput += v.Output
-	}
-	retStruct.Output = tabularOutput
-	err := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_TABULAR, retStruct)
-	if err != nil {
-		log.Println("Error processing default template:", err.Error())
-		http.Error(w, "Could not process request.", http.StatusInternalServerError)
-	}
-
-	// Final comment in log
-	Println("Success")
-	// Ensure logging is terminated
-	err3 := terminateOutput(SUCCESS_SUFFIX)
-	if err3 != nil {
-		log.Println("Error when finalizing log file: ", err3.Error())
-	}
-	return
+	// Deliver parsed content back to client
+	deliverParsedOutput(w, retStruct, TEMPLATE_NAME_PARSER_TABULAR, finalOutput, err2)
 }
 
 /*
@@ -124,32 +86,64 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	tree.SetBinaryPrinting(binaryOutput)
 	Println("Setting activation condition on top in visual output:", moveActivationConditionsToTop)
 	tree.SetMoveActivationConditionsToFront(moveActivationConditionsToTop)
+	// Prepopulate coded statement in return structure
+	retStruct.CodedStmt = codedStmt
 	// Convert input
 	output, err2 := endpoints.ConvertIGScriptToVisualTree(codedStmt, stmtId, "")
-	if err2.ErrorCode != tree.PARSING_NO_ERROR {
+	// Deliver parsed content back to client
+	deliverParsedOutput(w, retStruct, TEMPLATE_NAME_PARSER_VISUAL, output, err2)
+}
+
+/*
+Processes parsed output and delivers it back to client. Takes input from any kind of parser.
+- w: Response writer to deliver output to client
+- retStruct: Return structure to be populated with parsed output and error information
+- template: Name of template to be used for output
+- output: Stringified output to be delivered
+- parsingError: Parsing error object to be processed in frontend
+*/
+func deliverParsedOutput(w http.ResponseWriter, retStruct shared.ReturnStruct, template string, output string, parsingError tree.ParsingError) {
+	if parsingError.ErrorCode != tree.PARSING_NO_ERROR {
 		retStruct.Success = false
 		retStruct.Error = true
-		retStruct.CodedStmt = codedStmt
 		// Deal with potential errors and prepopulate return message
-		switch err2.ErrorCode {
+		switch parsingError.ErrorCode {
 		case tree.PARSING_ERROR_EMPTY_LEAF:
 			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
 		case tree.PARSING_ERROR_EMPTY_STATEMENT:
 			retStruct.Message = shared.ERROR_INPUT_NO_STATEMENT
+		case tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS:
+			// Parts that have been ignored in parsing due to errors
+			retStruct.Message = shared.ERROR_INPUT_IGNORED_ELEMENTS + "\"" + strings.Join(parsingError.ErrorIgnoredElements, ", ") + "\""
+		case tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT:
+			// Parts that have been ignored in parsing without errors, but could potentially needed to be parsed
+			retStruct.Message = shared.WARNING_INPUT_NON_PARSED_ELEMENTS + "\"" + strings.Join(parsingError.ErrorIgnoredElements, ", ") + "\""
+			// Still allow it to show
+			retStruct.Success = true
+			retStruct.Output = output
 		default:
-			retStruct.Message = "Parsing error (" + err2.ErrorCode + "): " + err2.ErrorMessage
+			retStruct.Message = "Parsing error (" + parsingError.ErrorCode + "): " + parsingError.ErrorMessage
 		}
 		// Execute template
-		err3 := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_VISUAL, retStruct)
+		err3 := tmpl.ExecuteTemplate(w, template, retStruct)
 		if err3 != nil {
-			log.Println("Error processing visual template:", err3.Error())
+			log.Println("Error processing template:", err3.Error())
 			http.Error(w, "Could not process request.", http.StatusInternalServerError)
 		}
 
-		// Final comment in log
-		Println("Error: " + fmt.Sprint(err2))
+		// Determine suffix for final output in log (warning or error)
+		errSuffix := ""
+		if retStruct.Success {
+			// Warning
+			Println("Warning: " + fmt.Sprint(parsingError))
+			errSuffix = WARNING_SUFFIX
+		} else {
+			// Hard error
+			Println("Error: " + fmt.Sprint(parsingError))
+			errSuffix = ERROR_SUFFIX
+		}
 		// Ensure logging is terminated
-		err := terminateOutput(ERROR_SUFFIX)
+		err := terminateOutput(errSuffix)
 		if err != nil {
 			log.Println("Error when finalizing log file: ", err.Error())
 		}
@@ -157,11 +151,10 @@ func handleVisualOutput(w http.ResponseWriter, codedStmt string, stmtId string, 
 	}
 	// Return success if parsing was successful
 	retStruct.Success = true
-	retStruct.CodedStmt = codedStmt
 	retStruct.Output = output
-	err := tmpl.ExecuteTemplate(w, TEMPLATE_NAME_PARSER_VISUAL, retStruct)
+	err := tmpl.ExecuteTemplate(w, template, retStruct)
 	if err != nil {
-		log.Println("Error processing default template:", err.Error())
+		log.Println("Error processing template:", err.Error())
 		http.Error(w, "Could not process request.", http.StatusInternalServerError)
 	}
 

@@ -5,6 +5,7 @@ import (
 	"IG-Parser/core/tree"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -24,9 +25,15 @@ func TestValidStatementGoogleSheets(t *testing.T) {
 		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
 
 	_, err := ConvertIGScriptToTabularOutput(originalStatement, text, "650", tabular.OUTPUT_TYPE_GOOGLE_SHEETS, "", true, true, tabular.ORIGINAL_STATEMENT_OUTPUT_NONE, tabular.IG_SCRIPT_OUTPUT_NONE)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Statement parsing should not fail")
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+		t.Fatal("Statement parsing should not fail. Error:", err)
 	}
+
+	if strings.Join(err.ErrorIgnoredElements, "") != "(National Organic Program's Program Manager), ,  ,   ." {
+		t.Fatal("Warning was done for content '"+strings.Join(err.ErrorIgnoredElements, "")+
+			"', but returned error: ", err)
+	}
+
 }
 
 /*
@@ -45,8 +52,13 @@ func TestValidStatementNestingGoogleSheets(t *testing.T) {
 		"Cac{A(Program Manager) I(has gained) Bdir(competence)}"
 
 	_, err := ConvertIGScriptToTabularOutput(originalStatement, text, "650", tabular.OUTPUT_TYPE_GOOGLE_SHEETS, "", true, true, tabular.ORIGINAL_STATEMENT_OUTPUT_NONE, tabular.IG_SCRIPT_OUTPUT_NONE)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Statement parsing should not fail")
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+		t.Fatal("Statement parsing should not fail. Error:", err)
+	}
+
+	if strings.Join(err.ErrorIgnoredElements, "") != "(National Organic Program's Program Manager), ,  ,    " {
+		t.Fatal("Warning was done for content '"+strings.Join(err.ErrorIgnoredElements, "")+
+			"', but returned error: ", err)
 	}
 }
 
@@ -126,7 +138,7 @@ func TestInvalidAttributeStatementGoogleSheets(t *testing.T) {
 Tests basic valid statement for visual tree output
 */
 func TestValidStatementVisualTree(t *testing.T) {
-	text := "(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
@@ -139,10 +151,30 @@ func TestValidStatementVisualTree(t *testing.T) {
 }
 
 /*
+Tests basic valid statement for visual tree output, including incomplete coding, which should produce a warning.
+*/
+func TestValidStatementVisualTreeWarning(t *testing.T) {
+	text := "(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part))."
+
+	_, err := ConvertIGScriptToVisualTree(text, "650", "")
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+		t.Fatal("Statement parsing should warn about missing content, but returned error: ", err)
+	}
+	if strings.Join(err.ErrorIgnoredElements, "") != "(National Organic Program's Program Manager), ,  ,   ." {
+		t.Fatal("Warning was done for content '"+strings.Join(err.ErrorIgnoredElements, "")+
+			"', but returned error: ", err)
+	}
+}
+
+/*
 Tests simple statement-level nesting on activation condition for visual tree output
 */
 func TestValidStatementNestingVisualTree(t *testing.T) {
-	text := "(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+	text := "A(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
 		"D(may) " +
 		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
 		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
@@ -152,7 +184,31 @@ func TestValidStatementNestingVisualTree(t *testing.T) {
 
 	_, err := ConvertIGScriptToVisualTree(text, "650", "")
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
-		t.Fatal("Statement parsing should not fail")
+		t.Fatal("Statement parsing should not fail, but returned error: ", err)
+	}
+}
+
+/*
+Tests simple statement-level nesting on activation condition for visual tree output, but incomplete coding, which
+should produce a warning.
+*/
+func TestValidStatementNestingVisualTreeWarning(t *testing.T) {
+	// Note incomplete attributes
+	text := "(National Organic Program's Program Manager), Cex(on behalf of the Secretary), " +
+		"D(may) " +
+		"I(inspect and), I(sustain (review [AND] (refresh [AND] drink))) " +
+		"Bdir(approved (certified production and [AND] handling operations and [AND] accredited certifying agents)) " +
+		"Cex(for compliance with the (Act or [XOR] regulations in this part)) " +
+		// This is the essential line
+		"Cac{A(Program Manager) I(has gained) Bdir(competence)}"
+
+	_, err := ConvertIGScriptToVisualTree(text, "650", "")
+	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+		t.Fatal("Statement parsing should warn about missing content, but returned error: ", err)
+	}
+	if strings.Join(err.ErrorIgnoredElements, "") != "(National Organic Program's Program Manager), ,  ,    " {
+		t.Fatal("Warning was done for content '"+strings.Join(err.ErrorIgnoredElements, "")+
+			"', but returned error: ", err)
 	}
 }
 

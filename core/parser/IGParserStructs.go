@@ -44,8 +44,8 @@ const COMBINATION_PATTERN_PARENTHESES = "\\" + LEFT_PARENTHESIS + WORDS_WITH_PAR
 const COMBINATION_PATTERN_BRACES = "\\" + LEFT_BRACE + WORDS_WITH_PARENTHESES + "\\" + RIGHT_BRACE +
 	"\\s+" + "(\\[" + LOGICAL_OPERATORS + "\\]\\s+" + WORDS_WITH_PARENTHESES + ")+\\" + RIGHT_BRACE
 
-// Annotation syntax (e.g., [semanticAnnotations#99])
-const COMPONENT_ANNOTATION_MAIN = "[" + ALPHA_NUMERIC_CHARACTERS + "\\s" + SPECIAL_SYMBOLS + "]+"
+// Annotation syntax (e.g., [semanticAnnotations#99]), but also including parentheses (e.g., [kjgdslk(gj(sdkfjlk)dlfkjs)]) - validation on bracket matching needs to be done before annotation extraction
+const COMPONENT_ANNOTATION_MAIN = "[" + ALPHA_NUMERIC_CHARACTERS + "\\s" + SPECIAL_SYMBOLS + "\\" + LEFT_PARENTHESIS + "\\" + RIGHT_PARENTHESIS + "]+"
 
 // Nested annotation syntax (e.g., [first=[left,right]])
 const COMPONENT_ANNOTATION_OPTIONAL_BRACKET = "(\\[" + COMPONENT_ANNOTATION_MAIN + "\\])*"

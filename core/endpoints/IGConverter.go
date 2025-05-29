@@ -39,7 +39,7 @@ func ConvertIGScriptToTabularOutput(originalStatement string, statement string, 
 
 	// Parse IGScript statement into tree
 	stmts, err := parser.ParseStatement(statement)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 		return nil, err
 	}
 
@@ -50,7 +50,7 @@ func ConvertIGScriptToTabularOutput(originalStatement string, statement string, 
 		originalStatement, statement, stmtId, filename, overwrite, tree.AGGREGATE_IMPLICIT_LINKAGES,
 		separator, outputType, printHeaders, printOriginalStatement, printIgScriptInput)
 	for _, res := range results {
-		if res.Error.ErrorCode != tree.PARSING_NO_ERROR {
+		if res.Error.ErrorCode != tree.PARSING_NO_ERROR && res.Error.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 			return results, res.Error
 		}
 	}
@@ -78,7 +78,8 @@ func ConvertIGScriptToVisualTree(statement string, stmtId string, filename strin
 
 	// Parse IGScript statement into tree
 	stmts, err := parser.ParseStatement(statement)
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	// Print output in case there is no error, or in case there are only potentially missing elements
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 		return "", err
 	}
 

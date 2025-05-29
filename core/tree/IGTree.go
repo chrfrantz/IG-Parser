@@ -1548,7 +1548,7 @@ func (n *Node) IsNil() bool {
 }
 
 /*
-Applies statement parsing function to all entries below a given node.
+Applies function to all entries below a given node and adds statements to their entries based on parsed input.
 */
 func (n *Node) ParseAllEntries(function func(string) (*Statement, ParsingError)) ParsingError {
 	if n.IsNil() {
