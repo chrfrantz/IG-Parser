@@ -364,6 +364,8 @@ In the following, you will find selected examples that highlight the practical u
   * `A(responsible actor) [statement annotation0] I(action) Cac(condition) [statement annotation1]`
 * Semantic annotation on nested component:
   * `Cac[annotation]{ A(actor) I(act) }`
+* Semantic annotation with additional annotation in nested part (will be concatenated in output):
+  * `Cac[outer annotation]{ A(actor) [inner annotation] I(act) }`
 * Semantic annotation on component pair combination/combined statements (with each side having distinctive components):
   * `{ [left annotation] A(leftActor) I(leftAct) [XOR] [right annotation] A(rightActor) [another annotation] I(rightAct) }`
 * Semantic annotation on component pair combination within nested component (output concatenates leading annotation with branch-specific ones):
