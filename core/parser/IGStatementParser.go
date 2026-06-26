@@ -110,28 +110,18 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		Println("Basic statement: " + s.String())
 
 		// Substitute text with remaining parts (the one that have not been parsed as part of the basic component parsing)
-		text = remainingText
-		Println("Remaining text after basic component parsing: " + text)
+		Println("Remaining text after basic component parsing: " + remainingText)
 		// Parse statement-level annotations
-		stmtLevelAnnotationsArr, remainingText := parseStatementLevelAnnotations(text)
+		stmtLevelAnnotationsArr, remainingText := parseStatementLevelAnnotations(remainingText)
+
+		// Reassign to outer scope input text
+		text = remainingText
+		Println("Remaining text after parsing statement-level annotations: " + text)
 
 		// Join remaining annotations into single string
 		stmtLevelAnnotations = strings.Join(stmtLevelAnnotationsArr, "")
 
-		Println("Remaining text after parsing statement-level annotations: " + remainingText)
-
-		// Check whether the remaining text contains potentially non-parsed content
-		// (e.g., parentheses, brackets and braces) in order to output it as a warning to the user
-		if strings.ContainsAny(remainingText, "(){}[]") {
-			// Create a warning to user in case of important content or unintended parsing
-			warn.ErrorCode = tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT
-			// Error message for internal use; will be overwritten with UI error message
-			warn.ErrorMessage = "The following text is potentially non-parsed IG Script content. " +
-				"Please consider reviewing your coding in case it should have been parsed as part of the output."
-			// Pass fragments of concern along
-			warn.ErrorIgnoredElements = []string{remainingText}
-			// Let the final return command handle the actual return ...
-		}
+		// Perform check on potential IG Script content later ...
 	}
 
 	Println("Testing for nested combinations in " + fmt.Sprint(nestedCombos))
@@ -147,11 +137,13 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 				// Shift to regular nested statement if parsing as combo failed (Regex is too coarse-grained and favors combinations before fine-grained parsing)
 				nestedStmts = append(nestedStmts, err.ErrorIgnoredElements...)
 				Println("Reclassifying statement as nested statement (as opposed to nested combination) ...")
-			} else if err.ErrorCode != tree.PARSING_NO_ERROR {
+			} else if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 				// Populate return structure
 				ret := []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}
 				return ret, err
 			}
+			// Retain warning for return structure if different from default error value
+			warn = updateDefaultError(warn, err)
 		}
 	}
 
@@ -187,6 +179,11 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 				}
 				detectedLogicalOperator = tree.OR
 			}
+			// Remove detected logical operator from input text
+			if detectedLogicalOperator != "" {
+				Println("Removing detected logical operator from input text: ", detectedLogicalOperator, " (", text, ")")
+				text = strings.ReplaceAll(text, "["+detectedLogicalOperator+"]", "")
+			}
 		}
 
 		err = parseNestedStatements(&s, nestedStmts, detectedLogicalOperator)
@@ -197,7 +194,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 			Println("Returning error "+tree.PARSING_ERROR_IGNORED_NESTED_ELEMENTS+" with ignored elements: ", err)
 			return ret, err
 		}
-		if err.ErrorCode != tree.PARSING_NO_ERROR {
+		if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 			// Populate return structure
 			ret := []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}
 			return ret, err
@@ -205,6 +202,8 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		// Process potential private nodes for complex components
 		ProcessPrivateComponentLinkages(&s, true)
 
+		// Retain warning for return structure
+		warn = updateDefaultError(warn, err)
 	}
 
 	Println("Statement (after assigning nested elements, before expanding statement with paired components):\n" + s.String() +
@@ -223,7 +222,7 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		} else {
 			// If one component pair combination on a given nesting level, extrapolate (may contain nested pair combination (e.g., { left [AND] { right [XOR] alsoRight }})
 			extrapolatedStmts, err2 := extrapolateStatementWithPairedComponents(&s, compAndNestedStmts[3])
-			if err2.ErrorCode != tree.PARSING_NO_ERROR {
+			if err2.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 				return extrapolatedStmts, err2
 			}
 			Println("Final statements (with extrapolation): " + tree.PrintNodes(extrapolatedStmts))
@@ -243,8 +242,49 @@ func ParseStatement(text string) ([]*tree.Node, tree.ParsingError) {
 		return nil, tree.ParsingError{ErrorCode: tree.PARSING_ERROR_EMPTY_STATEMENT}
 	}
 
+	Println("Remaining text: ", text)
+
+	// Final check for unparsed content
+	warn = checkForPotentiallyUnparsedIGScript(text, warn)
+
 	// Else return wrapped statement (no extrapolation included), attach potential warning
 	return []*tree.Node{&tree.Node{Entry: &s, Annotations: stmtLevelAnnotations}}, warn
+}
+
+/*
+Updates given default error with given current error, unless default error is already set to a different error code.
+Where the error code is the same, potential ignored elements are appended to the default error.
+Adjusted or unmodified default error is returned.
+*/
+func updateDefaultError(defaultError tree.ParsingError, currentError tree.ParsingError) tree.ParsingError {
+	// Retain warning for return structure if different from default value
+	if defaultError.ErrorCode == tree.PARSING_NO_ERROR && currentError.ErrorCode != tree.PARSING_NO_ERROR {
+		defaultError = currentError
+	} else if defaultError.ErrorCode == tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && currentError.ErrorCode == tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
+		// Append potential ignored items if already populated
+		defaultError.ErrorIgnoredElements = append(defaultError.ErrorIgnoredElements, currentError.ErrorIgnoredElements...)
+	}
+	return defaultError
+}
+
+/*
+Check for potentially unparsed IG Script content (e.g., parentheses, brackets, braces) in order to output it as a warning to the user.
+Populates an error for later processing. Else leaves error reference unchanged.
+*/
+func checkForPotentiallyUnparsedIGScript(remainingText string, defaultError tree.ParsingError) tree.ParsingError {
+	// Check whether the remaining text contains potentially non-parsed content
+	// (e.g., parentheses, brackets and braces) in order to output it as a warning to the user
+	if strings.ContainsAny(remainingText, "(){}[]") {
+		// Create a warning to user in case of important content or unintended parsing
+		defaultError.ErrorCode = tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT
+		// Error message for internal use; will be overwritten with UI error message
+		defaultError.ErrorMessage = "The following text is potentially non-parsed IG Script content. " +
+			"Please consider reviewing your coding in case it should have been parsed as part of the output."
+		// Pass fragments of concern along
+		defaultError.ErrorIgnoredElements = []string{remainingText}
+		// Let the final return command handle the actual return ...
+	}
+	return defaultError
 }
 
 /*
@@ -595,6 +635,10 @@ func parseNestedStatements(stmtToAttachTo *tree.Statement, nestedStmts []string,
 			fmt.Println("Missing text fragments when parsing nested statements: ", errStmt)
 			defaultError = errStmt
 		}
+		if len(stmt) < 1 {
+			fmt.Println("Unhandled case: No decomposed statements in nested component ...", stmt)
+			return errStmt
+		}
 		if len(stmt) > 1 {
 			fmt.Println("Unhandled case: Multiple decomposed statements in nested component ...", stmt)
 			return errStmt
@@ -766,8 +810,8 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 		}
 	}
 
-	// Parse all entries in tree from string to statement (walks through entire tree linked to node)
-	err := combo.ParseAllEntries(func(oldValue string) (*tree.Statement, tree.ParsingError) {
+	// Parse all entries in tree from string to statement embedded in node (walks through entire tree linked to node)
+	err := combo.ParseAllEntries(func(oldValue string) (*tree.Node, tree.ParsingError) {
 
 		// Check whether the combination element contains a nested structure ...
 		tempComponentType := oldValue
@@ -779,13 +823,13 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 		// Extract component type (after stripping potential nested statements)
 		compType, prop, err := extractComponentType(tempComponentType)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
-			return &tree.Statement{}, err
+			return &tree.Node{}, err
 		}
 		// Extracting suffices and annotations
 		suffix, annotation, content, err := extractSuffixAndAnnotations(compType, prop, oldValue, LEFT_BRACE, RIGHT_BRACE)
 		if err.ErrorCode != tree.PARSING_NO_ERROR {
 			fmt.Println("Error during extraction of suffices and annotations of component '" + compType + "': " + err.ErrorCode)
-			return &tree.Statement{}, err
+			return &tree.Node{}, err
 		}
 
 		Println("Nested Combo Stmt Suffix:", suffix)
@@ -794,11 +838,11 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 
 		stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1 : strings.LastIndex(oldValue, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
-			return stmt[0].Entry.(*tree.Statement), errStmt
+			return stmt[0], errStmt
 		}
-		return stmt[0].Entry.(*tree.Statement), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+		return stmt[0], tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 	})
-	if err.ErrorCode != tree.PARSING_NO_ERROR {
+	if err.ErrorCode != tree.PARSING_NO_ERROR && err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 		return err
 	}
 
@@ -821,7 +865,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.DIRECT_OBJECT_PROPERTY) {
@@ -833,7 +877,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.DIRECT_OBJECT) {
@@ -845,7 +889,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.INDIRECT_OBJECT_PROPERTY) {
@@ -857,7 +901,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.INDIRECT_OBJECT) {
@@ -869,7 +913,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.ACTIVATION_CONDITION) {
@@ -881,7 +925,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.EXECUTION_CONSTRAINT) {
@@ -893,7 +937,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.CONSTITUTED_ENTITY_PROPERTY) {
@@ -905,7 +949,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.CONSTITUTING_PROPERTIES_PROPERTY) {
@@ -917,7 +961,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.CONSTITUTING_PROPERTIES) {
@@ -929,7 +973,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 	if strings.HasPrefix(sharedPrefix, tree.OR_ELSE) {
@@ -941,7 +985,7 @@ func parseNestedStatementCombination(stmtToAttachTo *tree.Statement, nestedCombo
 			return tree.ParsingError{ErrorCode: tree.PARSING_ERROR_INVALID_COMPONENT_TYPE_COMBINATION,
 				ErrorMessage: "Invalid combination of component types of different kinds. Error: " + nodeCombinationError.ErrorMessage}
 		} else {
-			return tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+			return err
 		}
 	}
 

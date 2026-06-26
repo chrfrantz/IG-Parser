@@ -242,7 +242,7 @@ func TestConverterHandlerVisualPostWarning(t *testing.T) {
 	// Read server information
 	client := http.Client{}
 
-	body := "codedStmt=Cac{%20Cac{%20A(actor6)%20I(actor6)%20}%20[XOR]%20Cac{%20A(actor7)%20I(actor7)%20}}%20Cac{%20Cac{%20A(actor1)%20I(aim1)%20}%20[OR]%20Cac{%20A(actor0)%20I(aim0)%20Cac{%20A(actor2)%20I(aim2)%20Cac{%20Cac{%20A(actor3)%20I(aim3)%20}%20[OR]%20Cac{%20A(actor4)%20I(aim4)%20}%20}%20Bdir(object2)%20}%20[OR]%20Cac{%20A(actor5)%20I(aim5)}%20}}&propertyTree=on&canvasHeight=2000&canvasWidth=4000"
+	body := "codedStmt=Cac{%20Cac{%20A(actor6)%20I(actor6)%20}%20[XOR]%20Cac{%20A(actor7)%20[out[inner]erAnnotation]%20I(actor7)%20}}%20Cac{%20Cac{%20A(actor1)%20I(aim1)%20}%20[OR]%20Cac{%20A(actor0)%20I(aim0)%20Cac{%20A(actor2)%20I(aim2)%20Cac{%20Cac{%20A(actor3)%20I(aim3)%20}%20[OR]%20Cac{%20A(actor4)%20I(aim4)%20}%20}%20Bdir(object2)%20}%20[OR]%20Cac{%20A(actor5)%20I(aim5)}%20}}&propertyTree=on&canvasHeight=2000&canvasWidth=4000"
 
 	res, err := client.Post(server.URL, "application/x-www-form-urlencoded", strings.NewReader(body))
 	if err != nil {
@@ -440,7 +440,7 @@ func TestConverterHandlerGoogleSheetsPostWarning(t *testing.T) {
 	// Read server information
 	client := http.Client{}
 
-	body := "codedStmt=Cac{%20Cac{%20A(actor6)%20I(actor6)%20}%20[XOR]%20Cac{%20A(actor7)%20I(actor7)%20}}%20Cac{%20Cac{%20A(actor1)%20I(aim1)%20}%20[OR]%20Cac{%20A(actor0)%20I(aim0)%20Cac{%20A(actor2)%20I(aim2)%20Cac{%20Cac{%20A(actor3)%20I(aim3)%20}%20[OR]%20Cac{%20A(actor4)%20I(aim4)%20}%20}%20Bdir(object2)%20}%20[OR]%20Cac{%20A(actor5)%20I(aim5)}%20}}&stmtId=123&igExtended=on&outputType=Google+Sheets"
+	body := "codedStmt=Cac{ Cac{ A(actor1) I(aim1) } [OR] [out[inner]er] Cac{ Cac{ A(actor2)[random]  I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5) Cac{ A(actor6) I(aim6) } } }}&stmtId=123&igExtended=on&outputType=Google+Sheets"
 
 	res, err := client.Post(server.URL, "application/x-www-form-urlencoded", strings.NewReader(body))
 	if err != nil {

@@ -7310,7 +7310,7 @@ func TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOp
 	}
 
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != "  [OR]  " {
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement:", err)
 	}
 
@@ -7409,7 +7409,7 @@ func TestTabularOutputCombinationOfComponentLevelNestingAndCombinationsLogicalOp
 	}
 
 	stmts, err := parser.ParseStatement(text)
-	if err.ErrorCode != tree.PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT && strings.Join(err.ErrorIgnoredElements, "") != "    [OR]  " {
+	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Error during parsing of statement:", err)
 	}
 

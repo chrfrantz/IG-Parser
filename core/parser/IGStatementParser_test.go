@@ -952,12 +952,12 @@ func TestFlatteningAndParsingOfStatementCombinations(t *testing.T) {
 	}
 
 	// Parse all entries in tree from string to statement
-	err := combo.ParseAllEntries(func(oldValue string) (*tree.Statement, tree.ParsingError) {
+	err := combo.ParseAllEntries(func(oldValue string) (*tree.Node, tree.ParsingError) {
 		stmt, errStmt := ParseStatement(oldValue[strings.Index(oldValue, LEFT_BRACE)+1 : strings.LastIndex(oldValue, RIGHT_BRACE)])
 		if errStmt.ErrorCode != tree.PARSING_NO_ERROR {
-			return stmt[0].Entry.(*tree.Statement), errStmt
+			return stmt[0], errStmt
 		}
-		return stmt[0].Entry.(*tree.Statement), tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
+		return stmt[0], tree.ParsingError{ErrorCode: tree.PARSING_NO_ERROR}
 	})
 	if err.ErrorCode != tree.PARSING_NO_ERROR {
 		t.Fatal("Conversion of string entries to parsed statements failed:", err.Error())

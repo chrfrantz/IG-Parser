@@ -1550,38 +1550,45 @@ func (n *Node) IsNil() bool {
 /*
 Applies function to all entries below a given node and adds statements to their entries based on parsed input.
 */
-func (n *Node) ParseAllEntries(function func(string) (*Statement, ParsingError)) ParsingError {
+func (n *Node) ParseAllEntries(function func(string) (*Node, ParsingError)) ParsingError {
 	if n.IsNil() {
 		return ParsingError{ErrorCode: PARSING_ERROR_NIL_ELEMENT, ErrorMessage: "Attempted to parse nil element."}
 	}
+
+	// Default error to capture nested parsing errors
+	defaultError := ParsingError{ErrorCode: PARSING_NO_ERROR}
+
 	if !n.IsEmptyOrNilNode() && n.Entry != nil {
 
 		// Execute actual function
 		newEntry, err := function(n.Entry.(string))
-		if err.ErrorCode != PARSING_NO_ERROR {
+		if err.ErrorCode != PARSING_NO_ERROR && err.ErrorCode != PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 			Println("Received error when parsing nested string to statement.")
 			return err
 		}
-		// and reassign parsed element (i.e., substitute previous string element with node representation of statement)
-		n.Entry = newEntry
+		// and reassign parsed element to caller node (embedding complete statement representation)
+		*n = *newEntry
+		defaultError = err
 	}
 	if !n.Left.IsNil() {
 		// Parse left child of combination
 		err := n.Left.ParseAllEntries(function)
-		if err.ErrorCode != PARSING_NO_ERROR {
+		if err.ErrorCode != PARSING_NO_ERROR && err.ErrorCode != PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 			Println("Received error when parsing left-hand nested statement.")
 			return err
 		}
+		defaultError = err
 	}
 	if !n.Right.IsNil() {
 		// Parse right child of combination
 		err := n.Right.ParseAllEntries(function)
-		if err.ErrorCode != PARSING_NO_ERROR {
+		if err.ErrorCode != PARSING_NO_ERROR && err.ErrorCode != PARSING_WARNING_POSSIBLY_NON_PARSED_CONTENT {
 			Println("Received error when parsing right-hand nested statement.")
 			return err
 		}
+		defaultError = err
 	}
-	return ParsingError{ErrorCode: PARSING_NO_ERROR}
+	return defaultError
 }
 
 /*
