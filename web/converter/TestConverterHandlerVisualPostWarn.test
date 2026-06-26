@@ -183,7 +183,7 @@
             <div class="button" role="button" aria-pressed="false" tabindex="0" id="keybinds">Show Keybindings</div></span>
         </div>
         
-        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()" aria-labelledby="editorLabel">Cac{ Cac{ A(actor6) I(actor6) } [XOR] Cac{ A(actor7) I(actor7) }} Cac{ Cac{ A(actor1) I(aim1) } [OR] Cac{ A(actor0) I(aim0) Cac{ A(actor2) I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5)} }}</div>
+        <div id="editor" name="editor" onkeyup="copyEditorContentToTextArea();saveFormContent()" onpaste="copyEditorContentToTextArea();saveFormContent()" aria-labelledby="editorLabel">Cac{ Cac{ A(actor6) I(actor6) } [XOR] Cac{ A(actor7) [out[inner]erAnnotation] I(actor7) }} Cac{ Cac{ A(actor1) I(aim1) } [OR] Cac{ A(actor0) I(aim0) Cac{ A(actor2) I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5)} }}</div>
         <script>
             let editor = ace.edit("editor");
             editor.session.setMode("ace/mode/text"); 
@@ -886,7 +886,7 @@
         </dialog>
 
         
-        <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">Cac{ Cac{ A(actor6) I(actor6) } [XOR] Cac{ A(actor7) I(actor7) }} Cac{ Cac{ A(actor1) I(aim1) } [OR] Cac{ A(actor0) I(aim0) Cac{ A(actor2) I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5)} }}</textarea><br />
+        <textarea id="codedStmt" name="codedStmt" onfocusin="check(this)" onkeyup="check(this)" style="display:none;">Cac{ Cac{ A(actor6) I(actor6) } [XOR] Cac{ A(actor7) [out[inner]erAnnotation] I(actor7) }} Cac{ Cac{ A(actor1) I(aim1) } [OR] Cac{ A(actor0) I(aim0) Cac{ A(actor2) I(aim2) Cac{ Cac{ A(actor3) I(aim3) } [OR] Cac{ A(actor4) I(aim4) } } Bdir(object2) } [OR] Cac{ A(actor5) I(aim5)} }}</textarea><br />
         
         <span data-text="Resets the 'Original Statement' and 'Encoded Statement' fields to the original example content. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example1" href="#" onclick="resetContent()">Reset to default statement example</a></span>
         &nbsp;&nbsp;&nbsp;<span data-text="Switches to a moderately complex example statement showcasing advanced component-level nesting, component combinations and semantic annotations. Note that this will overwrite the current content (e.g., statements you coded)." class="tooltip"><a id="example2" href="#" onclick="linkIntercept(event)">Example Statement 2 (moderately complex)</a></span>
@@ -924,7 +924,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
 
 
 <div class="error">
-    Warning: The input text might have contained IG Script text fragments that have not been parsed (e.g., annotation parts, nested statements). If you believe the following text, or parts of it, should have been parsed, please review your coding accordingly (else ignore this message): &#34;    [OR]  &#34;
+    Warning: The input text might have contained IG Script text fragments that have not been parsed (e.g., annotation parts, nested statements). If you believe the following text, or parts of it, should have been parsed, please review your coding accordingly (else ignore this message): &#34;  [outerAnnotation]  &#34;
 </div>
 
 
@@ -962,7 +962,7 @@ Width of output canvas (in pixels): <input id="canvasWidth" name="canvasWidth" t
     var colorHigherLevel = "linen";
 
     
-    var treeData = JSON.parse("{\n\"name\": \"\",\n\"level\": 1, \n\"children\": [\n{\"name\": \"AND\",\n\"children\": [{\"name\": \"XOR\",\n\"children\": [{\n\"name\": \"Cac\",\n\"level\": 2, \n\"children\": [\n{\"name\": \"actor6\", \"comp\": \"A\", \"level\": 2},\n{\"name\": \"actor6\", \"comp\": \"I\", \"level\": 2}\n]\n},\n{\n\"name\": \"Cac\",\n\"level\": 2, \n\"children\": [\n{\"name\": \"actor7\", \"comp\": \"A\", \"level\": 2},\n{\"name\": \"actor7\", \"comp\": \"I\", \"level\": 2}\n]\n}], \"comp\": \"Cac\", \"level\": 1},\n{\n\"name\": \"Cac\",\n\"level\": 2, \n\"children\": [\n{\"name\": \"OR\",\n\"children\": [{\n\"name\": \"Cac\",\n\"level\": 3, \n\"children\": [\n{\"name\": \"actor1\", \"comp\": \"A\", \"level\": 3},\n{\"name\": \"aim1\", \"comp\": \"I\", \"level\": 3}\n]\n},\n{\n\"name\": \"Cac\",\n\"level\": 3, \n\"children\": [\n{\"name\": \"actor0\", \"comp\": \"A\", \"level\": 3},\n{\"name\": \"aim0\", \"comp\": \"I\", \"level\": 3},\n{\"name\": \"OR\",\n\"children\": [{\n\"name\": \"Cac\",\n\"level\": 4, \n\"children\": [\n{\"name\": \"actor2\", \"comp\": \"A\", \"level\": 4},\n{\"name\": \"aim2\", \"comp\": \"I\", \"level\": 4},\n{\"name\": \"object2\", \"comp\": \"Bdir\", \"level\": 4},\n{\"name\": \"OR\",\n\"children\": [{\n\"name\": \"Cac\",\n\"level\": 5, \n\"children\": [\n{\"name\": \"actor3\", \"comp\": \"A\", \"level\": 5},\n{\"name\": \"aim3\", \"comp\": \"I\", \"level\": 5}\n]\n},\n{\n\"name\": \"Cac\",\n\"level\": 5, \n\"children\": [\n{\"name\": \"actor4\", \"comp\": \"A\", \"level\": 5},\n{\"name\": \"aim4\", \"comp\": \"I\", \"level\": 5}\n]\n}], \"comp\": \"Cac\", \"level\": 4}\n]\n},\n{\n\"name\": \"Cac\",\n\"level\": 4, \n\"children\": [\n{\"name\": \"actor5\", \"comp\": \"A\", \"level\": 4},\n{\"name\": \"aim5\", \"comp\": \"I\", \"level\": 4}\n]\n}], \"comp\": \"Cac\", \"level\": 3}\n]\n}], \"comp\": \"Cac\", \"level\": 2}\n]\n}], \"comp\": \"Cac\", \"level\": 1}\n]\n}");
+    var treeData = JSON.parse("{\n\"name\": \"\",\n\"level\": 1, \n\n}");
 
     
     var margin = {top: 20, right: 90, bottom: 30, left: 90},
